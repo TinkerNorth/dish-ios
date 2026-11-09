@@ -29,6 +29,17 @@ package struct DestinationFact: Equatable {
     }
 }
 
+/// One switch a controller carries, and whether it is on.
+package struct ControllerFeatureFact: Equatable {
+    package let feature: SlotSwitch
+    package let enabled: Bool
+
+    package init(feature: SlotSwitch, enabled: Bool) {
+        self.feature = feature
+        self.enabled = enabled
+    }
+}
+
 /// A controller Dish knows: a pad on a link, or the on-screen gamepad.
 package struct ControllerFact: Equatable, Identifiable {
     package let id: String
@@ -38,18 +49,40 @@ package struct ControllerFact: Equatable, Identifiable {
     package let batteryPercent: Int?
     /// Nil while the controller is bound to no PC.
     package let destination: DestinationFact?
+    package let family: PadFamily
+    /// The pad the PC is to see: the user's pick, else the family's own.
+    package let emulateAs: EmulatedPad
+    /// The switches the pad has the hardware for, in the page's order.
+    package let features: [ControllerFeatureFact]
+    /// False for a pad iOS lists without the extended profile, which Dish
+    /// cannot read.
+    package let supported: Bool
 
-    package init(id: String, name: String, link: ControllerLink, batteryPercent: Int?, destination: DestinationFact?) {
+    package init(
+        id: String,
+        name: String,
+        link: ControllerLink,
+        batteryPercent: Int?,
+        destination: DestinationFact?,
+        family: PadFamily = .other,
+        emulateAs: EmulatedPad = .xboxWireless,
+        features: [ControllerFeatureFact] = [],
+        supported: Bool = true
+    ) {
         self.id = id
         self.name = name
         self.link = link
         self.batteryPercent = batteryPercent
         self.destination = destination
+        self.family = family
+        self.emulateAs = emulateAs
+        self.features = features
+        self.supported = supported
     }
 }
 
 /// How an attached pad reaches the iPhone.
-package enum PadLink: Equatable {
+package enum PadLink: Hashable {
     case usbC
     case bluetooth
 }

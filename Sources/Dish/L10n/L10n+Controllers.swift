@@ -46,4 +46,8 @@ extension L10n {
     func batteryPercent(_ percent: Int) -> String {
         catalog.format("%lld%%", percent)
     }
+
+    var notSupported: String {
+        catalog.text("Not supported")
+    }
 }

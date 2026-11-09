@@ -11,9 +11,9 @@
 > it at run time yet · **not yet** not built; the row says where it lands ·
 > **n/a** does not apply on iOS. Verified against the code on 2026-11-09.
 >
-> This is wave 1, the shell. The engine publishes real but empty facts (no
-> controllers, no connections, no session, a Local Network status that stays
-> unknown), so the next waves only wire sources.
+> Wave 1 built the shell; wave B the controller bridge. The engine publishes
+> the pads iOS sees; connections, the session and the Local Network status
+> are still real but empty, so the next waves only wire sources.
 
 ## 1. What is built in wave 1
 
@@ -31,13 +31,23 @@
 | Six languages (en, bs, de, es, fr, pt-BR) through the `L10n` funnel | built; `%lld s` and `%lld min` carry no plural forms (section 2) | `Sources/Dish/L10n/`, `Localizable.xcstrings`; `LocalizationTests` |
 | Views are layout: one state per page from a pure mapper, intents only | built | `ViewPurityTests` (V1 to V12), `NavigationCoverageTests` |
 | Keep screen on while a session streams | mapper only: `idleTimerDisabled(facts:)` is true only with a session | `ShellMappers.swift`; `ShellMappersTests` |
+| **The GameController bridge (wave B).** Attach and detach through the `GCController` messages and the launch sweep; each pad's handlers on its own serial `userInteractive` queue (`com.tinkernorth.dish.input.<slot id>`), set before any handler; the extended gamepad sampled into `PadSample` and `wireReport`; motion, the DualSense and DualShock 4 touchpad, battery on the 30 s cadence with the 3 s charging-state watch; the family from `productCategory`; a pad without the extended profile listed as "Not supported" and not read | built | `DishEngine/Input/GameControllerInput*.swift`; `GameControllerInputTests`, `MotionConversionTests` |
+| The hot path's pad side: `PadFeed` (route in a mailbox, dead zones in an atomic word, a repeated report dropped, the record under a seqlock), `PadSink` for the sender, the routing table, and no lock on the Input thread | built; nothing routes a pad until the network wave binds it | `DishEngine/Input/PadFeed.swift`, `PadRecord.swift`, `InputSink.swift`, `InputRouting.swift`, `Util/`; `PadFeedTests`, `GamepadInputProcessorTests`, `MailboxTests`, `AtomicWordTests`, `LockLawTests` |
+| The return paths: rumble through CoreHaptics, `GCDualSenseAdaptiveTrigger`, `GCDeviceLight`, player index, the newest of each kind on `dish.feedback` | built; no PC sends them until the network wave wires `ReturnPathRouter` to its connections | `PadFeedback.swift`, `PadActuators.swift`, `RumbleActuator.swift`, `DualSenseTriggerEffect.swift`, `ReturnPathRouter.swift`; `PadFeedbackTests`, `FeedbackActuationTests`, `DualSenseTriggerEffectTests` |
+| Per-pad switches (motion, rumble, adaptive triggers, light bar, player LEDs, touchpad) under the fleet's `*_preferences` rows, the global `feature_*` switches, the "Emulate as" pick and the dead zones (`deadzone:<slot id>`) | built; the global switches and the dead zones have no page yet (section 2) | `Models/SlotPreferences.swift`, `FeatureSettings.swift`, `ControllerTypeStore.swift`, `DeadzonePreferenceStore.swift`, `AppModel+Controllers.swift`; `SlotPreferencesTests`, `ControllerStoresTests`, `AppModelControllersTests` |
+| Controllers rows live and tappable; Input's "Found on this iPhone" with Use; the controller page (status card, Binding with "Destination · Not bound" and Emulate as, Functions, the microphone and speaker footnote) | built | `ControllersPage.swift`, `ControllerPage.swift`, `ControllerSections.swift`, `ControllerMappers.swift`; `ControllerMappersTests`, `ControllersMappersTests` |
 
 ## 2. Not yet, one row each
 
 | Feature | Where it lands |
 |---|---|
-| **GameController bridge.** `ShellFacts.attachedPads` and `controllers` are empty, so Input offers no "Found on this iPhone" pad and Controllers is always the empty state. | `DishEngine/Input/`, the wave that reads `GCController`; it fills `attachedPads` and `controllers` and ports the pad family detection (`EmulatedPad`) |
-| **The controller page and tappable rows.** Controller rows draw but do nothing when tapped; there is no per-controller page (rename, Unbind, dead zones, switches). | `Page.controller(id:)` in `NavigationMachine.swift`, `UI/Pages/ControllerPage.swift` and its mapper tests, with the bridge |
+| **The controller page's PC half.** Destination reads "Not bound" and is disabled; there is no Unbind, no Touchpad and Mouse buttons on the status card, no rename. | the binding wave fills Destination and Unbind; the play wave the Touchpad and Mouse buttons |
+| **The controller page's telemetry.** C1's TELEMETRY (report, motion and touch rates) is hidden until it is measured. | a rate tracker over each pad's `PadRecord` counts (dish-mac's `InputRateTracker`), shown once its numbers come from a real pad |
+| **Dead zones and the global switches have no page.** `setStickDeadzone`, `setTriggerDeadzone`, `resetDeadzones` and `FeatureSettings` are stored and applied, but nothing in the UI reaches them. | a Dead zones page under the controller page, and the global switches in Settings |
+| **The `LOCK_STATS` lane in CI.** `LockLawTests` holds the Input, Receive and Feedback threads to no lock in a `LOCK_STATS` build (`SWIFT_ACTIVE_COMPILATION_CONDITIONS='$(inherited) LOCK_STATS'`); the plain build skips it, and no CI job builds that lane yet. | a CI job with the network wave's sender, so its receive loop and heartbeat run in the law's run too |
+| **The link of a pad.** GameController on iOS 26 tells an app one thing about the transport, `isAttachedToDevice` (a clip-on such as a Backbone), which reads as USB-C; every other pad reads as Bluetooth, a wired DualSense included. | a transport property in GameController, if Apple adds one |
+| **A pad's battery when it reports none.** dish-mac sends the host Mac's battery for a pad without its own; the engine here imports no UIKit, so such a pad sends no battery. | the iPhone's battery through a seam the scene fills (`UIDevice`), if the satellite's view needs it |
+| **The touchpad as the host's mouse.** dish-mac's per-pad touchpad pick (pad, mouse, off) under `touchpad_mode_preferences` is an on and off switch here. | the play wave, with the mouse screen |
 | **Bonjour discovery behind the `LocalNetworkAccess` seam.** `RecordedLocalNetworkAccess` records asks and scans; its status never leaves `.unknown`, so the Local Network denied state (Connections and Pick your PC) is unreachable at run time, `found` and `scanning` stay empty and iOS never shows its permission prompt. The Info.plist already declares `_satellite._udp` and `_nvstream._tcp`. | a `DishEngine/Network` implementation of `LocalNetworkAccess`; the app swaps it in `AppModel`'s convenience initializer |
 | **Pairing: the pair sheet, both paths, and the PC detail page.** Connection rows are not tappable; there is no pair sheet (the operator's approval and the typed PIN), no Forget This PC, no PC detail page. | `DishEngine/Network` (`PairingClient`, the connection store, the Keychain key store) and `UI/Pages/ConnectionPage.swift`, the pair sheet as a `Cover`/sheet case in the navigation machine |
 | **The binding behind `BindingRequests`, and the apply overlay.** Bind records the draft in memory and sends nothing; there is no apply progress, no Unbind. | the binding wave: `DishEngine/Network` sends the session PUT; `BindingRequests` is replaced by the real coordinator and the apply overlay lands in `UI/Kit/` |
@@ -91,3 +101,13 @@ so the sanctioned path works alone.
   foreground, so Keep screen on holds the idle timer off while a session is up
   and the dim exists to save power; nothing keeps the app running in the
   background, and no Live Activity is used (the design says so).
+- **No `PadGate`, no profile path, no Direct reader.** dish-mac's gate picks,
+  per pad, whether GameController or its Direct HID reader is published, and
+  its profile path reads pads GameController vends without the extended
+  profile. iOS has neither HID access nor a second source, so nothing would
+  read the gate: a pad's feed publishes every change, and a pad without the
+  extended profile is listed as "Not supported" and left alone.
+- **The return path's commands arrive as fields.** `FeedbackRoutes` takes the
+  rumble, light-bar, trigger and player-LED values the receive loop decoded
+  rather than dish-mac's `RumbleCommand`-shaped values, so the controller
+  bridge needs nothing from the wire codecs.

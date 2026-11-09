@@ -8,8 +8,9 @@ import Observation
 
 /// The composition root: it holds every store and seam and vends the facts
 /// the shell draws. Intents live in extensions by topic and are the only
-/// thing a view calls. Controllers, connections and the session have no
-/// source yet, so their facts are real and empty.
+/// thing a view calls. The controllers come from the GameController bridge;
+/// connections and the session have no source yet, so their facts are real
+/// and empty.
 @MainActor
 @Observable
 package final class AppModel {
@@ -20,6 +21,8 @@ package final class AppModel {
     let clock: ClockSource
     package let localNetwork: any LocalNetworkAccess
     package let bindings: BindingRequests
+    /// The pads iOS sees and their stores.
+    package let pads: ControllerStack
     let setupSource = StateSource<SetupState?>(initial: nil)
 
     package init(
@@ -29,7 +32,8 @@ package final class AppModel {
         streaming: StreamingPreferenceStore,
         clock: ClockSource,
         localNetwork: any LocalNetworkAccess,
-        bindings: BindingRequests
+        bindings: BindingRequests,
+        pads: ControllerStack
     ) {
         self.onboarding = onboarding
         self.appearance = appearance
@@ -38,15 +42,18 @@ package final class AppModel {
         self.clock = clock
         self.localNetwork = localNetwork
         self.bindings = bindings
+        self.pads = pads
+        applyStoredDeadzones()
     }
 
-    /// Every store over the same defaults, the wall clock, and the seams the
-    /// discovery and binding waves fill in.
+    /// Every store over the same defaults, the wall clock, the pads iOS
+    /// sees, and the seams the discovery and binding waves fill in.
     package convenience init(
         defaults: UserDefaults,
         clock: ClockSource = ClockSource(ticker: TimerTicker(), now: Date.init),
         localNetwork: any LocalNetworkAccess = RecordedLocalNetworkAccess(),
-        bindings: BindingRequests = BindingRequests()
+        bindings: BindingRequests = BindingRequests(),
+        controllerSource: any ControllerSource = GameControllerInput()
     ) {
         self.init(
             onboarding: OnboardingPreferenceStore(defaults: defaults),
@@ -55,7 +62,8 @@ package final class AppModel {
             streaming: StreamingPreferenceStore(defaults: defaults),
             clock: clock,
             localNetwork: localNetwork,
-            bindings: bindings
+            bindings: bindings,
+            pads: ControllerStack(source: controllerSource, defaults: defaults)
         )
     }
 
@@ -66,8 +74,8 @@ package final class AppModel {
 
     package var shellFacts: ShellFacts {
         ShellFacts(
-            controllers: [],
-            attachedPads: [],
+            controllers: controllerFacts,
+            attachedPads: attachedPadFacts,
             paired: [],
             found: [],
             scanning: false,

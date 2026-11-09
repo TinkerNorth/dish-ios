@@ -104,4 +104,9 @@ final class NavigationMachineTests: XCTestCase {
         XCTAssertEqual(woken.effects, [])
         XCTAssertEqual(after(.coverDismissed).state, NavigationState(), "nothing to lower")
     }
+
+    func testAControllerRowPushesItsPageOntoControllers() {
+        let step = after(.select(.controllers), .push(.controller(id: "pad")))
+        XCTAssertEqual(step.state.path(of: .controllers), [.controller(id: "pad")])
+    }
 }

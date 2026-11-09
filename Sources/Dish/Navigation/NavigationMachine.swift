@@ -15,6 +15,8 @@ enum Tab: CaseIterable, Hashable {
 enum Page: Hashable {
     /// Settings › Name on your PC.
     case deviceName
+    /// Controllers › a controller's own page, by its slot id.
+    case controller(id: String)
 }
 
 /// Where the setup cover opens.

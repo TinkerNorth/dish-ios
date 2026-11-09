@@ -3,9 +3,29 @@
 
 import SwiftUI
 
-/// One controller: its glyph, name, destination line and battery.
+/// One controller: its glyph, name, destination line and battery. A row
+/// with a page opens it; a pad Dish cannot read has none and no chevron.
 struct ControllerRow: View {
     let state: ControllerRowState
+    let open: @MainActor (Page) -> Void
+
+    var body: some View {
+        if let page = state.page {
+            Button {
+                open(page)
+            } label: {
+                ControllerRowContent(state: state, disclosure: true)
+            }
+        } else {
+            ControllerRowContent(state: state, disclosure: false)
+        }
+    }
+}
+
+/// The row's own layout.
+private struct ControllerRowContent: View {
+    let state: ControllerRowState
+    let disclosure: Bool
 
     var body: some View {
         HStack(spacing: DishSpace.s6) {
@@ -22,8 +42,11 @@ struct ControllerRow: View {
             if let battery = state.battery {
                 Text(battery).font(DishFont.body).monospacedDigit().foregroundStyle(state.batteryColor)
             }
-            Image(systemName: "chevron.right").font(DishFont.detail).foregroundStyle(DishTheme.muted)
+            if disclosure {
+                Image(systemName: DishSymbol.disclosure).font(DishFont.detail).foregroundStyle(DishTheme.muted)
+            }
         }
+        .contentShape(Rectangle())
         .accessibilityElement(children: .combine)
     }
 }
