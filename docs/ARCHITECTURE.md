@@ -247,12 +247,25 @@ walk when `endSetup()` is called). The pure view-layer half is
 
 ## Threading and the hot path
 
-Nothing in this wave is on the hot path: there is no controller bridge, no
-socket and no session. The engine is `@MainActor` throughout (the stores, the
-clock, the seams, `AppModel`), and `TimerTicker` is the only timer.
+The pad side of the hot path is built (`Sources/DishEngine/Input/`); the
+socket and the session are not. `GameControllerInput` hands each pad its own
+serial `handlerQueue` before installing a handler; the handler samples the
+extended gamepad into a `PadSample`, `wireReport` turns it into a
+`GamepadReport`, and the pad's `PadFeed` drops a report that repeats the last
+one, applies the dead zones from an atomic word, writes the inspector's
+record under a seqlock and calls the `PadSink` of the route it took from its
+mailbox. The feed is `Sendable` because every field is an atomic word or a
+`let`, not because anything is promised past the compiler. The return paths
+post to each pad's `FeedbackPad`, and `PadActuators`, an actor whose executor
+is the `dish.feedback` queue, drives CoreHaptics, the light, the adaptive
+triggers and the player index; a `GCController` is filed there by identity
+and found in the framework's own list, so it never crosses isolations.
+`LockLawTests`, in a `LOCK_STATS` build, holds the Input, Receive and
+Feedback threads to no tracked lock. Everything else in the engine is
+`@MainActor`.
 
-These are the rules the waves that add the bridge and the wire carry, taken
-from dish-mac and recorded here so the engine is shaped for them:
+These are the rules the bridge keeps and the wire will carry, taken from
+dish-mac:
 
 - Every controller event takes one path and takes no lock on it. A
   controller's handler runs on that controller's own serial queue, its

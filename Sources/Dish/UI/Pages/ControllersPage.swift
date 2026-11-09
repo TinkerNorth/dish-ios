@@ -4,14 +4,18 @@
 import DishEngine
 import SwiftUI
 
-/// The Controllers tab (A2): the bound controllers, then Add a controller on
-/// its own under the list. Rows open the controller page in a later wave.
+/// The Controllers tab (A2): the pads iOS sees, then Add a controller on its
+/// own under the list. A row opens the controller's page.
 struct ControllersPage: View {
     @Environment(AppModel.self) private var model
     @Environment(NavigationStore.self) private var navigation
 
     var body: some View {
-        ControllersPageBody(state: controllersPageState(controllers: model.shellFacts.controllers), add: addController)
+        ControllersPageBody(state: controllersPageState(controllers: model.shellFacts.controllers), add: addController, open: open)
+    }
+
+    private func open(_ page: Page) {
+        navigation.send(.push(page))
     }
 
     private func addController() {
@@ -23,13 +27,14 @@ struct ControllersPage: View {
 struct ControllersPageBody: View {
     let state: ControllersPageState
     let add: () -> Void
+    let open: @MainActor (Page) -> Void
 
     var body: some View {
         List {
             switch state.content {
             case let .list(rows):
                 Section {
-                    ForEach(rows) { ControllerRow(state: $0) }
+                    ForEach(rows) { ControllerRow(state: $0, open: open) }
                 }
                 .listRowBackground(DishTheme.surface)
             case let .empty(invitation):
@@ -60,7 +65,7 @@ struct ControllersPageBody: View {
         ControllerFact(id: "3", name: "On-screen gamepad", link: .onScreen, batteryPercent: nil, destination: living)
     ]
     NavigationStack {
-        ControllersPageBody(state: controllersPageState(controllers: controllers), add: {})
+        ControllersPageBody(state: controllersPageState(controllers: controllers), add: {}, open: { _ in })
     }
 }
 
@@ -78,12 +83,12 @@ struct ControllersPageBody: View {
         )
     ]
     NavigationStack {
-        ControllersPageBody(state: controllersPageState(controllers: controllers), add: {})
+        ControllersPageBody(state: controllersPageState(controllers: controllers), add: {}, open: { _ in })
     }
 }
 
 #Preview("Empty") {
     NavigationStack {
-        ControllersPageBody(state: controllersPageState(controllers: []), add: {})
+        ControllersPageBody(state: controllersPageState(controllers: []), add: {}, open: { _ in })
     }
 }

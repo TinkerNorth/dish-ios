@@ -50,6 +50,7 @@ func tabTitle(_ tab: Tab, words: L10n = .app) -> String {
 func pageTitle(_ page: Page, words: L10n = .app) -> String {
     switch page {
     case .deviceName: words.nameOnYourPC
+    case .controller: words.controller
     }
 }
 

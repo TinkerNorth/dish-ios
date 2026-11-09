@@ -503,9 +503,10 @@ are a permanent API.
 
 ## Touching the hot path (later waves)
 
-Nothing in this wave is on the hot path: there is no controller bridge and no
-socket. These are the rules the waves that add them carry, taken from
-dish-mac, where they are enforced by tests this repository does not have yet.
+The pad side of the hot path is built (`Sources/DishEngine/Input/`); the
+socket is not. These are the rules it keeps, taken from dish-mac;
+`LockLawTests` enforces the first in a `LOCK_STATS` build
+(`SWIFT_ACTIVE_COMPILATION_CONDITIONS='$(inherited) LOCK_STATS'`).
 The controller's `valueChangedHandler` runs at the controller's polling rate
 and must never block.
 

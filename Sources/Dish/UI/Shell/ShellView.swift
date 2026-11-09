@@ -57,6 +57,7 @@ private struct PageView: View {
     var body: some View {
         switch page {
         case .deviceName: DeviceNamePage()
+        case let .controller(id): ControllerPage(id: id)
         }
     }
 }

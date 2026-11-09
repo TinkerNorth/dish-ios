@@ -22,6 +22,9 @@ struct ControllerRowState: Equatable, Identifiable {
     /// Nil when the controller reports no level.
     let battery: String?
     let batteryColor: Color
+    /// The controller's page; nil for a pad Dish cannot read, which has
+    /// nothing to set.
+    let page: Page?
 }
 
 /// What sits above the Add button: the rows, or an invitation.
@@ -63,7 +66,8 @@ func controllerRow(_ controller: ControllerFact, words: L10n = .app) -> Controll
         destination: destinationLine(controller, words: words),
         dot: destinationDot(controller.destination?.health),
         battery: controller.batteryPercent.map(words.batteryPercent),
-        batteryColor: batteryColor(controller.batteryPercent)
+        batteryColor: batteryColor(controller.batteryPercent),
+        page: controller.supported ? .controller(id: controller.id) : nil
     )
 }
 
@@ -85,6 +89,7 @@ func linkWord(_ link: ControllerLink, words: L10n = .app) -> String {
 /// The link word while the PC answers; an unsteady PC says so in its place,
 /// and a lost one replaces the whole line, as D4 draws it.
 private func destinationLine(_ controller: ControllerFact, words: L10n) -> DestinationLine {
+    guard controller.supported else { return .note(words.notSupported) }
     guard let destination = controller.destination else { return .note(words.notBound) }
     switch destination.health {
     case .online: return .bound(pcName: destination.name, detail: lineSeparator + linkWord(controller.link, words: words))
