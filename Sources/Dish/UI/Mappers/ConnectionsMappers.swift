@@ -55,20 +55,20 @@ enum ConnectionsPageState: Equatable {
     case list(ConnectionsListState)
 }
 
-/// `now` words an offline PC's last sighting; `settingsURL` is where Open
-/// Settings goes.
-func connectionsPageState(facts: ShellFacts, now: Date, settingsURL: URL?, words: L10n = .app) -> ConnectionsPageState {
+/// `facts.now` words an offline PC's last sighting; `settingsURL` is where
+/// Open Settings goes.
+func connectionsPageState(facts: ShellFacts, settingsURL: URL?, words: L10n = .app) -> ConnectionsPageState {
     switch facts.localNetwork {
     case .denied: .denied(networkDenied(settingsURL: settingsURL, words: words))
-    case .unknown, .allowed: reachablePage(facts, now: now, words: words)
+    case .unknown, .allowed: reachablePage(facts, words: words)
     }
 }
 
 /// With nothing paired, found or being looked for, a short empty state.
-private func reachablePage(_ facts: ShellFacts, now: Date, words: L10n) -> ConnectionsPageState {
+private func reachablePage(_ facts: ShellFacts, words: L10n) -> ConnectionsPageState {
     let nothingYet = facts.paired.isEmpty && facts.found.isEmpty && !facts.scanning
     guard !nothingYet else { return .empty(title: words.noPCsYet, body: words.noPCsYetBody) }
-    return .list(connectionsList(facts, now: now, words: words))
+    return .list(connectionsList(facts, now: facts.now, words: words))
 }
 
 private func networkDenied(settingsURL: URL?, words: L10n) -> NetworkDeniedState {

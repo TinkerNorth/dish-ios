@@ -8,8 +8,7 @@ import XCTest
 
 /// The clock and the PCs the Connections tests draw.
 private enum ConnectionsFixture {
-    static let now = Date(timeIntervalSince1970: 1_800_000_000)
-    static let yesterday = now.addingTimeInterval(-86400)
+    static let yesterday = FactsFixture.now.addingTimeInterval(-86400)
     static let settings = URL(string: "app-settings:")
 
     static func pc(_ name: String, kind: ConnectionKind = .satellite, state: ConnectionState) -> ConnectionFact {
@@ -17,7 +16,7 @@ private enum ConnectionsFixture {
     }
 
     static func page(_ facts: ShellFacts) -> ConnectionsPageState {
-        connectionsPageState(facts: facts, now: now, settingsURL: settings)
+        connectionsPageState(facts: facts, settingsURL: settings)
     }
 
     static func list(_ facts: ShellFacts) throws -> ConnectionsListState {

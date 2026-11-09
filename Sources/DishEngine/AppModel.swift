@@ -16,26 +16,30 @@ package final class AppModel {
     let appearance: AppearancePreferenceStore
     let device: DevicePreferenceStore
     let streaming: StreamingPreferenceStore
+    let clock: ClockSource
 
     package init(
         onboarding: OnboardingPreferenceStore,
         appearance: AppearancePreferenceStore,
         device: DevicePreferenceStore,
-        streaming: StreamingPreferenceStore
+        streaming: StreamingPreferenceStore,
+        clock: ClockSource
     ) {
         self.onboarding = onboarding
         self.appearance = appearance
         self.device = device
         self.streaming = streaming
+        self.clock = clock
     }
 
-    /// Every store over the same defaults.
+    /// Every store over the same defaults, and the wall clock.
     package convenience init(defaults: UserDefaults) {
         self.init(
             onboarding: OnboardingPreferenceStore(defaults: defaults),
             appearance: AppearancePreferenceStore(defaults: defaults),
             device: DevicePreferenceStore(defaults: defaults),
-            streaming: StreamingPreferenceStore(defaults: defaults)
+            streaming: StreamingPreferenceStore(defaults: defaults),
+            clock: ClockSource(ticker: TimerTicker(), now: Date.init)
         )
     }
 
@@ -47,7 +51,8 @@ package final class AppModel {
             scanning: false,
             session: nil,
             localNetwork: .unknown,
-            preferences: preferencesFacts
+            preferences: preferencesFacts,
+            now: clock.state
         )
     }
 

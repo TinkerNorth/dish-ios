@@ -7,6 +7,8 @@ import Foundation
 /// Facts for the mapper tests: the engine's defaults with one thing changed
 /// at a time.
 enum FactsFixture {
+    /// The wall clock every fixture reads.
+    static let now = Date(timeIntervalSince1970: 1_800_000_000)
     static let preferences = PreferencesFacts(deviceName: "", keepScreenOn: true, dimAfter: .twentySeconds, appearance: .system)
 
     static func shell(
@@ -16,7 +18,8 @@ enum FactsFixture {
         scanning: Bool = false,
         session: SessionFact? = nil,
         localNetwork: LocalNetworkStatus = .unknown,
-        preferences: PreferencesFacts = preferences
+        preferences: PreferencesFacts = preferences,
+        now: Date = now
     ) -> ShellFacts {
         ShellFacts(
             controllers: controllers,
@@ -25,7 +28,8 @@ enum FactsFixture {
             scanning: scanning,
             session: session,
             localNetwork: localNetwork,
-            preferences: preferences
+            preferences: preferences,
+            now: now
         )
     }
 

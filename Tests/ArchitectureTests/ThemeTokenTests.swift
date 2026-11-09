@@ -100,8 +100,20 @@ final class ThemeTokenTests: XCTestCase {
         }
     }
 
+    /// The code of a line: a whole-line comment names no token.
+    private static func isCode(_ line: Substring) -> Bool {
+        !line.trimmingCharacters(in: .whitespaces).hasPrefix("//")
+    }
+
+    /// A token is drawn by any code line under `Sources/Dish`, the theme's
+    /// own components (`SectionEyebrow`, `StatusDot`) included; its
+    /// declaration names it without the namespace, so it does not count.
     func testEveryTokenOutsideTheSharedPaletteIsDrawn() throws {
-        let sources = try viewFiles.map(RepoFiles.read).joined(separator: "\n")
+        let code = try RepoFiles.swiftFiles(under: "Sources/Dish")
+            .map(RepoFiles.read)
+            .flatMap { $0.split(separator: "\n") }
+            .filter(Self.isCode)
+        let sources = code.joined(separator: "\n")
         for token in try Self.tokens() where !(token.namespace == "DishTheme" && Self.sharedPalette.contains(token.name)) {
             let pattern = NSRegularExpression.escapedPattern(for: token.reference) + "\\b"
             XCTAssertNotNil(sources.range(of: pattern, options: .regularExpression), "\(token.reference) is declared but never drawn")

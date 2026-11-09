@@ -11,12 +11,9 @@ struct ConnectionsPage: View {
     @Environment(\.settingsURL) private var settingsURL
 
     var body: some View {
-        TimelineView(.everyMinute) { context in
-            ConnectionsPageBody(
-                title: tabTitle(.connections),
-                state: connectionsPageState(facts: model.shellFacts, now: context.date, settingsURL: settingsURL)
-            )
-        }
+        ConnectionsPageBody(title: tabTitle(.connections), state: connectionsPageState(facts: model.shellFacts, settingsURL: settingsURL))
+            .onAppear { model.pageAppeared(.connections) }
+            .onDisappear { model.pageDisappeared(.connections) }
     }
 }
 
@@ -99,10 +96,11 @@ private struct ConnectionsList: View {
         scanning: true,
         session: nil,
         localNetwork: .allowed,
-        preferences: PreferencesFacts(deviceName: "", keepScreenOn: true, dimAfter: .twentySeconds, appearance: .system)
+        preferences: PreferencesFacts(deviceName: "", keepScreenOn: true, dimAfter: .twentySeconds, appearance: .system),
+        now: now
     )
     NavigationStack {
-        ConnectionsPageBody(title: tabTitle(.connections), state: connectionsPageState(facts: facts, now: now, settingsURL: nil))
+        ConnectionsPageBody(title: tabTitle(.connections), state: connectionsPageState(facts: facts, settingsURL: nil))
     }
 }
 
@@ -114,12 +112,13 @@ private struct ConnectionsList: View {
         scanning: false,
         session: nil,
         localNetwork: .denied,
-        preferences: PreferencesFacts(deviceName: "", keepScreenOn: true, dimAfter: .twentySeconds, appearance: .system)
+        preferences: PreferencesFacts(deviceName: "", keepScreenOn: true, dimAfter: .twentySeconds, appearance: .system),
+        now: .distantPast
     )
     NavigationStack {
         ConnectionsPageBody(
             title: tabTitle(.connections),
-            state: connectionsPageState(facts: facts, now: .distantPast, settingsURL: URL(string: "app-settings:"))
+            state: connectionsPageState(facts: facts, settingsURL: URL(string: "app-settings:"))
         )
     }
 }

@@ -15,6 +15,9 @@ package struct ShellFacts: Equatable {
     package let session: SessionFact?
     package let localNetwork: LocalNetworkStatus
     package let preferences: PreferencesFacts
+    /// The wall clock, moving once a minute while a page that words a time
+    /// is on screen.
+    package let now: Date
 
     package init(
         controllers: [ControllerFact],
@@ -23,7 +26,8 @@ package struct ShellFacts: Equatable {
         scanning: Bool,
         session: SessionFact?,
         localNetwork: LocalNetworkStatus,
-        preferences: PreferencesFacts
+        preferences: PreferencesFacts,
+        now: Date
     ) {
         self.controllers = controllers
         self.paired = paired
@@ -32,5 +36,6 @@ package struct ShellFacts: Equatable {
         self.session = session
         self.localNetwork = localNetwork
         self.preferences = preferences
+        self.now = now
     }
 }
