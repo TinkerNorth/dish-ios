@@ -73,6 +73,17 @@
                ReferencedContainer = "container:.">
             </BuildableReference>
          </TestableReference>
+         <TestableReference
+            skipped = "NO"
+            parallelizable = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "ArchitectureTests"
+               BuildableName = "ArchitectureTests"
+               BlueprintName = "ArchitectureTests"
+               ReferencedContainer = "container:.">
+            </BuildableReference>
+         </TestableReference>
       </Testables>
       <CommandLineArguments>
       </CommandLineArguments>

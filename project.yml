@@ -77,5 +77,6 @@ schemes:
         - package: DishPackage/DishKernelTests
         - package: DishPackage/DishEngineTests
         - package: DishPackage/DishTests
+        - package: DishPackage/ArchitectureTests
     archive:
       config: Release
