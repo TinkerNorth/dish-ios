@@ -6,7 +6,7 @@
 --swiftversion 5.9
 
 # Scope
---exclude .build,.swiftpm,Dish.xcodeproj
+--exclude .build,.swiftpm,.claude,Dish.xcodeproj
 
 # Indentation & layout
 --indent 4

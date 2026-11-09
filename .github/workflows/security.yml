@@ -1,0 +1,40 @@
+name: Security
+
+# PR-time security gates for dish-ios. Pulls the shared jobs from this
+# repo's local copy of `_security.yml` (action-pin lint, allowlist-
+# expiry, OSV-Scanner, dependency-review, gitleaks). CodeQL lives in
+# codeql.yml because it has its own matrix.
+#
+# The app has no third-party dependencies, so there is no Package.resolved
+# for OSV to read; it scans the worktree anyway, which keeps the gate in
+# place for the day a dependency lands. `dependency-review-action` stays on:
+# it reads the manifest diff of a PR and fails on high-severity findings
+# against GitHub's advisory DB, so a first dependency is checked on arrival.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  schedule:
+    - cron: "0 6 * * 1"
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  pull-requests: read
+  security-events: write
+
+jobs:
+  shared:
+    uses: ./.github/workflows/_security.yml
+    with:
+      osv_scan_paths: |
+        .
+      gitleaks_enabled: true
+      dependency_review_enabled: true
+      action_pin_lint_enabled: true
+      allowlist_expiry_enabled: true

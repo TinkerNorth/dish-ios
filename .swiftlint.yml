@@ -9,6 +9,7 @@ included:
 excluded:
   - .build
   - .swiftpm
+  - .claude
   - Dish.xcodeproj
 
 line_length:

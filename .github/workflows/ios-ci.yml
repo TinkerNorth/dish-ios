@@ -1,0 +1,120 @@
+name: iOS CI
+
+# The merge gate for dish-ios: format, lint, project drift, the app build with
+# every package test target, and a Release build of the app. scripts/ci-local.sh
+# runs the same gates in the same order.
+#
+# No build cache. The package has no dependencies, so there is nothing to
+# resolve or download, and a restored DerivedData carries the previous
+# commit's objects and compiled resource bundles, which is how a stale
+# catalog shadows the current one. A cold build is the honest one.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  ci:
+    name: Format, lint, project, test, release build
+    # Xcode 26 is the default on this image and the iOS 26 SDK is the
+    # deployment floor; bump together with CONTRIBUTING.md.
+    runs-on: macos-26
+    timeout-minutes: 60
+    env:
+      SIM_DESTINATION: platform=iOS Simulator,name=iPhone 17 Pro
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Select Xcode
+        run: sudo xcode-select -s /Applications/Xcode.app
+
+      - name: Swift version
+        run: swift --version
+
+      # Release binaries at pinned versions, not `brew install`: Homebrew
+      # tracks its latest, and a new formatter rule turns the check red
+      # without a Swift file changing. These are the versions the tree is
+      # formatted, linted and generated with; a bump is a deliberate commit
+      # that reformats or regenerates alongside it, in scripts/tools.sh too.
+      - name: Install SwiftFormat, SwiftLint and XcodeGen (pinned)
+        env:
+          SWIFTFORMAT_VERSION: 0.61.1
+          SWIFTFORMAT_SHA256: b990400779aceb7d7020796eb9ba814d4480543f671d38fc0ff48cb72f04c584
+          SWIFTLINT_VERSION: 0.65.0
+          SWIFTLINT_SHA256: d6cb0aa7a2f5f1ef306fc9e37bcb54dc9a26facc8f7784ac0c3dd3eccf5c6ba6
+          XCODEGEN_VERSION: 2.46.0
+          XCODEGEN_SHA256: 4d9e34b62172d645eed6457cac13fc222569974098ef4ee9c3368bedf0196806
+        run: |
+          set -euo pipefail
+          tools="$RUNNER_TEMP/tools"
+          mkdir -p "$tools"
+          curl -fsSL --retry 3 -o "$tools/swiftformat.zip" \
+            "https://github.com/nicklockwood/SwiftFormat/releases/download/${SWIFTFORMAT_VERSION}/swiftformat.zip"
+          echo "${SWIFTFORMAT_SHA256}  $tools/swiftformat.zip" | shasum -a 256 -c -
+          unzip -q -o "$tools/swiftformat.zip" -d "$tools"
+          curl -fsSL --retry 3 -o "$tools/swiftlint.zip" \
+            "https://github.com/realm/SwiftLint/releases/download/${SWIFTLINT_VERSION}/portable_swiftlint.zip"
+          echo "${SWIFTLINT_SHA256}  $tools/swiftlint.zip" | shasum -a 256 -c -
+          unzip -q -o "$tools/swiftlint.zip" -d "$tools"
+          curl -fsSL --retry 3 -o "$tools/xcodegen.zip" \
+            "https://github.com/yonaskolb/XcodeGen/releases/download/${XCODEGEN_VERSION}/xcodegen.zip"
+          echo "${XCODEGEN_SHA256}  $tools/xcodegen.zip" | shasum -a 256 -c -
+          unzip -q -o "$tools/xcodegen.zip" -d "$tools"
+          chmod +x "$tools/swiftformat" "$tools/swiftlint" "$tools/xcodegen/bin/xcodegen"
+          echo "$tools" >> "$GITHUB_PATH"
+          "$tools/swiftformat" --version
+          "$tools/swiftlint" --version
+          "$tools/xcodegen/bin/xcodegen" --version
+
+      - name: SwiftFormat (check only)
+        run: swiftformat --lint .
+
+      - name: SwiftLint
+        run: swiftlint lint --strict --reporter github-actions-logging
+
+      # generate-project.sh fetches its own pinned XcodeGen into .build/tools;
+      # the copy above only proves the digest on this runner.
+      - name: Dish.xcodeproj matches project.yml
+        run: scripts/generate-project.sh --check
+
+      # Builds the app and runs every package test target the scheme lists.
+      - name: Build and test
+        run: |
+          set -euo pipefail
+          xcodebuild test \
+            -project Dish.xcodeproj \
+            -scheme DishApp \
+            -destination "$SIM_DESTINATION" \
+            -enableCodeCoverage YES \
+            CODE_SIGNING_ALLOWED=NO
+
+      - name: Build release
+        run: |
+          set -euo pipefail
+          xcodebuild build \
+            -project Dish.xcodeproj \
+            -scheme DishApp \
+            -configuration Release \
+            -destination "generic/platform=iOS Simulator" \
+            -derivedDataPath build \
+            CODE_SIGNING_ALLOWED=NO
+
+      - name: Upload simulator .app artifact
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: Dish.app
+          path: build/Build/Products/Release-iphonesimulator/Dish.app
+          if-no-files-found: error
+          retention-days: 14

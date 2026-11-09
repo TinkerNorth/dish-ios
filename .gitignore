@@ -44,3 +44,7 @@ Dish.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/
 *.mobileprovision
 *.provisionprofile
 AuthKey_*.p8
+
+# Agent worktrees and per-user harness settings, and CI scratch output
+.claude/
+/build/
