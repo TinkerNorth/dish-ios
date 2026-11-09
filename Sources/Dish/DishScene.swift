@@ -18,7 +18,12 @@ public struct DishScene: Scene {
     public init() {
         let model = AppModel(defaults: .standard)
         _model = State(initialValue: model)
-        _navigation = State(initialValue: NavigationStore(onboarding: model.onboarding, startSetup: { _ in }, endSetup: {}))
+        let navigation = NavigationStore(
+            onboarding: model.onboarding,
+            startSetup: { model.startSetup(setupStart($0)) },
+            endSetup: model.endSetup
+        )
+        _navigation = State(initialValue: navigation)
     }
 
     public var body: some Scene {

@@ -19,8 +19,13 @@ extension L10n {
         catalog.text("Searching")
     }
 
-    func onlineLatencyControllers(_ latencyMs: Int, _ controllers: Int) -> String {
-        catalog.format("Online · %lld ms · %lld controllers", latencyMs, controllers)
+    var online: String {
+        catalog.text("Online")
+    }
+
+    /// Plural: "1 controller", "3 controllers".
+    func controllerCount(_ controllers: Int) -> String {
+        catalog.format("%lld controllers", controllers)
     }
 
     var offline: String {

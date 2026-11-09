@@ -1,14 +1,15 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 // Copyright (C) 2026 Dish contributors.
 
+import DishCore
 import DishKernel
 import Foundation
 import Observation
 
-/// The composition root: it holds every store and vends the facts the shell
-/// draws. Intents live in extensions by topic and are the only thing a view
-/// calls. Controllers, connections and the session have no source yet, so
-/// their facts are real and empty.
+/// The composition root: it holds every store and seam and vends the facts
+/// the shell draws. Intents live in extensions by topic and are the only
+/// thing a view calls. Controllers, connections and the session have no
+/// source yet, so their facts are real and empty.
 @MainActor
 @Observable
 package final class AppModel {
@@ -17,42 +18,64 @@ package final class AppModel {
     let device: DevicePreferenceStore
     let streaming: StreamingPreferenceStore
     let clock: ClockSource
+    package let localNetwork: any LocalNetworkAccess
+    package let bindings: BindingRequests
+    let setupSource = StateSource<SetupState?>(initial: nil)
 
     package init(
         onboarding: OnboardingPreferenceStore,
         appearance: AppearancePreferenceStore,
         device: DevicePreferenceStore,
         streaming: StreamingPreferenceStore,
-        clock: ClockSource
+        clock: ClockSource,
+        localNetwork: any LocalNetworkAccess,
+        bindings: BindingRequests
     ) {
         self.onboarding = onboarding
         self.appearance = appearance
         self.device = device
         self.streaming = streaming
         self.clock = clock
+        self.localNetwork = localNetwork
+        self.bindings = bindings
     }
 
-    /// Every store over the same defaults, and the wall clock.
-    package convenience init(defaults: UserDefaults) {
+    /// Every store over the same defaults, the wall clock, and the seams the
+    /// discovery and binding waves fill in.
+    package convenience init(
+        defaults: UserDefaults,
+        clock: ClockSource = ClockSource(ticker: TimerTicker(), now: Date.init),
+        localNetwork: any LocalNetworkAccess = RecordedLocalNetworkAccess(),
+        bindings: BindingRequests = BindingRequests()
+    ) {
         self.init(
             onboarding: OnboardingPreferenceStore(defaults: defaults),
             appearance: AppearancePreferenceStore(defaults: defaults),
             device: DevicePreferenceStore(defaults: defaults),
             streaming: StreamingPreferenceStore(defaults: defaults),
-            clock: ClockSource(ticker: TimerTicker(), now: Date.init)
+            clock: clock,
+            localNetwork: localNetwork,
+            bindings: bindings
         )
+    }
+
+    /// The setup walk on screen; nil while the cover is down.
+    package var setup: SetupState? {
+        setupSource.state
     }
 
     package var shellFacts: ShellFacts {
         ShellFacts(
             controllers: [],
+            attachedPads: [],
             paired: [],
             found: [],
             scanning: false,
             session: nil,
-            localNetwork: .unknown,
+            localNetwork: localNetwork.status,
             preferences: preferencesFacts,
-            now: clock.state
+            now: clock.state,
+            setup: setup
         )
     }
 

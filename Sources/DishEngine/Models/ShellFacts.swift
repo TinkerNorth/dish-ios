@@ -1,12 +1,16 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 // Copyright (C) 2026 Dish contributors.
 
+import DishCore
 import Foundation
 
 /// Everything the shell draws from, in one value: the app's mappers word
 /// it, the engine never does.
 package struct ShellFacts: Equatable {
     package let controllers: [ControllerFact]
+    /// The pads attached to this iPhone right now, bound or not; setup
+    /// offers them first. Empty until the controller bridge lands.
+    package let attachedPads: [AttachedPadFact]
     package let paired: [ConnectionFact]
     package let found: [ConnectionFact]
     /// Whether discovery is looking right now.
@@ -18,18 +22,23 @@ package struct ShellFacts: Equatable {
     /// The wall clock, moving once a minute while a page that words a time
     /// is on screen.
     package let now: Date
+    /// The setup walk on screen; nil while the cover is down.
+    package let setup: SetupState?
 
     package init(
         controllers: [ControllerFact],
+        attachedPads: [AttachedPadFact],
         paired: [ConnectionFact],
         found: [ConnectionFact],
         scanning: Bool,
         session: SessionFact?,
         localNetwork: LocalNetworkStatus,
         preferences: PreferencesFacts,
-        now: Date
+        now: Date,
+        setup: SetupState?
     ) {
         self.controllers = controllers
+        self.attachedPads = attachedPads
         self.paired = paired
         self.found = found
         self.scanning = scanning
@@ -37,5 +46,6 @@ package struct ShellFacts: Equatable {
         self.localNetwork = localNetwork
         self.preferences = preferences
         self.now = now
+        self.setup = setup
     }
 }

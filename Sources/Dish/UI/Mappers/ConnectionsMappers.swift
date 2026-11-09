@@ -126,7 +126,8 @@ func connectionSymbol(_ kind: ConnectionKind) -> String {
 
 private func connectionLine(_ connection: ConnectionFact, now: Date, words: L10n) -> String {
     switch connection.state {
-    case let .online(latencyMs, controllers): words.onlineLatencyControllers(latencyMs, controllers)
+    case let .online(latencyMs, controllers):
+        [words.online, words.latency(latencyMs), words.controllerCount(controllers)].joined(separator: lineSeparator)
     case let .offline(lastSeen?): words.offlineSeen(relativeDay(lastSeen, now: now, words: words))
     case .offline(nil): words.offline
     case .needsPairing: words.needsPairingAt(connection.address)

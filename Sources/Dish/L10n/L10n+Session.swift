@@ -7,20 +7,18 @@ extension L10n {
 
     // MARK: - Session accessory
 
-    func streamingPadsLatency(_ pads: Int, _ latencyMs: Int) -> String {
-        catalog.format("Streaming · %lld pads · %lld ms", pads, latencyMs)
+    var streaming: String {
+        catalog.text("Streaming")
     }
 
-    func streamingPads(_ pads: Int) -> String {
-        catalog.format("Streaming · %lld pads", pads)
-    }
-
-    func padsLatency(_ pads: Int, _ latencyMs: Int) -> String {
-        catalog.format("%lld pads · %lld ms", pads, latencyMs)
-    }
-
-    func pads(_ pads: Int) -> String {
+    /// Plural: "1 pad", "3 pads".
+    func padCount(_ pads: Int) -> String {
         catalog.format("%lld pads", pads)
+    }
+
+    /// A round trip, as the session line and a PC row show it.
+    func latency(_ latencyMs: Int) -> String {
+        catalog.format("%lld ms", latencyMs)
     }
 
     var stoppedResponding: String {

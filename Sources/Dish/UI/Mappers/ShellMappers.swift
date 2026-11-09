@@ -89,8 +89,9 @@ func sessionBarState(_ session: SessionFact?, words: L10n = .app) -> SessionBarS
 }
 
 private func streamingBar(_ session: SessionFact, words: L10n) -> SessionBarState {
-    let line = session.latencyMs.map { words.streamingPadsLatency(session.pads, $0) } ?? words.streamingPads(session.pads)
-    let shortLine = session.latencyMs.map { words.padsLatency(session.pads, $0) } ?? words.pads(session.pads)
+    let counts = [words.padCount(session.pads)] + [session.latencyMs.map(words.latency)].compactMap(\.self)
+    let shortLine = counts.joined(separator: lineSeparator)
+    let line = ([words.streaming] + counts).joined(separator: lineSeparator)
     return .streaming(pcName: session.pcName, line: line, shortLine: shortLine, dim: words.dim, play: words.play)
 }
 

@@ -45,6 +45,17 @@
             parallelizable = "NO">
             <BuildableReference
                BuildableIdentifier = "primary"
+               BlueprintIdentifier = "DishCoreTests"
+               BuildableName = "DishCoreTests"
+               BlueprintName = "DishCoreTests"
+               ReferencedContainer = "container:.">
+            </BuildableReference>
+         </TestableReference>
+         <TestableReference
+            skipped = "NO"
+            parallelizable = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
                BlueprintIdentifier = "DishKernelTests"
                BuildableName = "DishKernelTests"
                BlueprintName = "DishKernelTests"

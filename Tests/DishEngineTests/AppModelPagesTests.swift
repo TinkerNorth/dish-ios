@@ -18,7 +18,9 @@ private struct ClockedModel {
             appearance: AppearancePreferenceStore(defaults: defaults),
             device: DevicePreferenceStore(defaults: defaults),
             streaming: StreamingPreferenceStore(defaults: defaults),
-            clock: ClockSource(ticker: ticker, now: now.read)
+            clock: ClockSource(ticker: ticker, now: now.read),
+            localNetwork: RecordedLocalNetworkAccess(),
+            bindings: BindingRequests()
         )
     }
 }

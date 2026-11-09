@@ -133,8 +133,8 @@ private let previewWords = L10n.app
 #Preview("Streaming") {
     SessionBarPreview(state: .streaming(
         pcName: "Living Room PC",
-        line: previewWords.streamingPadsLatency(3, 4),
-        shortLine: previewWords.padsLatency(3, 4),
+        line: [previewWords.streaming, previewWords.padCount(3), previewWords.latency(4)].joined(separator: lineSeparator),
+        shortLine: [previewWords.padCount(3), previewWords.latency(4)].joined(separator: lineSeparator),
         dim: previewWords.dim,
         play: previewWords.play
     ))

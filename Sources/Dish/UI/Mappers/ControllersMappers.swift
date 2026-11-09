@@ -40,8 +40,6 @@ struct ControllersPageState: Equatable {
 
 /// The level at and below which a battery reads in the error colour.
 private let lowBatteryPercent = 15
-/// Between the PC's name and the word after it.
-let lineSeparator = " · "
 
 func controllersPageState(controllers: [ControllerFact], words: L10n = .app) -> ControllersPageState {
     ControllersPageState(

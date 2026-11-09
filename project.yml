@@ -74,6 +74,7 @@ schemes:
       config: Debug
       gatherCoverageData: true
       targets:
+        - package: DishPackage/DishCoreTests
         - package: DishPackage/DishKernelTests
         - package: DishPackage/DishEngineTests
         - package: DishPackage/DishTests

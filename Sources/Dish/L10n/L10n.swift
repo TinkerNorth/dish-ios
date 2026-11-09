@@ -16,6 +16,11 @@ struct L10n {
     let appName = "Dish"
 }
 
+/// What joins the parts of a row's second line ("Streaming · 3 pads · 4 ms");
+/// not a word. Each part is its own key, so a count's plural switches on
+/// that count alone.
+let lineSeparator = " · "
+
 /// A paragraph the catalog keeps one sentence to a key, so every key fits
 /// on one line; the translations split at the same sentences.
 func paragraph(_ sentences: String...) -> String {

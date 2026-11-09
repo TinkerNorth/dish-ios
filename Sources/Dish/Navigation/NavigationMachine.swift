@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 // Copyright (C) 2026 Dish contributors.
 
+import DishCore
 import Foundation
 
 /// A tab: the root of its own navigation stack.
@@ -31,12 +32,6 @@ enum Cover: Hashable {
     case setup(SetupEntry)
     /// The low-power dim while a pad is forwarded; a tap wakes it.
     case dim
-}
-
-/// How the setup cover came down from inside: a binding landed, or Skip.
-enum SetupEnding: Equatable {
-    case bound
-    case skipped
 }
 
 enum NavigationEvent: Equatable {

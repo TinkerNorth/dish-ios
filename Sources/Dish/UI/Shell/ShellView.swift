@@ -85,8 +85,8 @@ private struct ShellCover: View {
 
     var body: some View {
         switch cover {
-        case .setup: DishTheme.background.ignoresSafeArea()
-        case .dim: Color.black.ignoresSafeArea()
+        case .setup: SetupCover()
+        case .dim: DimCover()
         }
     }
 }

@@ -76,6 +76,7 @@ private struct ConnectionsList: View {
     let now = Date(timeIntervalSince1970: 1_800_000_000)
     let facts = ShellFacts(
         controllers: [],
+        attachedPads: [],
         paired: [
             ConnectionFact(
                 id: "1",
@@ -97,7 +98,8 @@ private struct ConnectionsList: View {
         session: nil,
         localNetwork: .allowed,
         preferences: PreferencesFacts(deviceName: "", keepScreenOn: true, dimAfter: .twentySeconds, appearance: .system),
-        now: now
+        now: now,
+        setup: nil
     )
     NavigationStack {
         ConnectionsPageBody(title: tabTitle(.connections), state: connectionsPageState(facts: facts, settingsURL: nil))
@@ -107,13 +109,15 @@ private struct ConnectionsList: View {
 #Preview("Local Network off") {
     let facts = ShellFacts(
         controllers: [],
+        attachedPads: [],
         paired: [],
         found: [],
         scanning: false,
         session: nil,
         localNetwork: .denied,
         preferences: PreferencesFacts(deviceName: "", keepScreenOn: true, dimAfter: .twentySeconds, appearance: .system),
-        now: .distantPast
+        now: .distantPast,
+        setup: nil
     )
     NavigationStack {
         ConnectionsPageBody(

@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 // Copyright (C) 2026 Dish contributors.
 
+import DishCore
 import Foundation
 
 /// How a controller reaches this iPhone.
@@ -44,5 +45,29 @@ package struct ControllerFact: Equatable, Identifiable {
         self.link = link
         self.batteryPercent = batteryPercent
         self.destination = destination
+    }
+}
+
+/// How an attached pad reaches the iPhone.
+package enum PadLink: Equatable {
+    case usbC
+    case bluetooth
+}
+
+/// A pad attached to this iPhone, as setup offers it: its family picks the
+/// default emulation, and its link and battery word its row.
+package struct AttachedPadFact: Equatable, Identifiable {
+    package let id: String
+    package let name: String
+    package let family: EmulatedPad
+    package let link: PadLink
+    package let batteryPercent: Int?
+
+    package init(id: String, name: String, family: EmulatedPad, link: PadLink, batteryPercent: Int?) {
+        self.id = id
+        self.name = name
+        self.family = family
+        self.link = link
+        self.batteryPercent = batteryPercent
     }
 }

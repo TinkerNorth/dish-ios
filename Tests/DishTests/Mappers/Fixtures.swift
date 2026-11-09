@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 // Copyright (C) 2026 Dish contributors.
 
+import DishCore
 import DishEngine
 import Foundation
 
@@ -13,23 +14,27 @@ enum FactsFixture {
 
     static func shell(
         controllers: [ControllerFact] = [],
+        attachedPads: [AttachedPadFact] = [],
         paired: [ConnectionFact] = [],
         found: [ConnectionFact] = [],
         scanning: Bool = false,
         session: SessionFact? = nil,
         localNetwork: LocalNetworkStatus = .unknown,
         preferences: PreferencesFacts = preferences,
-        now: Date = now
+        now: Date = now,
+        setup: SetupState? = nil
     ) -> ShellFacts {
         ShellFacts(
             controllers: controllers,
+            attachedPads: attachedPads,
             paired: paired,
             found: found,
             scanning: scanning,
             session: session,
             localNetwork: localNetwork,
             preferences: preferences,
-            now: now
+            now: now,
+            setup: setup
         )
     }
 

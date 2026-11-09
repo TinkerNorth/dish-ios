@@ -34,13 +34,6 @@ package struct ConnectionFact: Equatable, Identifiable {
     }
 }
 
-/// The Local Network permission as Dish last learned it.
-package enum LocalNetworkStatus: Equatable {
-    case unknown
-    case allowed
-    case denied
-}
-
 /// Whether the PC a session streams to is still answering.
 package enum SessionPhase: Equatable {
     case streaming
