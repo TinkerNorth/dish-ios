@@ -63,6 +63,13 @@ let package = Package(
             dependencies: ["Dish", "DishEngine"],
             path: "Tests/DishTests",
             swiftSettings: warningsAreErrors
+        ),
+        // The repository's rules, read from the tree: imports, the package
+        // graph, headers, theme tokens, view purity, localization.
+        .testTarget(
+            name: "ArchitectureTests",
+            path: "Tests/ArchitectureTests",
+            swiftSettings: warningsAreErrors
         )
     ],
     swiftLanguageModes: [.v6]

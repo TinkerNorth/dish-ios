@@ -13,10 +13,10 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		2785A047BC47F0C88A67176A /* dish-ios */ = {isa = PBXFileReference; lastKnownFileType = folder; name = "dish-ios"; path = .; sourceTree = SOURCE_ROOT; };
 		2852772D9CB3C8CF766600CC /* DishApp.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = DishApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		6C8916C2FE2E8337B08D0229 /* DishApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DishApp.swift; sourceTree = "<group>"; };
 		ADAF4525ED27761494F19178 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		DC42A11AD5B6CD55F06DE820 /* agent-ab5ef98e65becfb25 */ = {isa = PBXFileReference; lastKnownFileType = folder; name = "agent-ab5ef98e65becfb25"; path = .; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -76,7 +76,7 @@
 		FEF29B0B46F2E99EA0C6D2F7 /* Packages */ = {
 			isa = PBXGroup;
 			children = (
-				2785A047BC47F0C88A67176A /* dish-ios */,
+				DC42A11AD5B6CD55F06DE820 /* agent-ab5ef98e65becfb25 */,
 			);
 			name = Packages;
 			sourceTree = "<group>";
