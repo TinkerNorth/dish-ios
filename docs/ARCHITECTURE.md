@@ -270,6 +270,18 @@ from dish-mac and recorded here so the engine is shaped for them:
   main-actor state.
 - Return paths (rumble, the light bar) run the other way in one hop to a queue
   that owns the actuators.
+- A mailbox or a direct send before a queue. The siblings carry a lock-free
+  bounded queue of Vyukov's design (the satellite's log queue, the desktops'
+  `MpscQueue` under the speaker playout, Android's `mpmc_ring` under the
+  bridge, the speaker and the USB acks); dish-mac carries none, and neither
+  does this client: no lane here has several producers feeding one consumer,
+  and iOS has no pad speaker and no USB output lane without the Direct path.
+  `Tests/PARITY.md` says when one would be ported and in which form.
+- Some of the siblings' capabilities sit behind entitlements Apple grants on
+  request: the multicast entitlement for the legacy discovery beacon, raw HID
+  access for the Direct path. The hot path reaches every pad through
+  GameController and every satellite through Bonjour until they are granted;
+  `Tests/PARITY.md` lists them.
 
 ## How to add a feature
 

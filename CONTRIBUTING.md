@@ -519,6 +519,14 @@ and must never block.
 - Preserve `IP_TOS = 0xB8` (DSCP EF) and `SO_NOSIGPIPE` on every send.
 - Where a shape rule and the hot path disagree, the hot path wins and the
   reason goes in a test name, not a comment.
+- A mailbox or a direct send before a queue. The siblings' lock-free bounded
+  queue (Vyukov's: the satellite's log queue, the desktops' `MpscQueue`,
+  Android's `mpmc_ring`) is not ported; `Tests/PARITY.md` says when it would
+  be and in which form.
+- Some of what the siblings do needs Apple's permission on iOS: the
+  multicast entitlement for the legacy beacon, raw HID access for the Direct
+  path. `Tests/PARITY.md` lists them; a wave that needs one asks for it first
+  and ships the sanctioned path alone until it is granted.
 
 The engine is shaped for it already: its stores publish through
 `StateSource`, which is for state the UI reads, not for per-report data.
