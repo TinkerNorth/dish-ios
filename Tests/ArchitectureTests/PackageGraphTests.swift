@@ -163,4 +163,12 @@ final class PackageGraphTests: XCTestCase {
         XCTAssertGreaterThan(testTargets.count, 2, "the sweep must see the test targets")
         XCTAssertEqual(schemeTestTargets().sorted(), testTargets.sorted())
     }
+
+    /// The UI tests live in the project, not the package: the scheme runs
+    /// them beside the package's suites.
+    func testTheSchemeRunsTheUITestsBesideThePackagesSuites() throws {
+        let project = try RepoFiles.read("project.yml")
+        XCTAssertTrue(project.contains("  DishUITests:\n    type: bundle.ui-testing"), "project.yml declares the UI test bundle")
+        XCTAssertTrue(project.contains("        - DishUITests\n"), "the DishApp scheme lists the UI tests")
+    }
 }

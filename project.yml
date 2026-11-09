@@ -63,6 +63,20 @@ targets:
       - package: DishPackage
         product: Dish
 
+  # The shell's critical path driven through the real app on the simulator;
+  # everything else is tested in the package.
+  DishUITests:
+    type: bundle.ui-testing
+    platform: iOS
+    sources:
+      - path: App/UITests
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.tinkernorth.dish.ios.uitests
+        GENERATE_INFOPLIST_FILE: YES
+    dependencies:
+      - target: DishApp
+
 schemes:
   DishApp:
     build:
@@ -79,5 +93,6 @@ schemes:
         - package: DishPackage/DishEngineTests
         - package: DishPackage/DishTests
         - package: DishPackage/ArchitectureTests
+        - DishUITests
     archive:
       config: Release

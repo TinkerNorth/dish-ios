@@ -16,7 +16,7 @@ final class LicenseHeaderTests: XCTestCase {
     }
 
     func testEverySwiftSourceStartsWithTheLicenseHeader() throws {
-        let files = ["Sources", "Tests", "App/Sources"].flatMap(RepoFiles.swiftFiles)
+        let files = ["Sources", "Tests", "App"].flatMap(RepoFiles.swiftFiles)
         XCTAssertGreaterThan(files.count, 10, "the sweep must see the whole tree")
         for file in files {
             let lines = try firstLines(file, count: 2)

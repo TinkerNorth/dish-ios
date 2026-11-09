@@ -4,7 +4,7 @@
 included:
   - Sources
   - Tests
-  - App/Sources
+  - App
 
 excluded:
   - .build
