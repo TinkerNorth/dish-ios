@@ -47,9 +47,9 @@ cover.
 
 The three tabs, in tab-bar order: **Controllers** (`gamecontroller`),
 **Connections** (the antenna stand-in for the Satellite glyph) and **Settings**
-(`gearshape`). The only pushed page today is **Name on your PC**
-(`Page.deviceName`, pushed from Settings). `NavigationCoverageTests` keeps the
-map whole.
+(`gearshape`). The pushed pages are **Name on your PC** (`Page.deviceName`,
+pushed from Settings) and a **controller's page** (`Page.controller(id:)`,
+pushed from a Controllers row). `NavigationCoverageTests` keeps the map whole.
 
 ### The session accessory
 
@@ -129,9 +129,10 @@ Today's pages and their mappers:
 
 | Page | View state | Mapper | What it draws |
 |---|---|---|---|
-| `ControllersPage` | `ControllersPageState` (`ControllersContent`: `empty` or `list`) | `controllersPageState(controllers:words:)` | A list of controller rows (glyph tile, name, the destination line with a dot and the link word, battery) over a separate "Add a controller" button with its hint, which sends `openSetup(.addController)`; with no controllers, the invitation above the same button. The facts are empty today, so only the empty state is reachable at run time. |
+| `ControllersPage` | `ControllersPageState` (`ControllersContent`: `empty` or `list`) | `controllersPageState(controllers:words:)` | A list of controller rows (glyph tile, name, the destination line with a dot and the link word, battery) over a separate "Add a controller" button with its hint, which sends `openSetup(.addController)`; with no controllers, the invitation above the same button. A row pushes its controller's page; a pad Dish cannot read says "Not supported" and opens nothing. |
 | `ConnectionsPage` | `ConnectionsPageState` (`denied`, `empty`, `list`) | `connectionsPageState(facts:settingsURL:words:)` | PAIRED and FOUND ON <Wi-Fi> sections, the Moonlight hosts row (not tappable yet) and a footnote; the empty state; and, when Local Network is denied, "Dish can't see your network" with Open Settings. The status never leaves `.unknown` today, so only the empty state is reachable at run time. |
 | `SettingsPage` | `SettingsPageState` | `settingsPageState(preferences:appVersion:words:)` | THIS IPHONE (Name on your PC, pushing `deviceName`), WHILE STREAMING (Keep screen on, Dim screen after), SETUP & HELP (Setup guide, sending `openSetup(.guide)`), APPEARANCE (System, Light, Dark) and ABOUT (the version). Help & FAQ and Diagnostics are not built and have no row. |
+| `ControllerPage` | `ControllerPageState` (`ControllerContent`: `pad` or `gone`) | `controllerPageState(controllers:id:words:)` | C1 without the PC half: the status card (name, link, family, battery), BINDING with "Destination · Not bound" (disabled) and Emulate as (a `Picker` through `setEmulatedType`), FUNCTIONS (a `Toggle` per switch the pad has, through `setControllerFeature`) and the microphone and speaker footnote; the title is the pad's name and the subtitle "84% battery · USB-C". A pad that left while the page was open shows "This controller isn’t connected to your iPhone." |
 | `DeviceNamePage` | `DeviceNamePageState` | `deviceNamePageState(preferences:words:)` | A text field whose draft is the page's own `@State`, committed with `setDeviceName`. |
 | the shell | `[TabItemState]`, `SessionBarState?` | `tabItems(facts:words:)`, `sessionBarState(_:words:)` | The tab titles, symbols and the Connections badge; the accessory's two shapes. |
 

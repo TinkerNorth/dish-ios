@@ -20,7 +20,8 @@ private struct ClockedModel {
             streaming: StreamingPreferenceStore(defaults: defaults),
             clock: ClockSource(ticker: ticker, now: now.read),
             localNetwork: RecordedLocalNetworkAccess(),
-            bindings: BindingRequests()
+            bindings: BindingRequests(),
+            pads: ControllerStack(source: FakeControllerSource(), defaults: defaults)
         )
     }
 }

@@ -11,9 +11,10 @@ private enum ControllerFixture {
     static func pad(
         link: ControllerLink = .usbC,
         battery: Int? = 84,
-        destination: DestinationFact? = DestinationFact(name: "Living Room PC", health: .online)
+        destination: DestinationFact? = DestinationFact(name: "Living Room PC", health: .online),
+        supported: Bool = true
     ) -> ControllerFact {
-        ControllerFact(id: "pad", name: "DualSense", link: link, batteryPercent: battery, destination: destination)
+        ControllerFact(id: "pad", name: "DualSense", link: link, batteryPercent: battery, destination: destination, supported: supported)
     }
 }
 
@@ -36,9 +37,17 @@ final class ControllersMappersTests: XCTestCase {
             destination: .bound(pcName: "Living Room PC", detail: " · USB-C"),
             dot: DishTheme.success,
             battery: "84%",
-            batteryColor: DishTheme.muted
+            batteryColor: DishTheme.muted,
+            page: .controller(id: "pad")
         )
         XCTAssertEqual(state.content, .list([row]))
+    }
+
+    func testAPadDishCannotReadSaysSoAndOpensNothing() {
+        let row = controllerRow(ControllerFixture.pad(destination: nil, supported: false))
+        XCTAssertEqual(row.destination, .note("Not supported"))
+        XCTAssertEqual(row.dot, DishTheme.muted)
+        XCTAssertNil(row.page, "there is nothing to set on a pad Dish cannot read")
     }
 
     func testEachLinkHasItsWordAndGlyph() {
