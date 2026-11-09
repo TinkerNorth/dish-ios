@@ -58,7 +58,7 @@ screens, Support Dish, Help & FAQ, Diagnostics and the rest.
 
 - iOS 26.0 or newer, iPhone only, portrait only in this wave. There is no
   fallback for an older iOS anywhere.
-- Xcode 26 (Swift 6.2 tools) to build; CI builds on `macos-26`.
+- Xcode 26.6 or newer (Swift 6.3) to build; CI builds on `macos-26` with its default Xcode 26.6, and the tree is also verified on Xcode 27.
 - To build from a clone, the checkout folder must be named `dish-ios`, as CI's
   is: XcodeGen names the project's local package reference after the folder,
   and `scripts/generate-project.sh --check` fails on any other name.

@@ -13,7 +13,7 @@ participating, you agree to uphold it. Report unacceptable behavior to
 ## Getting set up
 
 ```bash
-# 1) Install Xcode 26 or newer (Swift 6.2 tools, the iOS 26 SDK and an
+# 1) Install Xcode 26.6 or newer (Swift 6.3, the iOS 26 SDK and an
 #    iPhone 17 Pro simulator; the tree is also verified on the newest Xcode)
 # 2) Name the checkout folder dish-ios, as CI's is (see below)
 # 3) Point git at the in-tree pre-commit hook
@@ -214,9 +214,13 @@ The caps (a warning fails CI): line 140, function body 45, type body 300,
 file 500, cyclomatic complexity 10 (exhaustive `switch` arms do not count),
 parameters 8. `LintConfigTests` pins the thresholds this document names.
 
-CI builds on the `macos-26` runner image with its default Xcode (26.x, Swift
-6.2). The tree must be warning-free there and on the newest Xcode; write code
-that both compile, and use nothing that arrived after the iOS 26 SDK.
+CI builds on the `macos-26` runner image with its default Xcode (26.6, Swift
+6.3.3). The tree must be warning-free there and on the newest Xcode (27.x,
+Swift 6.4 locally); write code that both compile, and use nothing that
+arrived after the iOS 26 SDK. The older compiler is also the stricter judge:
+it refused to lower a main-actor function reference handed straight to
+`Binding(get:set:)`, so a setter there is a one-expression closure
+(`set: { select($0) }`), never a bare method reference.
 
 ### Shape of the code
 
