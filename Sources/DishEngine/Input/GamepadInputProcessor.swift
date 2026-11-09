@@ -145,12 +145,18 @@ func scaleAccel(_ gValue: Double) -> Int16 {
 }
 
 /// One IMU vector on three axes, in the unit its source reports.
-struct MotionAxes: Equatable {
-    var x: Double
-    var y: Double
-    var z: Double
+package struct MotionAxes: Equatable {
+    package var x: Double
+    package var y: Double
+    package var z: Double
 
-    static let zero = MotionAxes(x: 0, y: 0, z: 0)
+    package init(x: Double, y: Double, z: Double) {
+        self.x = x
+        self.y = y
+        self.z = z
+    }
+
+    package static let zero = MotionAxes(x: 0, y: 0, z: 0)
 }
 
 /// Convert a GCMotion-shaped reading to the wire frame. GameController's

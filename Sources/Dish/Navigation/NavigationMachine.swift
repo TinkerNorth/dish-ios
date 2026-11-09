@@ -2,6 +2,7 @@
 // Copyright (C) 2026 Dish contributors.
 
 import DishCore
+import DishEngine
 import Foundation
 
 /// A tab: the root of its own navigation stack.
@@ -38,6 +39,8 @@ enum SetupEntry: Hashable {
 /// A full-screen cover over the tabs.
 enum Cover: Hashable {
     case setup(SetupEntry)
+    /// A play screen, in landscape; the pause menu moves between them.
+    case play(PlayScreen)
     /// The low-power dim while a pad is forwarded; a tap wakes it.
     case dim
 }
@@ -50,6 +53,10 @@ enum NavigationEvent: Equatable {
     case pathChanged(Tab, [Page])
     case openSetup(SetupEntry)
     case setupEnded(SetupEnding)
+    /// Open a play screen, or move to another from the pause menu.
+    case openPlay(PlayScreen)
+    /// The pause menu's way out.
+    case closePlay
     /// The session accessory's Dim.
     case dim
     /// A tap on the dimmed screen.
@@ -64,6 +71,10 @@ enum NavigationEffect: Equatable {
     case startSetup(SetupEntry)
     /// The model drops its setup walk.
     case endSetup
+    /// The model opens this play screen on the on-screen controller.
+    case startPlay(PlayScreen)
+    /// The model closes the play screen, releasing what it held.
+    case endPlay
 }
 
 struct NavigationState: Equatable {
@@ -82,8 +93,9 @@ struct NavigationStep: Equatable {
 }
 
 /// The shell's one navigation rule: each tab keeps its own stack, a tap on
-/// the tab on screen unwinds it, a page pushes onto it, setup and the dim
-/// cover everything, and leaving setup by any road lands on Controllers.
+/// the tab on screen unwinds it, a page pushes onto it, setup, play and the
+/// dim cover everything, a cover replacing another ends it, and leaving
+/// setup by any road lands on Controllers.
 func reduceNavigation(_ state: NavigationState, _ event: NavigationEvent) -> NavigationStep {
     switch event {
     case let .select(tab): selected(state, tab)
@@ -91,6 +103,8 @@ func reduceNavigation(_ state: NavigationState, _ event: NavigationEvent) -> Nav
     case let .pathChanged(tab, path): pathMoved(state, tab, path)
     case let .openSetup(entry): setupOpened(state, entry)
     case let .setupEnded(ending): setupLeft(state, ending)
+    case let .openPlay(screen): playOpened(state, screen)
+    case .closePlay: playClosed(state)
     case .dim: dimmed(state)
     case .wake: woken(state)
     case .coverDismissed: coverLowered(state)
@@ -128,7 +142,32 @@ private func covered(_ state: NavigationState, _ cover: Cover) -> NavigationStep
 /// starts its walk at the entry asked for.
 private func setupOpened(_ state: NavigationState, _ entry: SetupEntry) -> NavigationStep {
     let raised = covered(state, .setup(entry))
-    return NavigationStep(state: raised.state, effects: [.startSetup(entry)])
+    return NavigationStep(state: raised.state, effects: ended(state.cover, by: .setup(entry)) + [.startSetup(entry)])
+}
+
+/// A play screen replaces whatever covered the tabs; from another play
+/// screen it is the pause menu moving on, under the same cover.
+private func playOpened(_ state: NavigationState, _ screen: PlayScreen) -> NavigationStep {
+    let raised = covered(state, .play(screen))
+    return NavigationStep(state: raised.state, effects: ended(state.cover, by: .play(screen)) + [.startPlay(screen)])
+}
+
+private func playClosed(_ state: NavigationState) -> NavigationStep {
+    guard case .play = state.cover else { return NavigationStep(state: state, effects: []) }
+    var next = state
+    next.cover = nil
+    return NavigationStep(state: next, effects: [.endPlay])
+}
+
+/// What the model must end when `next` replaces `cover`: a walk or a play
+/// screen covered by something else. A cover of the same kind carries on.
+private func ended(_ cover: Cover?, by next: Cover) -> [NavigationEffect] {
+    switch (cover, next) {
+    case (.setup, .setup), (.play, .play): []
+    case (.setup, _): [.endSetup]
+    case (.play, _): [.endPlay]
+    case (.dim, _), (nil, _): []
+    }
 }
 
 /// Both roads out of setup land on Controllers and complete the welcome, or
@@ -144,7 +183,7 @@ private func setupLeft(_ state: NavigationState, _ ending: SetupEnding) -> Navig
 }
 
 /// The dim rises only over the tabs: the accessory that asks for it is not
-/// on screen under a cover.
+/// on screen under a cover, a play screen included.
 private func dimmed(_ state: NavigationState) -> NavigationStep {
     guard state.cover == nil else { return NavigationStep(state: state, effects: []) }
     return covered(state, .dim)
@@ -157,12 +196,13 @@ private func woken(_ state: NavigationState) -> NavigationStep {
     return NavigationStep(state: next, effects: [])
 }
 
-/// A cover the system lowered ends what it showed: setup as a skip, the dim
-/// as a wake.
+/// A cover the system lowered ends what it showed: setup as a skip, play
+/// as a close, the dim as a wake.
 private func coverLowered(_ state: NavigationState) -> NavigationStep {
     switch state.cover {
     case .setup: setupLeft(state, .skipped)
     case .dim: woken(state)
+    case .play: playClosed(state)
     case nil: NavigationStep(state: state, effects: [])
     }
 }

@@ -9,6 +9,8 @@ import SwiftUI
 struct ControllerActions {
     let setFeature: @MainActor (SlotSwitch, Bool) -> Void
     let setEmulateAs: @MainActor (EmulatedPad) -> Void
+    /// The on-screen controller's Open: its gamepad.
+    let open: @MainActor () -> Void
 }
 
 /// Controllers › a controller (C1) without its PC half: the status card,
@@ -18,11 +20,12 @@ struct ControllerPage: View {
     let id: String
 
     @Environment(AppModel.self) private var model
+    @Environment(NavigationStore.self) private var navigation
 
     var body: some View {
         ControllerPageBody(
             state: controllerPageState(controllers: model.shellFacts.controllers, id: id),
-            actions: ControllerActions(setFeature: setFeature, setEmulateAs: setEmulateAs)
+            actions: ControllerActions(setFeature: setFeature, setEmulateAs: setEmulateAs, open: openGamepad)
         )
     }
 
@@ -32,6 +35,10 @@ struct ControllerPage: View {
 
     private func setEmulateAs(_ pad: EmulatedPad) {
         model.setEmulatedType(slotId: id, pad)
+    }
+
+    private func openGamepad() {
+        navigation.send(.openPlay(.gamepad))
     }
 }
 
@@ -67,6 +74,11 @@ private struct ControllerPadSections: View {
     var body: some View {
         Section {
             ControllerStatusCard(state: state.status)
+            if let open = state.open {
+                Button(open, systemImage: PlaySymbol.resume, action: actions.open)
+                    .font(DishFont.headline)
+                    .foregroundStyle(DishTheme.primary)
+            }
         }
         .listRowBackground(DishTheme.surface)
         ControllerBindingSection(state: state.binding, setEmulateAs: actions.setEmulateAs)
@@ -95,7 +107,7 @@ private struct ControllerPadSections: View {
     NavigationStack {
         ControllerPageBody(
             state: controllerPageState(controllers: [pad], id: "pad"),
-            actions: ControllerActions(setFeature: { _, _ in }, setEmulateAs: { _ in })
+            actions: ControllerActions(setFeature: { _, _ in }, setEmulateAs: { _ in }, open: {})
         )
     }
 }
@@ -114,7 +126,7 @@ private struct ControllerPadSections: View {
     NavigationStack {
         ControllerPageBody(
             state: controllerPageState(controllers: [pad], id: "pad"),
-            actions: ControllerActions(setFeature: { _, _ in }, setEmulateAs: { _ in })
+            actions: ControllerActions(setFeature: { _, _ in }, setEmulateAs: { _ in }, open: {})
         )
     }
 }
@@ -123,7 +135,7 @@ private struct ControllerPadSections: View {
     NavigationStack {
         ControllerPageBody(
             state: controllerPageState(controllers: [], id: "pad"),
-            actions: ControllerActions(setFeature: { _, _ in }, setEmulateAs: { _ in })
+            actions: ControllerActions(setFeature: { _, _ in }, setEmulateAs: { _ in }, open: {})
         )
     }
 }

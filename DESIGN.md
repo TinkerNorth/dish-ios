@@ -72,6 +72,14 @@ The low-power dim, which must not light the panel:
 |---|---|---|---|
 | `DishTheme.dimBackground` | `0x000000` | `0x000000` | True black in either appearance, so an OLED panel is off |
 | `DishTheme.dimText` | `0x8A8E9E` | `0x8A8E9E` | The dim's words, a grey low enough not to light the panel |
+| `DishTheme.dimCard` | `0x0A0E1C` | `0x0A0E1C` | The dim's session card, a shade off black |
+| `DishTheme.padGreen` | `0x7DB82A` | `0x7DB82A` | Xbox's A and PlayStation's triangle on the on-screen gamepad (the play screens are always dark) |
+| `DishTheme.padRed` | `0xE8492F` | `0xE8492F` | Xbox's B and PlayStation's circle |
+| `DishTheme.padBlue` | `0x1E9BEA` | `0x1E9BEA` | Xbox's X and PlayStation's cross |
+| `DishTheme.padYellow` | `0xF5A623` | `0xF5A623` | Xbox's Y |
+| `DishTheme.padPink` | `0xE86AA8` | `0xE86AA8` | PlayStation's square |
+| `DishTheme.padThumb` | `0x283160` | `0x283160` | A stick's thumb over its base |
+| `DishTheme.padGlow` | accent @ 28 % | accent @ 28 % | The glow around a held control and the ring under a finger on the mouse pad |
 
 The tips heart, the design's `#FF6FB5`, darkened in the light palette so it
 holds its contrast on white (dish-mac's value):
@@ -100,6 +108,10 @@ last column are the styles' defaults at the standard setting.
 | `DishFont.feature` | `.title2` | 22 | The glyph in a Local Network primer tile, and a welcome feature's symbol |
 | `DishFont.columnTitle` | `.footnote`, semibold | 13 | A column's title over its rows: Sends to PC, Gets back |
 | `DishFont.eyebrow` | `.caption`, monospaced, semibold | 12 | A section's eyebrow, drawn upper-cased and tracked |
+| `DishFont.padLabel` | `.headline`, monospaced, bold | 17 | A shoulder's, a rail's or the play pill's name |
+| `DishFont.padFace` | `.title2`, bold | 22 | A face button's letter or glyph |
+| `DishFont.padSmall` | `.subheadline`, monospaced, semibold | 15 | L3, R3 and the small round buttons |
+| `DishFont.dimClock` | `.largeTitle`, monospaced, light | 34 | The dim's clock |
 
 ## Measures (`DishSize`)
 
@@ -119,6 +131,23 @@ Points. Every size a kit component sets is one of these names.
 | `DishSize.primerTile` | 64 | The phone and PC tiles over the Local Network primer |
 | `DishSize.eyebrowTracking` | 1.4 | The tracking of a section eyebrow |
 | `DishSize.codeCorner` | 10 | The corner of a licence text's block on the licenses page |
+| `DishSize.padStick` | 128 | A stick's base on the on-screen gamepad |
+| `DishSize.padStickThumb` | 60 | A stick's thumb |
+| `DishSize.padFace` | 52 | A face button |
+| `DishSize.padRound` | 44 | L3, R3, the pause button, the centre buttons and the play pill's height |
+| `DishSize.padDpadKey` | 44 | One arm of the d-pad |
+| `DishSize.padCorner` | 12 | A d-pad arm's corner |
+| `DishSize.dpadDiagonal` | 0.3 | The minor axis's share of the major one before the d-pad lights a diagonal, the reducer's `dpadDiagonalThreshold` |
+| `DishSize.padRail` | 44 | A trigger rail's width |
+| `DishSize.padShoulderWidth` | 112 | A shoulder button's width |
+| `DishSize.padShoulderHeight` | 36 | A shoulder button's height |
+| `DishSize.padStroke` | 1.5 | A control's outline |
+| `DishSize.padHeldStroke` | 2.5 | A held control's outline, and a face button's ring |
+| `DishSize.padGlow` | 12 | The glow around a held control |
+| `DishSize.mouseColumn` | 180 | The mouse's Left, Scroll and Right column |
+| `DishSize.mouseCorner` | 28 | The mouse pad's, its buttons' and the touchpad's corners |
+| `DishSize.pointerRing` | 40 | The ring under the finger on the mouse pad |
+| `DishSize.dimCardCorner` | 20 | The dim's session card's corner |
 
 ## Spacing (`DishSpace`)
 

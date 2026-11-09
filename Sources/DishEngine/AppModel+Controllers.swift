@@ -10,10 +10,11 @@ import Foundation
 /// reach each pad's feed as they change.
 package extension AppModel {
 
-    /// Every pad iOS lists, readable or not, with its switches and pick. No
-    /// pad is bound until the network wave binds one.
+    /// Every pad iOS lists, readable or not, with its switches and pick,
+    /// then the on-screen controller once it is listed. No pad is bound
+    /// until the network wave binds one.
     internal var controllerFacts: [ControllerFact] {
-        pads.source.slots.map(controllerFact)
+        pads.source.slots.map(controllerFact) + onScreenFact
     }
 
     /// The pads setup can offer: the ones Dish can read.

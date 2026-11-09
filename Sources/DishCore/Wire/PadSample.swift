@@ -23,6 +23,10 @@ package struct WireButtonWord: Equatable, ExpressibleByArrayLiteral {
         rawValue |= button.bit
     }
 
+    package mutating func remove(_ button: WireButton) {
+        rawValue &= ~button.bit
+    }
+
     package func contains(_ button: WireButton) -> Bool {
         rawValue & button.bit != 0
     }

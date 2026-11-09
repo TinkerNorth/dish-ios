@@ -22,7 +22,9 @@ private struct ClockedModel {
             localNetwork: RecordedLocalNetworkAccess(),
             bindings: BindingRequests(),
             pads: ControllerStack(source: FakeControllerSource(), defaults: defaults),
-            tips: RecordedTipStore(shelf: .success([]))
+            tips: RecordedTipStore(shelf: .success([])),
+            motionSensor: FakeMotionSensor(),
+            resendTicker: ManualTicker()
         )
     }
 }
@@ -43,6 +45,14 @@ final class AppModelPagesTests: XCTestCase {
         let clocked = try ClockedModel(self)
         clocked.model.pageAppeared(.connections)
         clocked.model.pageDisappeared(.connections)
+        XCTAssertFalse(clocked.ticker.running)
+    }
+
+    func testTheDimRunsTheClockWhileItIsUp() throws {
+        let clocked = try ClockedModel(self)
+        clocked.model.pageAppeared(.dim)
+        XCTAssertTrue(clocked.ticker.running)
+        clocked.model.pageDisappeared(.dim)
         XCTAssertFalse(clocked.ticker.running)
     }
 

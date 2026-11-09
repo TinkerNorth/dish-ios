@@ -39,6 +39,21 @@ enum DishTheme {
     /// The tips heart: the Controllers toolbar, Settings › Support Dish and
     /// the Support Dish page.
     static let pulse = Color(dark: 0xFF6FB5, light: 0xC2417F)
+    /// The dim's session card, a shade off black.
+    static let dimCard = Color(dark: 0x0A0E1C, light: 0x0A0E1C)
+
+    /// The on-screen gamepad's face buttons, as the pads colour them: Xbox's A,
+    /// B, X and Y, and PlayStation's cross, circle, square and triangle. The play
+    /// screens are always dark, so both appearances share them.
+    static let padGreen = Color(dark: 0x7DB82A, light: 0x7DB82A)
+    static let padRed = Color(dark: 0xE8492F, light: 0xE8492F)
+    static let padBlue = Color(dark: 0x1E9BEA, light: 0x1E9BEA)
+    static let padYellow = Color(dark: 0xF5A623, light: 0xF5A623)
+    static let padPink = Color(dark: 0xE86AA8, light: 0xE86AA8)
+    /// A stick's thumb over its base.
+    static let padThumb = Color(dark: 0x283160, light: 0x283160)
+    /// The glow around a held control and the pointer's trail on the mouse.
+    static let padGlow = Color(dark: 0x4FE3FF, light: 0x4FE3FF, alpha: 0.28)
 }
 
 /// The SF Symbols the setup chrome draws on its own; a row's glyph comes
@@ -95,6 +110,14 @@ enum DishFont {
     static let columnTitle = Font.footnote.weight(.semibold)
     /// A section's eyebrow, drawn upper-cased and tracked.
     static let eyebrow = Font.system(.caption, design: .monospaced).weight(.semibold)
+    /// A shoulder, a rail or a session pill's name on the play screens.
+    static let padLabel = Font.system(.headline, design: .monospaced).weight(.bold)
+    /// A face button's letter or glyph.
+    static let padFace = Font.title2.bold()
+    /// L3, R3 and the small round buttons.
+    static let padSmall = Font.system(.subheadline, design: .monospaced).weight(.semibold)
+    /// The dim's clock.
+    static let dimClock = Font.system(.largeTitle, design: .monospaced).weight(.light)
 }
 
 /// The measures. Every size a kit component sets is one of these names.
@@ -123,6 +146,38 @@ enum DishSize {
     static let eyebrowTracking: CGFloat = 1.4
     /// The corner of a licence text's block on the licenses page.
     static let codeCorner: CGFloat = 10
+    /// A stick's base on the on-screen gamepad, and its thumb.
+    static let padStick: CGFloat = 128
+    static let padStickThumb: CGFloat = 60
+    /// A face button.
+    static let padFace: CGFloat = 52
+    /// L3, R3, the pause button and the centre buttons.
+    static let padRound: CGFloat = 44
+    /// One arm of the d-pad.
+    static let padDpadKey: CGFloat = 44
+    /// The d-pad's and a mouse button's corners.
+    static let padCorner: CGFloat = 12
+    /// The share of its major axis a finger's minor axis needs before the d-pad
+    /// lights a diagonal: the reducer's own `dpadDiagonalThreshold`.
+    static let dpadDiagonal: CGFloat = 0.3
+    /// A trigger rail's width.
+    static let padRail: CGFloat = 44
+    /// A shoulder button.
+    static let padShoulderWidth: CGFloat = 112
+    static let padShoulderHeight: CGFloat = 36
+    /// A control's outline, and a held one's.
+    static let padStroke: CGFloat = 1.5
+    static let padHeldStroke: CGFloat = 2.5
+    /// The glow around a held face button.
+    static let padGlow: CGFloat = 12
+    /// The mouse's Left, Scroll and Right column.
+    static let mouseColumn: CGFloat = 180
+    /// The mouse pad's and its buttons' corners.
+    static let mouseCorner: CGFloat = 28
+    /// The ring under the finger on the mouse pad.
+    static let pointerRing: CGFloat = 40
+    /// The dim's session card's corner.
+    static let dimCardCorner: CGFloat = 20
 }
 
 /// The spacing scale.

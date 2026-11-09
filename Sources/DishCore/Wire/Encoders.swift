@@ -115,14 +115,15 @@ package enum Encoders {
     /// fingerFlags(1) + buttons(1) + f0(id1 + x2 + y2) + f1(id1 + x2 + y2) +
     /// eventTimeMs(u32 LE @ 13) + scrollV(i16 LE @ 17)` = 19 bytes. The pad's
     /// click rides the buttons byte as the left button; `scrollV` is an
-    /// event in 120ths of a notch, 0 on a resend. Only a session settled on
+    /// event in 120ths of a notch, 0 on a resend, the sample's own unless
+    /// `scrollV` says otherwise. Only a session settled on
     /// version 2 or later may send this; the receiver tells the two shapes
     /// apart by length.
     package static func pointerPayload(
         controllerIndex: UInt8,
         sample: TouchpadSample,
         eventTimeMs: UInt32,
-        scrollV: Int16 = 0
+        scrollV: Int16? = nil
     ) -> Data {
         payload(1 + ProtocolConstants.pointerPayloadBytes) {
             writePointerPayload(controllerIndex: controllerIndex, sample: sample, eventTimeMs: eventTimeMs, scrollV: scrollV, into: $0)
@@ -134,12 +135,12 @@ package enum Encoders {
         controllerIndex: UInt8,
         sample: TouchpadSample,
         eventTimeMs: UInt32,
-        scrollV: Int16 = 0,
+        scrollV: Int16? = nil,
         into out: UnsafeMutableRawBufferPointer
     ) {
         out[0] = controllerIndex
         out[1] = pointerFingerFlags(sample)
-        out[2] = sample.buttonPressed ? ProtocolConstants.pointerButtonLeft : 0
+        out[2] = pointerButtons(sample)
         out[3] = sample.finger0.id
         storeLE16(sample.finger0.x, into: out, at: 4)
         storeLE16(sample.finger0.y, into: out, at: 6)
@@ -147,7 +148,14 @@ package enum Encoders {
         storeLE16(sample.finger1.x, into: out, at: 9)
         storeLE16(sample.finger1.y, into: out, at: 11)
         storeLE32(eventTimeMs, into: out, at: 13)
-        storeLE16(scrollV, into: out, at: 17)
+        storeLE16(scrollV ?? sample.scrollV, into: out, at: 17)
+    }
+
+    /// The left button is the click, the right one the mouse's second button.
+    private static func pointerButtons(_ sample: TouchpadSample) -> UInt8 {
+        let left = sample.buttonPressed ? ProtocolConstants.pointerButtonLeft : 0
+        let right = sample.rightPressed ? ProtocolConstants.pointerButtonRight : 0
+        return left | right
     }
 
     private static func pointerFingerFlags(_ sample: TouchpadSample) -> UInt8 {

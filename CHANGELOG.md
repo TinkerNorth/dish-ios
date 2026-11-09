@@ -20,10 +20,11 @@ lockstep across the repos share a version number.
 
 ## [Unreleased]
 
-Wave 1, the shell: the app runs and every screen of the shell is built, but
-nothing talks to a PC yet. The engine publishes real, empty facts (no
-controllers, no connections, no session, a Local Network status that stays
-unknown); `Tests/PARITY.md` lists everything not built.
+The shell, the protocol core, the controller bridge, the play screens, Help,
+Support and Licenses are built; nothing talks to a PC yet. The engine publishes
+the attached controllers and the on-screen one as facts, and empty connections
+(no paired PC, no session, a Local Network status that stays unknown) until the
+network engine lands; `Tests/PARITY.md` lists everything not built.
 
 ### Added
 
@@ -44,7 +45,37 @@ unknown); `Tests/PARITY.md` lists everything not built.
   machine in `DishCore` (`reduceSetup`); Bind records the request and sends
   nothing.
 - **The low-power dim.** A black cover with the status bar hidden; a tap wakes
-  it.
+  it. It shows the clock and, while a session is up, the session card with
+  each bound pad's level.
+- **The protocol core.** `DishCore` carries protocol 3 as dish-mac does, under
+  the same file and type names: the constants (ports 9443, 9876 and 9879,
+  `_satellite._udp`), the wire codecs for the pad, motion, touchpad and
+  feedback frames and the packet envelope (`Wire/`), the session crypto (HKDF
+  and ChaCha20-Poly1305 over CryptoKit) and the policy reducers the sessions
+  need (close-notify, backoff, reverse pairing's cadence, TOFU, protocol
+  negotiation, the capability solver, slot reconcile, apply progress, the
+  latency window and the link tier). Every codec and the crypto are pinned by
+  the fleet's cross-repo vectors.
+- **The controller bridge.** Every pad GameController attaches reaches its own
+  `PadFeed` on its own handler queue: the processor applies the deadzones, the
+  feed holds its route (a `PadSink` and a slot, or none) in a mailbox the main
+  actor writes and the queue reads without a lock, and the return paths
+  (rumble, light bar, adaptive triggers, player LEDs) and the battery flow
+  back through the same seam. The Controllers tab lists the attached pads
+  live, Input's "Found on this iPhone" fills, and each controller has its
+  page with everything but its PC binding. `LockLawTests` pins which thread
+  may take which lock.
+- **The play screens.** The on-screen gamepad (trigger rails, shoulders, two
+  sticks, the d-pad, the faces labelled for the emulated pad, L3 and R3), the
+  touchpad (one or two fingers and two click zones) and the mouse (Left, a
+  Scroll strip, Right and the move pad), each a landscape cover with the
+  status bar and the system's overlays hidden and its edge gestures held
+  back; the pause menu (Resume, the other screens, Motion, Rumble, Emulate as,
+  Stop gamepad). The on-screen controller is a controller slot of its own: it
+  is listed on the Controllers tab with Open, its touches leave through its
+  feed as they happen, a lost edge heals with three resends 50 ms apart and a
+  keepalive a second (Android's pacing), its motion comes from the iPhone's
+  sensors and its rumble plays on the Taptic Engine.
 - **The Settings page.** Name on your PC (a pushed page), Keep screen on, Dim
   screen after (10, 20, 30 seconds, 1 or 2 minutes, never), Setup guide,
   Appearance (System, Light, Dark) and the version. Keep screen on holds the

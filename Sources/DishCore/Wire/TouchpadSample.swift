@@ -23,14 +23,25 @@ package struct TouchpadFinger: Equatable {
 /// A touchpad sample as MSG_TOUCHPAD carries it: two finger slots and the
 /// clickable-pad button. The sender stamps `eventTimeMs` separately, since the
 /// stamp is taken at publish time rather than being part of the sample.
+/// The on-screen mouse adds the right button and a wheel event, which only
+/// the version-2 POINTER shape carries (`Encoders.pointerPayload`); a pad's
+/// own touchpad leaves both at rest.
 package struct TouchpadSample: Equatable {
     package let finger0: TouchpadFinger
     package let finger1: TouchpadFinger
     package let buttonPressed: Bool
+    package let rightPressed: Bool
+    /// A wheel event in 120ths of a notch, up positive; 0 on a resend.
+    package let scrollV: Int16
 
-    package init(finger0: TouchpadFinger, finger1: TouchpadFinger, buttonPressed: Bool) {
+    package init(finger0: TouchpadFinger, finger1: TouchpadFinger, buttonPressed: Bool, rightPressed: Bool = false, scrollV: Int16 = 0) {
         self.finger0 = finger0
         self.finger1 = finger1
         self.buttonPressed = buttonPressed
+        self.rightPressed = rightPressed
+        self.scrollV = scrollV
     }
+
+    /// Nothing touching, nothing held.
+    package static let idle = TouchpadSample(finger0: .none, finger1: .none, buttonPressed: false)
 }

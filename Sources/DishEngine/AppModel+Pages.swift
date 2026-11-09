@@ -9,6 +9,8 @@ package enum ShownPage: Equatable {
     case connections
     /// Asks the App Store what it sells each time it opens.
     case support
+    /// The low-power dim words the time.
+    case dim
 }
 
 /// The pages' lifecycle intents.
@@ -18,7 +20,7 @@ package extension AppModel {
     @discardableResult
     func pageAppeared(_ page: ShownPage) -> Task<Void, Never>? {
         switch page {
-        case .connections:
+        case .connections, .dim:
             clock.start()
             return nil
         case .support:
@@ -28,7 +30,7 @@ package extension AppModel {
 
     func pageDisappeared(_ page: ShownPage) {
         switch page {
-        case .connections: clock.stop()
+        case .connections, .dim: clock.stop()
         case .support: break
         }
     }

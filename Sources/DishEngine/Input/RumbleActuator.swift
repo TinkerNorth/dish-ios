@@ -62,6 +62,32 @@ final class RumbleActuator {
     }
 }
 
+/// The on-screen controller's rumble on the iPhone's own Taptic Engine. The
+/// phone has one actuator, so it plays the stronger of the two motors. It
+/// runs on the feedback queue, as a pad's actuator does.
+final class PhoneRumble {
+    private let motor: HapticMotor
+
+    /// Nil on an iPhone without haptics, and in the simulator.
+    init?() {
+        guard CHHapticEngine.capabilitiesForHardware().supportsHaptics else { return nil }
+        guard let engine = try? CHHapticEngine(), let motor = HapticMotor(engine: engine) else { return nil }
+        self.motor = motor
+    }
+
+    func apply(strong: UInt16, weak: UInt16, durationMs: UInt16) {
+        motor.drive(
+            magnitude: phoneRumbleMagnitude(strong: strong, weak: weak),
+            duration: RumbleActuator.holdSeconds(durationMs: durationMs)
+        )
+    }
+}
+
+/// One actuator for two motors: the stronger one is what the hand feels.
+func phoneRumbleMagnitude(strong: UInt16, weak: UInt16) -> UInt16 {
+    max(strong, weak)
+}
+
 /// One motor's level: what its player plays, and for how long.
 struct MotorLevel: Equatable {
     let magnitude: UInt16
@@ -87,7 +113,7 @@ func motorStep(playing: MotorLevel?, magnitude: UInt16, duration: TimeInterval) 
 }
 
 /// One motor's engine and the player for the level it plays.
-private final class HapticMotor {
+final class HapticMotor {
     private let engine: CHHapticEngine
     private var player: CHHapticPatternPlayer?
     private var playing: MotorLevel?

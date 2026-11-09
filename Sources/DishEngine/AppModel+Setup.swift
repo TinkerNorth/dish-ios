@@ -69,7 +69,9 @@ package extension AppModel {
         switch effect {
         case .askLocalNetwork: localNetwork.ask()
         case .scan: localNetwork.scan()
-        case let .bind(draft): bindings.record(draft)
+        case let .bind(draft):
+            bindings.record(draft)
+            adoptOnScreen(draft)
         case .ended: break
         }
     }

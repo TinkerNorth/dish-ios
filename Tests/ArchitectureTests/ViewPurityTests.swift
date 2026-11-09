@@ -81,7 +81,9 @@ final class ViewPurityTests: XCTestCase {
 
     /// The scene and its seams are not views: they are where the host's
     /// singletons are allowed to live.
-    private static let notViews = ["Sources/Dish/DishScene.swift", "Sources/Dish/UI/Shell/ShellEnvironment.swift"]
+    private static let notViews = [
+        "Sources/Dish/DishScene.swift", "Sources/Dish/Scene/Orientation.swift", "Sources/Dish/UI/Shell/ShellEnvironment.swift"
+    ]
 
     /// Components own their states and may pick a token by their own flag.
     private static let components = ["Sources/Dish/UI/Kit/", "Sources/Dish/UI/Theme.swift"]

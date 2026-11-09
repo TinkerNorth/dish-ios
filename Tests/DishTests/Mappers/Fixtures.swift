@@ -22,7 +22,8 @@ enum FactsFixture {
         localNetwork: LocalNetworkStatus = .unknown,
         preferences: PreferencesFacts = preferences,
         now: Date = now,
-        setup: SetupState? = nil
+        setup: SetupState? = nil,
+        play: PlayFacts? = nil
     ) -> ShellFacts {
         ShellFacts(
             controllers: controllers,
@@ -34,12 +35,23 @@ enum FactsFixture {
             localNetwork: localNetwork,
             preferences: preferences,
             now: now,
-            setup: setup
+            setup: setup,
+            play: play
         )
     }
 
     static func streaming(pads: Int = 3, latencyMs: Int? = 4) -> SessionFact {
         SessionFact(pcName: "Living Room PC", pads: pads, latencyMs: latencyMs, phase: .streaming)
+    }
+
+    static func play(
+        screen: PlayScreen = .gamepad,
+        emulateAs: EmulatedPad = .xboxWireless,
+        rumble: Bool = true,
+        motion: Bool = true,
+        motionAvailability: PlayMotion = .padHasNone
+    ) -> PlayFacts {
+        PlayFacts(screen: screen, emulateAs: emulateAs, rumble: rumble, motion: motion, motionAvailability: motionAvailability)
     }
 
     static let stopped = SessionFact(pcName: "Living Room PC", pads: 3, latencyMs: 4, phase: .stoppedResponding)

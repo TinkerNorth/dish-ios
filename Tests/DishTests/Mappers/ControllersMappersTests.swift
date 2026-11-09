@@ -9,12 +9,13 @@ import XCTest
 /// A controller fact with the fields a test does not care about filled in.
 private enum ControllerFixture {
     static func pad(
+        name: String = "DualSense",
         link: ControllerLink = .usbC,
         battery: Int? = 84,
         destination: DestinationFact? = DestinationFact(name: "Living Room PC", health: .online),
         supported: Bool = true
     ) -> ControllerFact {
-        ControllerFact(id: "pad", name: "DualSense", link: link, batteryPercent: battery, destination: destination, supported: supported)
+        ControllerFact(id: "pad", name: name, link: link, batteryPercent: battery, destination: destination, supported: supported)
     }
 }
 
@@ -43,7 +44,8 @@ final class ControllersMappersTests: XCTestCase {
             dot: DishTheme.success,
             battery: "84%",
             batteryColor: DishTheme.muted,
-            page: .controller(id: "pad")
+            page: .controller(id: "pad"),
+            open: nil
         )
         XCTAssertEqual(state.content, .list([row]))
     }
@@ -63,6 +65,14 @@ final class ControllersMappersTests: XCTestCase {
         XCTAssertEqual(onScreen.destination, .bound(pcName: "Living Room PC", detail: " · On-screen"))
         XCTAssertEqual(onScreen.symbol, "iphone")
         XCTAssertNil(onScreen.battery, "the on-screen gamepad has no battery of its own")
+    }
+
+    func testTheOnScreenControllerIsWordedAndOffersOpen() {
+        let row = controllerRow(ControllerFixture.pad(name: "", link: .onScreen, battery: nil))
+        XCTAssertEqual(row.name, "On-screen gamepad")
+        XCTAssertEqual(row.open, "Open")
+        XCTAssertEqual(row.page, .controller(id: "pad"), "its page is still a row away")
+        XCTAssertNil(controllerRow(ControllerFixture.pad()).open, "a pad has no screen to open")
     }
 
     func testAnUnsteadyPCIsCalledOutInPlaceOfTheLink() {

@@ -47,7 +47,7 @@ final class LockLawTests: XCTestCase {
         let actuators = RecordingActuators()
         let feedback = PadFeedback(actuators: actuators, queue: ThreadRole.feedback.queue(label: "test.feedback", qos: .userInteractive))
         let snapshot = RoutingSnapshot(
-            bySlot: ["pad": recorder.route("pad")].compactMapValues { $0 },
+            bySlot: ["pad": recorder.route("pad"), onScreenSlotId: recorder.route(onScreenSlotId)].compactMapValues { $0 },
             bySatellitePad: [SatellitePadKey(connectionId: "sat", controllerIndex: 0): BoundSlotRoute(
                 slotId: "pad",
                 flags: ForwardingFlags()
@@ -56,10 +56,11 @@ final class LockLawTests: XCTestCase {
         let routes = FeedbackRoutes(connectionId: "sat", snapshot: snapshot, global: ForwardingFlags(), feedback: feedback)
         routing.publish(snapshot, to: processor)
         let feed = processor.feed(for: "pad")
+        let onScreen = processor.feed(for: onScreenSlotId)
         let queue = ThreadRole.input.queue(label: "test.input", qos: .userInteractive)
         resetLockStats()
         let group = DispatchGroup()
-        startInputProducer(feed, queue: queue, group: group)
+        startInputProducer(feed, onScreen: onScreen, queue: queue, group: group)
         startFeedbackSender(routes, group: group)
         var tallied: UInt64 = 0
         var tick = 0
@@ -80,11 +81,14 @@ final class LockLawTests: XCTestCase {
         )
     }
 
-    private func startInputProducer(_ feed: PadFeed, queue: DispatchSerialQueue, group: DispatchGroup) {
+    private func startInputProducer(_ feed: PadFeed, onScreen: PadFeed, queue: DispatchSerialQueue, group: DispatchGroup) {
         group.enter()
         startThread {
             for frame in 0 ..< LockLawRun.frames {
-                queue.async { publishFrame(frame, on: feed) }
+                queue.async {
+                    publishFrame(frame, on: feed)
+                    publishOnScreenFrame(frame, on: onScreen)
+                }
                 Thread.sleep(forTimeInterval: LockLawRun.frameSeconds)
             }
             queue.async { group.leave() }
@@ -156,6 +160,16 @@ private func publishFrame(_ frame: Int, on feed: PadFeed) {
     if frame % 8 == 0 {
         let finger = TouchpadFinger(active: true, id: 1, x: 1000, y: -1000)
         feed.publishTouchpad(TouchpadSample(finger0: finger, finger1: .none, buttonPressed: false))
+    }
+}
+
+/// The on-screen controller's path on the same thread: a stick through its
+/// reducer and a finger through the touch surface's, out through its feed.
+private func publishOnScreenFrame(_ frame: Int, on feed: PadFeed) {
+    let travel = Float(frame % 100) / 100
+    feed.publishIfChanged(reduceOnScreenPad(OnScreenPadState(), .stick(.left, x: travel, y: 0)).report)
+    if frame % 8 == 0 {
+        feed.publishTouchpad(reduceTouchSurface(TouchSurfaceState(), .finger(.first, x: travel, y: 0)).sample)
     }
 }
 #endif

@@ -39,6 +39,16 @@ private enum PadFixture {
 /// binding, the pad's switches and why two of them are missing.
 final class ControllerMappersTests: XCTestCase {
 
+    func testTheOnScreenControllersPageIsWordedAndOffersOpen() throws {
+        let onScreen = ControllerFact(id: "on-screen", name: "", link: .onScreen, batteryPercent: nil, destination: nil)
+        let state = controllerPageState(controllers: [onScreen], id: "on-screen")
+        XCTAssertEqual(state.title, "On-screen gamepad")
+        XCTAssertEqual(state.subtitle, "On-screen")
+        let page = try XCTUnwrap(PadFixture.page(onScreen))
+        XCTAssertEqual(page.open, "Open")
+        XCTAssertNil(PadFixture.page(PadFixture.dualSense())?.open, "a pad has no screen to open")
+    }
+
     func testThePageIsTitledByThePadAndSubtitledByItsBatteryAndLink() {
         let state = controllerPageState(controllers: [PadFixture.dualSense()], id: "pad")
         XCTAssertEqual(state.title, "DualSense")

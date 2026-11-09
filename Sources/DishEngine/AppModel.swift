@@ -27,6 +27,12 @@ package final class AppModel {
     let tips: any TipStore
     let setupSource = StateSource<SetupState?>(initial: nil)
     let supportSource = StateSource<SupportFacts>(initial: .initial)
+    /// The on-screen controller's slot: its touches, its resend loop, its motion.
+    package let onScreen: OnScreenPad
+    /// The play screen on display; nil while none is.
+    let playSource = StateSource<PlayScreen?>(initial: nil)
+    /// Whether the on-screen controller is one of the controllers.
+    let onScreenListed = StateSource<Bool>(initial: false)
 
     package init(
         onboarding: OnboardingPreferenceStore,
@@ -37,7 +43,9 @@ package final class AppModel {
         localNetwork: any LocalNetworkAccess,
         bindings: BindingRequests,
         pads: ControllerStack,
-        tips: any TipStore
+        tips: any TipStore,
+        motionSensor: any MotionSensor,
+        resendTicker: any Ticker
     ) {
         self.onboarding = onboarding
         self.appearance = appearance
@@ -48,7 +56,9 @@ package final class AppModel {
         self.bindings = bindings
         self.pads = pads
         self.tips = tips
+        onScreen = OnScreenPad(feed: pads.source.processor.feed(for: onScreenSlotId), ticker: resendTicker, sensor: motionSensor)
         applyStoredDeadzones()
+        pads.source.processor.setDeadzones(deviceId: onScreenSlotId, GamepadInputProcessor.Deadzones())
     }
 
     /// Every store over the same defaults, the wall clock, the pads iOS
@@ -60,7 +70,9 @@ package final class AppModel {
         localNetwork: any LocalNetworkAccess = RecordedLocalNetworkAccess(),
         bindings: BindingRequests = BindingRequests(),
         tips: any TipStore = StoreKitTipStore(),
-        controllerSource: any ControllerSource = GameControllerInput()
+        controllerSource: any ControllerSource = GameControllerInput(),
+        motionSensor: any MotionSensor = DeviceMotionSensor(),
+        resendTicker: any Ticker = TimerTicker()
     ) {
         self.init(
             onboarding: OnboardingPreferenceStore(defaults: defaults),
@@ -71,7 +83,9 @@ package final class AppModel {
             localNetwork: localNetwork,
             bindings: bindings,
             pads: ControllerStack(source: controllerSource, defaults: defaults),
-            tips: tips
+            tips: tips,
+            motionSensor: motionSensor,
+            resendTicker: resendTicker
         )
     }
 
@@ -92,7 +106,8 @@ package final class AppModel {
             preferences: preferencesFacts,
             now: clock.state,
             setup: setup,
-            support: supportSource.state
+            support: supportSource.state,
+            play: playFacts
         )
     }
 

@@ -108,6 +108,15 @@ final class EncodersTests: XCTestCase {
 
     // MARK: - MSG_TOUCHPAD (0x000C) — the version-2 19-byte POINTER layout
 
+    func testThePointerShapeCarriesTheMousesRightButtonAndTheSamplesWheel() {
+        let sample = TouchpadSample(finger0: .none, finger1: .none, buttonPressed: true, rightPressed: true, scrollV: 240)
+        let payload = [UInt8](Encoders.pointerPayload(controllerIndex: 0, sample: sample, eventTimeMs: 0))
+        XCTAssertEqual(payload[2], ProtocolConstants.pointerButtonLeft | ProtocolConstants.pointerButtonRight)
+        XCTAssertEqual(Array(payload[17 ... 18]), [0xF0, 0x00], "the sample's own wheel, 240 LE")
+        let resend = [UInt8](Encoders.pointerPayload(controllerIndex: 0, sample: sample, eventTimeMs: 0, scrollV: 0))
+        XCTAssertEqual(Array(resend[17 ... 18]), [0, 0], "an explicit wheel wins")
+    }
+
     func testPointerPayloadPinsTheNineteenByteLayout() {
         let payload = Encoders.pointerPayload(
             controllerIndex: 5,

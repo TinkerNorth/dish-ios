@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 // Copyright (C) 2026 Dish contributors.
 
+import DishEngine
 import XCTest
 @testable import Dish
 
@@ -116,6 +117,70 @@ final class NavigationMachineTests: XCTestCase {
         XCTAssertNil(woken.state.cover)
         XCTAssertEqual(woken.effects, [])
         XCTAssertEqual(after(.coverDismissed).state, NavigationState(), "nothing to lower")
+    }
+
+    func testOpeningAPlayScreenRaisesItsCoverAndStartsIt() {
+        for screen in PlayScreen.allCases {
+            let step = after(.select(.settings), .openPlay(screen))
+            XCTAssertEqual(step.state.cover, .play(screen))
+            XCTAssertEqual(step.state.tab, .settings, "the tabs wait under the cover")
+            XCTAssertEqual(step.effects, [.startPlay(screen)])
+        }
+    }
+
+    func testClosingPlayLowersItsCoverAndEndsIt() {
+        let step = after(.openPlay(.gamepad), .closePlay)
+        XCTAssertNil(step.state.cover)
+        XCTAssertEqual(step.effects, [.startPlay(.gamepad), .endPlay])
+    }
+
+    func testClosingPlayWithNoPlayUpChangesNothing() {
+        XCTAssertEqual(after(.closePlay).state, NavigationState())
+        XCTAssertEqual(after(.closePlay).effects, [])
+        let step = after(.openSetup(.guide), .closePlay)
+        XCTAssertEqual(step.state.cover, .setup(.guide), "setup is not play")
+        XCTAssertEqual(step.effects, [.startSetup(.guide)])
+    }
+
+    func testThePauseMenuMovesFromOneScreenToAnotherUnderOneCover() {
+        let step = after(.openPlay(.gamepad), .openPlay(.mouse))
+        XCTAssertEqual(step.state.cover, .play(.mouse))
+        XCTAssertEqual(step.effects, [.startPlay(.gamepad), .startPlay(.mouse)], "a screen replacing a screen ends nothing")
+        XCTAssertEqual(Cover.play(.gamepad).id, Cover.play(.mouse).id, "the same presentation stays up")
+    }
+
+    func testACoverReplacingAnotherEndsWhatItReplaced() {
+        let setupOverPlay = after(.openPlay(.gamepad), .openSetup(.addController))
+        XCTAssertEqual(setupOverPlay.state.cover, .setup(.addController))
+        XCTAssertEqual(setupOverPlay.effects, [.startPlay(.gamepad), .endPlay, .startSetup(.addController)])
+        let playOverSetup = after(.openSetup(.firstRun), .openPlay(.touchpad))
+        XCTAssertEqual(playOverSetup.state.cover, .play(.touchpad))
+        XCTAssertEqual(playOverSetup.effects, [.startSetup(.firstRun), .endSetup, .startPlay(.touchpad)])
+        let playOverDim = after(.dim, .openPlay(.gamepad))
+        XCTAssertEqual(playOverDim.state.cover, .play(.gamepad))
+        XCTAssertEqual(playOverDim.effects, [.startPlay(.gamepad)], "the dim ends with nothing to end")
+    }
+
+    /// The design puts Dim on the accessory, which no play screen shows.
+    func testTheDimIsRefusedOverPlay() {
+        let step = after(.openPlay(.gamepad), .dim)
+        XCTAssertEqual(step.state.cover, .play(.gamepad))
+        XCTAssertEqual(step.effects, [.startPlay(.gamepad)])
+    }
+
+    func testADismissedPlayCoverClosesPlay() {
+        let step = after(.openPlay(.mouse), .coverDismissed)
+        XCTAssertNil(step.state.cover)
+        XCTAssertEqual(step.effects, [.startPlay(.mouse), .endPlay])
+    }
+
+    func testPlayIsLandscapeAndEveryOtherScreenPortrait() {
+        for screen in PlayScreen.allCases {
+            XCTAssertEqual(screenOrientation(for: .play(screen)), .landscape)
+        }
+        for cover in [Cover.setup(.firstRun), .dim, nil] {
+            XCTAssertEqual(screenOrientation(for: cover), .portrait)
+        }
     }
 
     func testAControllerRowPushesItsPageOntoControllers() {
