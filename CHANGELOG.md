@@ -20,13 +20,30 @@ lockstep across the repos share a version number.
 
 ## [Unreleased]
 
-The shell, the protocol core, the controller bridge, the play screens, Help,
-Support and Licenses are built; nothing talks to a PC yet. The engine publishes
-the attached controllers and the on-screen one as facts, and empty connections
-(no paired PC, no session, a Local Network status that stays unknown) until the
-network engine lands; `Tests/PARITY.md` lists everything not built.
+The shell, the protocol core, the controller bridge, the network engine, the
+play screens, Help, Support and Licenses are built: the engine finds, pairs
+with and streams to a Satellite, and the on-screen controller and every pad
+iOS sees reach it through the hot path. The pages for pairing, a PC and the
+binding come next; `Tests/PARITY.md` lists everything not built.
 
 ### Added
+
+- **The network engine: the engine can now find, pair with and stream to a
+  Satellite.** A Bonjour browse for `_satellite._udp` that also reads the
+  Local Network permission (iOS asks at the first scan, after setup's
+  primer); pairing both ways at once, the operator's approval of a client
+  PIN and the satellite's PIN typed in, with the key in the Keychain and the
+  satellite's certificate pinned on first contact; the declarative session
+  with up to four pads per satellite on the lowest free index, the per-slot
+  converge while live, reconcile, re-key, close-notify and the backoff; the
+  encrypted UDP data plane, a bound pad's report sealed and sent on its own
+  queue with no lock, and the satellite's rumble, light bar, adaptive
+  triggers and player LEDs back to the pad bound to their index; the facts
+  for the paired and found PCs, the session and each controller's
+  destination; setup's Bind binding the pad it names. Ported from dish-mac
+  under its names, driven by its in-process `FakeSatellite`, and verified
+  against the real satellite binary by `scripts/e2e_local.sh` and the
+  `e2e.yml` lane. The `lock-stats` job in `ios-ci.yml` runs the lock laws.
 
 - **The shell.** Three tabs, Controllers, Connections and Settings, each its
   own `NavigationStack`, with the session accessory

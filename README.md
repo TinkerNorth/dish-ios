@@ -4,7 +4,8 @@ The native iPhone client for the Satellite wireless-gamepad server, one of the
 Dish clients beside [dish-mac], [dish-android], [dish-windows] and
 [dish-linux]. It is meant to find a Satellite on the Wi-Fi, pair with it,
 declare the iPhone's controllers to the server and stream their input to the
-PC. **This is wave 1, the shell: nothing talks to a PC yet.** See
+PC. The engine finds a Satellite, pairs with it and streams a bound
+controller to it; the pages for pairing and a PC are still to come. See
 [Status](#status) for what is built and what is not.
 
 [dish-mac]: https://github.com/TinkerNorth/dish-mac

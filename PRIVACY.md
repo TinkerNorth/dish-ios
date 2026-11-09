@@ -12,32 +12,31 @@ client. The server (`satellite`) runs on your own machine and has its own
 policy. The other clients have their own policies and different behaviour, so
 do not read one as describing another.
 
-This policy describes the app as it is today: **wave 1, the shell.** The app
-does not yet talk to a PC. Section 2.2 and section 4 say what the later waves
-add, as plans, so that this file is true now and changes in the same commit
+This policy describes the app as it is today: it finds a Satellite on your
+Wi-Fi, pairs with it and streams a controller's input to it. Section 2.2
+says exactly what crosses your network; this file changes in the same commit
 as the code that makes it untrue.
 
 ---
 
 ## 1. Short version
 
-- Dish for iOS is meant to turn a game controller, or the iPhone's own screen,
-  into a wireless gamepad for a `satellite` server on your own network. Today
-  it does none of that: it is the app's shell, the setup walk and the
-  Settings page. TinkerNorth does not operate a server for Dish at all.
-- **In this version the app makes no network connection of its own.** It has
-  no account, no analytics SDK, no telemetry, no advertising identifier, no
-  usage reporting and no crash reporting. It sends nothing to TinkerNorth or
-  to anyone else. The one exception is Apple's: Support Dish asks the App
-  Store, through StoreKit, for the price of its three tips, and a tip you
-  choose is an App Store purchase (section 2.3).
-- It stores four preferences and one flag on your iPhone, in the app's own
-  preferences (`UserDefaults`), listed in section 2.1. Nothing is synced to a
-  cloud account by the app.
-- The app's Info.plist declares the Local Network permission and two Bonjour
-  services, so the build is ready for the wave that finds your PC. Nothing in
-  this version browses them or asks iOS for the permission; section 4 says
-  what changes when something does.
+- Dish for iOS turns a game controller, or the iPhone's own screen, into a
+  wireless gamepad for a `satellite` server on your own network. TinkerNorth
+  does not operate a server for Dish at all.
+- **Everything the app sends stays on your local network**, between this
+  iPhone and the PC you paired (section 2.2). It has no account, no analytics
+  SDK, no telemetry, no advertising identifier, no usage reporting and no
+  crash reporting. It sends nothing to TinkerNorth or to anyone else. The one
+  exception is Apple's: Support Dish asks the App Store, through StoreKit, for
+  the price of its three tips, and a tip you choose is an App Store purchase
+  (section 2.3).
+- It stores its preferences, the PCs you paired and a device id on your
+  iPhone (section 2.1), each PC's pairing key in the Keychain, and each PC's
+  certificate fingerprint in a file in the app's own container. Nothing is
+  synced to a cloud account by the app.
+- iOS asks for the Local Network permission the first time Dish looks for
+  your PC, after the setup flow has explained why (section 4).
 - We do not sell, share, or rent your data. We do not show ads. We do not
   profile you.
 
@@ -58,22 +57,43 @@ Preferences are stored with `UserDefaults` in the app's preferences domain
 | `dim_after_seconds` | 10, 20, 30, 60, 120 or 0 for never; 20 by default | When the low-power dim rises while streaming |
 | `onboarding_welcome_completed` | Whether the welcome was finished or skipped | Showing the setup cover on its own only once |
 
-The setup walk keeps your answers in memory while it is open. Binding at its
-last step records the request in memory and sends nothing; closing the app
-forgets it. No file, database, keychain item or log is written by the app.
+Beside them, for the PCs you pair:
+
+| Stored | Where | Holds | Used for |
+|---|---|---|---|
+| `deviceId` | `UserDefaults` | A random id made on first use, not derived from the device | The id the PC knows this iPhone by; it rides every request to the PC you paired, and it is not a secret |
+| `wifi_list` | `UserDefaults` | Each paired PC's name, its address and ports, and its machine id | Reconnecting to the PCs you paired, and finding one that moved address |
+| `wifi_last_seen:<PC>` | `UserDefaults` | When a session with that PC last ended | The "seen yesterday" line of an offline PC |
+| The pairing key | The Keychain, readable after the first unlock and never moved to another device (`com.tinkernorth.dish.ios.pairing-key`) | One 32-byte key per paired PC, which the PC handed over when you paired | Proving to that PC that this iPhone is the one you paired; the traffic itself is encrypted under a fresh key per session derived from it |
+| The certificate pins | `Application Support/Dish/cert-pins.json` in the app's container | Each PC's address and the SHA-256 fingerprint of the certificate it showed the first time | Refusing a later certificate that differs, so nothing else on your network can pretend to be your PC (trust on first use) |
+
+Forget This PC removes that PC's row, key, pin and last sighting, after
+telling the PC to drop this iPhone. The setup walk keeps your answers in
+memory while it is open. No database or log is written by the app.
 
 ### 2.2 Sent to your own LAN, not to TinkerNorth
 
-Nothing, in this version. The app opens no socket, browses no service and
-sends no packet. The waves that follow are planned to add, as the other
-clients do, and this section will list each of them before it ships:
+Everything below goes only to the PC you chose, on your local network, and
+nothing of it leaves that network:
 
-- discovery: a Bonjour browse for `_satellite._udp` (and `_nvstream._tcp` for
-  Moonlight hosts), which sends nothing of yours and reads the announcements
-  of the PCs on your network;
-- pairing and the control plane: HTTPS on port 9443 to the PC you chose;
-- streaming: encrypted UDP on port 9876 to the PC you chose, carrying the
-  controller's input, and bringing rumble and similar commands back.
+- **Discovery**: a Bonjour browse for `_satellite._udp`, which sends nothing
+  of yours and reads the announcements of the PCs on your network (their
+  name, address, ports and machine id).
+- **Pairing and the control plane**: HTTPS on port 9443 to the PC you chose,
+  carrying the device id, the name you gave this iPhone (or "iPhone"), the
+  PIN of the pairing, a proof of the pairing key (never the key itself, except
+  that the PC hands the key to this iPhone once when you pair), and a
+  description of each controller you bound (the kind it is emulated as and
+  the features you left on). The PC's certificate is self-signed, so the app
+  pins it on first contact instead of trusting a certificate authority.
+- **Streaming**: UDP on port 9876 to the PC you chose, encrypted with
+  ChaCha20-Poly1305 under a key fresh for each session: each bound
+  controller's buttons, sticks and triggers, its motion and touchpad when you
+  left them on, its battery level, and a heartbeat every two seconds; the PC
+  sends back the heartbeat's answer and the rumble, light-bar, trigger and
+  player-light commands for the controller.
+- **Forget This PC** sends that PC one request to drop this iPhone from its
+  paired list.
 
 ### 2.3 Sent to TinkerNorth or a third party
 
@@ -109,14 +129,14 @@ Improvements; that is Apple's mechanism and policy, not the app's.
 
 | Capability | Why |
 |---|---|
-| Local network access and Bonjour (`_satellite._udp`, `_nvstream._tcp`), declared in `App/Info.plist` with the usage text "Dish finds Satellite on your Wi‑Fi and sends controller input straight to your PC." | Declared for the discovery wave. Finding PCs on your Wi-Fi, and later talking to the one you chose, needs it; everything stays on your LAN. iOS asks once, at the first scan, after the setup flow's primer has explained why; if you refuse, the Connections page says so and points to Settings. This version never scans, so iOS never asks. |
+| Local network access and Bonjour (`_satellite._udp`, `_nvstream._tcp`), declared in `App/Info.plist` with the usage text "Dish finds Satellite on your Wi‑Fi and sends controller input straight to your PC." | Finding PCs on your Wi-Fi and talking to the one you chose; everything stays on your LAN. iOS asks once, at the first scan, which the setup flow's primer runs after it has explained why; if you refuse, the Connections page says so and points to Settings. The Moonlight service is declared and not yet browsed. |
+| The Keychain | One item per paired PC, holding its pairing key (section 2.1). |
 | Keeping the screen on (the idle timer) | Held off only while a session is up and Keep screen on is set, so that iOS does not lock the screen and suspend Dish mid-game. There is no session in this version, so it is never held. |
 
 The app asks for no other permission. It does not use the camera, the
-microphone, location, contacts, photos, notifications or tracking. Later
-waves add the GameController framework (reading controller input and writing
-rumble back) and a keychain item per paired PC; each is listed here, with its
-reason, in the same change that adds it.
+microphone, location, contacts, photos, notifications or tracking. It reads
+your controllers through the GameController framework, which needs no
+permission, and writes rumble and light commands back to them.
 
 ---
 
@@ -127,7 +147,11 @@ reason, in the same change that adds it.
 - **Turn the Local Network permission off** in Settings › Privacy & Security ›
   Local Network (or from Dish's page in Settings); the Connections page then
   says it cannot see your network.
-- **Reset everything** by deleting the app. Its preferences go with it.
+- **Forget a PC** to remove its row, its pairing key and its pin, after the
+  app tells the PC to drop this iPhone.
+- **Reset everything** by deleting the app. Its preferences and files go
+  with it; iOS keeps an app's Keychain items after the app is deleted, so
+  Forget each PC first to remove its pairing key too.
 
 ---
 
@@ -138,7 +162,7 @@ information from anyone, and no account exists.
 
 ## 7. International transfers
 
-None. This version sends no data anywhere.
+None. Nothing the app sends leaves your local network.
 
 ## 8. Changes to this policy
 

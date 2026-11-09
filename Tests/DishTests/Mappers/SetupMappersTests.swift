@@ -92,6 +92,14 @@ final class SetupMappersTests: XCTestCase {
         XCTAssertEqual(setupStepState(review, inputs), .review(reviewStepState(review.draft, inputs)))
     }
 
+    /// Setup offers satellites and Moonlight hosts; the ladder's Bluetooth
+    /// rung is no PC on iOS and reads as the client's own wire.
+    func testEachKindOfPCReadsAsItsSetupKind() {
+        XCTAssertEqual(setupPCKind(.satellite), .satellite)
+        XCTAssertEqual(setupPCKind(.moonlight), .moonlightHost)
+        XCTAssertEqual(setupPCKind(.bluetooth), .satellite)
+    }
+
     func testABluetoothPadKeepsItsLink() {
         let pad = AttachedPadFact(
             id: "pad-2",

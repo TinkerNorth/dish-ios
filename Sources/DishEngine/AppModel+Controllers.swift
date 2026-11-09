@@ -10,9 +10,8 @@ import Foundation
 /// reach each pad's feed as they change.
 package extension AppModel {
 
-    /// Every pad iOS lists, readable or not, with its switches and pick,
-    /// then the on-screen controller once it is listed. No pad is bound
-    /// until the network wave binds one.
+    /// Every pad iOS lists, readable or not, with its switches, its pick and
+    /// the PC it is bound to, then the on-screen controller once it is listed.
     internal var controllerFacts: [ControllerFact] {
         pads.source.slots.map(controllerFact) + onScreenFact
     }
@@ -35,13 +34,16 @@ package extension AppModel {
         effectiveFlags(global: pads.features.flags, slot: pads.switches.preferences(for: slotId))
     }
 
+    /// A switch moves the pad's route and, while bound, its descriptor.
     func setControllerFeature(slotId: String, _ feature: SlotSwitch, enabled: Bool) {
         pads.switches.set(feature, enabled, for: slotId)
+        refreshRouting()
     }
 
     /// The family's own pick is no pick: the stored entry goes, so a pad
     /// follows its family again.
     func setEmulatedType(slotId: String, _ pad: EmulatedPad) {
+        network.hub.setEmulatedType(slotId: slotId, pad)
         let family = pads.source.slots.first { $0.id == slotId }?.family.emulatedPad
         guard pad != family else { return pads.types.clear(slotId) }
         pads.types.setType(pad, for: slotId)
@@ -85,7 +87,7 @@ package extension AppModel {
             name: slot.name,
             link: controllerLink(slot.link),
             batteryPercent: slot.battery?.level,
-            destination: nil,
+            destination: destination(slotId: slot.id),
             family: slot.family,
             emulateAs: pads.types.typeFor(slot.id) ?? slot.family.emulatedPad,
             features: carried.map { ControllerFeatureFact(feature: $0, enabled: switches.isOn($0)) },

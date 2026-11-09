@@ -119,6 +119,32 @@ final class PadFeedTests: XCTestCase {
         XCTAssertEqual(recorder.reports.map(\.report.buttons), [1, 2, 1, 0])
     }
 
+    /// The wire's motion frame carries the time since the pad's last sample
+    /// let through: zero for the first, then the window between them.
+    func testMotionCarriesTheDeltaSinceTheLastSampleLetThrough() {
+        let processor = zeroZones()
+        let recorder = InputRecorder()
+        processor.route(recorder.route)
+        let feed = processor.feed(for: "pad")
+        let sample = MotionSample(gyroX: 1, gyroY: 0, gyroZ: 0, accelX: 0, accelY: 0, accelZ: 0)
+        let window = GamepadInputProcessor.motionMinIntervalNs
+        feed.publishMotion(sample, nowNs: 1_000_000)
+        feed.publishMotion(sample, nowNs: 1_000_000 + window / 2)
+        feed.publishMotion(sample, nowNs: 1_000_000 + window * 3)
+        XCTAssertEqual(recorder.stamps, [.motionDeltaUs(0), .motionDeltaUs(UInt32(window * 3 / 1000))])
+    }
+
+    /// GameController gives a touch no timestamp of its own, so the feed
+    /// stamps the instant it publishes, in milliseconds.
+    func testATouchIsStampedWithItsPublishInstant() {
+        let processor = zeroZones()
+        let recorder = InputRecorder()
+        processor.route(recorder.route)
+        let feed = processor.feed(for: "pad")
+        feed.publishTouchpad(TouchpadSample(finger0: .none, finger1: .none, buttonPressed: true), nowNs: 7_250_000_000)
+        XCTAssertEqual(recorder.stamps, [.touchTimeMs(7250)])
+    }
+
     func testTheFingersIdsBumpOnEachFreshContactPerFinger() {
         let feed = zeroZones().feed(for: "pad")
         XCTAssertTrue(feed.advanceTouchIds(finger0Active: true, finger1Active: false) == (1, 0))

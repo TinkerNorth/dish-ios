@@ -40,20 +40,31 @@ final class InputRecorder: Sendable {
         case battery(String, BatteryReading)
     }
 
+    /// What the feed stamped beside a sample, in send order.
+    enum Stamp: Equatable {
+        case motionDeltaUs(UInt32)
+        case touchTimeMs(UInt32)
+    }
+
     /// The switches every recorded route carries.
     let flags: ForwardingFlags
     private let log = Locked<[Sent]>([])
+    private let stampLog = Locked<[Stamp]>([])
 
     init(flags: ForwardingFlags = ForwardingFlags()) {
         self.flags = flags
     }
 
     func route(_ deviceId: String) -> Route? {
-        Route(sink: RecordingSink(deviceId: deviceId, log: log), slot: 0, flags: flags)
+        Route(sink: RecordingSink(deviceId: deviceId, log: log, stamps: stampLog), slot: 0, flags: flags)
     }
 
     var sent: [Sent] {
         log.get()
+    }
+
+    var stamps: [Stamp] {
+        stampLog.get()
     }
 
     var reports: [(id: String, report: GamepadReport)] {
@@ -89,21 +100,25 @@ final class InputRecorder: Sendable {
 private final class RecordingSink: PadSink {
     let deviceId: String
     let log: Locked<[InputRecorder.Sent]>
+    let stamps: Locked<[InputRecorder.Stamp]>
 
-    init(deviceId: String, log: Locked<[InputRecorder.Sent]>) {
+    init(deviceId: String, log: Locked<[InputRecorder.Sent]>, stamps: Locked<[InputRecorder.Stamp]>) {
         self.deviceId = deviceId
         self.log = log
+        self.stamps = stamps
     }
 
     func send(_ report: GamepadReport, slot _: SlotIndex) {
         note(.report(deviceId, report))
     }
 
-    func send(_ motion: MotionSample, slot _: SlotIndex) {
+    func send(_ motion: MotionSample, timestampDeltaUs: UInt32, slot _: SlotIndex) {
+        stamps.mutate { $0.append(.motionDeltaUs(timestampDeltaUs)) }
         note(.motion(deviceId, motion))
     }
 
-    func send(_ touch: TouchpadSample, slot _: SlotIndex) {
+    func send(_ touch: TouchpadSample, eventTimeMs: UInt32, slot _: SlotIndex) {
+        stamps.mutate { $0.append(.touchTimeMs(eventTimeMs)) }
         note(.touchpad(deviceId, touch))
     }
 
@@ -155,9 +170,11 @@ final class RecordingActuators: FeedbackActuators {
 final class FakeControllerSource: ControllerSource {
     var slots: [ControllerSlot]
     let processor = GamepadInputProcessor()
-    let feedback = PadFeedback(actuators: RecordingActuators(), queue: DispatchSerialQueue(label: "test.feedback"))
+    let actuators = RecordingActuators()
+    let feedback: PadFeedback
 
     init(slots: [ControllerSlot] = []) {
         self.slots = slots
+        feedback = PadFeedback(actuators: actuators, queue: DispatchSerialQueue(label: "test.feedback"))
     }
 }

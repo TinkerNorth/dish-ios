@@ -20,8 +20,8 @@ private struct ClockedModel {
             streaming: StreamingPreferenceStore(defaults: defaults),
             clock: ClockSource(ticker: ticker, now: now.read),
             localNetwork: RecordedLocalNetworkAccess(),
-            bindings: BindingRequests(),
             pads: ControllerStack(source: FakeControllerSource(), defaults: defaults),
+            network: TestNetwork.stack(defaults: defaults),
             tips: RecordedTipStore(shelf: .success([])),
             motionSensor: FakeMotionSensor(),
             resendTicker: ManualTicker()

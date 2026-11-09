@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 // Copyright (C) 2026 Dish contributors.
 
+import DishCore
 import DishEngine
 import SwiftUI
 import XCTest
@@ -91,5 +92,13 @@ final class ConnectionsMappersTests: XCTestCase {
             dot: DishTheme.warning
         )
         XCTAssertEqual(list.found, FoundSectionState(title: "Found on your Wi‑Fi", searching: nil, rows: [row]))
+    }
+
+    /// The fleet's ladder has a Bluetooth rung, Android's own gamepad layer;
+    /// no PC on iOS is one, and it would draw as the client's own wire.
+    func testEachKindOfPCHasItsGlyph() {
+        XCTAssertEqual(connectionSymbol(.satellite), satelliteSymbol)
+        XCTAssertEqual(connectionSymbol(.moonlight), "desktopcomputer")
+        XCTAssertEqual(connectionSymbol(.bluetooth), satelliteSymbol)
     }
 }

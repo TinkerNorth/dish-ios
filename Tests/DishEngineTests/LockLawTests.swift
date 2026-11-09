@@ -11,10 +11,11 @@ import XCTest
 /// queue, a receive thread posting rumble and light-bar commands through a
 /// connection's feedback routes, the feedback queue draining them, and the
 /// main actor republishing the routing table every 100 ms and reading the
-/// tally. The lists are a ratchet: a lock that appears fails, and so does a
-/// listed one no longer observed until it is deleted. Today every list is
-/// empty: no hot thread takes a lock. The sender's own run joins this one
-/// when the network wave lands.
+/// tally; and the satellite path's own run, a pad routed to a live client,
+/// its heartbeat, and its receive loop opening a loopback satellite's
+/// return commands. The lists are a ratchet: a lock that appears fails, and
+/// so does a listed one no longer observed until it is deleted. No hot
+/// thread takes a lock; the heartbeat takes the latency window's.
 @MainActor
 final class LockLawTests: XCTestCase {
 
@@ -31,6 +32,27 @@ final class LockLawTests: XCTestCase {
         expectExactly("Feedback may acquire", observed: run.snapshot.acquired(by: .feedback), listed: [])
         expectExactly("held across a blocking call", observed: Set(run.snapshot.blocking.keys.map(label)), listed: [])
         expectExactly("taken inside another", observed: Set(run.snapshot.edges.keys.map(label)), listed: [])
+    }
+
+    /// The satellite path: the pad's reports leave through the client on
+    /// the input queue, the receive thread opens the return commands and
+    /// posts them to the pad's feedback, and the heartbeat beats; none of
+    /// them takes a tracked lock but the heartbeat, which arms the latency
+    /// window's ping clock under its lock, as dish-mac's does.
+    func testTheSatellitesThreadsTakeExactlyTheLocksOnTheirLists() throws {
+        let run = try LockLawSatelliteRun.run()
+        XCTAssertGreaterThan(run.uplinks, 1, "the pad's reports and the heartbeats reached the satellite")
+        XCTAssertGreaterThan(run.downlinks, 0, "the satellite answered")
+        XCTAssertGreaterThan(run.actuations, 0, "the return commands reached the actuators")
+        XCTAssertGreaterThan(run.latencySamples, 0, "the acks paired with the heartbeat's pings")
+        let snapshot = run.snapshot
+        XCTAssertTrue(snapshot.acquired(by: .main).contains("satellite.latency"), "the main actor read the window under its lock")
+        expectExactly("Input may acquire", observed: snapshot.acquired(by: .input), listed: [])
+        expectExactly("Receive may acquire", observed: snapshot.acquired(by: .receive), listed: [])
+        expectExactly("Feedback may acquire", observed: snapshot.acquired(by: .feedback), listed: [])
+        expectExactly("Heartbeat may acquire", observed: snapshot.acquired(by: .heartbeat), listed: ["satellite.latency"])
+        expectExactly("held across a blocking call", observed: Set(snapshot.blocking.keys.map(label)), listed: [])
+        expectExactly("taken inside another", observed: Set(snapshot.edges.keys.map(label)), listed: [])
     }
 
     private struct HotRun {

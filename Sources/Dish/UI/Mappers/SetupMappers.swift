@@ -82,9 +82,11 @@ func setupPCInput(_ connection: ConnectionFact, paired: Bool) -> SetupPCInput {
     )
 }
 
-func setupPCKind(_ kind: DishEngine.ConnectionKind) -> SetupPCKind {
+/// The Bluetooth rung of the fleet's ladder is Android's own gamepad
+/// layer; no PC on iOS is one, so it reads as the client's own wire.
+func setupPCKind(_ kind: ConnectionKind) -> SetupPCKind {
     switch kind {
-    case .satellite: .satellite
+    case .satellite, .bluetooth: .satellite
     case .moonlight: .moonlightHost
     }
 }

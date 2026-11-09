@@ -1,13 +1,8 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 // Copyright (C) 2026 Dish contributors.
 
+import DishCore
 import Foundation
-
-/// What a PC runs to receive input.
-package enum ConnectionKind: Equatable {
-    case satellite
-    case moonlight
-}
 
 /// Where a PC stands with this iPhone.
 package enum ConnectionState: Equatable {
@@ -17,7 +12,8 @@ package enum ConnectionState: Equatable {
     case needsPairing
 }
 
-/// A PC, paired or found on the network.
+/// A PC, paired or found on the network. Its kind is the fleet's
+/// `ConnectionKind` from the link-tier ladder.
 package struct ConnectionFact: Equatable, Identifiable {
     package let id: String
     package let name: String

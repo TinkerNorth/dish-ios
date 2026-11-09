@@ -2,15 +2,17 @@
 
 A map of the codebase aimed at people working in it. It says which primitive to
 reach for, where the code goes, and what the layering rules are. The protocol
-contract lives in `satellite/docs/contract.md`; the iOS-side mapping, almost
-all of it not yet, is [`contract.md`](contract.md). The design tokens are in
+contract lives in `satellite/docs/contract.md`; the iOS-side mapping, row by
+row with its files, is [`contract.md`](contract.md). The design tokens are in
 [`../DESIGN.md`](../DESIGN.md); the shell's, the pages' and the kit's rules in
 [`UI_CONTRACT.md`](UI_CONTRACT.md); the design handoff in
 [`design/README.md`](design/README.md).
 
-This is wave 1, the shell. The engine publishes real, empty facts, and the
-sections below say which parts of the layering have code today and which are
-the rules the next waves carry.
+The shell, the controller bridge, the protocol core and the network engine
+are built: the engine finds a Satellite over Bonjour, pairs with it both
+ways, opens its session and streams a bound pad to it over the encrypted
+data plane. The sections below say which parts of the layering have code and
+which are the rules the next waves carry.
 
 Data flows one way. A source of truth owns state, pure reducers derive from
 it, the UI binds and renders it, and the UI sends commands back to the source.
@@ -60,7 +62,7 @@ own directory.
 |---|---|---|---|
 | `DishCore` | The pure core: the setup machine (`Setup/`), the protocol constants (`ProtocolConstants.swift`), the wire codecs and the session crypto (`Wire/`) and the policy reducers (`Reducers/`), ported from dish-mac under its names and pinned by the fleet's vectors. | nothing | Foundation, CryptoKit |
 | `DishKernel` | The dataflow primitive `StateSource` (below) | nothing | Foundation, Observation |
-| `DishEngine` | Everything that owns state or touches the platform: the preference stores (`Preferences/`), the minute clock (`Clock/`), the Local Network seam (`LocalNetwork/`), the recorded binding requests (`Setup/`), the facts the UI draws (`Models/`) and `AppModel`, the one composition root, with its intents by topic. Later `Network/` (sockets, REST, discovery) and the GameController bridge. | `DishCore`, `DishKernel` | Foundation, Observation, os, DishCore, DishKernel; never SwiftUI or UIKit |
+| `DishEngine` | Everything that owns state or touches the platform: the preference stores (`Preferences/`), the minute clock (`Clock/`), the Local Network seam and its Bonjour implementation (`LocalNetwork/`), the GameController bridge and the hot path's pad side (`Input/`), the satellite pool, the REST control plane and the UDP data plane (`Network/`), the facts the UI draws (`Models/`) and `AppModel`, the one composition root, with its intents by topic. | `DishCore`, `DishKernel` | Foundation, Observation, os, Synchronization, GameController, CoreHaptics, Network, Security, CryptoKit, Darwin, DishCore, DishKernel; never SwiftUI or UIKit |
 | `Dish` | The SwiftUI library: `DishScene` and `OrientationLock` (the two `public` types), the navigation machine and its store, the shell, the pages, the setup cover and the dim, the kit, the mappers, the theme, the localized words and their catalog | `DishEngine`, `DishCore`, `DishKernel` | Foundation, Observation, SwiftUI, UIKit (only `UI/Theme.swift` and `DishScene.swift`), the three modules |
 
 `ImportBoundariesTests` fails the build when a file imports outside its row
@@ -71,8 +73,8 @@ not list every test target.
 
 Inside the engine the folders are the contract: `Models/` is the value types
 the UI binds, `Preferences/` the stores over `UserDefaults`, `Clock/` the
-wall-clock fact, `LocalNetwork/` and `Setup/` the seams to what later waves
-build, and `AppModel*.swift` the root and its intents. The engine's UI-facing
+wall-clock fact, `LocalNetwork/` the permission seam, `Input/` the pads,
+`Network/` the satellites, and `AppModel*.swift` the root and its intents. The engine's UI-facing
 surface is `package`-visible; everything else stays `internal`, and the tests
 reach it with `@testable import`. `public` is `DishScene` alone.
 
@@ -105,11 +107,28 @@ and a request does not exist.
 
 Two more conventions are classes written per feature. A **coordinator** owns
 imperative, cross-cutting commands over several sources and re-exposes a
-child's state by reference, never as a copy; there is none yet. A **gateway**
-is an IO boundary with no domain state; the seams of this wave
-(`LocalNetworkAccess`, `Ticker`) are protocols with one production
-implementation each, so a test replaces them. A **reducer** is a pure free
-function in `DishCore` for a `(state, event) -> result` decision.
+child's state by reference, never as a copy. A **gateway** is an IO boundary
+with no domain state. A **reducer** is a pure free function in `DishCore`
+for a `(state, event) -> result` decision.
+
+The network engine has these, under dish-mac's names:
+
+| Object | Kind | What it does |
+|---|---|---|
+| `WifiConnectionManager` (`Network/WifiConnectionManager*.swift`) | coordinator | The pool of satellite sessions: connect, pair (path A in `+Pairing`, path B in `+Approval`), the session PUT and the re-key (`+Session`), the per-slot converge (`+Slots`), the scan (`+Discovery`), death, close-notify, reconcile and the backoff (`+Lifecycle`). `@Observable`; every decision it takes is a `DishCore` reducer's. |
+| `WifiConnection` (`+Slots`, `+ReturnPaths`) | the per-satellite state the manager drives | The session's state machine, the alive tick, the slot table, the live client and the return-path routes. |
+| `ConnectionHub` | coordinator | The rows the pages read, derived on each read from the manager's observable state, and the slot → satellite binding table. |
+| `PairingAttempts` | store | Each satellite's pairing card, over a held `StateSource`. |
+| `ConnectionStore`, `KeyStore`, `CertPins` | stores | The remembered satellites and the device id in `UserDefaults`, the pairing keys in the Keychain, the TOFU pins in a file of their own (the TLS delegate reads them off the main actor). |
+| `HTTPClient`, `PairingClient`, `TofuPinningDelegate` | gateways | The REST control plane over `URLSession`, TOFU-pinned. |
+| `SatelliteClient` (`+IO`, `+Streams`, `SendGate`, `ReceiveHandlers`) | gateway, and the hot path's sink | The UDP data plane: one POSIX socket, the session key, the counters, the replay guard, the heartbeat and the receive thread. It is the `PadSink` a bound pad's feed sends to. |
+| `BonjourScan`, `MdnsBrowser`, `LocalNetworkProbe` | gateways | The `_satellite._udp` browse, and what it says about the Local Network permission. |
+
+The seams are protocols with one production implementation each, so a test
+replaces them: `LocalNetworkAccess` (`BonjourLocalNetworkAccess`, the scan;
+`RecordedLocalNetworkAccess` for tests), `Ticker`, `ControllerSource`,
+`KeyStore` (`KeychainKeyStore`, `InMemoryKeyStore`) and the manager's
+`DiscoveryPaths` (the live browse, or a scripted LAN).
 
 ## The composition root
 
@@ -117,8 +136,14 @@ function in `DishCore` for a `(state, event) -> result` decision.
 final class and the only place the engine's objects are made. The designated
 initializer takes every collaborator, so a test builds one over fakes; the
 convenience initializer takes a `UserDefaults` and builds the real set: the four
-preference stores over those defaults, a `ClockSource` over a `TimerTicker`, a
-`RecordedLocalNetworkAccess` and a `BindingRequests`.
+preference stores over those defaults, a `ClockSource` over a `TimerTicker`,
+the pads (`ControllerStack` over `GameControllerInput`), the satellite pool
+(`NetworkStack`: the manager over a `ConnectionStore` with its keys in the
+Keychain and its pins in Application Support, and the hub over it) and the
+Bonjour scan as its `LocalNetworkAccess`. The root wires the pool's signals
+to itself once (`wireNetwork`), so a refused slot lets its binding go, a
+client that comes or goes moves the pads' routes, and a satellite that wants
+a PIN opens its pairing card.
 
 `DishScene` is the composition root of the app layer. It makes `AppModel` and
 `NavigationStore` once, as `@State`, hands the store the model's
@@ -133,17 +158,28 @@ view.
 
 What `AppModel` publishes today:
 
-- `shellFacts`, a computed `ShellFacts` the mappers word: `controllers`,
-  `attachedPads`, `paired`, `found`, `scanning` and `session` (all empty: no
-  source exists yet), `localNetwork` (the seam's status, which stays `.unknown`),
-  `preferences` (the stores' state), `now` (the clock) and `setup` (the walk,
-  nil while the cover is down).
+- `shellFacts`, a computed `ShellFacts` the mappers word: `controllers` and
+  `attachedPads` from the bridge (each controller's `destination` from its
+  binding), `paired`, `found` and `scanning` from the hub and the manager,
+  `session` from the live satellite carrying the most pads (its latency off
+  the heartbeat window, `.stoppedResponding` while its acks falter),
+  `localNetwork` from the last scan, `preferences` (the stores' state), `now`
+  (the clock) and `setup` (the walk, nil while the cover is down). Beside it,
+  for the pages the next wave draws: `openPairing` (the card),
+  `bindingProgress` (the apply) and `lastConnectionEvent` (a failure to word).
 - the intents, in extensions by topic: `AppModel+Setup.swift` (`startSetup`,
   `endSetup`, `setupNext`, `setupBack`, `setupSkip`, `pickSetupInput`,
   `answerLocalNetwork`, `pickSetupDestination`, `setSetupEmulateAs`,
   `setSetupMotion`, `bindSetup`), `AppModel+Preferences.swift` (`setDeviceName`,
-  `setKeepScreenOn`, `setDimAfter`, `setAppearance`) and `AppModel+Pages.swift`
-  (`pageAppeared`, `pageDisappeared`). A view calls these and nothing else.
+  `setKeepScreenOn`, `setDimAfter`, `setAppearance`), `AppModel+Pages.swift`
+  (`pageAppeared`, `pageDisappeared`), `AppModel+Controllers.swift` (the
+  switches, the pick, the dead zones), `AppModel+Connections.swift`
+  (`startScan`, `connect`, `disconnect`, `forget`, `addByAddress`),
+  `AppModel+Pairing.swift` (`beginPairing(serverId:)`, `submitPin`, `newCode`,
+  `cancelPairing`), `AppModel+Binding.swift` (`bind(slotId:to:)`,
+  `unbind(slotId:)`, `dismissApply`) and `AppModel+Session.swift`
+  (`reconnect`, `enteredBackground`, `enteredForeground`). A view calls these
+  and nothing else.
 
 ## Unidirectional flow: the rules
 
@@ -237,37 +273,61 @@ there (`Tests/DishCoreTests/SetupMachineTests.swift`) with no mocks.
 - Review's Bind emits `.bind(draft)` then `.ended(.bound)`. Skip anywhere emits
   `.ended(.skipped)`. Back walks one step; there is none from the welcome, and
   none from Input when the walk opened there ("Add a controller").
-- Nothing leaves the draft until Bind, and Bind is recorded in
-  `BindingRequests`, not sent.
+- Nothing leaves the draft until Bind. Bind of a pad iOS sees to a
+  satellite writes the pick and the motion switch and binds it
+  (`bind(slotId:to:)`), which rides the session PUT, or the per-slot PUT
+  while live; the other ways in have no pad to bind yet.
 
 `AppModel+Setup` applies the machine to the model's `setupSource` and runs the
-effects: `.askLocalNetwork` and `.scan` go to the `LocalNetworkAccess` seam,
-`.bind` to `BindingRequests`, and `.ended` is the view's business (the cover
+effects: `.askLocalNetwork` runs the first browse, which makes iOS put its
+question, and answers the walk when the status leaves unknown; `.scan` goes
+to the `LocalNetworkAccess` seam; `.bind` binds; and `.ended` is the view's
+business (the cover
 sends `navigation.send(.setupEnded(...))` itself, and the model only drops the
 walk when `endSetup()` is called). The pure view-layer half is
 `setupCoverState(facts:words:)` and the step mappers.
 
 ## Threading and the hot path
 
-The pad side of the hot path is built (`Sources/DishEngine/Input/`); the
-socket and the session are not. `GameControllerInput` hands each pad its own
+The hot path is built end to end. `GameControllerInput` hands each pad its own
 serial `handlerQueue` before installing a handler; the handler samples the
 extended gamepad into a `PadSample`, `wireReport` turns it into a
 `GamepadReport`, and the pad's `PadFeed` drops a report that repeats the last
 one, applies the dead zones from an atomic word, writes the inspector's
 record under a seqlock and calls the `PadSink` of the route it took from its
 mailbox. The feed is `Sendable` because every field is an atomic word or a
-`let`, not because anything is promised past the compiler. The return paths
+`let`, not because anything is promised past the compiler. A bound pad's
+route holds the satellite's live `SatelliteClient` as its sink and the index
+the pad holds there: `AppModel+Binding` publishes one routing snapshot from
+the bindings and the live clients through `InputRouting` whenever a binding,
+a client or a switch changes, so a pad's route is set when its satellite's
+session comes up and cleared when it goes down. The client stamps nothing of
+its own: the feed hands it each motion sample's delta since the last one let
+through and each touch's publish instant, as the wire carries them.
+`SatelliteClient.send` claims the counter, seals the report from a stack
+buffer and calls `sendto` while it holds the send gate, a compare-exchange
+flag; the generation it seals under, the target and the fd are atomic words
+and an object slot replaced only under that gate, so the send takes no lock
+and allocates nothing but CryptoKit's sealed box, on the pad's own queue.
+
+The receive loop runs on a thread of its own at `userInteractive`
+(`ThreadRole.receive`), with one datagram buffer on its stack: it opens each
+datagram in place, takes each new key generation and handler set from a
+mailbox, and hands a rumble, light-bar, trigger or player-LED command to the
+connection's `FeedbackRoutes`, which post it to the bound pad's feedback in
+one hop. The heartbeat runs on its own queue (`ThreadRole.heartbeat`) and
+takes the latency window's lock to arm its ping; the receive loop only leaves
+an ack's time in an atomic word for the next holder to pair. The return paths
 post to each pad's `FeedbackPad`, and `PadActuators`, an actor whose executor
 is the `dish.feedback` queue, drives CoreHaptics, the light, the adaptive
 triggers and the player index; a `GCController` is filed there by identity
 and found in the framework's own list, so it never crosses isolations.
-`LockLawTests`, in a `LOCK_STATS` build, holds the Input, Receive and
-Feedback threads to no tracked lock. Everything else in the engine is
-`@MainActor`.
+`LockLawTests`, in a `LOCK_STATS` build (its own CI job), holds the Input,
+Receive and Feedback threads to no tracked lock and the Heartbeat to the
+latency window's alone, over a pad routed to a live client and a loopback
+satellite answering it. Everything else in the engine is `@MainActor`.
 
-These are the rules the bridge keeps and the wire will carry, taken from
-dish-mac:
+These are the rules the bridge and the wire keep, taken from dish-mac:
 
 - Every controller event takes one path and takes no lock on it. A
   controller's handler runs on that controller's own serial queue, its
@@ -322,14 +382,13 @@ dish-mac:
 Each entry names the decided shape, so a change lands on it. The row-by-row
 list, with where each lands, is [`../Tests/PARITY.md`](../Tests/PARITY.md).
 
-- **Nothing talks to a PC.** No discovery, pairing, wire protocol or
-  controller bridge; the engine's controllers, connections and session are
-  empty. The Local Network denied state, the session accessory's Reconnect and
-  the dim's only trigger are built and tested through their mappers and
-  previews, and are unreachable at run time.
-- **The recorded seams.** `RecordedLocalNetworkAccess` counts asks and scans and
-  never answers, and `BindingRequests` keeps the drafts Bind asked for. Both are
-  the shape the discovery and binding waves fill.
+- **No page for pairing or a PC yet.** The engine pairs, binds and streams,
+  and publishes the card, the apply and the failures; the pair sheet, the PC
+  page, Forget and the controller page's Binding section are the next wave's.
+- **The Local Network status is the last scan's word.** iOS has no call that
+  asks; the simulator does not enforce the permission, so the denied path is
+  proved through the browser's documented policy error, not observed
+  (`LocalNetworkProbeTests`).
 - **iOS gives apps no pad speaker.** The Review step's "Gets back" column
   never carries a speaker, because iOS offers apps no way to play into a
   controller.
@@ -343,8 +402,12 @@ list, with where each lands, is [`../Tests/PARITY.md`](../Tests/PARITY.md).
   `StateSource`'s distinct-until-changed rule.
 - **The engine is tested against fakes it owns.** `Tests/DishEngineTests`
   drives the stores over a fresh `UserDefaults` (`TestDefaults`), the clock
-  over a `ManualTicker`, and the intents over a model built with
-  `RecordedLocalNetworkAccess` and `BindingRequests`.
+  over a `ManualTicker`, the pads over `FakeControllerSource`, and the network
+  against `FakeSatellite`, an in-process satellite on the loopback with its
+  own crypto; the model's intents run over a scripted LAN and an in-memory
+  key store. `IntegrationLiveSatelliteE2ETests`, gated on `DISH_E2E_LIVE=1`,
+  drives the real satellite binary through `scripts/e2e_local.sh` and
+  `e2e.yml`.
 - **The rules are tested.** `Tests/ArchitectureTests` reads the tree: import
   boundaries, the dependency graph, license headers, suppressions, mutable
   statics, the lint thresholds, the tool and workflow pins, the version
