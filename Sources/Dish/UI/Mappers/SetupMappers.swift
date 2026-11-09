@@ -82,7 +82,7 @@ func setupPCInput(_ connection: ConnectionFact, paired: Bool) -> SetupPCInput {
     )
 }
 
-func setupPCKind(_ kind: ConnectionKind) -> SetupPCKind {
+func setupPCKind(_ kind: DishEngine.ConnectionKind) -> SetupPCKind {
     switch kind {
     case .satellite: .satellite
     case .moonlight: .moonlightHost
