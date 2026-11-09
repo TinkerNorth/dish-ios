@@ -17,9 +17,16 @@ let package = Package(
         // extension or bench can link just the layer it needs.
         .library(name: "Dish", targets: ["Dish"]),
         .library(name: "DishEngine", targets: ["DishEngine"]),
+        .library(name: "DishCore", targets: ["DishCore"]),
         .library(name: "DishKernel", targets: ["DishKernel"])
     ],
     targets: [
+        // The pure core: the reducers and, later, the wire. Foundation only.
+        .target(
+            name: "DishCore",
+            path: "Sources/DishCore",
+            swiftSettings: warningsAreErrors
+        ),
         // The dataflow primitives the engine's stores are built on.
         // Foundation + Observation only.
         .target(
@@ -32,7 +39,7 @@ let package = Package(
         // app hands it lifecycle signals and binds to what it publishes.
         .target(
             name: "DishEngine",
-            dependencies: ["DishKernel"],
+            dependencies: ["DishCore", "DishKernel"],
             path: "Sources/DishEngine",
             swiftSettings: warningsAreErrors
         ),
@@ -41,9 +48,15 @@ let package = Package(
         // the brand mark.
         .target(
             name: "Dish",
-            dependencies: ["DishEngine", "DishKernel"],
+            dependencies: ["DishCore", "DishEngine", "DishKernel"],
             path: "Sources/Dish",
             resources: [.process("Resources")],
+            swiftSettings: warningsAreErrors
+        ),
+        .testTarget(
+            name: "DishCoreTests",
+            dependencies: ["DishCore"],
+            path: "Tests/DishCoreTests",
             swiftSettings: warningsAreErrors
         ),
         .testTarget(
@@ -54,13 +67,13 @@ let package = Package(
         ),
         .testTarget(
             name: "DishEngineTests",
-            dependencies: ["DishEngine", "DishKernel"],
+            dependencies: ["DishCore", "DishEngine", "DishKernel"],
             path: "Tests/DishEngineTests",
             swiftSettings: warningsAreErrors
         ),
         .testTarget(
             name: "DishTests",
-            dependencies: ["Dish", "DishEngine"],
+            dependencies: ["Dish", "DishCore", "DishEngine"],
             path: "Tests/DishTests",
             swiftSettings: warningsAreErrors
         )

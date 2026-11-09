@@ -1,0 +1,262 @@
+// SPDX-License-Identifier: LGPL-3.0-or-later
+// Copyright (C) 2026 Dish contributors.
+
+import DishCore
+import Foundation
+import SwiftUI
+
+// MARK: - What setup reads
+
+/// What the setup pages read beside the walk itself: the pads iOS sees, the
+/// PCs discovery heard, whether it is looking, and the Local Network answer.
+/// Plain values, so the pages do not depend on the engine's fact types.
+struct SetupInputs: Equatable {
+    let detectedPads: [SetupPadInput]
+    let found: [SetupPCInput]
+    let scanning: Bool
+    let localNetwork: LocalNetworkStatus
+}
+
+/// How a seen pad reaches the iPhone.
+enum SetupPadLink: Equatable {
+    case usbC
+    case bluetooth
+}
+
+struct SetupPadInput: Equatable {
+    let id: String
+    let name: String
+    let link: SetupPadLink
+    let batteryPercent: Int?
+    let family: EmulatedPad
+}
+
+enum SetupPCKind: Equatable {
+    case satellite
+    case moonlightHost
+}
+
+struct SetupPCInput: Equatable {
+    let id: String
+    let name: String
+    let address: String
+    let kind: SetupPCKind
+    let paired: Bool
+}
+
+/// What setup reads while no pad bridge and no discovery exist: nothing seen,
+/// nothing heard, and the Local Network status as the model reports it.
+func setupInputs(localNetwork: LocalNetworkStatus) -> SetupInputs {
+    SetupInputs(detectedPads: [], found: [], scanning: false, localNetwork: localNetwork)
+}
+
+/// The fleet's Satellite download page.
+enum SetupLinks {
+    static let satellite = URL(string: "https://dish.tinkernorth.com/downloads/satellite")
+}
+
+/// A link a page opens through `openURL`.
+struct SetupLink: Equatable {
+    let title: String
+    let url: URL?
+}
+
+// MARK: - The cover's chrome
+
+/// The toolbar over every step: the title and the step it counts, Back where
+/// the walk has one, and Skip. The welcome draws no title.
+struct SetupChromeState: Equatable {
+    let title: String?
+    let subtitle: String?
+    let showsBack: Bool
+    let back: String
+    let skip: String
+}
+
+func setupChromeState(_ walk: SetupState, words: L10n = .app) -> SetupChromeState {
+    let onWelcome = walk.step == .welcome
+    return SetupChromeState(
+        title: onWelcome ? nil : words.setUpDish,
+        subtitle: setupSubtitle(walk.step, words: words),
+        showsBack: walk.canGoBack,
+        back: words.setupBack,
+        skip: words.setupSkip
+    )
+}
+
+private func setupSubtitle(_ step: SetupStep, words: L10n) -> String? {
+    switch step {
+    case .welcome: nil
+    case .input: words.setupInputStep
+    case .localNetworkPrimer, .pickPC: words.setupDestinationStep
+    case .review: words.setupBindingStep
+    }
+}
+
+// MARK: - Welcome
+
+/// A symbol, a name and the line under it: a welcome feature, a primer row.
+struct SetupFeature: Equatable, Identifiable {
+    let symbol: String
+    let title: String
+    let body: String
+
+    var id: String {
+        title
+    }
+}
+
+struct WelcomeStepState: Equatable {
+    let headline: String
+    let intro: String
+    let features: [SetupFeature]
+    let primary: String
+    let getSatellite: SetupLink
+}
+
+func welcomeStepState(words: L10n = .app) -> WelcomeStepState {
+    WelcomeStepState(
+        headline: words.welcomeHeadline,
+        intro: words.welcomeIntro,
+        features: [
+            SetupFeature(symbol: "gamecontroller", title: words.bringTheControllerYouOwn, body: words.bringTheControllerYouOwnBody),
+            SetupFeature(symbol: "iphone", title: words.orPlayOnTheScreen, body: words.orPlayOnTheScreenBody),
+            SetupFeature(symbol: "lock.shield", title: words.staysOnYourNetwork, body: words.staysOnYourNetworkBody)
+        ],
+        primary: words.setupContinue,
+        getSatellite: SetupLink(title: words.getSatelliteForYourPC, url: SetupLinks.satellite)
+    )
+}
+
+// MARK: - Input · 1 of 3
+
+struct ChipState: Equatable {
+    let text: String
+    let tone: ChipTone
+}
+
+/// A pad iOS already sees, with its Use button.
+struct SetupPadRow: Equatable, Identifiable {
+    let id: String
+    let symbol: String
+    let name: String
+    let detail: String
+    let use: String
+    let pick: InputKind
+}
+
+/// One of the three ways in.
+struct SetupChoiceRow: Equatable, Identifiable {
+    let symbol: String
+    let title: String
+    let body: String
+    let chip: ChipState?
+    let pick: InputKind
+
+    var id: String {
+        title
+    }
+}
+
+struct SetupFoundPads: Equatable {
+    let title: String
+    let pads: [SetupPadRow]
+}
+
+struct InputStepState: Equatable {
+    let title: String
+    let body: String
+    /// Nil while iOS sees no pad: the section is left out.
+    let found: SetupFoundPads?
+    let chooseTitle: String
+    let choices: [SetupChoiceRow]
+    let footnote: String
+}
+
+func inputStepState(_ inputs: SetupInputs, words: L10n = .app) -> InputStepState {
+    let pads = inputs.detectedPads.map { setupPadRow($0, words: words) }
+    return InputStepState(
+        title: words.howDoYouWantToPlay,
+        body: words.howDoYouWantToPlayBody,
+        found: pads.isEmpty ? nil : SetupFoundPads(title: words.foundOnThisIPhone, pads: pads),
+        chooseTitle: words.orChoose,
+        choices: [
+            SetupChoiceRow(
+                symbol: "cable.connector",
+                title: words.wiredController,
+                body: words.wiredControllerBody,
+                chip: ChipState(text: words.setupBest, tone: .success),
+                pick: .wired
+            ),
+            SetupChoiceRow(
+                symbol: "antenna.radiowaves.left.and.right",
+                title: words.bluetoothController,
+                body: words.bluetoothControllerBody,
+                chip: nil,
+                pick: .bluetooth
+            ),
+            SetupChoiceRow(symbol: "iphone", title: words.onScreenGamepad, body: words.onScreenGamepadBody, chip: nil, pick: .onScreen)
+        ],
+        footnote: words.dishReadsAnyController
+    )
+}
+
+private func setupPadRow(_ pad: SetupPadInput, words: L10n) -> SetupPadRow {
+    let state = padState(pad.link, words: words)
+    let parts = [state, setupPadLinkWord(pad.link, words: words)] + setupBatteryWord(pad.batteryPercent, words: words)
+    return SetupPadRow(
+        id: pad.id,
+        symbol: "gamecontroller",
+        name: pad.name,
+        detail: parts.joined(separator: words.setupLineSeparator),
+        use: words.setupUse,
+        pick: .detectedPad(id: pad.id, family: pad.family)
+    )
+}
+
+private func padState(_ link: SetupPadLink, words: L10n) -> String {
+    switch link {
+    case .usbC: words.pluggedIn
+    case .bluetooth: words.setupConnected
+    }
+}
+
+func setupPadLinkWord(_ link: SetupPadLink, words: L10n) -> String {
+    switch link {
+    case .usbC: words.usbC
+    case .bluetooth: words.setupBluetooth
+    }
+}
+
+/// The battery as a line part; nothing when the pad does not report one.
+func setupBatteryWord(_ percent: Int?, words: L10n) -> [String] {
+    percent.map { [words.setupBattery($0)] } ?? []
+}
+
+// MARK: - Destination · 2 of 3: the Local Network primer
+
+struct LocalNetworkStepState: Equatable {
+    let thisIPhone: String
+    let yourPC: String
+    let title: String
+    let body: String
+    let rows: [SetupFeature]
+    let primary: String
+    let byAddress: String
+}
+
+func localNetworkStepState(words: L10n = .app) -> LocalNetworkStepState {
+    LocalNetworkStepState(
+        thisIPhone: words.setupThisIPhone,
+        yourPC: words.setupYourPC,
+        title: words.letDishFindYourPC,
+        body: words.letDishFindYourPCBody,
+        rows: [
+            SetupFeature(symbol: "wifi", title: words.onlyThisWiFi, body: words.onlyThisWiFiBody),
+            SetupFeature(symbol: "lock.shield", title: words.nothingPairsWithoutAPIN, body: words.nothingPairsWithoutAPINBody),
+            SetupFeature(symbol: "gearshape", title: words.yoursToChangeLater, body: words.yoursToChangeLaterBody)
+        ],
+        primary: words.setupContinue,
+        byAddress: words.addMyPCByAddressInstead
+    )
+}
