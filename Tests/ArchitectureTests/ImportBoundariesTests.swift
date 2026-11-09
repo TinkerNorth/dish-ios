@@ -19,7 +19,7 @@ final class ImportBoundariesTests: XCTestCase {
         Layer(directory: "Sources/DishKernel", allowed: ["Foundation", "Observation"]),
         Layer(
             directory: "Sources/DishEngine",
-            allowed: ["Foundation", "Observation", "os", "DishCore", "DishKernel"]
+            allowed: ["Foundation", "Observation", "os", "Synchronization", "GameController", "CoreHaptics", "DishCore", "DishKernel"]
         ),
         Layer(
             directory: "Sources/Dish",

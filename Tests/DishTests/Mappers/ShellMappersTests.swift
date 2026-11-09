@@ -68,4 +68,9 @@ final class ShellMappersTests: XCTestCase {
         XCTAssertEqual(colorScheme(for: .light), .light)
         XCTAssertEqual(colorScheme(for: .dark), .dark)
     }
+
+    func testAPushedControllerPageFallsBackToTheGenericTitle() {
+        XCTAssertEqual(pageTitle(.controller(id: "pad")), "Controller")
+        XCTAssertEqual(pageTitle(.deviceName), "Name on your PC")
+    }
 }
