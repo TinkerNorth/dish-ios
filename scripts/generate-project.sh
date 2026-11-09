@@ -5,8 +5,12 @@
 #  the pinned XcodeGen. Run after editing project.yml and commit the result;
 #  ios-ci.yml runs it and fails when the committed project differs.
 #
+#  XcodeGen names the local package reference after the checkout's folder,
+#  so the committed project assumes the checkout is called dish-ios, as CI's
+#  is; a clone under another name regenerates with a different reference.
+#
 #  Options:
-#    --check   regenerate into a scratch copy and fail on any difference
+#    --check   regenerate in place and fail on any difference
 # ============================================================================
 
 set -euo pipefail
@@ -30,6 +34,9 @@ if [ "${1:-}" = "--check" ]; then
         rm -rf Dish.xcodeproj
         cp -R "$scratch/Dish.xcodeproj" Dish.xcodeproj
         echo "Dish.xcodeproj is not what project.yml generates; run scripts/generate-project.sh and commit" >&2
+        if [ "$(basename "$PWD")" != "dish-ios" ]; then
+            echo "note: the checkout is named $(basename "$PWD"), and the package reference carries the folder's name" >&2
+        fi
         exit 1
     fi
     echo "Dish.xcodeproj matches project.yml"

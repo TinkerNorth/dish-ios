@@ -16,7 +16,7 @@ struct DeviceNamePageState: Equatable {
 
 func deviceNamePageState(preferences: PreferencesFacts, words: L10n = .app) -> DeviceNamePageState {
     DeviceNamePageState(
-        title: words.nameOnYourPC,
+        title: pageTitle(.deviceName, words: words),
         placeholder: words.iPhone,
         draft: preferences.deviceName,
         footer: words.deviceNamePageFooter

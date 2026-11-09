@@ -21,10 +21,13 @@ final class NavigationCoverageTests: XCTestCase {
     private static let tabTitleMarker = "func tabTitle("
     private static let pageTitleMarker = "func pageTitle("
     private static let titleClosing = "\n}"
-    private static let rootMarker = "TabView(selection:"
-    private static let pushedMarker = "func pushed("
-    private static let coverMarker = "func cover("
+    /// The root switch is a property of the tab's stack; the pushed pages
+    /// and the covers are each drawn by a private view of their own.
+    private static let rootMarker = "private var root: some View {"
+    private static let pushedMarker = "private struct PageView: View {"
+    private static let coverMarker = "private struct ShellCover: View {"
     private static let switchClosing = "\n    }\n"
+    private static let structClosing = "\n}\n"
 
     /// The case names of `enum <name>` in the navigation machine.
     private static func cases(of enumName: String) throws -> [String] {
@@ -114,8 +117,8 @@ final class NavigationCoverageTests: XCTestCase {
     func testTheShellDrawsEveryTabPageAndCover() throws {
         let source = try RepoFiles.read(Self.shellView)
         let root = try Self.section(of: source, after: Self.rootMarker, closing: Self.switchClosing)
-        let pushed = try Self.section(of: source, after: Self.pushedMarker, closing: Self.switchClosing)
-        let cover = try Self.section(of: source, after: Self.coverMarker, closing: Self.switchClosing)
+        let pushed = try Self.section(of: source, after: Self.pushedMarker, closing: Self.structClosing)
+        let cover = try Self.section(of: source, after: Self.coverMarker, closing: Self.structClosing)
         let drawnByValue = #"\.NAME\b"#
         let drawnByCase = #"case (let )?[^\n]*\.NAME\b"#
         for name in try tabs {

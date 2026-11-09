@@ -45,6 +45,14 @@ func tabTitle(_ tab: Tab, words: L10n = .app) -> String {
     }
 }
 
+/// A pushed page's title, worded in one place so the map stays whole
+/// (NavigationCoverageTests).
+func pageTitle(_ page: Page, words: L10n = .app) -> String {
+    switch page {
+    case .deviceName: words.nameOnYourPC
+    }
+}
+
 func tabSymbol(_ tab: Tab) -> String {
     switch tab {
     case .controllers: "gamecontroller"
