@@ -8,7 +8,7 @@ import UIKit
 /// The one scene. The composition root's objects are made here once and
 /// handed to the shell as environment values. It is not a view: the clock,
 /// the defaults and UIKit's shared objects are allowed here and nowhere
-/// under `UI/`.
+/// under `UI/`, and it is the one place the window is turned.
 @MainActor
 public struct DishScene: Scene {
 
@@ -16,14 +16,19 @@ public struct DishScene: Scene {
     @State private var navigation: NavigationStore
     /// THIRD_PARTY.md from the package's resource bundle, for the licenses page.
     private let notice = thirdPartyNotice(in: L10n.app.catalog.bundle)
+    private let orientation: OrientationLock
 
-    public init() {
+    /// `orientation` is the app delegate the `@main` app declared.
+    public init(orientation: OrientationLock) {
+        self.orientation = orientation
         let model = AppModel(defaults: .standard)
         _model = State(initialValue: model)
         let navigation = NavigationStore(
             onboarding: model.onboarding,
             startSetup: { model.startSetup(setupStart($0)) },
-            endSetup: model.endSetup
+            endSetup: model.endSetup,
+            startPlay: model.openPlay,
+            endPlay: model.closePlay
         )
         _navigation = State(initialValue: navigation)
     }
@@ -38,6 +43,7 @@ public struct DishScene: Scene {
                 .environment(\.thirdPartyNotice, notice)
                 .preferredColorScheme(colorScheme(for: model.shellFacts.preferences.appearance))
                 .onChange(of: idleTimerDisabled(facts: model.shellFacts), initial: true) { holdScreenOn($1) }
+                .onChange(of: screenOrientation(for: navigation.state.cover), initial: true) { turn(to: $1) }
         }
     }
 
@@ -45,6 +51,25 @@ public struct DishScene: Scene {
     private func holdScreenOn(_ disabled: Bool) {
         UIApplication.shared.isIdleTimerDisabled = disabled
     }
+
+    /// The delegate answers with the new mask from now on, and every window
+    /// turns to it: UIKit only rereads the mask when asked to.
+    private func turn(to screenOrientation: ScreenOrientation) {
+        let mask = interfaceMask(screenOrientation)
+        orientation.mask = mask
+        let scenes = UIApplication.shared.connectedScenes.compactMap { $0 as? UIWindowScene }
+        for scene in scenes {
+            scene.requestGeometryUpdate(UIWindowScene.GeometryPreferences.iOS(interfaceOrientations: mask))
+            scene.windows.compactMap(\.rootViewController).forEach(refreshOrientations)
+        }
+    }
+}
+
+/// A controller and everything it presents reread their orientations.
+@MainActor
+private func refreshOrientations(_ controller: UIViewController) {
+    controller.setNeedsUpdateOfSupportedInterfaceOrientations()
+    if let presented = controller.presentedViewController { refreshOrientations(presented) }
 }
 
 /// The bundle's marketing version, empty when the bundle carries none.

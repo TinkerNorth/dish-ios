@@ -26,6 +26,8 @@ package struct ShellFacts: Equatable {
     package let setup: SetupState?
     /// Support Dish: what the App Store sells and where a tip stands.
     package let support: SupportFacts
+    /// The play screen on display; nil while none is.
+    package let play: PlayFacts?
 
     package init(
         controllers: [ControllerFact],
@@ -38,7 +40,8 @@ package struct ShellFacts: Equatable {
         preferences: PreferencesFacts,
         now: Date,
         setup: SetupState?,
-        support: SupportFacts = .initial
+        support: SupportFacts = .initial,
+        play: PlayFacts? = nil
     ) {
         self.controllers = controllers
         self.attachedPads = attachedPads
@@ -51,5 +54,6 @@ package struct ShellFacts: Equatable {
         self.now = now
         self.setup = setup
         self.support = support
+        self.play = play
     }
 }

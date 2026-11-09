@@ -81,7 +81,7 @@ final class NavigationCoverageTests: XCTestCase {
     func testTheSweepSeesEveryTabPageAndCover() throws {
         XCTAssertEqual(try tabs, ["controllers", "connections", "settings"])
         XCTAssertTrue(try pages.contains("deviceName"), "the sweep must read the Page enum")
-        XCTAssertEqual(try covers, ["setup", "dim"])
+        XCTAssertEqual(try covers, ["setup", "play", "dim"])
     }
 
     func testEveryTabAndPageHasAWordedTitle() throws {

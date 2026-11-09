@@ -5,19 +5,30 @@ import SwiftUI
 
 /// One controller: its glyph, name, destination line and battery. A row
 /// with a page opens it; a pad Dish cannot read has none and no chevron.
+/// The on-screen controller also has Open, which raises its gamepad.
 struct ControllerRow: View {
     let state: ControllerRowState
     let open: @MainActor (Page) -> Void
+    let play: @MainActor () -> Void
 
     var body: some View {
-        if let page = state.page {
-            Button {
-                open(page)
-            } label: {
-                ControllerRowContent(state: state, disclosure: true)
+        HStack(spacing: DishSpace.s6) {
+            if let page = state.page {
+                Button {
+                    open(page)
+                } label: {
+                    ControllerRowContent(state: state, disclosure: true)
+                }
+                .buttonStyle(.borderless)
+            } else {
+                ControllerRowContent(state: state, disclosure: false)
             }
-        } else {
-            ControllerRowContent(state: state, disclosure: false)
+            if let title = state.open {
+                Button(title, action: play)
+                    .buttonStyle(.borderedProminent)
+                    .buttonBorderShape(.capsule)
+                    .font(DishFont.headline)
+            }
         }
     }
 }

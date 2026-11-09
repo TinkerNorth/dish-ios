@@ -18,6 +18,7 @@ package actor PadActuators: FeedbackActuators {
     package nonisolated let queue: DispatchSerialQueue
     private var controllers: [String: GCController] = [:]
     private var rumblers: [String: RumbleActuator] = [:]
+    private var phone: PhoneRumble?
 
     package nonisolated var unownedExecutor: UnownedSerialExecutor {
         queue.asUnownedSerialExecutor()
@@ -49,7 +50,11 @@ package actor PadActuators: FeedbackActuators {
 
     // MARK: - The feedback queue's actuators
 
+    /// The on-screen controller rumbles the iPhone; a pad its own motors.
     package nonisolated func rumble(_ slotId: String, strong: UInt16, weak: UInt16, durationMs: UInt16) {
+        guard slotId != onScreenSlotId else {
+            return assumeIsolated { $0.phoneRumbler()?.apply(strong: strong, weak: weak, durationMs: durationMs) }
+        }
         assumeIsolated { $0.rumbler(for: slotId)?.apply(strong: strong, weak: weak, durationMs: durationMs) }
     }
 
@@ -75,6 +80,13 @@ package actor PadActuators: FeedbackActuators {
         guard let dualSense = controllers[slotId]?.extendedGamepad as? GCDualSenseGamepad else { return }
         GameControllerInput.play(left, on: dualSense.leftTrigger)
         GameControllerInput.play(right, on: dualSense.rightTrigger)
+    }
+
+    /// Made on the first rumble; an iPhone without haptics drops it.
+    private func phoneRumbler() -> PhoneRumble? {
+        if let phone { return phone }
+        phone = PhoneRumble()
+        return phone
     }
 
     /// A pad without haptics takes no actuator and its rumble is dropped.

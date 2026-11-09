@@ -19,13 +19,17 @@ struct ShellView: View {
                 .badge(item.badgeCount)
             }
         }
-        .modifier(SessionAccessory(state: sessionBarState(model.shellFacts.session), dim: dim))
+        .modifier(SessionAccessory(state: sessionBarState(model.shellFacts.session), dim: dim, play: play))
         .tabBarMinimizeBehavior(.onScrollDown)
         .fullScreenCover(item: navigation.cover) { ShellCover(cover: $0) }
     }
 
     private func dim() {
         navigation.send(.dim)
+    }
+
+    private func play() {
+        navigation.send(.openPlay(.gamepad))
     }
 }
 
@@ -67,15 +71,16 @@ private struct PageView: View {
 
 /// The accessory, attached only while there is a session to show: iOS 26.0
 /// has no `isEnabled:` form, and an empty accessory still draws its glass.
-/// Play and Reconnect arrive with the play and session waves.
+/// Play opens the on-screen gamepad; Reconnect arrives with the session wave.
 private struct SessionAccessory: ViewModifier {
     let state: SessionBarState?
     let dim: () -> Void
+    let play: () -> Void
 
     func body(content: Content) -> some View {
         if let state {
             content.tabViewBottomAccessory {
-                SessionBar(state: state, dim: dim, play: nil, reconnect: nil)
+                SessionBar(state: state, dim: dim, play: play, reconnect: nil)
             }
         } else {
             content
@@ -90,13 +95,26 @@ private struct ShellCover: View {
     var body: some View {
         switch cover {
         case .setup: SetupCover()
+        case let .play(screen): PlayCover(screen: screen)
         case .dim: DimCover()
         }
     }
 }
 
+/// One presentation per kind of cover: the pause menu moving from one play
+/// screen to another keeps the cover up and swaps what it draws.
+enum CoverIdentity: Hashable {
+    case setup(SetupEntry)
+    case play
+    case dim
+}
+
 extension Cover: Identifiable {
-    var id: Self {
-        self
+    var id: CoverIdentity {
+        switch self {
+        case let .setup(entry): .setup(entry)
+        case .play: .play
+        case .dim: .dim
+        }
     }
 }

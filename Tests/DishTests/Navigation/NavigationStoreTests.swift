@@ -20,6 +20,21 @@ private final class SetupLog {
     }
 }
 
+/// What the store asked of the model's play screens.
+@MainActor
+private final class PlayLog {
+    private(set) var opened: [PlayScreen] = []
+    private(set) var closed = 0
+
+    func open(_ screen: PlayScreen) {
+        opened.append(screen)
+    }
+
+    func close() {
+        closed += 1
+    }
+}
+
 @MainActor
 final class NavigationStoreTests: XCTestCase {
 
@@ -81,6 +96,24 @@ final class NavigationStoreTests: XCTestCase {
         store.cover.wrappedValue = nil
         XCTAssertNil(store.state.cover, "a system dismissal is a skip")
         XCTAssertEqual(store.state.tab, .controllers)
+    }
+
+    func testPlayOpensAndClosesTheModelsScreens() throws {
+        let plays = PlayLog()
+        let store = try NavigationStore(
+            onboarding: completedOnboarding(),
+            startSetup: SetupLog().start,
+            endSetup: SetupLog().end,
+            startPlay: plays.open,
+            endPlay: plays.close
+        )
+        store.send(.openPlay(.gamepad))
+        store.send(.openPlay(.touchpad))
+        XCTAssertEqual(store.state.cover, .play(.touchpad))
+        store.cover.wrappedValue = nil
+        XCTAssertNil(store.state.cover, "a system dismissal closes play")
+        XCTAssertEqual(plays.opened, [.gamepad, .touchpad])
+        XCTAssertEqual(plays.closed, 1)
     }
 
     func testTheCoverBindingIgnoresARedundantNil() throws {

@@ -16,7 +16,8 @@ test or a `#Preview`.
 content: a `TabView` of three `SwiftUI.Tab`s, each its own `NavigationStack`,
 with the session accessory under the tab bar and the covers over all of it.
 There is one window and no second scene. The tab bar, the toolbars and the
-glass are iOS 26's own and are not restyled. iPhone only, portrait only.
+glass are iOS 26's own and are not restyled. iPhone only, portrait only but
+for the play cover, which is landscape only.
 
 Navigation is data.
 [`NavigationMachine.swift`](../Sources/Dish/Navigation/NavigationMachine.swift)
@@ -71,23 +72,42 @@ session source yet, so today the accessory never appears.
   `SessionBar` reads `tabViewBottomAccessoryPlacement` and draws the short line
   alone, "3 pads · 4 ms", or the warning alone.
 - A button whose closure is nil is left out. Dim sends `navigation.send(.dim)`;
-  Play and Reconnect are nil until the play and session waves wire them
-  (`Tests/PARITY.md`).
+  Play sends `openPlay(.gamepad)`; Reconnect is nil until the session wave
+  wires it (`Tests/PARITY.md`).
 
 ### The covers
 
-Both are `fullScreenCover(item: navigation.cover)`; `ShellCover` switches on
+All three are `fullScreenCover(item: navigation.cover)`, one presentation per
+kind (`CoverIdentity`), so the pause menu moving between play screens keeps
+its cover up; `ShellCover` switches on
 the `Cover` case and `NavigationCoverageTests` requires a
 `<Name>Cover.swift` for each.
 
 - **Setup** (`Sources/Dish/UI/Setup/SetupCover.swift`): see "The setup cover"
   below. Skip is on the toolbar of every step, including the welcome.
+- **Play** (`PlayCover.swift`, the screens in `Sources/Dish/UI/Play/`):
+  `openPlay(screen)` raises it and starts the screen on the on-screen
+  controller (effect `startPlay`); `closePlay`, Stop gamepad and a system
+  dismissal lower it and release what it held (effect `endPlay`). A cover
+  replacing another ends it. The scene locks the window to landscape while
+  it is up (`screenOrientation(for:)`, the `OrientationLock` app delegate)
+  and to portrait otherwise. It is dark, hides the status bar and the
+  system's overlays and defers the system's edge gestures. The gamepad, the
+  touchpad and the mouse are drawn from `playCoverState`; each control is a
+  kit component tracking its own finger (`PadButtons`, `PadSticks`,
+  `TouchSurfaces`), so several fingers hold several controls; the touchpad's
+  two fingers come from `SpatialEventGesture`. The pause menu is a native
+  `Menu`: Resume, the other two screens, on the gamepad Motion (disabled
+  with its reason), Rumble and Emulate as, and the destructive Stop gamepad.
+  The dim is refused over play: its Dim lives on the accessory.
 - **Dim** (`DimCover.swift`): `DishTheme.dimBackground` (true black in either
   appearance), `.statusBarHidden()`, `.persistentSystemOverlays(.hidden)`, the
   words "low power" and "tap to wake" in the eyebrow style, and a tap anywhere
   sends `.wake`. It is also an accessibility button with the same action. It
-  is raised only by the accessory's Dim, so it is unreachable at run time in
-  this wave; its session card and clock are in `Tests/PARITY.md`.
+  draws the clock from `ShellFacts.now` (the dim runs the clock while it is
+  up) and, while a session is up, the session card: the accessory's own
+  line and each bound pad's level (`dimCoverState`). It is raised only by
+  the accessory's Dim.
 
 ### The scene
 
@@ -225,8 +245,13 @@ state. The desktops' C1 to C8, adapted:
 | K8 | **A glyph is never recoloured by state inside the component.** `RowGlyph` takes its tint and fill as values from the mapper's state; state colour lives in the dot and the chip. |
 
 Today's kit: `Chip` (BEST, FASTEST, FAST; a tone is `success` or `primary`),
-`RowGlyph` (the rounded tile at the head of a row) and `SessionBar` (the
-session accessory, with its inline form). `SectionEyebrow` and `StatusDot` live
+`RowGlyph` (the rounded tile at the head of a row), `SessionBar` (the
+session accessory, with its inline form), and the play screens' controls:
+`FaceButton`, `RoundPadButton`, `ShoulderButton`, `HoldPanel`,
+`PadStickControl`, `TriggerRail`, `DirectionPad`, `MovePad`, `ScrollStrip`,
+`TwoFingerSurface` and `PlayPill`, each reporting its own finger in its own
+units (a held flag, an offset in radii, a position across the surface) for
+the page to turn into the reducer's event. `SectionEyebrow` and `StatusDot` live
 in `Theme.swift` and follow the same rules. The setup chrome's own pieces are
 in `UI/Setup/SetupKit.swift` and are host views, not kit: they are built from
 a step's state and may use the environment's `openURL`.

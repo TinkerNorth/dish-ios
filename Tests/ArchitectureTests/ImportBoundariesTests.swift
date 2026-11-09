@@ -27,6 +27,7 @@ final class ImportBoundariesTests: XCTestCase {
                 "GameController",
                 "CoreHaptics",
                 "StoreKit",
+                "CoreMotion",
                 "DishCore",
                 "DishKernel"
             ]
@@ -38,8 +39,12 @@ final class ImportBoundariesTests: XCTestCase {
         Layer(directory: "App/Sources", allowed: ["SwiftUI", "Dish"])
     ]
 
-    /// The only files of the UI library that may import UIKit.
-    private static let uikitFiles: Set = ["Sources/Dish/UI/Theme.swift", "Sources/Dish/DishScene.swift"]
+    /// The only files of the UI library that may import UIKit: the theme's
+    /// dynamic colours, the scene, and the app delegate the scene turns the
+    /// window through (UIKit asks a delegate for the orientations it allows).
+    private static let uikitFiles: Set = [
+        "Sources/Dish/UI/Theme.swift", "Sources/Dish/DishScene.swift", "Sources/Dish/Scene/Orientation.swift"
+    ]
     private static let kit = "Sources/Dish/UI/Kit"
 
     func testEveryLayerHasSources() {
@@ -66,14 +71,17 @@ final class ImportBoundariesTests: XCTestCase {
     }
 
     func testTheUILayerDoesNoIO() throws {
-        let ioModules: Set = ["Network", "GameController", "CoreHaptics", "StoreKit", "Security", "CryptoKit", "Darwin", "IOKit"]
+        let ioModules: Set = [
+            "Network", "GameController", "CoreHaptics", "StoreKit", "CoreMotion", "Security", "CryptoKit", "Darwin", "IOKit"
+        ]
         for file in RepoFiles.swiftFiles(under: "Sources/Dish") {
             let imports = try Set(RepoFiles.imports(of: RepoFiles.read(file)))
             XCTAssertTrue(imports.isDisjoint(with: ioModules), "\(file) imports an IO framework: \(imports.intersection(ioModules))")
         }
     }
 
-    /// UIKit is the escape hatch of the scene and the theme's dynamic colours.
+    /// UIKit is the escape hatch of the scene, its orientation delegate and
+    /// the theme's dynamic colours.
     func testOnlyTheSceneAndTheThemeImportUIKit() throws {
         for file in RepoFiles.swiftFiles(under: "Sources/Dish") where !Self.uikitFiles.contains(file) {
             let imports = try RepoFiles.imports(of: RepoFiles.read(file))

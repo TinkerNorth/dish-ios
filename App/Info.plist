@@ -35,6 +35,8 @@
     <key>UISupportedInterfaceOrientations</key>
     <array>
         <string>UIInterfaceOrientationPortrait</string>
+        <string>UIInterfaceOrientationLandscapeLeft</string>
+        <string>UIInterfaceOrientationLandscapeRight</string>
     </array>
     <key>NSLocalNetworkUsageDescription</key>
     <string>Dish finds Satellite on your Wi‑Fi and sends controller input straight to your PC.</string>

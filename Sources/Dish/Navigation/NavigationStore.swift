@@ -7,7 +7,7 @@ import SwiftUI
 
 /// The navigation machine at the app layer: it applies events, runs the
 /// effects the machine returns (the welcome's completion persists; the
-/// model's setup walk starts and ends), and hands `TabView`, each
+/// model's setup walk and play screens start and end), and hands `TabView`, each
 /// `NavigationStack` and the `fullScreenCover` their bindings. On a first run
 /// it raises the setup cover before anything is drawn, and starts the walk.
 @MainActor
@@ -19,11 +19,21 @@ final class NavigationStore {
     @ObservationIgnored private let onboarding: OnboardingPreferenceStore
     @ObservationIgnored private let startSetup: (SetupEntry) -> Void
     @ObservationIgnored private let endSetup: () -> Void
+    @ObservationIgnored private let startPlay: (PlayScreen) -> Void
+    @ObservationIgnored private let endPlay: () -> Void
 
-    init(onboarding: OnboardingPreferenceStore, startSetup: @escaping (SetupEntry) -> Void, endSetup: @escaping () -> Void) {
+    init(
+        onboarding: OnboardingPreferenceStore,
+        startSetup: @escaping (SetupEntry) -> Void,
+        endSetup: @escaping () -> Void,
+        startPlay: @escaping (PlayScreen) -> Void = { _ in },
+        endPlay: @escaping () -> Void = {}
+    ) {
         self.onboarding = onboarding
         self.startSetup = startSetup
         self.endSetup = endSetup
+        self.startPlay = startPlay
+        self.endPlay = endPlay
         let firstRun = !onboarding.state.welcomeCompleted
         state = NavigationState(cover: firstRun ? .setup(.firstRun) : nil)
         if firstRun { startSetup(.firstRun) }
@@ -40,6 +50,8 @@ final class NavigationStore {
         case .markWelcomeComplete: onboarding.markWelcomeComplete()
         case let .startSetup(entry): startSetup(entry)
         case .endSetup: endSetup()
+        case let .startPlay(screen): startPlay(screen)
+        case .endPlay: endPlay()
         }
     }
 

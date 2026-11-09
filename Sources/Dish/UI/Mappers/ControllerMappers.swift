@@ -51,6 +51,8 @@ struct ControllerPadState: Equatable {
     let binding: ControllerBindingState
     /// Nil for a pad with no switch to offer: the section is left out.
     let functions: ControllerFunctionsState?
+    /// The on-screen controller's Open, which raises its gamepad; nil for a pad.
+    let open: String?
     let footnote: String
 }
 
@@ -77,7 +79,7 @@ func controllerPageState(controllers: [ControllerFact], id: String, words: L10n 
         )
     }
     return ControllerPageState(
-        title: controller.name,
+        title: controllerName(controller, words: words),
         subtitle: controllerSubtitle(controller, words: words),
         content: .pad(controllerPadState(controller, words: words))
     )
@@ -94,7 +96,7 @@ private func controllerPadState(_ controller: ControllerFact, words: L10n) -> Co
         id: controller.id,
         status: ControllerStatusState(
             symbol: controllerSymbol(controller.link),
-            title: controller.name,
+            title: controllerName(controller, words: words),
             line: statusLine(controller, words: words),
             dot: destinationDot(controller.destination?.health)
         ),
@@ -108,6 +110,7 @@ private func controllerPadState(_ controller: ControllerFact, words: L10n) -> Co
             emulateOptions: EmulatedPad.allCases.map { EmulateOption(pad: $0, name: emulatedPadName($0, words: words)) }
         ),
         functions: rows.isEmpty ? nil : ControllerFunctionsState(title: words.functions, rows: rows),
+        open: opensPlay(controller.link) ? words.open : nil,
         footnote: words.noPadAudio
     )
 }

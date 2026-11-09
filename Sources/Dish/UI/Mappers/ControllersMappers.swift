@@ -25,6 +25,8 @@ struct ControllerRowState: Equatable, Identifiable {
     /// The controller's page; nil for a pad Dish cannot read, which has
     /// nothing to set.
     let page: Page?
+    /// The on-screen controller's Open, which raises its gamepad; nil for a pad.
+    let open: String?
 }
 
 /// What sits above the Add button: the rows, or an invitation.
@@ -72,13 +74,30 @@ func controllerRow(_ controller: ControllerFact, words: L10n = .app) -> Controll
     ControllerRowState(
         id: controller.id,
         symbol: controllerSymbol(controller.link),
-        name: controller.name,
+        name: controllerName(controller, words: words),
         destination: destinationLine(controller, words: words),
         dot: destinationDot(controller.destination?.health),
         battery: controller.batteryPercent.map(words.batteryPercent),
         batteryColor: batteryColor(controller.batteryPercent),
-        page: controller.supported ? .controller(id: controller.id) : nil
+        page: controller.supported ? .controller(id: controller.id) : nil,
+        open: opensPlay(controller.link) ? words.open : nil
     )
+}
+
+/// A pad's own name; the on-screen controller is worded here.
+func controllerName(_ controller: ControllerFact, words: L10n = .app) -> String {
+    switch controller.link {
+    case .usbC, .bluetooth: controller.name
+    case .onScreen: words.onScreenGamepad
+    }
+}
+
+/// Only the on-screen controller has a screen to open.
+func opensPlay(_ link: ControllerLink) -> Bool {
+    switch link {
+    case .usbC, .bluetooth: false
+    case .onScreen: true
+    }
 }
 
 func controllerSymbol(_ link: ControllerLink) -> String {
