@@ -27,6 +27,8 @@ enum DishTheme {
     static let pulse = Color(dark: 0xFF6FB5, light: 0xC2417F)
     /// The brand glyphs' fill, from the brand book rather than the UI accent.
     static let brandGlyph = Color(dark: 0x8FCFE3, light: 0x2F7E96)
+    /// The tile behind a warning glyph: the session accessory's stopped PC.
+    static let errorDim = Color(dark: 0xFF6B5C, light: 0xC0392B, alpha: 0.16)
 }
 
 /// The type scale, every name a Dynamic Type style so the words grow with
@@ -61,6 +63,10 @@ enum DishSize {
     static let rowGlyphCorner: CGFloat = 10
     /// The glyph inside the tile.
     static let rowGlyphSymbol: CGFloat = 20
+    /// The session accessory's round Dim and Play buttons.
+    static let sessionButton: CGFloat = 44
+    /// The glyph inside a session accessory button.
+    static let sessionButtonSymbol: CGFloat = 16
     /// The small coloured status dot.
     static let statusDot: CGFloat = 8
     /// The brand mark on the welcome.

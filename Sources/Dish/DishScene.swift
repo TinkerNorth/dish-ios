@@ -3,6 +3,7 @@
 
 import DishEngine
 import SwiftUI
+import UIKit
 
 /// The one scene. The composition root's objects are made here once and
 /// handed to the shell as environment values. It is not a view: the clock,
@@ -11,19 +12,34 @@ import SwiftUI
 @MainActor
 public struct DishScene: Scene {
 
-    @State private var navigation = NavigationStore(
-        onboarding: OnboardingPreferenceStore(defaults: .standard),
-        startSetup: { _ in },
-        endSetup: {}
-    )
+    @State private var model: AppModel
+    @State private var navigation: NavigationStore
 
-    public init() {}
+    public init() {
+        let model = AppModel(defaults: .standard)
+        _model = State(initialValue: model)
+        _navigation = State(initialValue: NavigationStore(onboarding: model.onboarding, startSetup: { _ in }, endSetup: {}))
+    }
 
     public var body: some Scene {
         WindowGroup {
-            DishTheme.background
-                .ignoresSafeArea()
+            ShellView()
+                .environment(model)
                 .environment(navigation)
+                .environment(\.settingsURL, URL(string: UIApplication.openSettingsURLString))
+                .environment(\.appVersion, shortVersion(of: .main))
+                .preferredColorScheme(colorScheme(for: model.shellFacts.preferences.appearance))
+                .onChange(of: idleTimerDisabled(facts: model.shellFacts), initial: true) { holdScreenOn($1) }
         }
     }
+
+    /// iOS locks the screen and suspends Dish unless the idle timer is off.
+    private func holdScreenOn(_ disabled: Bool) {
+        UIApplication.shared.isIdleTimerDisabled = disabled
+    }
+}
+
+/// The bundle's marketing version, empty when the bundle carries none.
+private func shortVersion(of bundle: Bundle) -> String {
+    bundle.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? ""
 }

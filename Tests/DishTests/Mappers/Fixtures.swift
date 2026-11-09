@@ -1,0 +1,37 @@
+// SPDX-License-Identifier: LGPL-3.0-or-later
+// Copyright (C) 2026 Dish contributors.
+
+import DishEngine
+import Foundation
+
+/// Facts for the mapper tests: the engine's defaults with one thing changed
+/// at a time.
+enum FactsFixture {
+    static let preferences = PreferencesFacts(deviceName: "", keepScreenOn: true, dimAfter: .twentySeconds, appearance: .system)
+
+    static func shell(
+        controllers: [ControllerFact] = [],
+        paired: [ConnectionFact] = [],
+        found: [ConnectionFact] = [],
+        scanning: Bool = false,
+        session: SessionFact? = nil,
+        localNetwork: LocalNetworkStatus = .unknown,
+        preferences: PreferencesFacts = preferences
+    ) -> ShellFacts {
+        ShellFacts(
+            controllers: controllers,
+            paired: paired,
+            found: found,
+            scanning: scanning,
+            session: session,
+            localNetwork: localNetwork,
+            preferences: preferences
+        )
+    }
+
+    static func streaming(pads: Int = 3, latencyMs: Int? = 4) -> SessionFact {
+        SessionFact(pcName: "Living Room PC", pads: pads, latencyMs: latencyMs, phase: .streaming)
+    }
+
+    static let stopped = SessionFact(pcName: "Living Room PC", pads: 3, latencyMs: 4, phase: .stoppedResponding)
+}
