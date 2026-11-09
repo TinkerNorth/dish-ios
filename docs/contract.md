@@ -10,36 +10,38 @@ contract disagree, the contract wins.
 
 ## Where the contract lands in this app
 
-**Today it lands nowhere.** Wave 1 is the shell: `DishCore` holds the setup
-machine and no codec, `DishEngine` opens no socket, and the app makes no
-network connection (`PRIVACY.md`). Every row below is therefore "not yet",
-with the home it is planned to have, so the wave that builds it fills the
-second column instead of inventing a layout. The pure protocol layer will be
-the `DishCore` target (Foundation and CryptoKit only; `ImportBoundariesTests`
-lists the allowlist, and CryptoKit joins it in the wave that needs it). The
-imperative shell will be `Sources/DishEngine/Network`, which owns sockets, the
+**Today it lands in the pure core only.** The pure protocol layer is the
+`DishCore` target (Foundation and CryptoKit only; `ImportBoundariesTests`
+lists the allowlist): the constants, the codecs, the session crypto and the
+policy reducers, ported from dish-mac with its file, type and test names and
+pinned by the fleet's cross-repo vectors
+(`Tests/DishCoreTests/SessionCryptoVectorTests.swift`, `TestVectors.swift`).
+`DishEngine` opens no socket yet, and the app makes no network connection
+(`PRIVACY.md`). A row that is "not yet" names the home it is planned to have,
+so the wave that builds it fills the second column instead of inventing a
+layout. The imperative shell will be `Sources/DishEngine/Network`, which owns sockets, the
 URL session and the stores, behind seams the tests replace, as
 `LocalNetworkAccess` is replaced today. Each row's gap is in
 [`Tests/PARITY.md`](../Tests/PARITY.md).
 
 | Contract concept | dish-ios home |
 |---|---|
-| Ports (9879 beacon, 9443 control, 9876 data) | not yet: `DishCore` constants, with the protocol version (3) and the opcodes |
+| Ports (9879 beacon, 9443 control, 9876 data) | `Sources/DishCore/ProtocolConstants.swift`, with the protocol version (3), the opcodes, the caps and the cadences; `ProtocolConstantsTests` |
 | Identity (`deviceId`, the satellite's machine id) | not yet: `DishEngine/Network`, beside the connection store; the device's name is the one piece that exists, in `DevicePreferenceStore` (`device_name`) |
-| Pairing, paths A and B (`POST /api/pair`, `GET /api/pair/status`), key rotation, delete | not yet: `DishEngine/Network` for the client; the approval verdicts and the poll's next step in `DishCore` |
-| `hmacProof` and the authed headers | not yet: `DishCore` |
-| Session create and update (`PUT /api/connections`), read, delete; the declarative controller set | not yet: `DishEngine/Network` for the requests, `DishCore` for the reconcile rules |
-| Controller sub-resource (slot, per-slot `PUT` and `DELETE`) | not yet: `DishCore` for the slot table, `DishEngine/Network` for the requests |
-| ServerInfo and catalog (`/api/server/capabilities`, `/api/catalog`, the images) | not yet: `DishEngine/Network` for the reads, `DishCore` for the capability folding; the Review step's carry columns (`padCarries` in `SetupReviewMappers.swift`) are a hand-written stand-in |
-| Keys: the HKDF session key, the packet AEAD (direction nonce, AAD = token) | not yet: `DishCore`, pinned by the cross-repo vectors |
-| Packet format and the UDP messages (input, motion, battery, touchpad, heartbeat, rumble, light bar, trigger effects, player LEDs, close-notify, controller audio and haptics) | not yet: `DishCore` codecs; the send path in `DishEngine/Network`, on the hot path rules in `CONTRIBUTING.md` |
-| The enriched heartbeat ack and the reconcile loop | not yet: `DishCore` reducers, driven from `DishEngine/Network` |
+| Pairing, paths A and B (`POST /api/pair`, `GET /api/pair/status`), key rotation, delete | the approval verdicts and the poll's next step in `Sources/DishCore/Reducers/ReversePairing.swift`; not yet: `DishEngine/Network` for the client |
+| `hmacProof` and the authed headers | `hmacProof` in `Sources/DishCore/Wire/SessionCrypto.swift`; not yet: the headers, in `DishEngine/Network` |
+| Session create and update (`PUT /api/connections`), read, delete; the declarative controller set | the reconcile rules and `counterNeedsRepush` in `Sources/DishCore/Reducers/Reconcile.swift`; not yet: `DishEngine/Network` for the requests |
+| Controller sub-resource (slot, per-slot `PUT` and `DELETE`) | `Sources/DishCore/Reducers/SatelliteSlots.swift` (lowest free index of four) and `lateSlotConverge` in `Reconcile.swift`; not yet: `DishEngine/Network` for the requests |
+| ServerInfo and catalog (`/api/server/capabilities`, `/api/catalog`, the images) | the capability folding in `Sources/DishCore/Reducers/CapabilitySolver.swift`, `TouchpadModeResolve.swift` and `MotionIndicator.swift`; not yet: `DishEngine/Network` for the reads; the Review step's carry columns (`padCarries` in `SetupReviewMappers.swift`) are a hand-written stand-in |
+| Keys: the HKDF session key, the packet AEAD (direction nonce, AAD = token) | `Sources/DishCore/Wire/SessionCrypto.swift`, pinned by the cross-repo vectors in `SessionCryptoVectorTests` |
+| Packet format and the UDP messages (input, motion, battery, touchpad, heartbeat, rumble, light bar, trigger effects, player LEDs, close-notify, controller audio and haptics) | `Sources/DishCore/Wire/`: `PacketCodec.swift` (framing), `Encoders.swift` (the stream payloads, the heartbeat ack, rumble, light bar, the pointer frame), `FeedbackCommands.swift` (trigger effects, player LEDs), `AudioFrames.swift` (decoded so the receive path can skip them: iOS gives apps no pad audio), `GamepadReport.swift`, `PadSample.swift`, `ProfileLayout.swift`; `Reducers/CloseNotify.swift` for close-notify; not yet: the send path in `DishEngine/Network`, on the hot path rules in `CONTRIBUTING.md` |
+| The enriched heartbeat ack and the reconcile loop | `HeartbeatAck` in `Encoders.swift`, the rules in `Reducers/Reconcile.swift`, the latency readout in `Reducers/LatencyWindow.swift`, the reconnect backoff in `Reducers/Backoff.swift`; not yet: the loop in `DishEngine/Network` |
 | Liveness (the session that stops responding) | partly: the shell draws `SessionPhase.stoppedResponding` from `SessionFact`, with Reconnect; the fact has no source until the session wave |
-| TOFU pinning of the control plane's certificate | not yet: `DishCore` verdicts, `DishEngine/Network` for the trust delegate |
+| TOFU pinning of the control plane's certificate | the verdicts and the fingerprint in `Sources/DishCore/Reducers/Tofu.swift`; not yet: `DishEngine/Network` for the trust delegate |
 | Pairing-key storage (Keychain) | not yet: `DishEngine/Network` |
 | Discovery: mDNS `_satellite._udp` and the legacy beacon | partly: `Info.plist` declares `NSLocalNetworkUsageDescription` and `NSBonjourServices` (`_satellite._udp`, `_nvstream._tcp`), and `LocalNetworkAccess` is the seam (`Sources/DishEngine/LocalNetwork/LocalNetworkAccess.swift`); its one implementation, `RecordedLocalNetworkAccess`, browses nothing and its status stays `.unknown` |
-| Versioning: the offer, the 409 range, the settled version | not yet: `DishCore` |
-| The error model (terminal 401 codes, 409, 503, transport) | not yet: `DishCore` reducers |
+| Versioning: the offer, the 409 range, the settled version | `Sources/DishCore/Reducers/ProtocolNegotiation.swift` |
+| The error model (terminal 401 codes, 409, 503, transport) | `Sources/DishCore/Reducers/RestOutcome.swift` |
 | The admin API (loopback `:9877`) | not applicable: the satellite's operator surface, not a client's |
 
 ## What exists that the contract will use

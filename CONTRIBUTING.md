@@ -74,7 +74,7 @@ module may import.
 
 | You have... | It goes in | May import |
 |---|---|---|
-| a `(state, event) -> result` decision with no IO, and later a wire codec or a crypto primitive | `DishCore` (`Sources/DishCore`) | Foundation |
+| a `(state, event) -> result` decision with no IO, a wire codec or a crypto primitive | `DishCore` (`Sources/DishCore`) | Foundation, CryptoKit |
 | a dataflow primitive | `DishKernel` (`Sources/DishKernel`) | Foundation, Observation |
 | a store, a seam to the platform, a clock, an intent, or the composition root | `DishEngine` (`Sources/DishEngine`) | Foundation, Observation, os, DishCore, DishKernel; never SwiftUI or UIKit |
 | a view, a theme token, a localized word, a mapper, or the navigation | `Dish` (`Sources/Dish`) | SwiftUI, Observation, Foundation, the three modules; UIKit only in `UI/Theme.swift` and `DishScene.swift`; never Network, GameController, Security, CryptoKit |

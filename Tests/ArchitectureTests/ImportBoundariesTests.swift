@@ -15,7 +15,7 @@ final class ImportBoundariesTests: XCTestCase {
     }
 
     private static let layers: [Layer] = [
-        Layer(directory: "Sources/DishCore", allowed: ["Foundation"]),
+        Layer(directory: "Sources/DishCore", allowed: ["Foundation", "CryptoKit"]),
         Layer(directory: "Sources/DishKernel", allowed: ["Foundation", "Observation"]),
         Layer(
             directory: "Sources/DishEngine",

@@ -39,8 +39,8 @@ SwiftPM targets whose dependency arrows point one way, and
                              │ built on             │ built on
         ┌────────────────────┴──────────┐ ┌─────────┴──────────────────┐
         │  DishKernel                   │ │  DishCore                  │
-        │  StateSource                  │ │  the setup machine         │
-        │  (Foundation + Observation)   │ │  (Foundation)              │
+        │  StateSource                  │ │  setup · wire · reducers   │
+        │  (Foundation + Observation)   │ │  (Foundation + CryptoKit)  │
         └───────────────────────────────┘ └────────────────────────────┘
 ```
 
@@ -56,7 +56,7 @@ project's own directory.
 
 | Module | Role | Depends on | May import |
 |---|---|---|---|
-| `DishCore` | The pure core. Today the setup machine (`Setup/SetupMachine.swift`, `SetupModels.swift`, `LocalNetworkStatus.swift`); later the wire codecs, the session crypto and the policy reducers. | nothing | Foundation |
+| `DishCore` | The pure core: the setup machine (`Setup/`), the protocol constants (`ProtocolConstants.swift`), the wire codecs and the session crypto (`Wire/`) and the policy reducers (`Reducers/`), ported from dish-mac under its names and pinned by the fleet's vectors. | nothing | Foundation, CryptoKit |
 | `DishKernel` | The dataflow primitive `StateSource` (below) | nothing | Foundation, Observation |
 | `DishEngine` | Everything that owns state or touches the platform: the preference stores (`Preferences/`), the minute clock (`Clock/`), the Local Network seam (`LocalNetwork/`), the recorded binding requests (`Setup/`), the facts the UI draws (`Models/`) and `AppModel`, the one composition root, with its intents by topic. Later `Network/` (sockets, REST, discovery) and the GameController bridge. | `DishCore`, `DishKernel` | Foundation, Observation, os, DishCore, DishKernel; never SwiftUI or UIKit |
 | `Dish` | The SwiftUI library: `DishScene` (the only `public` type), the navigation machine and its store, the shell, the pages, the setup cover and the dim, the kit, the mappers, the theme, the localized words and their catalog | `DishEngine`, `DishCore`, `DishKernel` | Foundation, Observation, SwiftUI, UIKit (only `UI/Theme.swift` and `DishScene.swift`), the three modules |
