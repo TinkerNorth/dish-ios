@@ -57,10 +57,22 @@
 | **The e2e lane and the bench.** There is no loopback end-to-end against the real satellite, no bench and no measurements job. | `scripts/e2e_local.sh` and an `e2e.yml` workflow once the wire exists; `tools/bench/` with the hot path |
 | **App Store signing secrets and export compliance.** The six secrets are not set, so `release.yml` ships an unsigned IPA; the Info.plist carries no `ITSAppUsesNonExemptEncryption` answer, which App Store Connect asks once the wire's encryption ships. | repository secrets and variables, and `App/Info.plist` |
 | **Plural forms for `%lld s` and `%lld min`.** The two duration words are plain keys, so a language whose plural of a unit differs would show the wrong form. | the catalog and `LocalizationTests`, which would require the forms |
-| **The Welcome mark's gear ring.** It did not render in the simulator; the SVG asset needs checking. | `Sources/Dish/Resources/Media.xcassets/DishMark.imageset/dish-logo.svg` and `DishImage.mark` |
-| **The custom satellite glyph.** An SF Symbol antenna (`satelliteSymbol`) stands in on the tab, the accessory and a Satellite PC's row. | an SVG asset in `Media.xcassets` and `DishImage`, replacing `satelliteSymbol` |
+| **The custom satellite glyph.** An SF Symbol antenna (`satelliteSymbol`) stands in on the tab, the accessory and a Satellite PC's row. | an asset in `Media.xcassets` and `DishImage`, replacing `satelliteSymbol`; rendered as PNGs by `scripts/render-icon.sh`, as the mark is, since the asset catalog drops SVG masks |
+| **A lock-free bounded queue (Vyukov's).** Not built, on purpose. The satellite (`core/log_queue.h`), dish-linux and dish-windows (`src/core/thread/MpscQueue.h`, the speaker playout) and dish-android (`mpmc_ring.h`: the bridge reports, the speaker frames, the USB acks) each carry one; dish-mac carries none, and the iOS hot path is dish-mac's: each pad's reports leave `sendto` on that pad's own `handlerQueue` under a compare-exchange send gate, a route change crosses to the hot path through a single-slot mailbox and atomic words, and a return command keeps only the newest of its kind. None of those is a many-producers-one-consumer hand-off, and the two consumers that justify a ring on the siblings do not exist on iOS: apps get no pad speaker, and there is no USB output lane without the Direct path. | port the desktops' `MpscQueue` (refuse when full, count the drop; not Android's drop-oldest ring) into `DishCore` over `Synchronization.Atomic<UInt64>` cells with trivially copyable items, with tests for FIFO order across producers, a refused push on a full queue and the drop count, only when a lane needs several producers feeding one consumer: the Direct path's USB output and acks, or a flight recorder written from the hot path. A mailbox or a direct send stays the first choice. |
 
-## 3. Decided differences
+## 3. Permission-gated APIs the later waves need
+
+Apple grants these on request, so each wave that needs one asks early and
+ships without it until it is granted; the code keeps the feature behind a seam
+so the sanctioned path works alone.
+
+| Capability | What needs it | Until it is granted |
+|---|---|---|
+| `com.apple.developer.networking.multicast` | Listening for the satellite's legacy UDP discovery beacon on 9879, or any broadcast or multicast send. Browsing `_satellite._udp` and `_nvstream._tcp` over Bonjour needs no entitlement, only the `NSLocalNetworkUsageDescription` and `NSBonjourServices` the Info.plist already carries. | Discovery is Bonjour only; the beacon fallback stays off and `docs/contract.md` says so. |
+| Raw HID report access for the Direct path | Reading Switch Pro, N64 and generic HID pads by their reports, as dish-mac does with IOHIDManager and the desktops with their own readers. iOS has no public HID report API for an app: DriverKit with its USB transport entitlement exists on iPadOS only, and CoreHID is macOS only. | Every pad reaches the hot path through GameController alone; the Direct path and its USB output lane wait behind their own seam, and the entitlement request is made before that wave starts. |
+| Background execution | Streaming while Dish is not frontmost. There is no entitlement for it that fits a controller bridge; the design keeps Dish open and dims instead. | Keep screen on and the dim cover; no `UIBackgroundModes`, no Live Activity. |
+
+## 4. Decided differences
 
 - **Appearance defaults to the system's, not dark.** The design handoff calls
   dark "the default" palette; the Settings › Appearance picker (System, Light,

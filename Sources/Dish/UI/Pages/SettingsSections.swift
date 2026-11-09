@@ -30,8 +30,8 @@ struct StreamingSection: View {
 
     var body: some View {
         Section {
-            Toggle(state.keepScreenOnTitle, isOn: Binding(get: { state.keepScreenOn }, set: actions.setKeepScreenOn))
-            Picker(state.dimTitle, selection: Binding(get: { state.dimAfter }, set: actions.setDimAfter)) {
+            Toggle(state.keepScreenOnTitle, isOn: Binding(get: { state.keepScreenOn }, set: { actions.setKeepScreenOn($0) }))
+            Picker(state.dimTitle, selection: Binding(get: { state.dimAfter }, set: { actions.setDimAfter($0) })) {
                 ForEach(state.options) { Text($0.title).tag($0.delay) }
             }
             .pickerStyle(.navigationLink)
@@ -72,7 +72,7 @@ struct AppearanceSection: View {
 
     var body: some View {
         Section {
-            Picker(state.title, selection: Binding(get: { state.selected }, set: select)) {
+            Picker(state.title, selection: Binding(get: { state.selected }, set: { select($0) })) {
                 ForEach(state.options) { Text($0.title).tag($0.appearance) }
             }
             .pickerStyle(.segmented)

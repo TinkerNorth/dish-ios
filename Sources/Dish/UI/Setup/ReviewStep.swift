@@ -49,11 +49,11 @@ struct ReviewStep: View {
     }
 
     private var emulateAs: Binding<EmulatedPad> {
-        Binding(get: { state.emulateAs }, set: model.setSetupEmulateAs)
+        Binding(get: { state.emulateAs }, set: { model.setSetupEmulateAs($0) })
     }
 
     private var motion: Binding<Bool> {
-        Binding(get: { state.motion }, set: model.setSetupMotion)
+        Binding(get: { state.motion }, set: { model.setSetupMotion($0) })
     }
 }
 
