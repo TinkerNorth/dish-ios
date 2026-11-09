@@ -25,8 +25,8 @@ assignees: ''
 <!-- If applicable, add screenshots to help explain your problem -->
 
 ## Environment
-- Mac model: [e.g. MacBook Pro M3 2024]
-- macOS version: [e.g. 14.5 Sonoma]
+- iPhone model: [e.g. iPhone 17 Pro]
+- iOS version: [e.g. 26.1]
 - App version / commit: [e.g. 0.1 / 8a3f2c]
 - Controller: [e.g. Xbox Series X, DualSense]
 
