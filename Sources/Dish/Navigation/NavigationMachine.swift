@@ -17,6 +17,12 @@ enum Page: Hashable {
     case deviceName
     /// Controllers › a controller's own page, by its slot id.
     case controller(id: String)
+    /// Settings › Setup & help › Help & FAQ.
+    case help
+    /// Settings › About › Open source licenses.
+    case licenses
+    /// Support Dish: the Controllers tab's heart, and Settings › About.
+    case support
 }
 
 /// Where the setup cover opens.

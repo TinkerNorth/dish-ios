@@ -7,19 +7,29 @@ import Foundation
 package enum ShownPage: Equatable {
     /// Words an offline PC's last sighting, so it runs the clock.
     case connections
+    /// Asks the App Store what it sells each time it opens.
+    case support
 }
 
 /// The pages' lifecycle intents.
 package extension AppModel {
-    func pageAppeared(_ page: ShownPage) {
+    /// The task a page started, when it asked for one, so a test can wait
+    /// for it.
+    @discardableResult
+    func pageAppeared(_ page: ShownPage) -> Task<Void, Never>? {
         switch page {
-        case .connections: clock.start()
+        case .connections:
+            clock.start()
+            return nil
+        case .support:
+            return loadTips()
         }
     }
 
     func pageDisappeared(_ page: ShownPage) {
         switch page {
         case .connections: clock.stop()
+        case .support: break
         }
     }
 }

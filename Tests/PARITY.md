@@ -11,7 +11,8 @@
 > it at run time yet · **not yet** not built; the row says where it lands ·
 > **n/a** does not apply on iOS. Verified against the code on 2026-11-09.
 >
-> Wave 1 built the shell; wave B the controller bridge. The engine publishes
+> Wave 1 built the shell; wave B the controller bridge; wave G1 Support Dish,
+> Help & FAQ, the licenses and the About links. The engine publishes
 > the pads iOS sees; connections, the session and the Local Network status
 > are still real but empty, so the next waves only wire sources.
 
@@ -24,7 +25,10 @@
 | The session accessory with its inline form | mapper only: it is attached only while a session exists, and no source publishes one | `UI/Kit/SessionBar.swift`, `ShellMappers.swift`; `ShellMappersTests` |
 | Setup: Welcome, Input (1 of 3), the Local Network primer and Pick your PC (2 of 3), Review and bind (3 of 3); Skip lands on Controllers | built; the pads and PCs it lists are empty today, and Bind records the request and sends nothing | `DishCore/Setup/SetupMachine.swift`, `UI/Setup/`, `Mappers/Setup*Mappers.swift`; `SetupMachineTests`, `Setup*MappersTests`, `AppModelSetupTests` |
 | The low-power dim cover (black, tap to wake) | built; its only trigger is the accessory's Dim, so unreachable at run time | `UI/Setup/DimCover.swift`; `NavigationMachineTests` |
-| Settings: Name on your PC, Keep screen on, Dim screen after, Setup guide, Appearance, version | built | `UI/Pages/Settings*.swift`, `DeviceNamePage.swift`; `SettingsMappersTests`, `DeviceNameMappersTests` |
+| Settings: Name on your PC, Keep screen on, Dim screen after, Setup guide, Help & FAQ, Appearance, Support Dish, version, Website, Source code, Privacy policy, Open source licenses | built | `UI/Pages/Settings*.swift`, `DeviceNamePage.swift`; `SettingsMappersTests`, `DeviceNameMappersTests` |
+| **Support Dish (wave G1).** Three consumable tips through StoreKit 2 (`com.tinkernorth.dish.ios.tip.small`, `.medium`, `.large`), the App Store's localized prices passed through unchanged, the thank-you, pending, failed and "no tip to restore" outcomes, Restore purchases (`AppStore.sync` and every unfinished transaction finished), from the Controllers toolbar's heart and Settings › About. `App/Dish.storekit` sells them on the simulator through the scheme's run action. | built; the products must exist in App Store Connect before a release sells them | `DishEngine/Support/`, `AppModel+Support.swift`, `Models/SupportFacts.swift`, `UI/Pages/SupportPage.swift`, `SupportMappers.swift`; `AppModelSupportTests`, `TipStoreTests`, `SupportMappersTests`, `StoreKitConfigurationTests` |
+| **Help & FAQ (wave G1).** The desktops' five sections reworded for an iPhone, plus its own questions (connecting a pad, the Local Network, a missing pad, the screen staying on, tips); Walk me through setup | built | `UI/Pages/HelpPage.swift`, `HelpMappers.swift`, `L10n+Help.swift`; `HelpMappersTests` |
+| **Licenses and the About links (wave G1).** The bundled `THIRD_PARTY.md` drawn as headings, paragraphs, tables and licence texts, then the LGPL notice and the version; Website, Source code and Privacy policy through `openURL` (`DishLinks`) | built | `UI/Pages/LicensesPage.swift`, `LicensesMappers.swift`, `Services/ThirdPartyNotice.swift`, `DishLinks.swift`; `LicensesMappersTests`, `DishLinksTests`, `VersionConsistencyTests` |
 | Empty Controllers and Connections pages | built | `ControllersPage.swift`, `ConnectionsPage.swift`; `ControllersMappersTests`, `ConnectionsMappersTests` |
 | Preference stores under the fleet's keys (`theme_mode`, `onboarding_welcome_completed`) and the iOS keys (`device_name`, `keep_screen_on`, `dim_after_seconds`) | built | `DishEngine/Preferences/`; the store tests |
 | Light, dark and system appearance | built; System by default (section 3) | `AppearancePreferenceStore`, `colorScheme(for:)` |
@@ -55,10 +59,7 @@
 | **Session facts.** No source publishes `ShellFacts.session`, so the accessory hides; Play is not wired (the accessory draws Dim alone), Reconnect is not wired, and the Connections badge for a stopped session never shows. | the session wave: `AppModel+Session.swift` with `reconnect()`, and the play screens for Play |
 | **The play screens: gamepad, touchpad, mouse**, landscape, and the pause menu. The app is portrait only. | `UI/Play/` and an orientation change in `Info.plist` and `project.yml` for the play cover only |
 | **The dim's session card and clock.** The cover draws "Low power", "Tap to wake" and a footnote only. | `DimCover.swift` with the session facts |
-| **Support Dish.** StoreKit tips, so there is no heart button and no tips page. | `UI/Pages/SupportPage.swift`, a StoreKit seam in `DishEngine`, and the heart token the design names |
-| **Help & FAQ.** Settings has no row for it. | `UI/Pages/HelpPage.swift`, pushed from Settings › Setup & Help |
 | **Diagnostics.** Settings has no row for it. | `UI/Pages/DiagnosticsPage.swift` and a diagnostics source in `DishEngine` |
-| **Licenses and About links.** Settings › About shows the version only. | a licenses page fed from `THIRD_PARTY.md`, and the About links, pushed from Settings |
 | **Add a PC by address.** The primer and Pick your PC offer it and Review words it ("A PC by address"), but the pick leads to a binding with no address entry. | an address form in the setup cover and on the PC list, with `DishEngine/Network` |
 | **The Moonlight hosts page.** The Connections row is not tappable. | `UI/Pages/MoonlightHostsPage.swift`, pushed from Connections |
 | **Long-press menus, swipe actions, pull to refresh.** No row has a context menu or a swipe action, and no list refreshes. | with the pages that own the actions (Unbind, Forget This PC, Rescan) |
@@ -95,6 +96,17 @@ so the sanctioned path works alone.
 - **One red for errors.** The design leaves a choice between `#FF6B5C` and
   `#E74C3C`; the code uses `#FF6B5C` in the dark palette
   (`DishTheme.error`).
+- **Tips are App Store purchases, and no donation link is in the app.** The
+  desktops' and dish-mac's Support page links GitHub Sponsors, Ko-fi and Buy
+  Me a Coffee; Apple requires in-app purchase for tips in an iOS app, so Dish
+  for iOS sells three consumable tips through StoreKit instead and links none
+  of those sites (`DishLinksTests` pins that). Help & FAQ answers "What do
+  tips pay for?" in their place.
+- **Help & FAQ answers for an iPhone.** The desktops' answers that speak of a
+  tray, a window, two PCs or Settings › Diagnostics are reworded: pads pair
+  in Settings › Bluetooth, iOS asks for the Local Network once, a Dish you
+  leave is suspended (so it dims instead), and there is no crash reporting to
+  turn off.
 - **iOS gives apps no pad speaker.** The Review step's Gets back column never
   carries a speaker.
 - **A backgrounded Dish does not stream.** iOS suspends Dish when it leaves the

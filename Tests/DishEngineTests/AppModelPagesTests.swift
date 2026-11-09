@@ -21,7 +21,8 @@ private struct ClockedModel {
             clock: ClockSource(ticker: ticker, now: now.read),
             localNetwork: RecordedLocalNetworkAccess(),
             bindings: BindingRequests(),
-            pads: ControllerStack(source: FakeControllerSource(), defaults: defaults)
+            pads: ControllerStack(source: FakeControllerSource(), defaults: defaults),
+            tips: RecordedTipStore(shelf: .success([]))
         )
     }
 }

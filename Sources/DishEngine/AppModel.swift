@@ -23,7 +23,10 @@ package final class AppModel {
     package let bindings: BindingRequests
     /// The pads iOS sees and their stores.
     package let pads: ControllerStack
+    /// The App Store, for Support Dish.
+    let tips: any TipStore
     let setupSource = StateSource<SetupState?>(initial: nil)
+    let supportSource = StateSource<SupportFacts>(initial: .initial)
 
     package init(
         onboarding: OnboardingPreferenceStore,
@@ -33,7 +36,8 @@ package final class AppModel {
         clock: ClockSource,
         localNetwork: any LocalNetworkAccess,
         bindings: BindingRequests,
-        pads: ControllerStack
+        pads: ControllerStack,
+        tips: any TipStore
     ) {
         self.onboarding = onboarding
         self.appearance = appearance
@@ -43,16 +47,19 @@ package final class AppModel {
         self.localNetwork = localNetwork
         self.bindings = bindings
         self.pads = pads
+        self.tips = tips
         applyStoredDeadzones()
     }
 
     /// Every store over the same defaults, the wall clock, the pads iOS
-    /// sees, and the seams the discovery and binding waves fill in.
+    /// sees, the App Store, and the seams the discovery and binding waves
+    /// fill in.
     package convenience init(
         defaults: UserDefaults,
         clock: ClockSource = ClockSource(ticker: TimerTicker(), now: Date.init),
         localNetwork: any LocalNetworkAccess = RecordedLocalNetworkAccess(),
         bindings: BindingRequests = BindingRequests(),
+        tips: any TipStore = StoreKitTipStore(),
         controllerSource: any ControllerSource = GameControllerInput()
     ) {
         self.init(
@@ -63,7 +70,8 @@ package final class AppModel {
             clock: clock,
             localNetwork: localNetwork,
             bindings: bindings,
-            pads: ControllerStack(source: controllerSource, defaults: defaults)
+            pads: ControllerStack(source: controllerSource, defaults: defaults),
+            tips: tips
         )
     }
 
@@ -83,7 +91,8 @@ package final class AppModel {
             localNetwork: localNetwork.status,
             preferences: preferencesFacts,
             now: clock.state,
-            setup: setup
+            setup: setup,
+            support: supportSource.state
         )
     }
 

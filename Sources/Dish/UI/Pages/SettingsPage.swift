@@ -8,17 +8,21 @@ import SwiftUI
 struct SettingsActions {
     let editDeviceName: @MainActor () -> Void
     let openGuide: @MainActor () -> Void
+    let openHelp: @MainActor () -> Void
+    let openSupport: @MainActor () -> Void
+    let openLicenses: @MainActor () -> Void
+    let open: @MainActor (URL?) -> Void
     let setKeepScreenOn: @MainActor (Bool) -> Void
     let setDimAfter: @MainActor (DimDelay) -> Void
     let setAppearance: @MainActor (Appearance) -> Void
 }
 
-/// The Settings tab (D5). Help & FAQ, Diagnostics and Support Dish come
-/// with their pages.
+/// The Settings tab (D5). Diagnostics comes with its page.
 struct SettingsPage: View {
     @Environment(AppModel.self) private var model
     @Environment(NavigationStore.self) private var navigation
     @Environment(\.appVersion) private var appVersion
+    @Environment(\.openURL) private var openURL
 
     var body: some View {
         SettingsPageBody(
@@ -26,6 +30,10 @@ struct SettingsPage: View {
             actions: SettingsActions(
                 editDeviceName: editDeviceName,
                 openGuide: openGuide,
+                openHelp: { push(.help) },
+                openSupport: { push(.support) },
+                openLicenses: { push(.licenses) },
+                open: open,
                 setKeepScreenOn: model.setKeepScreenOn,
                 setDimAfter: model.setDimAfter,
                 setAppearance: model.setAppearance
@@ -40,6 +48,15 @@ struct SettingsPage: View {
     private func openGuide() {
         navigation.send(.openSetup(.guide))
     }
+
+    private func push(_ page: Page) {
+        navigation.send(.push(page))
+    }
+
+    private func open(_ url: URL?) {
+        guard let url else { return }
+        openURL(url)
+    }
 }
 
 /// The page over its state, so a preview can draw it.
@@ -51,9 +68,9 @@ struct SettingsPageBody: View {
         List {
             DeviceSection(state: state.device, edit: actions.editDeviceName)
             StreamingSection(state: state.streaming, actions: actions)
-            HelpSection(state: state.help, openGuide: actions.openGuide)
+            SetupHelpSection(state: state.help, actions: actions)
             AppearanceSection(state: state.appearance, select: actions.setAppearance)
-            AboutSection(state: state.about)
+            AboutSection(state: state.about, actions: actions)
         }
         .listStyle(.insetGrouped)
         .scrollContentBackground(.hidden)
@@ -71,6 +88,10 @@ struct SettingsPageBody: View {
             actions: SettingsActions(
                 editDeviceName: {},
                 openGuide: {},
+                openHelp: {},
+                openSupport: {},
+                openLicenses: {},
+                open: { _ in },
                 setKeepScreenOn: { _ in },
                 setDimAfter: { _ in },
                 setAppearance: { _ in }

@@ -8,7 +8,8 @@ redistributing the binary has to do.
 The app has no third-party code in it. `Package.swift` declares no package
 dependencies (`PackageGraphTests` pins that), so the binary links only Apple's
 system frameworks. Nothing is bundled but the app's own String Catalog, its
-asset catalogs and the fleet's app mark.
+asset catalogs, the fleet's app mark and this notice, which Settings › About ›
+Open source licenses shows.
 
 ---
 
@@ -16,7 +17,7 @@ asset catalogs and the fleet's app mark.
 
 | Component | Version | SPDX | How it reaches the user | Attribution obligation |
 |---|---|---|---|---|
-| Apple system frameworks (Foundation, Observation, SwiftUI, UIKit, os) | the iOS the app runs on | Apple SDK license | Dynamically linked against the user's iOS. Nothing is bundled. | None for redistributors of the app |
+| Apple system frameworks (Foundation, Observation, Synchronization, SwiftUI, UIKit, os, GameController, CoreHaptics, StoreKit) | the iOS the app runs on | Apple SDK license | Dynamically linked against the user's iOS. Nothing is bundled. StoreKit sells Support Dish's tips; the App Store, not Dish, handles the payment. | None for redistributors of the app |
 | [SwiftFormat](https://github.com/nicklockwood/SwiftFormat) | 0.61.1 | `MIT` | Build and CI only, as a pinned release binary (`scripts/tools.sh`). Not in the app. | None for redistributors of the app |
 | [SwiftLint](https://github.com/realm/SwiftLint) | 0.65.0 | `MIT` | Build and CI only, as a pinned release binary (`scripts/tools.sh`). Not in the app. | None for redistributors of the app |
 | [XcodeGen](https://github.com/yonaskolb/XcodeGen) | 2.46.0 | `MIT` | Build and CI only, as a pinned release binary (`scripts/tools.sh`); generates `Dish.xcodeproj`. Not in the app. | None for redistributors of the app |
@@ -24,9 +25,14 @@ asset catalogs and the fleet's app mark.
 The pinned tools are verified by SHA-256 against the digests in
 `scripts/tools.sh` and `.github/workflows/ios-ci.yml`.
 
-Everything under `App/Resources/` and `Sources/Dish/Resources/` is original
-TinkerNorth artwork (the app mark is the fleet's, `dish-linux`'s
-`resources/brand/dish-logo.svg`), covered by this repository's own license.
+`App/Dish.storekit` is a StoreKit configuration for the simulator and for
+Xcode's run action only; it lists the three tip products and is not in the app.
+
+Everything under `App/Resources/` and `Sources/Dish/Resources/` is
+TinkerNorth's own, covered by this repository's own license: the artwork (the
+app mark is the fleet's, `dish-linux`'s `resources/brand/dish-logo.svg`), the
+String Catalog, and `THIRD_PARTY.md`, a copy of this file that
+`VersionConsistencyTests` keeps equal to it.
 
 ### CI and release tooling
 

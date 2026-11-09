@@ -14,6 +14,12 @@ private struct AppVersionKey: EnvironmentKey {
     static let defaultValue = ""
 }
 
+/// The bundled third-party notice, read once by the scene. Nil when the
+/// build carries none.
+private struct ThirdPartyNoticeKey: EnvironmentKey {
+    static let defaultValue: String? = nil
+}
+
 extension EnvironmentValues {
     var settingsURL: URL? {
         get { self[SettingsURLKey.self] }
@@ -23,5 +29,10 @@ extension EnvironmentValues {
     var appVersion: String {
         get { self[AppVersionKey.self] }
         set { self[AppVersionKey.self] = newValue }
+    }
+
+    var thirdPartyNotice: String? {
+        get { self[ThirdPartyNoticeKey.self] }
+        set { self[ThirdPartyNoticeKey.self] = newValue }
     }
 }

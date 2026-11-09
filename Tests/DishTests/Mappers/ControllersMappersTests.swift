@@ -28,6 +28,11 @@ final class ControllersMappersTests: XCTestCase {
         XCTAssertEqual(state.addHint, "Wired, Bluetooth, or on-screen.")
     }
 
+    func testTheToolbarsHeartOpensSupportDish() {
+        let state = controllersPageState(controllers: [])
+        XCTAssertEqual(state.support, ToolbarLinkState(title: "Support Dish", symbol: "heart.fill", page: .support))
+    }
+
     func testABoundPadNamesItsPCItsLinkAndItsBattery() {
         let state = controllersPageState(controllers: [ControllerFixture.pad()])
         let row = ControllerRowState(

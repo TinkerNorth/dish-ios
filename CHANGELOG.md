@@ -61,6 +61,26 @@ unknown); `Tests/PARITY.md` lists everything not built.
   `device_name`, `keep_screen_on` and `dim_after_seconds`; a minute clock for
   words like "seen yesterday"; seams for the Local Network permission and the
   binding request, each recording what it was asked until its wave lands.
+- **Support Dish.** Three optional tips (small, medium, large) sold as
+  consumable in-app purchases through StoreKit 2 under
+  `com.tinkernorth.dish.ios.tip.small`, `.medium` and `.large`, with the App
+  Store's own localized prices, a thank-you, the pending and failed outcomes
+  and Restore purchases (which finishes any tip the App Store still holds).
+  It opens from the heart on the Controllers toolbar and from Settings ›
+  About › Support Dish. `App/Dish.storekit` sells the three tips on the
+  simulator through the scheme's run action. Apple requires in-app purchase
+  for tips, so the fleet's GitHub Sponsors, Ko-fi and Buy Me a Coffee links
+  are not in the app.
+- **Help & FAQ.** The desktops' CONCEPTS, BEST PERFORMANCE, TROUBLESHOOTING,
+  ABOUT DISH and LINKS, reworded for an iPhone (pads pair in Settings ›
+  Bluetooth, iOS asks for the Local Network once, iOS suspends a Dish you
+  leave, which is why it dims), with questions of its own on connecting a
+  controller, the Local Network, a missing pad, the screen staying on and
+  what tips pay for. Settings › Setup & help › Help & FAQ opens it.
+- **Open source licenses and the About links.** Settings › About gains
+  Website, Source code, Privacy policy and Open source licenses, which draws
+  the bundled copy of `THIRD_PARTY.md` (kept equal to the root's by
+  `VersionConsistencyTests`) with the LGPL notice and the version.
 - **Six languages.** English, Bosnian, German, Spanish, French and Brazilian
   Portuguese in one String Catalog, read through the `L10n` funnel.
 - **The architecture tests.** Import boundaries, the package graph, license

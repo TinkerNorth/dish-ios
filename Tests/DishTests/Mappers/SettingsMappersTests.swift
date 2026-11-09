@@ -45,8 +45,14 @@ final class SettingsMappersTests: XCTestCase {
         XCTAssertEqual(page(chosen).streaming.dimAfter, .never)
     }
 
-    func testSetupAndHelpOffersTheGuide() {
-        XCTAssertEqual(page().help, HelpSectionState(title: "Setup & help", guide: "Setup guide", guideSymbol: "sparkles"))
+    func testSetupAndHelpOffersTheGuideAndHelp() {
+        XCTAssertEqual(page().help, SetupHelpSectionState(
+            title: "Setup & help",
+            guide: "Setup guide",
+            guideSymbol: "sparkles",
+            help: "Help & FAQ",
+            helpSymbol: "questionmark.circle"
+        ))
     }
 
     func testAppearanceOffersSystemLightAndDarkWithTheStoredOneSelected() {
@@ -58,7 +64,20 @@ final class SettingsMappersTests: XCTestCase {
         XCTAssertEqual(appearance.options.map(\.title), ["System", "Light", "Dark"])
     }
 
-    func testAboutShowsTheVersion() {
-        XCTAssertEqual(page().about, AboutSectionState(title: "About", versionTitle: "Version", version: "0.1.0"))
+    func testAboutOffersTipsTheVersionTheLinksAndTheLicenses() {
+        XCTAssertEqual(page().about, AboutSectionState(
+            title: "About",
+            support: "Support Dish",
+            supportValue: "Tips",
+            supportSymbol: "heart.fill",
+            versionTitle: "Version",
+            version: "0.1.0",
+            links: [
+                PageLink(title: "Website", url: DishLinks.website),
+                PageLink(title: "Source code", url: DishLinks.source),
+                PageLink(title: "Privacy policy", url: DishLinks.privacy)
+            ],
+            licenses: "Open source licenses"
+        ))
     }
 }

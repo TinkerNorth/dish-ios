@@ -25,10 +25,12 @@ as the code that makes it untrue.
   into a wireless gamepad for a `satellite` server on your own network. Today
   it does none of that: it is the app's shell, the setup walk and the
   Settings page. TinkerNorth does not operate a server for Dish at all.
-- **In this version the app makes no network connection of any kind.** It has
+- **In this version the app makes no network connection of its own.** It has
   no account, no analytics SDK, no telemetry, no advertising identifier, no
   usage reporting and no crash reporting. It sends nothing to TinkerNorth or
-  to anyone else.
+  to anyone else. The one exception is Apple's: Support Dish asks the App
+  Store, through StoreKit, for the price of its three tips, and a tip you
+  choose is an App Store purchase (section 2.3).
 - It stores four preferences and one flag on your iPhone, in the app's own
   preferences (`UserDefaults`), listed in section 2.1. Nothing is synced to a
   cloud account by the app.
@@ -75,14 +77,22 @@ clients do, and this section will list each of them before it ships:
 
 ### 2.3 Sent to TinkerNorth or a third party
 
-Nothing. There is no TinkerNorth server for this app to talk to, no update
-check (the App Store and TestFlight deliver updates) and no crash reporter.
+Nothing reaches TinkerNorth. There is no TinkerNorth server for this app to
+talk to, no update check (the App Store and TestFlight deliver updates) and no
+crash reporter.
+
+Support Dish sells three optional tips as consumable in-app purchases. When
+its page opens, StoreKit asks the App Store for their prices; when you buy a
+tip, the purchase and its payment happen between you and Apple, under Apple's
+privacy policy. Dish never sees your card or your Apple Account; it receives
+only StoreKit's signed record that the tip completed, which it marks finished
+and does not store. A tip unlocks nothing.
 
 The only way this app causes a request to a TinkerNorth or third-party address
 is if you tap a link, which hands the URL to your default browser and is then
-between you and that site. Today those links are the one that opens Satellite's
-download page from the setup flow, and the one that opens Dish's page in the
-Settings app.
+between you and that site. Today those links are Satellite's download page
+from the setup flow, Dish's page in the Settings app, and Settings › About's
+and Help & FAQ's links to the website, the source code and this policy.
 
 ---
 

@@ -92,7 +92,7 @@ final class SetupDestinationMappersTests: XCTestCase {
         let state = pickPCStepState(SetupFixture.inputs())
         XCTAssertEqual(state.byAddress, "Add a PC by address")
         XCTAssertEqual(state.getSatellite.title, "Get Satellite for your PC")
-        XCTAssertEqual(state.getSatellite.url, SetupLinks.satellite)
+        XCTAssertEqual(state.getSatellite.url, DishLinks.satellite)
         XCTAssertEqual(state.footnote, "Don’t see your PC? Start Satellite on it and check that both are on the same Wi‑Fi.")
     }
 }

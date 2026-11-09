@@ -44,6 +44,10 @@ targets:
     sources:
       - path: App/Sources
       - path: App/Resources
+      # The simulator's App Store for the tips; listed so Xcode shows it,
+      # built into nothing.
+      - path: App/Dish.storekit
+        buildPhase: none
     settings:
       base:
         PRODUCT_NAME: Dish
@@ -84,6 +88,8 @@ schemes:
         DishApp: all
     run:
       config: Debug
+      # Support Dish buys its three tips from this file on the simulator.
+      storeKitConfiguration: App/Dish.storekit
     test:
       config: Debug
       gatherCoverageData: true

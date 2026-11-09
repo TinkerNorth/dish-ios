@@ -36,6 +36,19 @@ final class NavigationMachineTests: XCTestCase {
         XCTAssertEqual(step.state.path(of: .settings), [])
     }
 
+    func testSupportDishOpensFromTheControllersHeartAndFromSettings() {
+        let fromHeart = after(.push(.support))
+        XCTAssertEqual(fromHeart.state.path(of: .controllers), [.support])
+        let fromSettings = after(.select(.settings), .push(.support))
+        XCTAssertEqual(fromSettings.state.path(of: .settings), [.support])
+        XCTAssertEqual(fromSettings.state.path(of: .controllers), [])
+    }
+
+    func testHelpAndTheLicensesPushOntoSettings() {
+        let step = after(.select(.settings), .push(.help), .select(.settings), .push(.licenses))
+        XCTAssertEqual(step.state.path(of: .settings), [.licenses], "a tap on Settings unwinds Help first")
+    }
+
     func testAPushLandsOnTheTabOnScreen() {
         let step = after(.select(.settings), .push(.deviceName))
         XCTAssertEqual(step.state.path(of: .settings), [.deviceName])
