@@ -1,0 +1,81 @@
+# The app target, generated into Dish.xcodeproj by XcodeGen
+# (scripts/generate-project.sh). This file is the source; the project is
+# committed so a clone opens in Xcode without tools, and CI regenerates it and
+# fails on any drift. Everything the app does lives in the Swift package beside
+# it; the target here is the entry point under App/, the asset catalog, the
+# Info.plist and the entitlements. The project sits at the root because Xcode
+# resolves a local package at the project's own directory and refuses one at
+# its parent. The scheme's test action lists every test target of the package,
+# so one `xcodebuild test` runs them all; PackageGraphTests pins the list.
+name: Dish
+options:
+  bundleIdPrefix: com.tinkernorth
+  deploymentTarget:
+    iOS: "26.0"
+  xcodeVersion: "26.0"
+  minimumXcodeGenVersion: "2.46.0"
+  createIntermediateGroups: true
+  generateEmptyDirectories: false
+  defaultConfig: Debug
+
+settings:
+  base:
+    SWIFT_VERSION: "6.0"
+    SWIFT_STRICT_CONCURRENCY: complete
+    SWIFT_TREAT_WARNINGS_AS_ERRORS: YES
+    GCC_TREAT_WARNINGS_AS_ERRORS: YES
+    # VERSION is the one source of the version; version-consistency.yml and
+    # VersionConsistencyTests fail a change that moves one mirror alone.
+    MARKETING_VERSION: "0.1.0"
+    CURRENT_PROJECT_VERSION: "1"
+    ENABLE_USER_SCRIPT_SANDBOXING: YES
+
+packages:
+  DishPackage:
+    path: .
+
+targets:
+  # Named apart from the package's `Dish` product: Xcode cannot tell a target
+  # from a package product of the same name. PRODUCT_NAME keeps the bundle
+  # Dish.app.
+  DishApp:
+    type: application
+    platform: iOS
+    sources:
+      - path: App/Sources
+      - path: App/Resources
+    settings:
+      base:
+        PRODUCT_NAME: Dish
+        # The bundle is Dish.app; the module is not `Dish`, which is the
+        # package's UI library.
+        PRODUCT_MODULE_NAME: DishApp
+        PRODUCT_BUNDLE_IDENTIFIER: com.tinkernorth.dish.ios
+        INFOPLIST_FILE: App/Info.plist
+        GENERATE_INFOPLIST_FILE: NO
+        CODE_SIGN_ENTITLEMENTS: App/Dish.entitlements
+        CODE_SIGN_STYLE: Automatic
+        TARGETED_DEVICE_FAMILY: "1"
+        SUPPORTS_MACCATALYST: NO
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
+    dependencies:
+      - package: DishPackage
+        product: Dish
+
+schemes:
+  DishApp:
+    build:
+      targets:
+        DishApp: all
+    run:
+      config: Debug
+    test:
+      config: Debug
+      gatherCoverageData: true
+      targets:
+        - package: DishPackage/DishKernelTests
+        - package: DishPackage/DishEngineTests
+        - package: DishPackage/DishTests
+    archive:
+      config: Release

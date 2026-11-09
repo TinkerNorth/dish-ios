@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Pause menu</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@500;600&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#4FE3FF}a:hover{color:#8FEFFF}
+</style>
+</helmet>
+<div style="position: relative; width: 874px; height: 402px; overflow: hidden; border-radius: 58px; background: radial-gradient(120% 90% at 50% 0%, #0F1530 0%, #060818 62%); font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', Inter, system-ui, sans-serif; color: #E6ECFF; -webkit-font-smoothing: antialiased">
+<div style="position: absolute; left: 11px; top: 138px; width: 37px; height: 126px; border-radius: 20px; background: #000000"></div>
+
+<div aria-hidden="true" style="position: absolute; inset: 0; opacity: 0.32; filter: blur(1.5px)">
+<div style="position: absolute; left: 120px; top: 18px; width: 150px; height: 36px; border-radius: 18px; background: #131A3A; border: 1px solid rgba(79,227,255,0.16)"></div>
+<div style="position: absolute; left: 604px; top: 18px; width: 150px; height: 36px; border-radius: 18px; background: #131A3A; border: 1px solid rgba(79,227,255,0.16)"></div>
+<div style="position: absolute; left: 64px; top: 66px; width: 42px; height: 270px; border-radius: 21px; background: #131A3A; border: 1px solid rgba(79,227,255,0.16)"></div>
+<div style="position: absolute; left: 768px; top: 66px; width: 42px; height: 270px; border-radius: 21px; background: #131A3A; border: 1px solid rgba(79,227,255,0.16)"></div>
+<div style="position: absolute; left: 132px; top: 100px; width: 132px; height: 132px; border-radius: 50%; background: #0C1027; border: 1px solid rgba(79,227,255,0.16)"></div>
+<div style="position: absolute; left: 166px; top: 134px; width: 64px; height: 64px; border-radius: 50%; background: #1B244B"></div>
+<div style="position: absolute; left: 252px; top: 292px; width: 114px; height: 38px; border-radius: 10px; background: #131A3A"></div>
+<div style="position: absolute; left: 290px; top: 254px; width: 38px; height: 114px; border-radius: 10px; background: #131A3A"></div>
+<div style="position: absolute; left: 648px; top: 96px; width: 52px; height: 52px; border-radius: 50%; border: 2px solid #FEB504"></div>
+<div style="position: absolute; left: 690px; top: 138px; width: 52px; height: 52px; border-radius: 50%; border: 2px solid #EF4E29"></div>
+<div style="position: absolute; left: 648px; top: 180px; width: 52px; height: 52px; border-radius: 50%; border: 2px solid #7DB700"></div>
+<div style="position: absolute; left: 606px; top: 138px; width: 52px; height: 52px; border-radius: 50%; border: 2px solid #009FEB"></div>
+<div style="position: absolute; left: 486px; top: 240px; width: 132px; height: 132px; border-radius: 50%; background: #0C1027; border: 1px solid rgba(79,227,255,0.16)"></div>
+<div style="position: absolute; left: 520px; top: 274px; width: 64px; height: 64px; border-radius: 50%; background: #1B244B"></div>
+</div>
+
+<div style="position: absolute; left: 314px; top: 18px; display: flex; align-items: center; gap: 8px">
+<div style="height: 38px; padding: 0 14px 0 10px; border-radius: 19px; background: rgba(28,36,72,0.58); border: 1px solid rgba(255,255,255,0.14); display: flex; align-items: center; gap: 8px; box-sizing: border-box">
+<svg width="20" height="20" viewBox="0 0 64 64" aria-hidden="true"><rect x="2" y="28" width="20" height="10" rx="1" fill="#8FCFE3"/><rect x="42" y="28" width="20" height="10" rx="1" fill="#8FCFE3"/><rect x="22" y="31" width="4" height="4" fill="#8FCFE3"/><rect x="38" y="31" width="4" height="4" fill="#8FCFE3"/><rect x="26" y="22" width="12" height="20" rx="2" fill="#8FCFE3"/><rect x="31" y="10" width="2" height="12" fill="#8FCFE3"/><path d="M27 8 Q32 2 37 8 L34 10 Q32 5 30 10 Z" fill="#8FCFE3"/></svg>
+<span style="font-family: ui-monospace, 'SF Mono', 'JetBrains Mono', monospace; font-size: 13px; font-weight: 600">Living Room PC</span>
+<span style="width: 6px; height: 6px; border-radius: 50%; background: #22C55E"></span>
+<span style="font-family: ui-monospace, 'SF Mono', 'JetBrains Mono', monospace; font-size: 12px; color: #22C55E">4 ms</span>
+</div>
+<span style="width: 38px; height: 38px; border-radius: 50%; background: #4FE3FF; display: flex; align-items: center; justify-content: center"><svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="5" width="4" height="14" rx="1.3" fill="#060818"/><rect x="14" y="5" width="4" height="14" rx="1.3" fill="#060818"/></svg></span>
+</div>
+
+<div role="menu" aria-label="Gamepad menu" style="position: absolute; left: 448px; top: 62px; width: 268px; padding: 6px 0; border-radius: 26px; background: rgba(30,38,76,0.80); backdrop-filter: blur(30px) saturate(170%); -webkit-backdrop-filter: blur(30px) saturate(170%); border: 1px solid rgba(255,255,255,0.16); box-shadow: 0 20px 50px rgba(0,0,0,0.55); display: flex; flex-direction: column">
+<a href="C2-gamepad.dc.html" role="menuitem" style="height: 38px; padding: 0 18px; display: flex; align-items: center; gap: 12px; text-decoration: none; color: #E6ECFF; font-size: 16px"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path fill="#E6ECFF" d="M8 5.6v12.8c0 .8.9 1.3 1.6.9l10.2-6.4c.6-.4.6-1.4 0-1.8L9.6 4.7C8.9 4.3 8 4.8 8 5.6z"/></svg>Resume</a>
+<span style="height: 5px; margin: 3px 0; background: rgba(0,0,0,0.18)"></span>
+<a href="#" role="menuitem" style="height: 38px; padding: 0 18px; display: flex; align-items: center; gap: 12px; text-decoration: none; color: #E6ECFF; font-size: 16px"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#E6ECFF" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2.8"/><path d="M3 15h18M12 15v4"/></svg>Touchpad</a>
+<a href="C4-mouse.dc.html" role="menuitem" style="height: 38px; padding: 0 18px; display: flex; align-items: center; gap: 12px; text-decoration: none; color: #E6ECFF; font-size: 16px"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#E6ECFF" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3.5l12 7.3-5.2 1.2-2.5 5.3L6 3.5z"/></svg>Mouse</a>
+<span style="height: 5px; margin: 3px 0; background: rgba(0,0,0,0.18)"></span>
+<span role="menuitemcheckbox" aria-checked="false" aria-disabled="true" style="height: 48px; padding: 0 18px; display: flex; align-items: center; gap: 12px; color: rgba(230,236,255,0.42); font-size: 16px"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="rgba(230,236,255,0.42)" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><ellipse cx="12" cy="12" rx="9" ry="3.6"/><ellipse cx="12" cy="12" rx="3.6" ry="9"/></svg><span style="flex: 1; display: flex; flex-direction: column"><span>Motion</span><span style="font-size: 12px; line-height: 15px">Needs DualSense emulation</span></span></span>
+<a href="#" role="menuitemcheckbox" aria-checked="true" style="height: 38px; padding: 0 18px; display: flex; align-items: center; gap: 12px; text-decoration: none; color: #E6ECFF; font-size: 16px"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#E6ECFF" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8.5" y="4" width="7" height="16" rx="1.8"/><path d="M5 8.5v7M19 8.5v7"/></svg><span style="flex: 1">Rumble</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4FE3FF" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></a>
+<a href="#" role="menuitem" style="height: 38px; padding: 0 18px; display: flex; align-items: center; gap: 12px; text-decoration: none; color: #E6ECFF; font-size: 16px"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#E6ECFF" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 9l4-4 4 4M8 15l4 4 4-4"/></svg><span style="flex: 1">Emulate as</span><span style="font-size: 15px; color: #93A0C8">Xbox 360</span></a>
+<span style="height: 5px; margin: 3px 0; background: rgba(0,0,0,0.18)"></span>
+<a href="C1-controller.dc.html" role="menuitem" style="height: 38px; padding: 0 18px; display: flex; align-items: center; gap: 12px; text-decoration: none; color: #FF6B5C; font-size: 16px"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="6" width="12" height="12" rx="2.4" fill="#FF6B5C"/></svg>Stop gamepad</a>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":874,"height":402}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

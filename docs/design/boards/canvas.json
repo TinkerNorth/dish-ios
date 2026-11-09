@@ -1,0 +1,52 @@
+{
+  "v": 3,
+  "createdOnFiles": { "v": 1, "at": "2026-11-09T15:12:30Z" },
+  "title": "Dish for iOS — navigation & critical flows",
+  "launch": { "view": "canvas" },
+  "pages": [],
+  "boards": {
+    "Main.dc.html": { "x": 0, "y": 0, "w": 1380, "h": 1040, "title": "App map · Option B" },
+    "A2-tabs.dc.html": { "x": 1460, "y": 0, "w": 402, "h": 874, "title": "Controllers tab · iOS 26+", "radius": 58 },
+    "N1-tabs-ios18.dc.html": { "x": 1942, "y": 0, "w": 402, "h": 874, "title": "Controllers tab · iOS 18 and earlier", "radius": 58 },
+    "N2-glass-scrolled.dc.html": { "x": 2424, "y": 0, "w": 402, "h": 874, "title": "Controller page scrolled · iOS 26+, Clear glass", "radius": 58 },
+    "N3-ios18-scrolled.dc.html": { "x": 2906, "y": 0, "w": 402, "h": 874, "title": "Controller page scrolled · iOS 18 and earlier", "radius": 58 },
+    "N4-glass-minimized.dc.html": { "x": 3388, "y": 0, "w": 402, "h": 874, "title": "Scrolled further · tabs minimized, iOS 26+", "radius": 58 },
+
+    "B1-welcome.dc.html": { "x": 0, "y": 1420, "w": 402, "h": 874, "title": "1 · Welcome", "radius": 58 },
+    "B2-input.dc.html": { "x": 482, "y": 1420, "w": 402, "h": 874, "title": "2 · How do you want to play?", "radius": 58 },
+    "B3-local-network.dc.html": { "x": 964, "y": 1420, "w": 402, "h": 874, "title": "3 · Local Network, explained then asked", "radius": 58 },
+    "B4-pick-pc.dc.html": { "x": 1446, "y": 1420, "w": 402, "h": 874, "title": "4 · Pick your PC", "radius": 58 },
+    "B5-pair.dc.html": { "x": 1928, "y": 1420, "w": 402, "h": 874, "title": "5 · Pair sheet, both paths", "radius": 58 },
+    "B6-ready.dc.html": { "x": 2410, "y": 1420, "w": 402, "h": 874, "title": "6 · Review and bind", "radius": 58 },
+
+    "C1-controller.dc.html": { "x": 0, "y": 2720, "w": 402, "h": 874, "title": "Controller page (push, tabs stay)", "radius": 58 },
+    "C2-gamepad.dc.html": { "x": 482, "y": 2720, "w": 874, "h": 402, "title": "On-screen gamepad (full screen)", "radius": 58 },
+    "C3-pause.dc.html": { "x": 482, "y": 3202, "w": 874, "h": 402, "title": "Pause menu", "radius": 58 },
+    "C4-mouse.dc.html": { "x": 1436, "y": 2720, "w": 874, "h": 402, "title": "Mouse (full screen)", "radius": 58 },
+    "C5-pocket.dc.html": { "x": 2390, "y": 2720, "w": 402, "h": 874, "title": "Low power while forwarding a pad", "radius": 58 },
+
+    "D1-connections.dc.html": { "x": 0, "y": 4020, "w": 402, "h": 874, "title": "Connections tab", "radius": 58 },
+    "D2-pc-detail.dc.html": { "x": 482, "y": 4020, "w": 402, "h": 874, "title": "PC detail · Forget confirmation", "radius": 58 },
+    "D3-no-network.dc.html": { "x": 964, "y": 4020, "w": 402, "h": 874, "title": "Connections tab · Local Network denied", "radius": 58 },
+    "D4-host-lost.dc.html": { "x": 1446, "y": 4020, "w": 402, "h": 874, "title": "Controllers tab · PC stopped responding", "radius": 58 },
+    "D5-settings.dc.html": { "x": 1928, "y": 4020, "w": 402, "h": 874, "title": "Settings tab · light mode", "radius": 58 }
+  },
+  "order": [
+    "Main.dc.html", "A2-tabs.dc.html", "N1-tabs-ios18.dc.html", "N2-glass-scrolled.dc.html", "N3-ios18-scrolled.dc.html", "N4-glass-minimized.dc.html",
+    "B1-welcome.dc.html", "B2-input.dc.html", "B3-local-network.dc.html", "B4-pick-pc.dc.html", "B5-pair.dc.html", "B6-ready.dc.html",
+    "C1-controller.dc.html", "C2-gamepad.dc.html", "C3-pause.dc.html", "C4-mouse.dc.html", "C5-pocket.dc.html",
+    "D1-connections.dc.html", "D2-pc-detail.dc.html", "D3-no-network.dc.html", "D4-host-lost.dc.html", "D5-settings.dc.html"
+  ],
+  "notes": {
+    "t-paradigm": { "x": 0, "y": -300, "text": "Navigation · Option B, tab bar", "kind": "title1", "maxW": 4250 },
+    "t-flow1": { "x": 0, "y": 1120, "text": "Flow 1 · First run and pairing", "kind": "title1", "maxW": 2812 },
+    "t-flow2": { "x": 0, "y": 2420, "text": "Flow 2 · Play", "kind": "title1", "maxW": 2792 },
+    "t-flow3": { "x": 0, "y": 3720, "text": "Flow 3 · Connections, recovery, Settings", "kind": "title1", "maxW": 2330 },
+    "s-optionb": { "x": 3870, "y": 560, "w": 380, "fill": "blue", "size": "m", "text": "Three tabs (Controllers, Connections, Settings), each its own stack. Add a controller is a standalone button under the list.\n\nThe session accessory above the tab bar carries the live link on every tab: Play, Dim, and PC problems with Reconnect.\n\nTabs stay visible on pushed pages. Setup and play screens go full screen, so the tab bar never covers the gamepad." },
+    "s-variants": { "x": 3870, "y": 0, "w": 380, "fill": "purple", "size": "m", "text": "Same code, two looks. TabView, toolbar buttons, List and Toggle are native: iOS 26 and later draw them in Liquid Glass, iOS 18 and earlier draw the classic bars.\n\nGlass follows the person’s Clear or Tinted setting; the scrolled boards show Clear. Scrolling down can shrink the tabs to one button, and the accessory slides in beside it in a shorter form.\n\niOS 18 has no tab accessory and no navigation subtitle, so the session bar becomes a custom bar above the tabs and battery moves into the status card. A minimum of iOS 26 drops both fallbacks." },
+    "s-flow1": { "x": 2892, "y": 1420, "w": 380, "fill": "teal", "size": "m", "text": "iOS asks for Local Network once, so Dish explains it first, then asks. Bluetooth pads pair in iOS Settings, not in Dish. The pair sheet runs both Satellite paths at once, as dish-mac does. iOS only tells apps “iPhone”, so naming the device lives in the pair sheet and in Settings.\n\nBind returns to the Controllers tab." },
+    "s-flow2": { "x": 2872, "y": 2720, "w": 380, "fill": "teal", "size": "m", "text": "Play is a full-screen cover locked to landscape: status bar hidden, home indicator auto-hides, screen edges deferred so a swipe never exits mid-game. Exit lives in the pause menu. iOS pauses apps you leave, so forwarding a physical pad keeps Dish open and dims instead of locking; Dim lives in the accessory.\n\nTelemetry numbers are placeholders until measured on iPhone." },
+    "s-flow3": { "x": 2410, "y": 4020, "w": 380, "fill": "teal", "size": "m", "text": "Connections and Settings are tabs. A PC problem shows once, in the accessory, with Reconnect; the Connections tab gets a badge and the rows say Connection lost. A Local Network denial gets a native empty state on the Connections tab that opens Settings › Dish. Light mode uses the darker #0E7C97 accent because #4FE3FF fails on white." }
+  },
+  "designSystems": []
+}

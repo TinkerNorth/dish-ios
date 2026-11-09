@@ -1,0 +1,125 @@
+# Dish iOS — SwiftLint configuration
+# The same rules dish-mac lints with, so code ported between the two keeps its shape.
+
+included:
+  - Sources
+  - Tests
+  - App/Sources
+
+excluded:
+  - .build
+  - .swiftpm
+  - Dish.xcodeproj
+
+line_length:
+  warning: 140
+  error: 200
+  ignores_urls: true
+  ignores_comments: true
+  ignores_function_declarations: true
+
+function_body_length:
+  warning: 45
+  error: 60
+
+type_body_length:
+  warning: 300
+  error: 400
+
+file_length:
+  warning: 500
+  error: 700
+
+cyclomatic_complexity:
+  warning: 10
+  error: 15
+  # An exhaustive switch over an enum is the preferred form of "one function,
+  # one flow"; its arms are not branching the reader has to untangle.
+  ignores_case_statements: true
+
+function_parameter_count:
+  warning: 8
+  error: 10
+
+large_tuple:
+  warning: 4
+  error: 5
+
+nesting:
+  type_level:
+    warning: 3
+
+identifier_name:
+  min_length: 2
+  max_length:
+    warning: 50
+    error: 60
+  # Single-letter names are idiomatic in bit-packing / HID report code and
+  # in short-lived loop indices; wire layout constants use compact naming.
+  # x/y/z: axis components (sticks, touchpad, IMU). r/g/b: lightbar RGB
+  # color components. c: short-lived loop var in tests.
+  # p: protocol payload byte buffer in parser tests.
+  # i: short loop index. o/s: SVG rendering aliases (overlay color / scale).
+  excluded:
+    - id
+    - ip
+    - x
+    - y
+    - z
+    - X
+    - Y
+    - r
+    - g
+    - b
+    - c
+    - i
+    - o
+    - p
+    - s
+    - lx
+    - ly
+    - rx
+    - ry
+    - lt
+    - rt
+    - fd
+    - sa
+    - sfd
+
+type_name:
+  min_length: 3
+  max_length:
+    warning: 50
+    error: 60
+
+disabled_rules:
+  - trailing_comma # SwiftFormat owns this
+  - opening_brace  # SwiftFormat owns this
+
+opt_in_rules:
+  - empty_count
+  - empty_string
+  - closure_end_indentation
+  - closure_spacing
+  - explicit_init
+  - first_where
+  - force_unwrapping
+  - implicit_return
+  - last_where
+  - literal_expression_end_indentation
+  - multiline_arguments
+  - operator_usage_whitespace
+  - overridden_super_call
+  - prohibited_super_call
+  - redundant_nil_coalescing
+  - toggle_bool
+  - vertical_whitespace_closing_braces
+  - yoda_condition
+
+analyzer_rules:
+  - unused_import
+
+force_unwrapping:
+  severity: warning
+
+reporter: "xcode"
