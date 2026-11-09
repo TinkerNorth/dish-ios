@@ -28,6 +28,12 @@ final class VersionConsistencyTests: XCTestCase {
         }
     }
 
+    func testTheBundledThirdPartyNoticeIsTheRepositorysOwn() throws {
+        let root = try RepoFiles.read("THIRD_PARTY.md")
+        let bundled = try RepoFiles.read("Sources/Dish/Resources/THIRD_PARTY.md")
+        XCTAssertEqual(bundled, root, "copy THIRD_PARTY.md to Sources/Dish/Resources when it changes")
+    }
+
     func testTheProjectCarriesTheVersionAsMarketingVersion() throws {
         let project = try RepoFiles.read("project.yml")
         XCTAssertTrue(try project.contains("MARKETING_VERSION: \"\(version())\""), "project.yml must carry VERSION")

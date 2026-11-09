@@ -45,17 +45,23 @@ struct StreamingSection: View {
     }
 }
 
-/// SETUP & HELP › Setup guide.
-struct HelpSection: View {
-    let state: HelpSectionState
-    let openGuide: @MainActor () -> Void
+/// SETUP & HELP › Setup guide, Help & FAQ.
+struct SetupHelpSection: View {
+    let state: SetupHelpSectionState
+    let actions: SettingsActions
 
     var body: some View {
         Section {
-            Button(action: openGuide) {
+            Button(action: actions.openGuide) {
                 HStack(spacing: DishSpace.s6) {
                     RowGlyph(symbol: state.guideSymbol)
                     SettingsLinkRow(title: state.guide, value: nil)
+                }
+            }
+            Button(action: actions.openHelp) {
+                HStack(spacing: DishSpace.s6) {
+                    RowGlyph(symbol: state.helpSymbol)
+                    SettingsLinkRow(title: state.help, value: nil)
                 }
             }
         } header: {
@@ -84,14 +90,28 @@ struct AppearanceSection: View {
     }
 }
 
-/// ABOUT › Version.
+/// ABOUT › Support Dish, Version, Website, Source code, Privacy policy,
+/// Open source licenses.
 struct AboutSection: View {
     let state: AboutSectionState
+    let actions: SettingsActions
 
     var body: some View {
         Section {
+            Button(action: actions.openSupport) {
+                HStack(spacing: DishSpace.s6) {
+                    RowGlyph(symbol: state.supportSymbol, tint: DishTheme.pulse)
+                    SettingsLinkRow(title: state.support, value: state.supportValue)
+                }
+            }
             LabeledContent(state.versionTitle, value: state.version)
                 .foregroundStyle(DishTheme.onSurface)
+            ForEach(state.links) { link in
+                Button { actions.open(link.url) } label: { ExternalLinkRow(title: link.title) }
+            }
+            Button(action: actions.openLicenses) {
+                SettingsLinkRow(title: state.licenses, value: nil)
+            }
         } header: {
             SectionEyebrow(title: state.title, color: DishTheme.muted)
         }
@@ -112,6 +132,20 @@ private struct SettingsLinkRow: View {
                 Text(value).font(DishFont.body).foregroundStyle(DishTheme.muted)
             }
             Image(systemName: "chevron.right").font(DishFont.detail).foregroundStyle(DishTheme.muted)
+        }
+        .contentShape(Rectangle())
+    }
+}
+
+/// A row that leaves Dish for a web page.
+struct ExternalLinkRow: View {
+    let title: String
+
+    var body: some View {
+        HStack {
+            Text(title).font(DishFont.body).foregroundStyle(DishTheme.onSurface)
+            Spacer()
+            Image(systemName: DishSymbol.external).font(DishFont.detail).foregroundStyle(DishTheme.muted)
         }
         .contentShape(Rectangle())
     }

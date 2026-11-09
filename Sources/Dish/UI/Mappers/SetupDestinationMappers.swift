@@ -53,7 +53,7 @@ struct PickPCStepState: Equatable {
     let satellite: SatelliteSectionState
     let moonlight: MoonlightSectionState
     let byAddress: String
-    let getSatellite: SetupLink
+    let getSatellite: PageLink
     let footnote: String
 }
 
@@ -78,7 +78,7 @@ func pickPCStepState(_ inputs: SetupInputs, words: L10n = .app) -> PickPCStepSta
             hosts: hosts.map { setupPCRow($0, words: words) }
         ),
         byAddress: words.addAPCByAddress,
-        getSatellite: SetupLink(title: words.getSatelliteForYourPC, url: SetupLinks.satellite),
+        getSatellite: PageLink(title: words.getSatelliteForYourPC, url: DishLinks.satellite),
         footnote: words.dontSeeYourPC
     )
 }

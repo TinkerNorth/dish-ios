@@ -34,11 +34,13 @@ struct StreamingSectionState: Equatable {
     let footer: String
 }
 
-/// SETUP & HELP. Help & FAQ and Diagnostics come with their pages.
-struct HelpSectionState: Equatable {
+/// SETUP & HELP: Setup guide and Help & FAQ. Diagnostics comes with its page.
+struct SetupHelpSectionState: Equatable {
     let title: String
     let guide: String
     let guideSymbol: String
+    let help: String
+    let helpSymbol: String
 }
 
 /// One Appearance choice.
@@ -58,11 +60,18 @@ struct AppearanceSectionState: Equatable {
     let options: [AppearanceOptionState]
 }
 
-/// ABOUT.
+/// ABOUT, as D5 draws it with Support Dish at its head: the tips, the
+/// version, the links and the licenses.
 struct AboutSectionState: Equatable {
     let title: String
+    let support: String
+    /// The row's value: what Support Dish offers.
+    let supportValue: String
+    let supportSymbol: String
     let versionTitle: String
     let version: String
+    let links: [PageLink]
+    let licenses: String
 }
 
 /// The Settings tab (D5), section by section.
@@ -70,7 +79,7 @@ struct SettingsPageState: Equatable {
     let title: String
     let device: DeviceSectionState
     let streaming: StreamingSectionState
-    let help: HelpSectionState
+    let help: SetupHelpSectionState
     let appearance: AppearanceSectionState
     let about: AboutSectionState
 }
@@ -85,13 +94,36 @@ func settingsPageState(preferences: PreferencesFacts, appVersion: String, words:
             footer: words.deviceNameFooter
         ),
         streaming: streamingSection(preferences, words: words),
-        help: HelpSectionState(title: words.setupAndHelp, guide: words.setupGuide, guideSymbol: "sparkles"),
+        help: SetupHelpSectionState(
+            title: words.setupAndHelp,
+            guide: words.setupGuide,
+            guideSymbol: "sparkles",
+            help: words.helpAndFaq,
+            helpSymbol: "questionmark.circle"
+        ),
         appearance: AppearanceSectionState(
             title: words.appearance,
             selected: preferences.appearance,
             options: Appearance.allCases.map { AppearanceOptionState(appearance: $0, title: appearanceText($0, words: words)) }
         ),
-        about: AboutSectionState(title: words.about, versionTitle: words.version, version: appVersion)
+        about: aboutSection(appVersion: appVersion, words: words)
+    )
+}
+
+private func aboutSection(appVersion: String, words: L10n) -> AboutSectionState {
+    AboutSectionState(
+        title: words.about,
+        support: words.supportDish,
+        supportValue: words.tips,
+        supportSymbol: heartSymbol,
+        versionTitle: words.version,
+        version: appVersion,
+        links: [
+            PageLink(title: words.website, url: DishLinks.website),
+            PageLink(title: words.sourceCode, url: DishLinks.source),
+            PageLink(title: words.privacyPolicy, url: DishLinks.privacy)
+        ],
+        licenses: words.openSourceLicenses
     )
 }
 

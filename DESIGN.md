@@ -73,6 +73,13 @@ The low-power dim, which must not light the panel:
 | `DishTheme.dimBackground` | `0x000000` | `0x000000` | True black in either appearance, so an OLED panel is off |
 | `DishTheme.dimText` | `0x8A8E9E` | `0x8A8E9E` | The dim's words, a grey low enough not to light the panel |
 
+The tips heart, the design's `#FF6FB5`, darkened in the light palette so it
+holds its contrast on white (dish-mac's value):
+
+| Token | Dark | Light | Role |
+|---|---|---|---|
+| `DishTheme.pulse` | `0xFF6FB5` | `0xC2417F` | The heart on the Controllers toolbar, Settings › About › Support Dish and the Support Dish page |
+
 ## Type scale (`DishFont`)
 
 Every name is a Dynamic Type style, so the words grow with the person's text
@@ -83,6 +90,7 @@ last column are the styles' defaults at the standard setting.
 | Token | Style | Default size | Role |
 |---|---|---|---|
 | `DishFont.largeTitle` | `.largeTitle`, bold | 34 | A cover's headline and a tab's own large title |
+| `DishFont.title` | `.title2`, bold | 22 | A notice's top heading on the licenses page, and Support Dish's name under its heart |
 | `DishFont.body` | `.body` | 17 | A row's name |
 | `DishFont.headline` | `.headline` | 17 semibold | A row's name with weight, a feature's name on the welcome |
 | `DishFont.detail` | `.footnote` | 13 | A row's second line |
@@ -110,6 +118,7 @@ Points. Every size a kit component sets is one of these names.
 | `DishSize.carryMark` | 16 | The check or dash column of a review carry row |
 | `DishSize.primerTile` | 64 | The phone and PC tiles over the Local Network primer |
 | `DishSize.eyebrowTracking` | 1.4 | The tracking of a section eyebrow |
+| `DishSize.codeCorner` | 10 | The corner of a licence text's block on the licenses page |
 
 ## Spacing (`DishSpace`)
 

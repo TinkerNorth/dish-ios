@@ -36,6 +36,9 @@ enum DishTheme {
     static let dimBackground = Color(dark: 0x000000, light: 0x000000)
     /// The dim's words, a grey low enough not to light the panel.
     static let dimText = Color(dark: 0x8A8E9E, light: 0x8A8E9E)
+    /// The tips heart: the Controllers toolbar, Settings › Support Dish and
+    /// the Support Dish page.
+    static let pulse = Color(dark: 0xFF6FB5, light: 0xC2417F)
 }
 
 /// The SF Symbols the setup chrome draws on its own; a row's glyph comes
@@ -71,6 +74,9 @@ enum DishImage {
 enum DishFont {
     /// A cover's headline and a tab's own large title.
     static let largeTitle = Font.largeTitle.bold()
+    /// A notice's top heading on the licenses page, and Support Dish's name
+    /// under its heart.
+    static let title = Font.title2.bold()
     /// A row's name.
     static let body = Font.body
     /// A row's name with weight, a feature's name on the welcome.
@@ -115,6 +121,8 @@ enum DishSize {
     static let primerTile: CGFloat = 64
     /// The tracking of a section eyebrow.
     static let eyebrowTracking: CGFloat = 1.4
+    /// The corner of a licence text's block on the licenses page.
+    static let codeCorner: CGFloat = 10
 }
 
 /// The spacing scale.

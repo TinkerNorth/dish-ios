@@ -54,6 +54,14 @@ struct ControllersPageBody: View {
         .background(DishTheme.background)
         .navigationTitle(state.title)
         .navigationBarTitleDisplayMode(.large)
+        .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                Button { open(state.support.page) } label: {
+                    Image(systemName: state.support.symbol).foregroundStyle(DishTheme.pulse)
+                }
+                .accessibilityLabel(state.support.title)
+            }
+        }
     }
 }
 

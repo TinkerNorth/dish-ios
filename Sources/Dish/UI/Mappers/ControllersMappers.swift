@@ -33,12 +33,21 @@ enum ControllersContent: Equatable {
     case list([ControllerRowState])
 }
 
+/// A toolbar button that pushes a page: its accessibility title and glyph.
+struct ToolbarLinkState: Equatable {
+    let title: String
+    let symbol: String
+    let page: Page
+}
+
 /// The Controllers tab.
 struct ControllersPageState: Equatable {
     let title: String
     let content: ControllersContent
     let addTitle: String
     let addHint: String
+    /// The heart on the toolbar: Support Dish.
+    let support: ToolbarLinkState
 }
 
 /// The level at and below which a battery reads in the error colour.
@@ -49,7 +58,8 @@ func controllersPageState(controllers: [ControllerFact], words: L10n = .app) -> 
         title: words.controllers,
         content: controllersContent(controllers, words: words),
         addTitle: words.addAController,
-        addHint: words.addAControllerHint
+        addHint: words.addAControllerHint,
+        support: ToolbarLinkState(title: words.supportDish, symbol: heartSymbol, page: .support)
     )
 }
 

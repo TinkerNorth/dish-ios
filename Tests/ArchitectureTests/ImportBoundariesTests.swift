@@ -19,7 +19,17 @@ final class ImportBoundariesTests: XCTestCase {
         Layer(directory: "Sources/DishKernel", allowed: ["Foundation", "Observation"]),
         Layer(
             directory: "Sources/DishEngine",
-            allowed: ["Foundation", "Observation", "os", "Synchronization", "GameController", "CoreHaptics", "DishCore", "DishKernel"]
+            allowed: [
+                "Foundation",
+                "Observation",
+                "os",
+                "Synchronization",
+                "GameController",
+                "CoreHaptics",
+                "StoreKit",
+                "DishCore",
+                "DishKernel"
+            ]
         ),
         Layer(
             directory: "Sources/Dish",
@@ -56,7 +66,7 @@ final class ImportBoundariesTests: XCTestCase {
     }
 
     func testTheUILayerDoesNoIO() throws {
-        let ioModules: Set = ["Network", "GameController", "CoreHaptics", "Security", "CryptoKit", "Darwin", "IOKit"]
+        let ioModules: Set = ["Network", "GameController", "CoreHaptics", "StoreKit", "Security", "CryptoKit", "Darwin", "IOKit"]
         for file in RepoFiles.swiftFiles(under: "Sources/Dish") {
             let imports = try Set(RepoFiles.imports(of: RepoFiles.read(file)))
             XCTAssertTrue(imports.isDisjoint(with: ioModules), "\(file) imports an IO framework: \(imports.intersection(ioModules))")

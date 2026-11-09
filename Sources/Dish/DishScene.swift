@@ -14,6 +14,8 @@ public struct DishScene: Scene {
 
     @State private var model: AppModel
     @State private var navigation: NavigationStore
+    /// THIRD_PARTY.md from the package's resource bundle, for the licenses page.
+    private let notice = thirdPartyNotice(in: L10n.app.catalog.bundle)
 
     public init() {
         let model = AppModel(defaults: .standard)
@@ -33,6 +35,7 @@ public struct DishScene: Scene {
                 .environment(navigation)
                 .environment(\.settingsURL, URL(string: UIApplication.openSettingsURLString))
                 .environment(\.appVersion, shortVersion(of: .main))
+                .environment(\.thirdPartyNotice, notice)
                 .preferredColorScheme(colorScheme(for: model.shellFacts.preferences.appearance))
                 .onChange(of: idleTimerDisabled(facts: model.shellFacts), initial: true) { holdScreenOn($1) }
         }

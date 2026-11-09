@@ -28,6 +28,7 @@
 		2852772D9CB3C8CF766600CC /* DishApp.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = DishApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		3D89D88147D0B5DAEE26521B /* SetupFlowUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetupFlowUITests.swift; sourceTree = "<group>"; };
 		6C8916C2FE2E8337B08D0229 /* DishApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DishApp.swift; sourceTree = "<group>"; };
+		AB984DAE071C22BF828A6112 /* Dish.storekit */ = {isa = PBXFileReference; path = Dish.storekit; sourceTree = "<group>"; };
 		ADAF4525ED27761494F19178 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		ED58ABFDF5C0E2AE25948649 /* DishUITests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = DishUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -47,6 +48,7 @@
 		30697E6CE150021CFDD4A0DE /* App */ = {
 			isa = PBXGroup;
 			children = (
+				AB984DAE071C22BF828A6112 /* Dish.storekit */,
 				A1558B517A15D0F664634E16 /* Resources */,
 				844DC714DE02FF126BE22D31 /* Sources */,
 				DDC620E0EFBC37E67D922814 /* UITests */,

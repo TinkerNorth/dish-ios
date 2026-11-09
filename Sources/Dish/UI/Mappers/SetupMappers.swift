@@ -121,17 +121,6 @@ func setupStepState(_ walk: SetupState, _ inputs: SetupInputs, words: L10n = .ap
     }
 }
 
-/// The fleet's Satellite download page.
-enum SetupLinks {
-    static let satellite = URL(string: "https://dish.tinkernorth.com/downloads/satellite")
-}
-
-/// A link a page opens through `openURL`.
-struct SetupLink: Equatable {
-    let title: String
-    let url: URL?
-}
-
 // MARK: - The cover's chrome
 
 /// The toolbar over every step: the title and the step it counts, Back where
@@ -182,7 +171,7 @@ struct WelcomeStepState: Equatable {
     let intro: String
     let features: [SetupFeature]
     let primary: String
-    let getSatellite: SetupLink
+    let getSatellite: PageLink
 }
 
 func welcomeStepState(words: L10n = .app) -> WelcomeStepState {
@@ -195,7 +184,7 @@ func welcomeStepState(words: L10n = .app) -> WelcomeStepState {
             SetupFeature(symbol: "lock.shield", title: words.staysOnYourNetwork, body: words.staysOnYourNetworkBody)
         ],
         primary: words.setupContinue,
-        getSatellite: SetupLink(title: words.getSatelliteForYourPC, url: SetupLinks.satellite)
+        getSatellite: PageLink(title: words.getSatelliteForYourPC, url: DishLinks.satellite)
     )
 }
 

@@ -475,6 +475,40 @@
         }
       }
     },
+    "A controller last paired with another device, such as a console, has to be paired with this iPhone again." : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kontroler koji je posljednji put uparen s drugim uređajem, poput konzole, mora se ponovo upariti s ovim iPhoneom."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ein Controller, der zuletzt mit einem anderen Gerät wie einer Konsole gekoppelt war, muss erneut mit diesem iPhone gekoppelt werden."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Un mando emparejado por última vez con otro dispositivo, como una consola, tiene que emparejarse de nuevo con este iPhone."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Une manette appairée en dernier à un autre appareil, comme une console, doit être appairée de nouveau à cet iPhone."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Um controle pareado por último com outro dispositivo, como um console, precisa ser pareado de novo com este iPhone."
+          }
+        }
+      }
+    },
     "A pad paired to this iPhone in Settings › Bluetooth." : {
       "localizations" : {
         "bs" : {
@@ -505,6 +539,74 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Um controle pareado com este iPhone em Ajustes › Bluetooth."
+          }
+        }
+      }
+    },
+    "A tip pays for the time that goes into Dish and Satellite." : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Napojnica plaća vrijeme uloženo u Dish i Satellite."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ein Trinkgeld bezahlt die Zeit, die in Dish und Satellite fließt."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Una propina paga el tiempo que se dedica a Dish y Satellite."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Un pourboire paie le temps consacré à Dish et Satellite."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uma gorjeta paga o tempo dedicado ao Dish e ao Satellite."
+          }
+        }
+      }
+    },
+    "ABOUT DISH" : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O DISHU"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ÜBER DISH"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ACERCA DE DISH"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "À PROPOS DE DISH"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "SOBRE O DISH"
           }
         }
       }
@@ -679,6 +781,40 @@
         }
       }
     },
+    "Almost nothing." : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gotovo ništa."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fast nichts."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Casi nada."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Presque rien."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Quase nada."
+          }
+        }
+      }
+    },
     "Appearance" : {
       "localizations" : {
         "bs" : {
@@ -709,6 +845,74 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Aparência"
+          }
+        }
+      }
+    },
+    "Apps can’t pair Bluetooth devices, so Dish leaves that to iOS." : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aplikacije ne mogu uparivati Bluetooth uređaje, pa Dish to prepušta iOS-u."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apps können keine Bluetooth-Geräte koppeln, daher überlässt Dish das iOS."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Las apps no pueden emparejar dispositivos Bluetooth, así que Dish se lo deja a iOS."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Les apps ne peuvent pas appairer d’appareils Bluetooth, donc Dish laisse cela à iOS."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apps não podem parear dispositivos Bluetooth, então o Dish deixa isso para o iOS."
+          }
+        }
+      }
+    },
+    "BEST PERFORMANCE" : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "NAJBOLJE PERFORMANSE"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "BESTE LEISTUNG"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "MEJOR RENDIMIENTO"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "PERFORMANCES OPTIMALES"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "MELHOR DESEMPENHO"
           }
         }
       }
@@ -1054,6 +1258,40 @@
         }
       }
     },
+    "Both need a PlayStation-style controller and a Satellite connection." : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Za oboje su potrebni kontroler u PlayStation stilu i Satellite veza."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Beides braucht einen Controller im PlayStation-Stil und eine Satellite-Verbindung."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ambos necesitan un mando estilo PlayStation y una conexión Satellite."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Les deux nécessitent une manette de style PlayStation et une connexion Satellite."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Os dois precisam de um controle estilo PlayStation e de uma conexão Satellite."
+          }
+        }
+      }
+    },
     "Bring the controller you own" : {
       "localizations" : {
         "bs" : {
@@ -1122,6 +1360,108 @@
         }
       }
     },
+    "CONCEPTS" : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "KONCEPTI"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "KONZEPTE"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "CONCEPTOS"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "CONCEPTS"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "CONCEITOS"
+          }
+        }
+      }
+    },
+    "Check that Satellite is running on the PC." : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Provjerite radi li Satellite na PC-ju."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prüfe, ob Satellite auf dem PC läuft."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Comprueba que Satellite esté en marcha en el PC."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vérifiez que Satellite est en cours d’exécution sur le PC."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Verifique se o Satellite está rodando no PC."
+          }
+        }
+      }
+    },
+    "Check the digits right before you type, and make sure you’re pairing with the right Satellite if more than one is listed." : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Provjerite cifre neposredno prije unosa i pazite da se uparujete s ispravnim satelitom ako ih je navedeno više."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prüfe die Ziffern direkt vor der Eingabe und achte darauf, dass du dich mit dem richtigen Satellite koppelst, falls mehrere aufgelistet sind."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Comprueba los dígitos justo antes de escribirlos y asegúrate de que te emparejas con el Satellite correcto si aparece más de uno."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vérifiez les chiffres juste avant de les saisir, et assurez-vous d'appairer le bon Satellite si plusieurs sont listés."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Confira os dígitos logo antes de digitar e verifique se está pareando com o satélite certo caso haja mais de um na lista."
+          }
+        }
+      }
+    },
     "Check the link, then bind it." : {
       "localizations" : {
         "bs" : {
@@ -1152,6 +1492,40 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Confira o vínculo e depois vincule."
+          }
+        }
+      }
+    },
+    "Confirm this iPhone and the PC are on the same Wi-Fi network." : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Potvrdite da su ovaj iPhone i PC na istoj Wi-Fi mreži."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stelle sicher, dass dieses iPhone und der PC im selben WLAN sind."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Confirma que este iPhone y el PC estén en la misma red Wi-Fi."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vérifiez que cet iPhone et le PC sont sur le même réseau Wi-Fi."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Confirme que este iPhone e o PC estão na mesma rede Wi-Fi."
           }
         }
       }
@@ -1532,6 +1906,142 @@
         }
       }
     },
+    "Dish %@ · TinkerNorth · LGPL-3.0" : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dish %@ · TinkerNorth · LGPL-3.0"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dish %@ · TinkerNorth · LGPL-3.0"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dish %@ · TinkerNorth · LGPL-3.0"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dish %@ · TinkerNorth · LGPL-3.0"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dish %@ · TinkerNorth · LGPL-3.0"
+          }
+        }
+      }
+    },
+    "Dish (iOS, Windows, Android, Linux, Mac) and Satellite are all released under LGPL-3.0." : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dish (iOS, Windows, Android, Linux, Mac) i Satellite izdani su pod LGPL-3.0."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dish (iOS, Windows, Android, Linux, Mac) und Satellite stehen alle unter LGPL-3.0."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dish (iOS, Windows, Android, Linux, Mac) y Satellite se publican bajo LGPL-3.0."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dish (iOS, Windows, Android, Linux, Mac) et Satellite sont tous publiés sous LGPL-3.0."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O Dish (iOS, Windows, Android, Linux, Mac) e o Satellite são publicados sob a LGPL-3.0."
+          }
+        }
+      }
+    },
+    "Dish can’t find any satellites. What now?" : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dish ne može pronaći nijedan satelit. Što sad?"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dish findet keine Satelliten. Was nun?"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dish no encuentra ningún satélite. ¿Y ahora qué?"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dish ne trouve aucun satellite. Que faire ?"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O Dish não encontra nenhum satélite. E agora?"
+          }
+        }
+      }
+    },
+    "Dish can’t see my network." : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dish ne vidi moju mrežu."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dish sieht mein Netzwerk nicht."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dish no ve mi red."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dish ne voit pas mon réseau."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O Dish não vê minha rede."
+          }
+        }
+      }
+    },
     "Dish can’t see your network" : {
       "localizations" : {
         "bs" : {
@@ -1600,6 +2110,210 @@
         }
       }
     },
+    "Dish doesn’t send gameplay or controller input anywhere except the host PC on your local network." : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dish ne šalje igru ni unos kontrolera nigdje osim na PC domaćin na vašoj lokalnoj mreži."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dish sendet Spielgeschehen und Controller-Eingaben nirgendwohin außer an den Host-PC in deinem lokalen Netzwerk."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dish no envía las partidas ni la entrada del mando a ningún sitio salvo al PC anfitrión de tu red local."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dish n'envoie ni parties ni entrées de manette ailleurs que vers le PC hôte de votre réseau local."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O Dish não envia jogo nem entrada de controle para lugar nenhum além do PC anfitrião na sua rede local."
+          }
+        }
+      }
+    },
+    "Dish is free and open source." : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dish je besplatan i otvorenog koda."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dish ist kostenlos und Open Source."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dish es gratuito y de código abierto."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dish est gratuit et open source."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dish é gratuito e de código aberto."
+          }
+        }
+      }
+    },
+    "Dish is free software, licensed under the GNU Lesser General Public License, version 3 or later." : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dish je slobodan softver, licenciran pod GNU Lesser General Public License, verzija 3 ili novija."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dish ist freie Software, lizenziert unter der GNU Lesser General Public License, Version 3 oder neuer."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dish es software libre, con licencia GNU Lesser General Public License, versión 3 o posterior."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dish est un logiciel libre, sous licence GNU Lesser General Public License, version 3 ou ultérieure."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O Dish é software livre, licenciado sob a GNU Lesser General Public License, versão 3 ou posterior."
+          }
+        }
+      }
+    },
+    "Dish keeps the session alive while the app is open." : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dish održava sesiju aktivnom dok je aplikacija otvorena."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dish hält die Sitzung aufrecht, solange die App geöffnet ist."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dish mantiene la sesión activa mientras la app está abierta."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dish maintient la session active tant que l'application est ouverte."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O Dish mantém a sessão ativa enquanto o app está aberto."
+          }
+        }
+      }
+    },
+    "Dish lists every pad iOS supports and marks one it can’t read as Not supported." : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dish prikazuje svaki kontroler koji iOS podržava, a onaj koji ne može čitati označava kao Nije podržano."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dish listet jeden Controller, den iOS unterstützt, und markiert einen, den es nicht lesen kann, als Nicht unterstützt."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dish muestra cada mando que iOS admite y marca como No compatible el que no puede leer."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dish affiche chaque manette prise en charge par iOS et marque Non pris en charge celle qu’il ne peut pas lire."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O Dish lista todo controle que o iOS suporta e marca como Não compatível aquele que não consegue ler."
+          }
+        }
+      }
+    },
+    "Dish never sees your card." : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dish nikada ne vidi vašu karticu."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dish sieht deine Karte nie."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dish nunca ve tu tarjeta."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dish ne voit jamais votre carte."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O Dish nunca vê seu cartão."
+          }
+        }
+      }
+    },
     "Dish pairs with Satellite on your PC and sends every press over your own Wi‑Fi." : {
       "localizations" : {
         "bs" : {
@@ -1664,6 +2378,74 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "O Dish lê qualquer controle compatível com o iOS: DualSense, DualShock 4, Xbox Wireless e Switch Pro."
+          }
+        }
+      }
+    },
+    "Dish sends input as small UDP packets over your local network, so a fast LAN keeps the delay tiny." : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dish šalje unos kao male UDP pakete preko vaše lokalne mreže, pa brz LAN drži kašnjenje minimalnim."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dish schickt Eingaben als kleine UDP-Pakete über dein lokales Netzwerk, ein schnelles LAN hält die Verzögerung also winzig."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dish envía la entrada en paquetes UDP pequeños por tu red local, así que una LAN rápida mantiene el retardo mínimo."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dish envoie les entrées sous forme de petits paquets UDP sur votre réseau local, donc un réseau local rapide garde le délai minime."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O Dish envia a entrada como pequenos pacotes UDP pela sua rede local, então uma LAN rápida mantém o atraso mínimo."
+          }
+        }
+      }
+    },
+    "Dish turns a controller paired with this iPhone, or the iPhone’s own screen, into a wireless gamepad for your PC." : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dish pretvara kontroler uparen s ovim iPhoneom, ili sam ekran iPhonea, u bežični gamepad za vaš PC."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dish macht aus einem mit diesem iPhone gekoppelten Controller oder dem Bildschirm des iPhone selbst ein kabelloses Gamepad für deinen PC."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dish convierte un mando emparejado con este iPhone, o la propia pantalla del iPhone, en un mando inalámbrico para tu PC."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dish transforme une manette appairée à cet iPhone, ou l’écran de l’iPhone lui-même, en manette sans fil pour votre PC."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O Dish transforma um controle pareado com este iPhone, ou a própria tela do iPhone, em um gamepad sem fio para o seu PC."
           }
         }
       }
@@ -1940,6 +2722,40 @@
         }
       }
     },
+    "Every feature stays free, tip or not." : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Svaka funkcija ostaje besplatna, s napojnicom ili bez nje."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Jede Funktion bleibt kostenlos, mit Trinkgeld oder ohne."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Todas las funciones siguen siendo gratis, con propina o sin ella."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Chaque fonction reste gratuite, avec ou sans pourboire."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Todo recurso continua grátis, com gorjeta ou sem."
+          }
+        }
+      }
+    },
     "Fast" : {
       "comment" : "Latency badge on a setup option.",
       "localizations" : {
@@ -2005,6 +2821,74 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Mais rápida"
+          }
+        }
+      }
+    },
+    "For the controller-to-iPhone leg, a wired controller has no radio latency." : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Na dionici kontroler–iPhone, žičani kontroler nema radio kašnjenja."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Auf der Strecke Controller-zu-iPhone hat ein kabelgebundener Controller keine Funklatenz."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "En el tramo del mando al iPhone, un mando con cable no tiene latencia de radio."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pour le trajet manette-vers-iPhone, une manette filaire n’a aucune latence radio."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No trecho do controle até o iPhone, um controle com fio não tem latência de rádio."
+          }
+        }
+      }
+    },
+    "For the iPhone-to-PC leg, Wi-Fi is the only way, so connect the PC to the router with Ethernet if you can." : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Na dionici iPhone–PC, Wi-Fi je jedini put, pa povežite PC na usmjerivač Ethernetom ako možete."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Auf der Strecke iPhone-zu-PC ist WLAN der einzige Weg, verbinde den PC also nach Möglichkeit per Ethernet mit dem Router."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "En el tramo del iPhone al PC, el Wi-Fi es la única vía, así que conecta el PC al router con Ethernet si puedes."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pour le trajet iPhone-vers-PC, le Wi-Fi est le seul chemin, donc reliez le PC au routeur en Ethernet si vous le pouvez."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No trecho do iPhone até o PC, o Wi-Fi é o único caminho, então ligue o PC ao roteador com Ethernet se puder."
           }
         }
       }
@@ -2180,6 +3064,142 @@
         }
       }
     },
+    "Guest networks and 2.4 GHz vs 5 GHz on the same router count as different." : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gostujuće mreže i 2,4 GHz naspram 5 GHz na istom usmjerivaču računaju se kao različite."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gastnetzwerke sowie 2,4 GHz und 5 GHz am selben Router zählen als verschiedene Netzwerke."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Las redes de invitados y 2,4 GHz frente a 5 GHz en el mismo router cuentan como distintas."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Les réseaux invités et le 2,4 GHz face au 5 GHz d'un même routeur comptent comme différents."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Redes de convidados e 2,4 GHz vs 5 GHz no mesmo roteador contam como redes diferentes."
+          }
+        }
+      }
+    },
+    "Help & FAQ" : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pomoć i česta pitanja"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hilfe & FAQ"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ayuda y preguntas frecuentes"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aide et FAQ"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ajuda e perguntas frequentes"
+          }
+        }
+      }
+    },
+    "How Dish works, and what to try when it doesn’t" : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kako Dish radi i što pokušati kada ne radi"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wie Dish funktioniert und was hilft, wenn es das nicht tut"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cómo funciona Dish y qué probar cuando no funciona"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Comment Dish fonctionne, et que faire quand ça ne marche pas"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Como o Dish funciona e o que tentar quando não funciona"
+          }
+        }
+      }
+    },
+    "How do I connect a controller?" : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kako da povežem kontroler?"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wie verbinde ich einen Controller?"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "¿Cómo conecto un mando?"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Comment connecter une manette ?"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Como conecto um controle?"
+          }
+        }
+      }
+    },
     "How do you want to play?" : {
       "localizations" : {
         "bs" : {
@@ -2214,6 +3234,40 @@
         }
       }
     },
+    "If you chose Don’t Allow, turn Dish on in Settings › Privacy & Security › Local Network." : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ako ste odabrali Ne dozvoli, uključite Dish u Postavke › Privatnost i sigurnost › Lokalna mreža."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wenn du Nicht erlauben gewählt hast, schalte Dish unter Einstellungen › Datenschutz & Sicherheit › Lokales Netzwerk ein."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Si elegiste No permitir, activa Dish en Ajustes › Privacidad y seguridad › Red local."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Si vous avez choisi Refuser, activez Dish dans Réglages › Confidentialité et sécurité › Réseau local."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Se você escolheu Não Permitir, ative o Dish em Ajustes › Privacidade e Segurança › Rede Local."
+          }
+        }
+      }
+    },
     "Input · 1 of 3" : {
       "localizations" : {
         "bs" : {
@@ -2244,6 +3298,244 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Entrada · 1 de 3"
+          }
+        }
+      }
+    },
+    "Install it from dish.tinkernorth.com/downloads/satellite." : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Instalirajte ga s dish.tinkernorth.com/downloads/satellite."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Installiere es von dish.tinkernorth.com/downloads/satellite."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Instálalo desde dish.tinkernorth.com/downloads/satellite."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Installez-le depuis dish.tinkernorth.com/downloads/satellite."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Instale-o em dish.tinkernorth.com/downloads/satellite."
+          }
+        }
+      }
+    },
+    "Is Dish open source?" : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Je li Dish otvorenog koda?"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ist Dish Open Source?"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "¿Dish es de código abierto?"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dish est-il open source ?"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O Dish é de código aberto?"
+          }
+        }
+      }
+    },
+    "Is wired better than wireless?" : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Je li žično bolje od bežičnog?"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ist kabelgebunden besser als kabellos?"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "¿Es mejor con cable que inalámbrico?"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Le filaire est-il meilleur que le sans-fil ?"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Com fio é melhor que sem fio?"
+          }
+        }
+      }
+    },
+    "It comes with no warranty, to the extent permitted by law." : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dolazi bez ikakve garancije, u mjeri u kojoj to zakon dozvoljava."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Es kommt ohne Gewährleistung, soweit gesetzlich zulässig."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Se ofrece sin garantía, en la medida en que lo permita la ley."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Il est fourni sans garantie, dans les limites permises par la loi."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ele vem sem garantia, na medida permitida por lei."
+          }
+        }
+      }
+    },
+    "It forwards input over your local network to the free Satellite helper." : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Unos prosljeđuje preko vaše lokalne mreže besplatnom pomoćniku Satellite."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die Eingaben werden über dein lokales Netzwerk an den kostenlosen Helfer Satellite weitergeleitet."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reenvía la entrada por tu red local al ayudante gratuito Satellite."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Il transmet les entrées via votre réseau local à l'assistant gratuit Satellite."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ele encaminha a entrada pela sua rede local até o ajudante gratuito Satellite."
+          }
+        }
+      }
+    },
+    "It has no analytics and no crash reporting." : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nema analitike niti izvještaja o padovima."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Es hat keine Analysen und keine Absturzberichte."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No tiene analíticas ni informes de fallos."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Il n’a ni statistiques d’usage ni rapports de plantage."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ele não tem análises nem relatórios de falhas."
+          }
+        }
+      }
+    },
+    "It receives input from Dish over Wi-Fi and presents itself to that PC’s games as a regular controller." : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prima unos iz Disha preko Wi-Fija i predstavlja se igrama na tom PC-u kao obični kontroler."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Es empfängt Eingaben von Dish über WLAN und meldet sich bei den Spielen dieses PCs als ganz normaler Controller an."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Recibe la entrada de Dish por Wi-Fi y se presenta ante los juegos de ese PC como un mando normal."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Il reçoit les entrées de Dish via Wi-Fi et se présente aux jeux de ce PC comme une manette ordinaire."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ele recebe a entrada do Dish por Wi-Fi e se apresenta aos jogos daquele PC como um controle comum."
           }
         }
       }
@@ -2312,6 +3604,142 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Manter a tela ligada"
+          }
+        }
+      }
+    },
+    "Keep the controller close to this iPhone and the PC on wired Ethernet." : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Držite kontroler blizu ovog iPhonea, a PC na žičanom Ethernetu."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Halte den Controller nah an diesem iPhone und den PC am kabelgebundenen Ethernet."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mantén el mando cerca de este iPhone y el PC con Ethernet por cable."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gardez la manette près de cet iPhone et le PC en Ethernet filaire."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mantenha o controle perto deste iPhone e o PC no Ethernet com fio."
+          }
+        }
+      }
+    },
+    "LINKS" : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "LINKOVI"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "LINKS"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ENLACES"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "LIENS"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "LINKS"
+          }
+        }
+      }
+    },
+    "Large tip" : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Velika napojnica"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Großes Trinkgeld"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Propina grande"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gros pourboire"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gorjeta grande"
+          }
+        }
+      }
+    },
+    "Leaving Dish stops forwarding, because iOS suspends it." : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Napuštanje Disha zaustavlja prosljeđivanje, jer ga iOS suspenduje."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wenn du Dish verlässt, endet die Weiterleitung, weil iOS es anhält."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Salir de Dish detiene el reenvío, porque iOS lo suspende."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Quitter Dish arrête le transfert, car iOS le suspend."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sair do Dish interrompe o encaminhamento, porque o iOS o suspende."
           }
         }
       }
@@ -2414,6 +3842,40 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Barra de luz"
+          }
+        }
+      }
+    },
+    "Loading" : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Učitavanje"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lädt"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cargando"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Chargement"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Carregando"
           }
         }
       }
@@ -2521,6 +3983,40 @@
         }
       }
     },
+    "Medium tip" : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Srednja napojnica"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mittleres Trinkgeld"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Propina mediana"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pourboire moyen"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gorjeta média"
+          }
+        }
+      }
+    },
     "Microphone and controller speaker aren’t open to apps on iOS, so Dish leaves them out." : {
       "localizations" : {
         "bs" : {
@@ -2589,6 +4085,40 @@
         }
       }
     },
+    "Most disconnects come from Wi-Fi switching bands or the controller’s own wireless dropping." : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Većina prekida dolazi od Wi-Fija koji mijenja pojas ili od pada bežične veze samog kontrolera."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die meisten Verbindungsabbrüche entstehen, wenn das WLAN das Band wechselt oder die Funkverbindung des Controllers abreißt."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La mayoría de las desconexiones vienen de la Wi-Fi cambiando de banda o de la caída del inalámbrico del propio mando."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La plupart des déconnexions viennent du Wi-Fi qui change de bande ou de la liaison sans fil de la manette qui lâche."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A maioria das desconexões vem do Wi-Fi trocando de banda ou do próprio sem fio do controle caindo."
+          }
+        }
+      }
+    },
     "Motion" : {
       "localizations" : {
         "bs" : {
@@ -2619,6 +4149,210 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Movimento"
+          }
+        }
+      }
+    },
+    "Motion (gyro aim) isn’t working." : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pokret (žiro nišanjenje) ne radi."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bewegung (Gyro-Zielen) funktioniert nicht."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El movimiento (puntería con giro) no funciona."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Le mouvement (visée gyro) ne fonctionne pas."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O movimento (mira giroscópica) não está funcionando."
+          }
+        }
+      }
+    },
+    "Motion is a controller’s gyroscope used as aim assist, forwarded as the gyro inside a PlayStation pad." : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pokret je žiroskop kontrolera koji se koristi kao pomoć pri nišanjenju i prosljeđuje se kao žiro unutar PlayStation pada."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bewegung ist das Gyroskop eines Controllers als Zielhilfe, weitergeleitet als das Gyro in einem PlayStation-Pad."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El movimiento es el giroscopio de un mando usado como ayuda de puntería, reenviado como el giro que hay dentro de un mando PlayStation."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Le mouvement, c'est le gyroscope d'une manette utilisé comme aide à la visée, transmis comme le gyro d'une manette PlayStation."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Movimento é o giroscópio de um controle usado como auxílio de mira, encaminhado como o giroscópio de dentro de um controle PlayStation."
+          }
+        }
+      }
+    },
+    "Motion needs three things: a Satellite connection, a controller with a gyroscope (DualSense, DualShock 4, Switch Pro)," : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Za pokret su potrebne tri stvari: Satellite veza, kontroler sa žiroskopom (DualSense, DualShock 4, Switch Pro)"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bewegung braucht drei Dinge: eine Satellite-Verbindung, einen Controller mit Gyroskop (DualSense, DualShock 4, Switch Pro)"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El movimiento necesita tres cosas: una conexión Satellite, un mando con giroscopio (DualSense, DualShock 4, Switch Pro)"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Le mouvement nécessite trois choses : une connexion Satellite, une manette dotée d'un gyroscope (DualSense, DualShock 4, Switch Pro)"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O movimento precisa de três coisas: uma conexão Satellite, um controle com giroscópio (DualSense, DualShock 4, Switch Pro)"
+          }
+        }
+      }
+    },
+    "My PIN keeps getting rejected." : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "PIN mi se stalno odbija."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Meine PIN wird immer wieder abgelehnt."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mi PIN se rechaza una y otra vez."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mon PIN est systématiquement refusé."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Meu PIN continua sendo recusado."
+          }
+        }
+      }
+    },
+    "My controller doesn’t show up." : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Moj kontroler se ne pojavljuje."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mein Controller wird nicht angezeigt."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mi mando no aparece."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ma manette n’apparaît pas."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Meu controle não aparece."
+          }
+        }
+      }
+    },
+    "My controller keeps disconnecting mid-game." : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kontroler mi se stalno prekida usred igre."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mein Controller trennt sich immer wieder mitten im Spiel."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mi mando se desconecta a mitad de partida."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ma manette se déconnecte sans arrêt en pleine partie."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Meu controle fica desconectando no meio do jogo."
           }
         }
       }
@@ -2963,6 +4697,40 @@
         }
       }
     },
+    "No license manifest" : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nema manifesta licenci"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kein Lizenzmanifest"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sin manifiesto de licencias"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aucun manifeste de licence"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sem manifesto de licenças"
+          }
+        }
+      }
+    },
     "Not bound" : {
       "localizations" : {
         "bs" : {
@@ -3269,6 +5037,40 @@
         }
       }
     },
+    "Once iOS sees the controller, it appears on the Controllers tab." : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Čim ga iOS vidi, kontroler se pojavljuje na kartici Kontroleri."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sobald iOS den Controller sieht, erscheint er im Tab Controller."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "En cuanto iOS ve el mando, aparece en la pestaña Mandos."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dès qu’iOS voit la manette, elle apparaît dans l’onglet Manettes."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Assim que o iOS vê o controle, ele aparece na aba Controles."
+          }
+        }
+      }
+    },
     "Online" : {
       "localizations" : {
         "bs" : {
@@ -3367,6 +5169,40 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Abrir Ajustes"
+          }
+        }
+      }
+    },
+    "Open source licenses" : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Licence otvorenog koda"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Open-Source-Lizenzen"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Licencias de código abierto"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Licences open source"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Licenças de código aberto"
           }
         }
       }
@@ -3470,6 +5306,74 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Os PCs com Satellite nesta Wi‑Fi aparecem aqui."
+          }
+        }
+      }
+    },
+    "Pair it in Settings › Bluetooth first, or plug it in." : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prvo ga uparite u Postavke › Bluetooth ili ga priključite kablom."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kopple ihn zuerst unter Einstellungen › Bluetooth oder schließe ihn per Kabel an."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Emparéjalo primero en Ajustes › Bluetooth o conéctalo con cable."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Appairez-la d’abord dans Réglages › Bluetooth, ou branchez-la."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pareie-o primeiro em Ajustes › Bluetooth ou conecte-o com cabo."
+          }
+        }
+      }
+    },
+    "Pair it with this iPhone in Settings › Bluetooth, or plug it in with a cable." : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uparite ga s ovim iPhoneom u Postavke › Bluetooth ili ga priključite kablom."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kopple ihn unter Einstellungen › Bluetooth mit diesem iPhone oder schließe ihn per Kabel an."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Emparéjalo con este iPhone en Ajustes › Bluetooth o conéctalo con un cable."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Appairez-la à cet iPhone dans Réglages › Bluetooth, ou branchez-la avec un câble."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pareie-o com este iPhone em Ajustes › Bluetooth ou conecte-o com um cabo."
           }
         }
       }
@@ -3749,6 +5653,108 @@
         }
       }
     },
+    "Privacy policy" : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Politika privatnosti"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Datenschutzerklärung"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Política de privacidad"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Politique de confidentialité"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Política de privacidade"
+          }
+        }
+      }
+    },
+    "Pull requests welcome." : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pull requestovi su dobrodošli."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pull Requests sind willkommen."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Los pull requests son bienvenidos."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Les pull requests sont les bienvenues."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pull requests são bem-vindos."
+          }
+        }
+      }
+    },
+    "Put the PC on wired Ethernet and this iPhone on 5 GHz Wi-Fi, both on the same router." : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stavite PC na žičani Ethernet, a ovaj iPhone na 5 GHz Wi-Fi, oba na istom usmjerivaču."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Häng den PC per Kabel ans Ethernet und dieses iPhone ins 5-GHz-WLAN, beide am selben Router."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pon el PC en Ethernet por cable y este iPhone en Wi-Fi de 5 GHz, ambos en el mismo router."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mettez le PC en Ethernet filaire et cet iPhone en Wi-Fi 5 GHz, tous deux sur le même routeur."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Coloque o PC no Ethernet com fio e este iPhone no Wi-Fi de 5 GHz, ambos no mesmo roteador."
+          }
+        }
+      }
+    },
     "Reconnect" : {
       "localizations" : {
         "bs" : {
@@ -3779,6 +5785,40 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Reconectar"
+          }
+        }
+      }
+    },
+    "Restore purchases" : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vrati kupovine"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Käufe wiederherstellen"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Restaurar compras"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Restaurer les achats"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Restaurar compras"
           }
         }
       }
@@ -3953,6 +5993,40 @@
         }
       }
     },
+    "Satellite is a small, free, open-source program that runs on the host PC." : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Satellite je mali, besplatan program otvorenog koda koji radi na PC-u domaćinu."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Satellite ist ein kleines, kostenloses Open-Source-Programm, das auf dem Host-PC läuft."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Satellite es un programa pequeño, gratuito y de código abierto que se ejecuta en el PC anfitrión."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Satellite est un petit programme gratuit et open source qui s'exécute sur le PC hôte."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O Satellite é um programa pequeno, gratuito e de código aberto que roda no PC anfitrião."
+          }
+        }
+      }
+    },
     "Satellite is the fastest path." : {
       "localizations" : {
         "bs" : {
@@ -4056,6 +6130,40 @@
         }
       }
     },
+    "See the privacy policy for the full list." : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cijeli spisak potražite u politici privatnosti."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die vollständige Liste findest du in der Datenschutzerklärung."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Consulta la política de privacidad para ver la lista completa."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Consultez la politique de confidentialité pour la liste complète."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Veja a política de privacidade para a lista completa."
+          }
+        }
+      }
+    },
     "Sends to PC" : {
       "comment" : "Column heading: what the controller sends to the PC.",
       "localizations" : {
@@ -4087,6 +6195,40 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Envia ao PC"
+          }
+        }
+      }
+    },
+    "Set Emulate as to DualSense or DualShock 4 on the controller’s page to enable the motion channel." : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Postavite Emuliraj kao na DualSense ili DualShock 4 na stranici kontrolera da omogućite kanal za pokret."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stelle Emulieren als auf der Seite des Controllers auf DualSense oder DualShock 4, um den Bewegungskanal zu aktivieren."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pon Emular como en DualSense o DualShock 4 en la página del mando para habilitar el canal de movimiento."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Réglez Émuler comme sur DualSense ou DualShock 4 dans la page de la manette pour activer le canal de mouvement."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Defina Emular como para DualSense ou DualShock 4 na página do controle para habilitar o canal de movimento."
           }
         }
       }
@@ -4325,6 +6467,74 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Pular"
+          }
+        }
+      }
+    },
+    "Small tip" : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mala napojnica"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kleines Trinkgeld"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Propina pequeña"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Petit pourboire"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gorjeta pequena"
+          }
+        }
+      }
+    },
+    "Source code" : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Izvorni kod"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Quellcode"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Código fuente"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Code source"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Código-fonte"
           }
         }
       }
@@ -4602,6 +6812,40 @@
         }
       }
     },
+    "Support Dish" : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Podržite Dish"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dish unterstützen"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apoyar Dish"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Soutenir Dish"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apoiar o Dish"
+          }
+        }
+      }
+    },
     "Switch Pro" : {
       "localizations" : {
         "bs" : {
@@ -4704,6 +6948,74 @@
         }
       }
     },
+    "TROUBLESHOOTING" : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "RJEŠAVANJE PROBLEMA"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "FEHLERBEHEBUNG"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "SOLUCIÓN DE PROBLEMAS"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "DÉPANNAGE"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "SOLUÇÃO DE PROBLEMAS"
+          }
+        }
+      }
+    },
+    "Tap the dimmed screen to wake it, and set the delay in Settings › Dim screen after." : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dodirnite zatamnjeni ekran da ga probudite, a kašnjenje postavite u Podešavanja › Zatamni ekran nakon."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tippe auf den abgedunkelten Bildschirm, um ihn aufzuwecken, und stelle die Wartezeit unter Einstellungen › Bildschirm abdunkeln nach ein."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Toca la pantalla atenuada para despertarla y ajusta la espera en Ajustes › Atenuar la pantalla tras."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Touchez l’écran assombri pour le réveiller, et réglez le délai dans Paramètres › Assombrir l’écran après."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Toque na tela escurecida para ativá-la e ajuste a espera em Configurações › Escurecer a tela após."
+          }
+        }
+      }
+    },
     "Tap to wake" : {
       "localizations" : {
         "bs" : {
@@ -4738,6 +7050,176 @@
         }
       }
     },
+    "Thank you" : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hvala vam"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Danke"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gracias"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Merci"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Obrigado"
+          }
+        }
+      }
+    },
+    "The App Store couldn’t complete the tip." : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "App Store nije mogao dovršiti napojnicu."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Der App Store konnte das Trinkgeld nicht abschließen."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El App Store no pudo completar la propina."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "L’App Store n’a pas pu finaliser le pourboire."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A App Store não conseguiu concluir a gorjeta."
+          }
+        }
+      }
+    },
+    "The App Store handles the payment." : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Plaćanje obrađuje App Store."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die Zahlung wickelt der App Store ab."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El App Store gestiona el pago."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "L’App Store gère le paiement."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A App Store cuida do pagamento."
+          }
+        }
+      }
+    },
+    "The PIN is shown by Satellite on the host PC and changes if you restart it." : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "PIN prikazuje Satellite na PC-u domaćinu i mijenja se ako ga ponovo pokrenete."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die PIN wird von Satellite auf dem Host-PC angezeigt und ändert sich, wenn du es neu startest."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Satellite muestra el PIN en el PC anfitrión y cambia si lo reinicias."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Le PIN est affiché par Satellite sur le PC hôte et change si vous le redémarrez."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O PIN é exibido pelo Satellite no PC anfitrião e muda se você reiniciá-lo."
+          }
+        }
+      }
+    },
+    "The bundled acknowledgements could not be read from this build." : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Priložene zahvale nije bilo moguće pročitati iz ovog builda."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die mitgelieferten Danksagungen konnten aus diesem Build nicht gelesen werden."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No se pudieron leer los reconocimientos incluidos en esta versión."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Les mentions incluses n'ont pas pu être lues depuis cette version."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Não foi possível ler os créditos incluídos nesta versão."
+          }
+        }
+      }
+    },
     "The other pads are in the menu." : {
       "localizations" : {
         "bs" : {
@@ -4768,6 +7250,142 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Os outros controles estão no menu."
+          }
+        }
+      }
+    },
+    "The source is on GitHub at github.com/TinkerNorth." : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Izvorni kod je na GitHubu, na github.com/TinkerNorth."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Der Quellcode liegt auf GitHub unter github.com/TinkerNorth."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El código está en GitHub, en github.com/TinkerNorth."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Le code source est sur GitHub à github.com/TinkerNorth."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O código está no GitHub em github.com/TinkerNorth."
+          }
+        }
+      }
+    },
+    "The touchpad forwards a DualSense / DualShock 4 touchpad." : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dodirna ploča prosljeđuje dodirnu ploču s DualSensea / DualShocka 4."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Das Touchpad leitet ein DualSense- / DualShock-4-Touchpad weiter."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El panel táctil reenvía el panel táctil de un DualSense / DualShock 4."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Le pavé tactile transmet le pavé d'une DualSense / DualShock 4."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O touchpad encaminha o touchpad de um DualSense / DualShock 4."
+          }
+        }
+      }
+    },
+    "There’s no tip to restore." : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nema napojnice za vraćanje."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Es gibt kein Trinkgeld zum Wiederherstellen."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No hay ninguna propina que restaurar."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aucun pourboire à restaurer."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Não há gorjeta para restaurar."
+          }
+        }
+      }
+    },
+    "They pay for the time that goes into Dish and Satellite." : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "One plaćaju vrijeme uloženo u Dish i Satellite."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sie bezahlen die Zeit, die in Dish und Satellite fließt."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pagan el tiempo que se dedica a Dish y Satellite."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ils paient le temps consacré à Dish et Satellite."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Elas pagam o tempo dedicado ao Dish e ao Satellite."
           }
         }
       }
@@ -4836,6 +7454,108 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Este iPhone"
+          }
+        }
+      }
+    },
+    "Tips" : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Napojnice"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Trinkgeld"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Propinas"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pourboires"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gorjetas"
+          }
+        }
+      }
+    },
+    "Tips are App Store in-app purchases that unlock nothing: every feature of Dish stays free." : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Napojnice su kupovine unutar aplikacije preko App Storea koje ništa ne otključavaju: svaka funkcija Disha ostaje besplatna."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Trinkgelder sind In-App-Käufe im App Store, die nichts freischalten: Jede Funktion von Dish bleibt kostenlos."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Las propinas son compras dentro de la app del App Store que no desbloquean nada: todas las funciones de Dish siguen siendo gratis."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Les pourboires sont des achats intégrés de l’App Store qui ne débloquent rien : chaque fonction de Dish reste gratuite."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gorjetas são compras dentro do app pela App Store que não desbloqueiam nada: todo recurso do Dish continua grátis."
+          }
+        }
+      }
+    },
+    "Tips aren’t available right now." : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Napojnice trenutno nisu dostupne."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Trinkgeld ist gerade nicht verfügbar."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Las propinas no están disponibles ahora mismo."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Les pourboires ne sont pas disponibles pour le moment."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "As gorjetas não estão disponíveis agora."
           }
         }
       }
@@ -4938,6 +7658,40 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Efeitos dos gatilhos"
+          }
+        }
+      }
+    },
+    "Try again" : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pokušaj ponovo"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Erneut versuchen"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Intentar de nuevo"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Réessayer"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tentar de novo"
           }
         }
       }
@@ -5182,6 +7936,108 @@
         }
       }
     },
+    "View source on GitHub" : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pogledaj izvorni kod na GitHubu"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Quellcode auf GitHub ansehen"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ver el código en GitHub"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Voir le code source sur GitHub"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ver o código no GitHub"
+          }
+        }
+      }
+    },
+    "Walk me through setup" : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Provedi me kroz postavljanje"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Setup-Anleitung öffnen"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Guíame paso a paso"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Guidez-moi pour la configuration"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Me guie pela configuração"
+          }
+        }
+      }
+    },
+    "Website" : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Web stranica"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Website"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sitio web"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Site web"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Site"
+          }
+        }
+      }
+    },
     "What carries" : {
       "localizations" : {
         "bs" : {
@@ -5216,6 +8072,244 @@
         }
       }
     },
+    "What do tips pay for?" : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Šta plaćaju napojnice?"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wofür sind Trinkgelder?"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "¿Qué pagan las propinas?"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "À quoi servent les pourboires ?"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O que as gorjetas pagam?"
+          }
+        }
+      }
+    },
+    "What does Dish collect?" : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Što Dish prikuplja?"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Was erfasst Dish?"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "¿Qué recopila Dish?"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Que collecte Dish ?"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O que o Dish coleta?"
+          }
+        }
+      }
+    },
+    "What is Dish?" : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Što je Dish?"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Was ist Dish?"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "¿Qué es Dish?"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Qu'est-ce que Dish ?"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O que é o Dish?"
+          }
+        }
+      }
+    },
+    "What is Satellite?" : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Što je Satellite?"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Was ist Satellite?"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "¿Qué es Satellite?"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Qu'est-ce que Satellite ?"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O que é o Satellite?"
+          }
+        }
+      }
+    },
+    "What’s motion and what’s the touchpad?" : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Što je pokret, a što dodirna ploča?"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Was ist Bewegung und was ist das Touchpad?"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "¿Qué son el movimiento y el panel táctil?"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Qu'est-ce que le mouvement et le pavé tactile ?"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O que é o movimento e o que é o touchpad?"
+          }
+        }
+      }
+    },
+    "What’s the best setup for low latency?" : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Koja je najbolja postavka za nisko kašnjenje?"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Was ist das beste Setup für niedrige Latenz?"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "¿Cuál es la mejor configuración para tener poca latencia?"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Quelle est la meilleure configuration pour une faible latence ?"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Qual é a melhor configuração para baixa latência?"
+          }
+        }
+      }
+    },
+    "While a controller is forwarded, Dish keeps the screen on and dims it instead of locking." : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dok se kontroler prosljeđuje, Dish drži ekran uključenim i zatamnjuje ga umjesto zaključavanja."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Solange ein Controller weitergeleitet wird, hält Dish den Bildschirm an und dunkelt ihn ab, statt zu sperren."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mientras se reenvía un mando, Dish mantiene la pantalla encendida y la atenúa en lugar de bloquearla."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pendant qu’une manette est transférée, Dish garde l’écran allumé et l’assombrit au lieu de le verrouiller."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Enquanto um controle é encaminhado, o Dish mantém a tela ligada e a escurece em vez de bloquear."
+          }
+        }
+      }
+    },
     "While streaming" : {
       "localizations" : {
         "bs" : {
@@ -5246,6 +8340,40 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Durante a transmissão"
+          }
+        }
+      }
+    },
+    "Why does Dish keep the screen on?" : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zašto Dish drži ekran uključenim?"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Warum hält Dish den Bildschirm an?"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "¿Por qué Dish mantiene la pantalla encendida?"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pourquoi Dish garde-t-il l’écran allumé ?"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Por que o Dish mantém a tela ligada?"
           }
         }
       }
@@ -5318,6 +8446,74 @@
         }
       }
     },
+    "Without Satellite, games can’t see your controller." : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bez programa Satellite igre ne mogu vidjeti vaš kontroler."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ohne Satellite können Spiele deinen Controller nicht sehen."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sin Satellite, los juegos no pueden ver tu mando."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sans Satellite, les jeux ne peuvent pas voir votre manette."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sem o Satellite, os jogos não conseguem ver o seu controle."
+          }
+        }
+      }
+    },
+    "Without it, Dish can’t find or reach your PC." : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bez te dozvole Dish ne može pronaći niti dosegnuti vaš PC."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ohne diese Freigabe kann Dish deinen PC weder finden noch erreichen."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sin ese permiso, Dish no puede encontrar ni alcanzar tu PC."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sans cette autorisation, Dish ne peut ni trouver ni joindre votre PC."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sem essa permissão, o Dish não consegue encontrar nem alcançar seu PC."
+          }
+        }
+      }
+    },
     "Xbox Wireless" : {
       "localizations" : {
         "bs" : {
@@ -5382,6 +8578,40 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "O Xbox Wireless transmite vibração, sem movimento nem touchpad."
+          }
+        }
+      }
+    },
+    "Yes." : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Da."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ja."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sí."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Oui."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sim."
           }
         }
       }
@@ -5454,6 +8684,74 @@
         }
       }
     },
+    "Your tip is waiting for approval." : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vaša napojnica čeka odobrenje."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dein Trinkgeld wartet auf Freigabe."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tu propina está esperando aprobación."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Votre pourboire attend une approbation."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sua gorjeta está aguardando aprovação."
+          }
+        }
+      }
+    },
+    "Your tip keeps Dish free for everyone." : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vaša napojnica čuva Dish besplatnim za sve."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dein Trinkgeld hält Dish für alle kostenlos."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tu propina mantiene Dish gratis para todos."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Votre pourboire garde Dish gratuit pour tous."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sua gorjeta mantém o Dish grátis para todos."
+          }
+        }
+      }
+    },
     "Yours to change later" : {
       "localizations" : {
         "bs" : {
@@ -5488,6 +8786,40 @@
         }
       }
     },
+    "and a PlayStation-style controller type on the slot." : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "i tip kontrolera u PlayStation stilu na slotu."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "und einen Controller-Typ im PlayStation-Stil auf dem Slot."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "y un tipo de mando estilo PlayStation en la ranura."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "et un type de manette de style PlayStation sur l'emplacement."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "e um tipo de controle estilo PlayStation no slot."
+          }
+        }
+      }
+    },
     "iOS asks before any app looks for devices on your network." : {
       "localizations" : {
         "bs" : {
@@ -5518,6 +8850,40 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "O iOS pergunta antes de qualquer app procurar dispositivos na sua rede."
+          }
+        }
+      }
+    },
+    "iOS asks once whether Dish may use the local network, the first time Dish looks for your PC." : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "iOS jednom pita smije li Dish koristiti lokalnu mrežu, prvi put kada Dish traži vaš PC."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "iOS fragt einmal, ob Dish das lokale Netzwerk nutzen darf, wenn Dish zum ersten Mal nach deinem PC sucht."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "iOS pregunta una vez si Dish puede usar la red local, la primera vez que Dish busca tu PC."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "iOS demande une seule fois si Dish peut utiliser le réseau local, la première fois que Dish cherche votre PC."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O iOS pergunta uma vez se o Dish pode usar a rede local, na primeira vez que o Dish procura seu PC."
           }
         }
       }
@@ -5586,6 +8952,40 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "O iOS pausa os apps que você deixa, então o Dish fica aberto e escurece em vez de bloquear."
+          }
+        }
+      }
+    },
+    "iOS suspends an app you leave, and a suspended Dish stops forwarding." : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "iOS suspenduje aplikaciju koju napustite, a suspendovan Dish prestaje prosljeđivati."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "iOS hält eine App an, die du verlässt, und ein angehaltenes Dish leitet nichts mehr weiter."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "iOS suspende la app que dejas, y un Dish suspendido deja de reenviar."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "iOS suspend l’app que vous quittez, et un Dish suspendu cesse le transfert."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O iOS suspende o app que você deixa, e um Dish suspenso para de encaminhar."
           }
         }
       }
