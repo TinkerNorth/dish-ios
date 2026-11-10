@@ -35,10 +35,17 @@ package extension AppModel {
             name: "",
             link: .onScreen,
             batteryPercent: nil,
-            destination: nil,
+            destination: destination(slotId: onScreenSlotId),
             emulateAs: onScreenEmulateAs,
             features: carried.map { ControllerFeatureFact(feature: $0, enabled: switches.isOn($0)) }
         )]
+    }
+
+    /// What the on-screen gamepad claims on a satellite: the phone's motion
+    /// when it has the sensors, the touchpad screen, and the Taptic Engine
+    /// as its rumble.
+    internal var onScreenCapabilities: ControllerCapabilities {
+        ControllerCapabilities(hasMotion: onScreen.hasMotionSensor, hasTouchpad: true, hasRumble: true)
     }
 
     func openPlay(_ screen: PlayScreen) {
@@ -84,11 +91,12 @@ package extension AppModel {
         syncPlayMotion()
     }
 
-    /// Stop gamepad: the screen closes and the on-screen controller leaves
-    /// the controllers, so nothing routes it any more.
+    /// Stop gamepad: the screen closes, the on-screen controller lets its
+    /// PC go and leaves the controllers, so nothing routes it any more.
     func stopOnScreenGamepad() {
         closePlay()
         onScreenListed.setState(false)
+        unbind(slotId: onScreenSlotId)
     }
 
     func onScreenPad(_ event: OnScreenPadEvent) {

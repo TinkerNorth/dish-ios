@@ -51,6 +51,7 @@ func pageTitle(_ page: Page, words: L10n = .app) -> String {
     switch page {
     case .deviceName: words.nameOnYourPC
     case .controller: words.controller
+    case .pcDetail: words.pc
     case .help: words.helpAndFaq
     case .licenses: words.openSourceLicenses
     case .support: words.supportDish
@@ -75,6 +76,12 @@ private func tabBadge(_ tab: Tab, facts: ShellFacts) -> Int? {
     case .connections: connectionsBadge(session: facts.session)
     case .controllers, .settings: nil
     }
+}
+
+/// The satellite whose card the model opened, which the shell's pair sheet
+/// follows; nil lowers the sheet.
+func pairingSheetId(_ open: OpenPairing?) -> String? {
+    open?.server.id
 }
 
 /// One badge while the session's PC has stopped responding, shown once.

@@ -21,13 +21,33 @@ lockstep across the repos share a version number.
 ## [Unreleased]
 
 The shell, the protocol core, the controller bridge, the network engine, the
-play screens, Help, Support and Licenses are built: the engine finds, pairs
-with and streams to a Satellite, and the on-screen controller and every pad
-iOS sees reach it through the hot path. The pages for pairing, a PC and the
-binding come next; `Tests/PARITY.md` lists everything not built.
+play screens, Help, Support and Licenses, the pair sheet, the Connections
+rows and the PC's page are built: a PC is found, paired with from a row, from
+setup or by its address, bound to a pad or the on-screen gamepad, and streamed
+to. `Tests/PARITY.md` lists everything not built.
 
 ### Added
 
+- **Pairing and connections.** The pair sheet (B5), from Pair on a found or
+  revoked row, from Pick your PC, from Re-pair on a PC's page and from a PC
+  that asks for a PIN as it is connected to: the satellite's PIN typed into
+  four cells and "Accept on your PC" with this iPhone's code, both at once,
+  the outcomes worded (declined or expired with Try again, a refused PIN,
+  a changed identity, another version), and Rename this iPhone. The
+  Connections rows live (D1): paired PCs online with their latency and
+  controllers, offline with when they were seen and Connect, or with Pair
+  once the PC revoked the key; the PCs found on the Wi-Fi with Pair; a scan
+  as the tab opens; and the plus that adds a PC by its address, in one
+  field with the default port named under it. The PC's page (D2): the status
+  card with the satellite's version and protocol, what it carries each way,
+  the controllers it carries on their slots, Re-pair, Disconnect or Connect,
+  and Forget This PC, which asks first. The session accessory's Reconnect,
+  the Connections badge and "Connection lost" on the rows of a PC that
+  stopped responding (D4). The controller page's Binding: the PC with
+  Unbind, or Bind to a paired PC, with the apply drawn inline and on the
+  Controllers row where setup's Bind lands. Setup's Bind now binds the
+  on-screen gamepad and a PC added by address like any pad. Every failure
+  the engine reports has its words.
 - **The network engine: the engine can now find, pair with and stream to a
   Satellite.** A Bonjour browse for `_satellite._udp` that also reads the
   Local Network permission (iOS asks at the first scan, after setup's

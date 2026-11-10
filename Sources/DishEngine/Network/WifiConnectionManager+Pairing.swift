@@ -9,7 +9,8 @@ extension WifiConnectionManager {
     /// TTL: once the request can no longer be accepted there, waiting ends.
     package struct ApprovalPolling {
         let intervalMs: Int
-        let timeoutMs: Int
+        /// How long the satellite keeps the request; the card words it.
+        package let timeoutMs: Int
 
         package static let standard = ApprovalPolling(intervalMs: 2000, timeoutMs: 120_000)
     }

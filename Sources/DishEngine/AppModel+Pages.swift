@@ -5,7 +5,8 @@ import Foundation
 
 /// A page that needs something running only while it is on screen.
 package enum ShownPage: Equatable {
-    /// Words an offline PC's last sighting, so it runs the clock.
+    /// Words an offline PC's last sighting, so it runs the clock, and looks
+    /// for PCs on the Wi‑Fi as it opens.
     case connections
     /// Asks the App Store what it sells each time it opens.
     case support
@@ -14,6 +15,8 @@ package enum ShownPage: Equatable {
     /// Diagnostics re-reads the sessions' words, the pads' rates and the
     /// lock statistics once a second while it shows.
     case diagnostics
+    /// The Add a PC by address sheet words only its own attempt's failure.
+    case addByAddress
 }
 
 /// The pages' lifecycle intents.
@@ -23,7 +26,11 @@ package extension AppModel {
     @discardableResult
     func pageAppeared(_ page: ShownPage) -> Task<Void, Never>? {
         switch page {
-        case .connections, .dim:
+        case .connections:
+            clock.start()
+            localNetwork.scan()
+            return nil
+        case .dim:
             clock.start()
             return nil
         case .support:
@@ -31,13 +38,16 @@ package extension AppModel {
         case .diagnostics:
             diagnostics.start()
             return nil
+        case .addByAddress:
+            lastConnectionEvent = nil
+            return nil
         }
     }
 
     func pageDisappeared(_ page: ShownPage) {
         switch page {
         case .connections, .dim: clock.stop()
-        case .support: break
+        case .support, .addByAddress: break
         case .diagnostics: diagnostics.stop()
         }
     }

@@ -6,12 +6,15 @@ import DishEngine
 import SwiftUI
 
 /// B4, Destination · 2 of 3: the Satellite PCs on this Wi‑Fi first, then a
-/// Moonlight host, a PC by address and the Satellite download. With Local
-/// Network off, the refusal and Open Settings stand in for the list.
+/// Moonlight host, a PC by address and the Satellite download. A PC that
+/// wants a PIN opens the pair sheet as it is picked; Add a PC by address
+/// opens its sheet. With Local Network off, the refusal and Open Settings
+/// stand in for the list.
 struct PickPCStep: View {
     let state: PickPCStepState
 
     @Environment(AppModel.self) private var model
+    @Environment(NavigationStore.self) private var navigation
     @Environment(\.openURL) private var openURL
     @Environment(\.settingsURL) private var settingsURL
 
@@ -26,7 +29,7 @@ struct PickPCStep: View {
             Section {
                 MoonlightRow(section: state.moonlight)
                 ForEach(state.moonlight.hosts) { host in
-                    SetupPCRowView(row: host, pick: model.pickSetupDestination)
+                    SetupPCRowView(row: host, pick: model.pickSetupDestination, pair: openPair)
                 }
                 Button(action: addByAddress) {
                     Label(state.byAddress, systemImage: DishSymbol.add)
@@ -48,7 +51,7 @@ struct PickPCStep: View {
         switch list {
         case let .rows(rows):
             ForEach(rows) { row in
-                SetupPCRowView(row: row, pick: model.pickSetupDestination)
+                SetupPCRowView(row: row, pick: model.pickSetupDestination, pair: openPair)
             }
         case let .nothingYet(text):
             Text(text)
@@ -59,8 +62,13 @@ struct PickPCStep: View {
         }
     }
 
+    private func openPair(_ serverId: String) {
+        navigation.send(.openSheet(.pair(serverId: serverId)))
+    }
+
     private func addByAddress() {
         model.pickSetupDestination(.byAddress)
+        navigation.send(.openSheet(.addByAddress))
     }
 
     private func openSatellite() {
@@ -116,10 +124,12 @@ private struct MoonlightRow: View {
     }
 }
 
-/// A PC Dish heard: its name in mono, the pairing dot and the address.
+/// A PC Dish heard: its name in mono, the pairing dot and the address. A
+/// pick moves the walk on, and pairs first with a PC that wants a PIN.
 private struct SetupPCRowView: View {
     let row: SetupPCRow
     let pick: (DestinationPick) -> Void
+    let pair: (String) -> Void
 
     var body: some View {
         Button(action: choose) {
@@ -146,6 +156,7 @@ private struct SetupPCRowView: View {
 
     private func choose() {
         pick(row.pick)
+        if let serverId = row.pairServerId { pair(serverId) }
     }
 }
 
@@ -176,14 +187,17 @@ private struct SetupRefusalView: View {
 #Preview("Nothing heard") {
     PickPCStep(state: pickPCStepState(PreviewSetup.nothingSeen))
         .environment(PreviewSetup.emptyModel())
+        .environment(PreviewSetup.navigation())
 }
 
 #Preview("Searching, two PCs") {
     PickPCStep(state: pickPCStepState(PreviewSetup.padsAndPCs))
         .environment(PreviewSetup.emptyModel())
+        .environment(PreviewSetup.navigation())
 }
 
 #Preview("Local Network off") {
     PickPCStep(state: pickPCStepState(PreviewSetup.refused))
         .environment(PreviewSetup.emptyModel())
+        .environment(PreviewSetup.navigation())
 }

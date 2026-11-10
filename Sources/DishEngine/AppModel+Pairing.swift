@@ -4,14 +4,21 @@
 import DishCore
 import Foundation
 
-/// The open pairing card: its satellite and where its pairing stands.
+/// The open pairing card: its satellite, where its pairing stands, and how
+/// long the satellite keeps an operator request before it expires.
 package struct OpenPairing: Equatable {
     package let server: DiscoveredServer
     package let attempt: PairingAttempt
+    package let requestTimeoutMs: Int
 
-    package init(server: DiscoveredServer, attempt: PairingAttempt) {
+    package init(
+        server: DiscoveredServer,
+        attempt: PairingAttempt,
+        requestTimeoutMs: Int = WifiConnectionManager.ApprovalPolling.standard.timeoutMs
+    ) {
         self.server = server
         self.attempt = attempt
+        self.requestTimeoutMs = requestTimeoutMs
     }
 }
 
@@ -30,7 +37,7 @@ package extension AppModel {
     /// session took over, or it was cancelled).
     var openPairing: OpenPairing? {
         guard let server = pairingTarget, let attempt = pairingAttempts[server.id] else { return nil }
-        return OpenPairing(server: server, attempt: attempt)
+        return OpenPairing(server: server, attempt: attempt, requestTimeoutMs: network.wifi.approvalPolling.timeoutMs)
     }
 
     /// A row's Pair: the card opens and an operator request is filed.
@@ -63,6 +70,14 @@ package extension AppModel {
         if pairingTarget?.id == serverId {
             pairingTarget = nil
         }
+    }
+
+    /// Rename this iPhone on the card: the satellite shows the new name, so
+    /// a request it already holds is filed again under it.
+    func renameThisIPhone(_ serverId: String, to name: String) {
+        setDeviceName(name)
+        guard pairingAttempts[serverId]?.phase == .awaiting else { return }
+        newCode(serverId)
     }
 
     private func closeCard(otherThan id: String) {

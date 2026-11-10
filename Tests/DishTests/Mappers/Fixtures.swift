@@ -25,7 +25,9 @@ enum FactsFixture {
         setup: SetupState? = nil,
         play: PlayFacts? = nil,
         diagnostics: DiagnosticsSnapshot = DiagnosticsSnapshot(),
-        diagnosticsEvents: [DiagnosticsEvent] = []
+        diagnosticsEvents: [DiagnosticsEvent] = [],
+        apply: ApplyFact? = nil,
+        addedByAddress: String? = nil
     ) -> ShellFacts {
         ShellFacts(
             controllers: controllers,
@@ -40,7 +42,9 @@ enum FactsFixture {
             setup: setup,
             play: play,
             diagnostics: diagnostics,
-            diagnosticsEvents: diagnosticsEvents
+            diagnosticsEvents: diagnosticsEvents,
+            apply: apply,
+            addedByAddress: addedByAddress
         )
     }
 

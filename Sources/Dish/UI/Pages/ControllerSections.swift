@@ -26,23 +26,20 @@ struct ControllerStatusCard: View {
     }
 }
 
-/// BINDING › Destination, Emulate as.
+/// BINDING › Destination with Unbind, or Bind to a paired PC; the apply
+/// inline while one runs or just ended; Emulate as.
 struct ControllerBindingSection: View {
     let state: ControllerBindingState
-    let setEmulateAs: @MainActor (EmulatedPad) -> Void
+    let apply: ApplyRowState?
+    let actions: ControllerActions
 
     var body: some View {
         Section {
-            LabeledContent(state.destinationTitle) {
-                HStack(spacing: DishSpace.s4) {
-                    Text(state.destination).font(DishFont.mono)
-                    Image(systemName: DishSymbol.disclosure).font(DishFont.detail)
-                }
-                .foregroundStyle(DishTheme.muted)
+            destination
+            if let apply {
+                ApplyRow(state: apply, retry: actions.bind)
             }
-            .foregroundStyle(DishTheme.onSurface)
-            .disabled(!state.destinationEnabled)
-            Picker(state.emulateTitle, selection: Binding(get: { state.emulateAs }, set: { setEmulateAs($0) })) {
+            Picker(state.emulateTitle, selection: Binding(get: { state.emulateAs }, set: { actions.setEmulateAs($0) })) {
                 ForEach(state.emulateOptions) { Text($0.name).tag($0.pad) }
             }
             .pickerStyle(.menu)
@@ -51,6 +48,70 @@ struct ControllerBindingSection: View {
             SectionEyebrow(title: state.title, color: DishTheme.muted)
         }
         .listRowBackground(DishTheme.surface)
+    }
+
+    @ViewBuilder private var destination: some View {
+        switch state.destination {
+        case let .bound(pcName, dot, unbind):
+            LabeledContent(state.destinationTitle) {
+                HStack(spacing: DishSpace.s3) {
+                    StatusDot(color: dot)
+                    Text(pcName).font(DishFont.mono)
+                }
+            }
+            .foregroundStyle(DishTheme.onSurface)
+            Button(unbind, role: .destructive, action: actions.unbind)
+        case let .unbound(bindTo, choices, hint):
+            Menu {
+                ForEach(choices) { choice in
+                    Button(choice.name) { actions.bind(choice.id) }
+                }
+            } label: {
+                BindToRow(title: state.destinationTitle, bindTo: bindTo)
+            }
+            .disabled(choices.isEmpty)
+            if let hint {
+                Text(hint).font(DishFont.detail).foregroundStyle(DishTheme.muted)
+            }
+        }
+    }
+}
+
+/// Destination · Bind to ›, the menu's label.
+private struct BindToRow: View {
+    let title: String
+    let bindTo: String
+
+    var body: some View {
+        HStack(spacing: DishSpace.s4) {
+            Text(title).foregroundStyle(DishTheme.onSurface)
+            Spacer()
+            Text(bindTo).font(DishFont.body).foregroundStyle(DishTheme.primary)
+            Image(systemName: DishSymbol.disclosure).font(DishFont.detail).foregroundStyle(DishTheme.muted)
+        }
+        .contentShape(Rectangle())
+    }
+}
+
+/// Where the bind stands, with Try again once it failed.
+private struct ApplyRow: View {
+    let state: ApplyRowState
+    let retry: @MainActor (String) -> Void
+
+    var body: some View {
+        HStack(spacing: DishSpace.s4) {
+            if state.spinner {
+                ProgressView().controlSize(.small)
+            }
+            Text(state.text).font(DishFont.detail).foregroundStyle(state.color)
+            Spacer(minLength: DishSpace.s4)
+            if let title = state.retry {
+                Button(title) { retry(state.connectionId) }
+                    .buttonStyle(.bordered)
+                    .buttonBorderShape(.capsule)
+                    .font(DishFont.detail)
+            }
+        }
     }
 }
 

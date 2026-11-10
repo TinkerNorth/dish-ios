@@ -106,7 +106,9 @@ private struct ReviewEndRow: View {
     }
 }
 
-private struct CarryColumnView: View {
+/// Sends to PC or Gets back: the title over its checked and dashed rows.
+/// The PC's page draws the same two columns from the satellite's capabilities.
+struct CarryColumnView: View {
     let column: CarryColumn
 
     var body: some View {

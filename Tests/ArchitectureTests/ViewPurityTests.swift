@@ -182,11 +182,12 @@ final class ViewPurityTests: XCTestCase {
     }
 
     /// Every `var` an `AppModel` file declares without `private`: the stored
-    /// facts and the computed ones its extensions derive, which a view may draw.
+    /// facts (set only by the engine, `private(set)` or `internal(set)`) and
+    /// the computed ones its extensions derive, which a view may draw.
     private static func modelFacts() throws -> Set<String> {
-        let declaration = #"^\s*(package\s+)?(private\(set\)\s+)?var\s+(\w+)"#
+        let declaration = #"^\s*(package\s+)?((private|internal)\(set\)\s+)?var\s+(\w+)"#
         return try modelFiles.reduce(into: Set<String>()) { all, file in
-            try all.formUnion(names(in: RepoFiles.read(file), pattern: declaration, group: 3))
+            try all.formUnion(names(in: RepoFiles.read(file), pattern: declaration, group: 4))
         }
     }
 

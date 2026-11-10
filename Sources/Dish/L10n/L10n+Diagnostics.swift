@@ -58,7 +58,8 @@ extension L10n {
         catalog.text("Protocol")
     }
 
-    func protocolVersion(_ version: Int) -> String {
+    /// The short form beside the Protocol label: v3.
+    func protocolTag(_ version: Int) -> String {
         catalog.format("v%lld", version)
     }
 
@@ -68,14 +69,6 @@ extension L10n {
 
     var satelliteUpdateRecommended: String {
         catalog.text("Satellite update recommended")
-    }
-
-    var satelliteUpdateRequired: String {
-        catalog.text("Satellite update required")
-    }
-
-    var dishUpdateRequired: String {
-        catalog.text("Dish update required")
     }
 
     var localNetwork: String {

@@ -32,6 +32,10 @@ package struct ShellFacts: Equatable {
     package let diagnostics: DiagnosticsSnapshot
     /// The flight recorder's lines, oldest first.
     package let diagnosticsEvents: [DiagnosticsEvent]
+    /// The bind in flight or just ended; nil while there is none.
+    package let apply: ApplyFact?
+    /// The PC added by its address this run, by id; nil until one is.
+    package let addedByAddress: String?
 
     package init(
         controllers: [ControllerFact],
@@ -47,7 +51,9 @@ package struct ShellFacts: Equatable {
         support: SupportFacts = .initial,
         play: PlayFacts? = nil,
         diagnostics: DiagnosticsSnapshot = DiagnosticsSnapshot(),
-        diagnosticsEvents: [DiagnosticsEvent] = []
+        diagnosticsEvents: [DiagnosticsEvent] = [],
+        apply: ApplyFact? = nil,
+        addedByAddress: String? = nil
     ) {
         self.controllers = controllers
         self.attachedPads = attachedPads
@@ -63,5 +69,7 @@ package struct ShellFacts: Equatable {
         self.play = play
         self.diagnostics = diagnostics
         self.diagnosticsEvents = diagnosticsEvents
+        self.apply = apply
+        self.addedByAddress = addedByAddress
     }
 }

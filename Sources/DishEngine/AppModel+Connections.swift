@@ -39,7 +39,24 @@ package extension AppModel {
     }
 
     private func pairedFact(_ row: ConnectionSummary) -> ConnectionFact {
-        ConnectionFact(id: row.id, name: row.name, address: row.address, kind: row.kind, state: connectionState(row))
+        let probe = network.wifi.capabilities[row.id]
+        return ConnectionFact(
+            id: row.id,
+            name: row.name,
+            address: row.address,
+            kind: row.kind,
+            state: connectionState(row),
+            boundControllerIds: row.boundSlotIds,
+            satelliteVersion: probe.flatMap(satelliteVersion),
+            protocolVersion: sessionProtocolVersion(row),
+            features: probe.map { SatelliteFeaturesFact(motion: $0.motionAvailable, rumble: $0.host.rumble.available) }
+        )
+    }
+
+    /// The version a live session speaks; nil while none is up.
+    private func sessionProtocolVersion(_ row: ConnectionSummary) -> Int? {
+        guard sessionIsUp(row.live) else { return nil }
+        return network.wifi.get(row.id)?.settledProtocolVersion
     }
 
     private func connectionState(_ row: ConnectionSummary) -> ConnectionState {
@@ -78,10 +95,14 @@ package extension AppModel {
     }
 
     /// A PC typed by its IPv4 address, optionally `:port`: the connect probes
-    /// it and opens its pairing card. False when the text is not an address.
+    /// it and opens its pairing card, and setup's Bind and Review know it as
+    /// the PC added by address. The attempt starts with no stale failure to
+    /// word. False when the text is not an address.
     @discardableResult
     func addByAddress(_ text: String) -> Bool {
         guard let server = DiscoveredServer.manual(from: text) else { return false }
+        lastConnectionEvent = nil
+        addedByAddress = server
         network.wifi.connect(to: server)
         return true
     }
@@ -96,4 +117,9 @@ package extension AppModel {
 /// A latency figure in whole milliseconds; zero until measured.
 func wholeMilliseconds(_ latencyMs: Double?) -> Int {
     latencyMs.map { Int($0.rounded()) } ?? 0
+}
+
+/// The satellite's own version string; nil for one that reports none.
+func satelliteVersion(_ probe: ServerCapabilitiesDTO) -> String? {
+    probe.serverVersion.isEmpty ? nil : probe.serverVersion
 }

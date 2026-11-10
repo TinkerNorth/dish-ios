@@ -43,7 +43,7 @@ func dotted(_ parts: String...) -> String {
 func appLines(appVersion: String, localNetwork: LocalNetworkStatus, words: L10n = .app) -> [FactLine] {
     [
         FactLine(key: words.appVersion, value: appVersion),
-        FactLine(key: words.protocolKey, value: words.protocolVersion(ProtocolConstants.protocolVersion)),
+        FactLine(key: words.protocolKey, value: words.protocolTag(ProtocolConstants.protocolVersion)),
         FactLine(key: words.localNetwork, value: localNetworkText(localNetwork, words: words))
     ]
 }
@@ -138,7 +138,7 @@ func linkDot(_ state: LinkState) -> Color {
 /// The settled version, the offer when it differed, and the standing when
 /// the negotiation wants attention.
 func protocolText(_ facts: HostSessionFacts, words: L10n = .app) -> String {
-    let settled = words.protocolVersion(facts.settledProtocol)
+    let settled = words.protocolTag(facts.settledProtocol)
     let lowered = facts.offeredProtocol != facts.settledProtocol
     let version = lowered ? words.protocolOffered(settled, facts.offeredProtocol) : settled
     guard let standing = protocolCompatText(facts.compat, words: words) else { return version }

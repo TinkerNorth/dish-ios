@@ -112,6 +112,8 @@ last column are the styles' defaults at the standard setting.
 | `DishFont.padFace` | `.title2`, bold | 22 | A face button's letter or glyph |
 | `DishFont.padSmall` | `.subheadline`, monospaced, semibold | 15 | L3, R3 and the small round buttons |
 | `DishFont.dimClock` | `.largeTitle`, monospaced, light | 34 | The dim's clock |
+| `DishFont.pinDigit` | `.title`, monospaced, semibold | 28 | A typed PIN's digit in its cell on the pair sheet |
+| `DishFont.clientPin` | `.largeTitle`, monospaced, bold | 34 | This iPhone's code to accept on the PC |
 
 ## Measures (`DishSize`)
 
@@ -141,13 +143,17 @@ Points. Every size a kit component sets is one of these names.
 | `DishSize.padRail` | 44 | A trigger rail's width |
 | `DishSize.padShoulderWidth` | 112 | A shoulder button's width |
 | `DishSize.padShoulderHeight` | 36 | A shoulder button's height |
-| `DishSize.padStroke` | 1.5 | A control's outline |
-| `DishSize.padHeldStroke` | 2.5 | A held control's outline, and a face button's ring |
+| `DishSize.padStroke` | 1.5 | A control's outline, and a PIN cell's |
+| `DishSize.padHeldStroke` | 2.5 | A held control's outline, a face button's ring, and the PIN cell the caret sits in |
 | `DishSize.padGlow` | 12 | The glow around a held control |
 | `DishSize.mouseColumn` | 180 | The mouse's Left, Scroll and Right column |
 | `DishSize.mouseCorner` | 28 | The mouse pad's, its buttons' and the touchpad's corners |
 | `DishSize.pointerRing` | 40 | The ring under the finger on the mouse pad |
 | `DishSize.dimCardCorner` | 20 | The dim's session card's corner |
+| `DishSize.pinCell` | 56 | A PIN cell on the pair sheet |
+| `DishSize.pinCellCorner` | 12 | A PIN cell's corner |
+| `DishSize.clientPinTracking` | 4 | The tracking of this iPhone's code on the pair sheet |
+| `DishSize.cardCorner` | 16 | The corner of a card inside a sheet: the pair sheet's request |
 
 ## Spacing (`DishSpace`)
 
@@ -179,6 +185,8 @@ mapper, and the tab bar's from `tabSymbol` in `ShellMappers.swift`.
 | `DishSymbol.linkArrow` | `arrow.down` | From the pad down to the PC on the review card |
 | `DishSymbol.add` | `plus` | Add a PC by address |
 | `DishSymbol.diagnostics` | `waveform.path.ecg` | The glyph of Settings › Setup & help › Diagnostics |
+| `DishSymbol.add` | `plus` | Add a PC by address, on the Connections toolbar and Pick your PC |
+| `DishSymbol.close` | `xmark` | The X that closes the pair sheet |
 
 SF Symbols has no satellite. The antenna, `antenna.radiowaves.left.and.right`
 (`satelliteSymbol` in `ShellMappers.swift`), stands in for it on the
@@ -201,8 +209,9 @@ Also in `Theme.swift`:
 
 The kit lives in `Sources/Dish/UI/Kit` and follows the kit rules in
 [docs/UI_CONTRACT.md](docs/UI_CONTRACT.md): `Chip` (BEST, FASTEST, FAST),
-`RowGlyph` (the rounded tile at the head of a row) and `SessionBar` (the
-session accessory).
+`RowGlyph` (the rounded tile at the head of a row), `SessionBar` (the
+session accessory) and `PinCells` (a PIN's digits in a row of cells, the
+caret's cell outlined in the focus colour).
 
 Words are not design values but follow the same rule: a view reads them from
 `L10n` ([Sources/Dish/L10n](Sources/Dish/L10n)), never from a literal, and the

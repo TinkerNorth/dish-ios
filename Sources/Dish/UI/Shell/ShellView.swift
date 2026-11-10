@@ -5,7 +5,8 @@ import DishEngine
 import SwiftUI
 
 /// The three tabs, each its own stack, the session accessory on every tab
-/// while a session is up, and the covers over all of it.
+/// while a session is up, the sheets over the tabs, and the covers over all
+/// of it. The model's pairing card opening or closing moves the pair sheet.
 struct ShellView: View {
     @Environment(AppModel.self) private var model
     @Environment(NavigationStore.self) private var navigation
@@ -19,9 +20,11 @@ struct ShellView: View {
                 .badge(item.badgeCount)
             }
         }
-        .modifier(SessionAccessory(state: sessionBarState(model.shellFacts.session), dim: dim, play: play))
+        .modifier(SessionAccessory(state: sessionBarState(model.shellFacts.session), dim: dim, play: play, reconnect: model.reconnect))
         .tabBarMinimizeBehavior(.onScrollDown)
+        .sheet(item: navigation.tabsSheet) { ShellSheet(sheet: $0) }
         .fullScreenCover(item: navigation.cover) { ShellCover(cover: $0) }
+        .onChange(of: pairingSheetId(model.openPairing)) { _, serverId in pairingChanged(serverId) }
     }
 
     private func dim() {
@@ -30,6 +33,10 @@ struct ShellView: View {
 
     private func play() {
         navigation.send(.openPlay(.gamepad))
+    }
+
+    private func pairingChanged(_ serverId: String?) {
+        navigation.send(.pairingChanged(serverId: serverId))
     }
 }
 
@@ -62,6 +69,7 @@ private struct PageView: View {
         switch page {
         case .deviceName: DeviceNamePage()
         case let .controller(id): ControllerPage(id: id)
+        case let .pcDetail(id): PcDetailPage(id: id)
         case .help: HelpPage()
         case .licenses: LicensesPage()
         case .support: SupportPage()
@@ -72,16 +80,17 @@ private struct PageView: View {
 
 /// The accessory, attached only while there is a session to show: iOS 26.0
 /// has no `isEnabled:` form, and an empty accessory still draws its glass.
-/// Play opens the on-screen gamepad; Reconnect arrives with the session wave.
+/// Play opens the on-screen gamepad; Reconnect brings a stopped PC back.
 private struct SessionAccessory: ViewModifier {
     let state: SessionBarState?
     let dim: () -> Void
     let play: () -> Void
+    let reconnect: () -> Void
 
     func body(content: Content) -> some View {
         if let state {
             content.tabViewBottomAccessory {
-                SessionBar(state: state, dim: dim, play: play, reconnect: nil)
+                SessionBar(state: state, dim: dim, play: play, reconnect: reconnect)
             }
         } else {
             content

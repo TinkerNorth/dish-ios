@@ -98,4 +98,35 @@ final class ControllersMappersTests: XCTestCase {
         XCTAssertEqual(controllerRow(ControllerFixture.pad(battery: 16)).batteryColor, DishTheme.muted)
         XCTAssertEqual(controllerRow(ControllerFixture.pad(battery: 12)).battery, "12%")
     }
+
+    private func row(
+        apply: ApplyFact?,
+        destination: DestinationFact? = DestinationFact(name: "Living Room PC", health: .lost)
+    ) -> ControllerRowState? {
+        guard case let .list(rows) = controllersPageState(controllers: [ControllerFixture.pad(destination: destination)], apply: apply)
+            .content else
+        {
+            return nil
+        }
+        return rows.first
+    }
+
+    /// A bind that waits for its link would read lost; the row says what is
+    /// happening instead, and a failed apply is shown there (B6).
+    func testAnApplyOnTheRowReplacesItsDestinationLine() {
+        let running = row(apply: ApplyFact(slotId: "pad", connectionId: "lr", progress: .running(.binding)))
+        XCTAssertEqual(running?.destination, .note("Applying binding…"))
+        XCTAssertEqual(running?.dot, DishTheme.muted)
+        let failed = row(apply: ApplyFact(slotId: "pad", connectionId: "lr", progress: .failed(.hostUnreachable)))
+        XCTAssertEqual(failed?.destination, .note("The PC didn’t answer in time."))
+        XCTAssertEqual(failed?.dot, DishTheme.error)
+    }
+
+    func testADoneApplyAndAnotherPadsApplyLeaveTheRowAlone() {
+        let done = row(apply: ApplyFact(slotId: "pad", connectionId: "lr", progress: .done))
+        XCTAssertEqual(done?.destination, .note("Connection lost"))
+        let other = row(apply: ApplyFact(slotId: "other", connectionId: "lr", progress: .failed(.rejected)))
+        XCTAssertEqual(other?.destination, .note("Connection lost"))
+        XCTAssertEqual(row(apply: nil)?.destination, .note("Connection lost"))
+    }
 }

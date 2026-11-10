@@ -77,6 +77,8 @@ enum DishSymbol {
     static let add = "plus"
     /// Settings › Setup & help › Diagnostics.
     static let diagnostics = "waveform.path.ecg"
+    /// The X that closes the pair sheet.
+    static let close = "xmark"
 }
 
 /// The images the views draw from the package's asset catalog.
@@ -120,6 +122,10 @@ enum DishFont {
     static let padSmall = Font.system(.subheadline, design: .monospaced).weight(.semibold)
     /// The dim's clock.
     static let dimClock = Font.system(.largeTitle, design: .monospaced).weight(.light)
+    /// A typed PIN's digit in its cell.
+    static let pinDigit = Font.system(.title, design: .monospaced).weight(.semibold)
+    /// This iPhone's code to accept on the PC.
+    static let clientPin = Font.system(.largeTitle, design: .monospaced).weight(.bold)
 }
 
 /// The measures. Every size a kit component sets is one of these names.
@@ -180,6 +186,13 @@ enum DishSize {
     static let pointerRing: CGFloat = 40
     /// The dim's session card's corner.
     static let dimCardCorner: CGFloat = 20
+    /// A PIN cell, and its corner.
+    static let pinCell: CGFloat = 56
+    static let pinCellCorner: CGFloat = 12
+    /// The tracking of this iPhone's code on the pair sheet.
+    static let clientPinTracking: CGFloat = 4
+    /// The corner of a card inside a sheet: the pair sheet's request.
+    static let cardCorner: CGFloat = 16
 }
 
 /// The spacing scale.

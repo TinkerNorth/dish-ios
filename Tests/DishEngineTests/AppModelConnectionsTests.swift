@@ -111,4 +111,41 @@ final class AppModelConnectionsTests: XCTestCase {
         recorded.model.startScan()
         XCTAssertEqual((recorded.model.localNetwork as? RecordedLocalNetworkAccess)?.scans, 1)
     }
+
+    /// A paired satellite's row carries what its page shows: the pads it
+    /// carries, its version and protocol, and what it can carry each way.
+    func testAPairedSatellitesRowCarriesItsPadsVersionProtocolAndFeatures() async {
+        let live = await fixture.connectPaired()
+        XCTAssertTrue(live)
+        fixture.model.bind(slotId: "pad", to: fixture.serverId)
+        let applied = await fixture.waitUntil { self.fixture.satellite.appliedControllers.count == 1 }
+        XCTAssertTrue(applied)
+        let row = fixture.model.shellFacts.paired.first
+        XCTAssertEqual(row?.boundControllerIds, ["pad"])
+        XCTAssertEqual(row?.satelliteVersion, "1.6.0")
+        XCTAssertEqual(row?.protocolVersion, 3)
+        XCTAssertEqual(row?.features, SatelliteFeaturesFact(motion: true, rumble: true))
+    }
+
+    /// A rested satellite's row keeps its version but has no protocol or
+    /// pads to show.
+    func testARestedSatellitesRowHasNoProtocolOrPads() async {
+        let live = await fixture.connectPaired()
+        XCTAssertTrue(live)
+        fixture.model.disconnect(fixture.serverId)
+        let row = fixture.model.shellFacts.paired.first
+        XCTAssertEqual(row?.boundControllerIds, [])
+        XCTAssertEqual(row?.satelliteVersion, "1.6.0", "the probe is remembered")
+        XCTAssertNil(row?.protocolVersion)
+    }
+
+    /// The PC typed by its address is published, so setup's Bind and Review
+    /// know which PC it is, and a fresh attempt starts with no stale failure.
+    func testATypedAddressIsPublishedAndStartsAFreshAttempt() {
+        XCTAssertNil(fixture.model.shellFacts.addedByAddress)
+        fixture.model.lastConnectionEvent = .failure(.noServersFound)
+        XCTAssertTrue(fixture.model.addByAddress("127.0.0.1:\(fixture.ports.udp)"))
+        XCTAssertEqual(fixture.model.shellFacts.addedByAddress, "wifi:127.0.0.1:\(fixture.ports.udp)")
+        XCTAssertNil(fixture.model.lastConnectionEvent)
+    }
 }

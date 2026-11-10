@@ -193,4 +193,84 @@ final class NavigationMachineTests: XCTestCase {
         let step = after(.select(.controllers), .push(.controller(id: "pad")))
         XCTAssertEqual(step.state.path(of: .controllers), [.controller(id: "pad")])
     }
+
+    func testAPairedRowPushesItsPCsPageAndForgetPopsIt() {
+        let pushed = after(.select(.connections), .push(.pcDetail(id: "den")))
+        XCTAssertEqual(pushed.state.path(of: .connections), [.pcDetail(id: "den")])
+        let popped = after(.select(.connections), .push(.pcDetail(id: "den")), .pop)
+        XCTAssertEqual(popped.state.path(of: .connections), [])
+        XCTAssertEqual(popped.effects, [])
+        XCTAssertEqual(after(.pop).state, NavigationState(), "nothing to pop")
+    }
+
+    // MARK: - Sheets
+
+    func testPairOpensTheSheetAndBeginsThePairing() {
+        let step = after(.select(.connections), .openSheet(.pair(serverId: "den")))
+        XCTAssertEqual(step.state.sheet, .pair(serverId: "den"))
+        XCTAssertEqual(step.effects, [.beginPairing(serverId: "den")])
+        XCTAssertEqual(step.state.tab, .connections, "the tabs wait under the sheet")
+    }
+
+    func testAddByAddressOpensItsSheetWithNothingToBegin() {
+        let step = after(.openSheet(.addByAddress))
+        XCTAssertEqual(step.state.sheet, .addByAddress)
+        XCTAssertEqual(step.effects, [])
+    }
+
+    func testASheetOpensOverTheSetupCoverButNotOverPlayOrTheDim() {
+        let overSetup = after(.openSetup(.firstRun), .openSheet(.pair(serverId: "den")))
+        XCTAssertEqual(overSetup.state.sheet, .pair(serverId: "den"))
+        XCTAssertEqual(overSetup.state.cover, .setup(.firstRun))
+        XCTAssertEqual(overSetup.effects, [.startSetup(.firstRun), .beginPairing(serverId: "den")])
+        XCTAssertNil(after(.openPlay(.gamepad), .openSheet(.addByAddress)).state.sheet)
+        let overDim = after(.dim, .openSheet(.pair(serverId: "den")))
+        XCTAssertNil(overDim.state.sheet)
+        XCTAssertEqual(overDim.effects, [], "a refused sheet begins nothing")
+    }
+
+    func testClosingThePairSheetCancelsThePairing() {
+        let step = after(.openSheet(.pair(serverId: "den")), .closeSheet)
+        XCTAssertNil(step.state.sheet)
+        XCTAssertEqual(step.effects, [.beginPairing(serverId: "den"), .cancelPairing(serverId: "den")])
+        XCTAssertEqual(after(.openSheet(.addByAddress), .closeSheet).effects, [], "an address sheet has nothing to cancel")
+        XCTAssertEqual(after(.closeSheet).state, NavigationState(), "nothing to close")
+    }
+
+    func testTheModelsCardOpeningRaisesThePairSheetWithoutBeginningAgain() {
+        let step = after(.openSheet(.addByAddress), .pairingChanged(serverId: "den"))
+        XCTAssertEqual(step.state.sheet, .pair(serverId: "den"), "the card replaces the address sheet")
+        XCTAssertEqual(step.effects, [], "the model already pairs")
+        let same = after(.openSheet(.pair(serverId: "den")), .pairingChanged(serverId: "den"))
+        XCTAssertEqual(same.state.sheet, .pair(serverId: "den"))
+        XCTAssertEqual(same.effects, [.beginPairing(serverId: "den")])
+    }
+
+    func testTheModelsCardClosingLowersThePairSheetAndNothingElse() {
+        let step = after(.openSheet(.pair(serverId: "den")), .pairingChanged(serverId: nil))
+        XCTAssertNil(step.state.sheet)
+        XCTAssertEqual(step.effects, [.beginPairing(serverId: "den")], "paired or cancelled in the model: nothing left to cancel")
+        XCTAssertEqual(after(.openSheet(.addByAddress), .pairingChanged(serverId: nil)).state.sheet, .addByAddress)
+    }
+
+    func testACoverRisingOrFallingDropsTheSheet() {
+        let setupEnded = after(.openSetup(.firstRun), .openSheet(.pair(serverId: "den")), .setupEnded(.skipped))
+        XCTAssertNil(setupEnded.state.sheet)
+        XCTAssertEqual(
+            setupEnded.effects,
+            [.startSetup(.firstRun), .beginPairing(serverId: "den"), .cancelPairing(serverId: "den"), .endSetup, .markWelcomeComplete]
+        )
+        let playOverSheet = after(.openSheet(.addByAddress), .openPlay(.gamepad))
+        XCTAssertNil(playOverSheet.state.sheet)
+        XCTAssertEqual(playOverSheet.effects, [.startPlay(.gamepad)])
+    }
+
+    func testTheSheetIsPresentedByTheTabsOrTheSetupCover() {
+        let tabs = after(.openSheet(.addByAddress)).state
+        XCTAssertEqual(presentedSheet(tabs, by: .tabs), .addByAddress)
+        XCTAssertNil(presentedSheet(tabs, by: .setup))
+        let setup = after(.openSetup(.guide), .openSheet(.pair(serverId: "den"))).state
+        XCTAssertEqual(presentedSheet(setup, by: .setup), .pair(serverId: "den"))
+        XCTAssertNil(presentedSheet(setup, by: .tabs))
+    }
 }

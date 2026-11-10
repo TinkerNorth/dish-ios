@@ -15,6 +15,9 @@ struct SetupPCRow: Equatable, Identifiable {
     let detail: String
     let dot: Color
     let pick: DestinationPick
+    /// The satellite the pick pairs with first, while it wants a PIN; nil
+    /// for a paired PC and for a Moonlight host, which pairs its own way.
+    let pairServerId: String?
 }
 
 /// Local Network is off: in place of the list, why, and the way to Settings.
@@ -110,8 +113,16 @@ private func setupPCRow(_ pc: SetupPCInput, words: L10n) -> SetupPCRow {
         name: pc.name,
         detail: [pairing, pc.address].joined(separator: lineSeparator),
         dot: setupPairingDot(pc.paired),
-        pick: destinationPick(pc)
+        pick: destinationPick(pc),
+        pairServerId: pairServerId(pc)
     )
+}
+
+private func pairServerId(_ pc: SetupPCInput) -> String? {
+    switch pc.kind {
+    case .satellite: pc.paired ? nil : pc.id
+    case .moonlightHost: nil
+    }
 }
 
 func setupPCSymbol(_ kind: SetupPCKind) -> String {

@@ -11,11 +11,17 @@ struct ControllerActions {
     let setEmulateAs: @MainActor (EmulatedPad) -> Void
     /// The on-screen controller's Open: its gamepad.
     let open: @MainActor () -> Void
+    /// Bind to the PC, by its connection id; Try again binds to the same one.
+    let bind: @MainActor (String) -> Void
+    let unbind: @MainActor () -> Void
+
+    /// Controls that do nothing, for a preview.
+    @MainActor static let preview = ControllerActions(setFeature: { _, _ in }, setEmulateAs: { _ in }, open: {}, bind: { _ in }, unbind: {})
 }
 
-/// Controllers › a controller (C1) without its PC half: the status card,
-/// BINDING with its destination (filled by the binding wave) and Emulate as,
-/// and the switches the pad has. Telemetry waits until it is measured.
+/// Controllers › a controller (C1): the status card, BINDING with the PC it
+/// sends to or the paired PCs to bind to, the apply inline, Emulate as, and
+/// the switches the pad has. Telemetry waits until it is measured.
 struct ControllerPage: View {
     let id: String
 
@@ -24,8 +30,13 @@ struct ControllerPage: View {
 
     var body: some View {
         ControllerPageBody(
-            state: controllerPageState(controllers: model.shellFacts.controllers, id: id),
-            actions: ControllerActions(setFeature: setFeature, setEmulateAs: setEmulateAs, open: openGamepad)
+            state: controllerPageState(
+                controllers: model.shellFacts.controllers,
+                paired: model.shellFacts.paired,
+                apply: model.shellFacts.apply,
+                id: id
+            ),
+            actions: ControllerActions(setFeature: setFeature, setEmulateAs: setEmulateAs, open: openGamepad, bind: bind, unbind: unbind)
         )
     }
 
@@ -39,6 +50,14 @@ struct ControllerPage: View {
 
     private func openGamepad() {
         navigation.send(.openPlay(.gamepad))
+    }
+
+    private func bind(_ connectionId: String) {
+        model.bind(slotId: id, to: connectionId)
+    }
+
+    private func unbind() {
+        model.unbind(slotId: id)
     }
 }
 
@@ -81,7 +100,7 @@ private struct ControllerPadSections: View {
             }
         }
         .listRowBackground(DishTheme.surface)
-        ControllerBindingSection(state: state.binding, setEmulateAs: actions.setEmulateAs)
+        ControllerBindingSection(state: state.binding, apply: state.apply, actions: actions)
         if let functions = state.functions {
             ControllerFunctionsSection(state: functions, footnote: state.footnote, setFeature: actions.setFeature)
         } else {
@@ -92,27 +111,25 @@ private struct ControllerPadSections: View {
     }
 }
 
-#Preview("DualSense") {
+#Preview("DualSense, bound") {
     let features = SlotSwitch.allCases.map { ControllerFeatureFact(feature: $0, enabled: $0 != .lightbar) }
     let pad = ControllerFact(
         id: "pad",
         name: "DualSense",
         link: .usbC,
         batteryPercent: 84,
-        destination: nil,
+        destination: DestinationFact(name: "Living Room PC", health: .online),
         family: .dualSense,
         emulateAs: .dualSense,
         features: features
     )
+    let apply = ApplyFact(slotId: "pad", connectionId: "lr", progress: .done)
     NavigationStack {
-        ControllerPageBody(
-            state: controllerPageState(controllers: [pad], id: "pad"),
-            actions: ControllerActions(setFeature: { _, _ in }, setEmulateAs: { _ in }, open: {})
-        )
+        ControllerPageBody(state: controllerPageState(controllers: [pad], apply: apply, id: "pad"), actions: .preview)
     }
 }
 
-#Preview("Xbox") {
+#Preview("Xbox, unbound") {
     let pad = ControllerFact(
         id: "pad",
         name: "Xbox Wireless Controller",
@@ -123,19 +140,14 @@ private struct ControllerPadSections: View {
         emulateAs: .xboxWireless,
         features: [ControllerFeatureFact(feature: .rumble, enabled: true)]
     )
+    let living = ConnectionFact(id: "lr", name: "Living Room PC", address: "192.168.1.24", kind: .satellite, state: .offline(lastSeen: nil))
     NavigationStack {
-        ControllerPageBody(
-            state: controllerPageState(controllers: [pad], id: "pad"),
-            actions: ControllerActions(setFeature: { _, _ in }, setEmulateAs: { _ in }, open: {})
-        )
+        ControllerPageBody(state: controllerPageState(controllers: [pad], paired: [living], id: "pad"), actions: .preview)
     }
 }
 
 #Preview("Gone") {
     NavigationStack {
-        ControllerPageBody(
-            state: controllerPageState(controllers: [], id: "pad"),
-            actions: ControllerActions(setFeature: { _, _ in }, setEmulateAs: { _ in }, open: {})
-        )
+        ControllerPageBody(state: controllerPageState(controllers: [], id: "pad"), actions: .preview)
     }
 }

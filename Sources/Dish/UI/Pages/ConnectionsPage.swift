@@ -4,36 +4,73 @@
 import DishEngine
 import SwiftUI
 
+/// What the Connections rows and toolbar do: a paired row opens its PC's
+/// page, Pair opens the sheet, Connect reaches for the PC, and the toolbar's
+/// plus adds a PC by address.
+struct ConnectionsActions {
+    let open: @MainActor (Page) -> Void
+    let act: @MainActor (ConnectionRowAction) -> Void
+    let add: @MainActor () -> Void
+
+    /// Controls that do nothing, for a preview.
+    @MainActor static let preview = ConnectionsActions(open: { _ in }, act: { _ in }, add: {})
+}
+
 /// The Connections tab (D1, D3): paired PCs, the ones found on the network,
-/// Moonlight hosts; or, with Local Network off, the way to turn it on.
+/// Moonlight hosts; or, with Local Network off, the way to turn it on. It
+/// looks for PCs as it opens.
 struct ConnectionsPage: View {
     @Environment(AppModel.self) private var model
+    @Environment(NavigationStore.self) private var navigation
     @Environment(\.settingsURL) private var settingsURL
 
     var body: some View {
-        ConnectionsPageBody(title: tabTitle(.connections), state: connectionsPageState(facts: model.shellFacts, settingsURL: settingsURL))
-            .onAppear { model.pageAppeared(.connections) }
-            .onDisappear { model.pageDisappeared(.connections) }
+        ConnectionsPageBody(
+            state: connectionsPageState(facts: model.shellFacts, settingsURL: settingsURL),
+            actions: ConnectionsActions(open: open, act: act, add: addByAddress)
+        )
+        .onAppear { model.pageAppeared(.connections) }
+        .onDisappear { model.pageDisappeared(.connections) }
+    }
+
+    private func open(_ page: Page) {
+        navigation.send(.push(page))
+    }
+
+    private func act(_ action: ConnectionRowAction) {
+        switch action {
+        case let .pair(serverId): navigation.send(.openSheet(.pair(serverId: serverId)))
+        case let .connect(id): model.connect(id)
+        }
+    }
+
+    private func addByAddress() {
+        navigation.send(.openSheet(.addByAddress))
     }
 }
 
 /// The page over its state, so a preview can draw every content state.
 struct ConnectionsPageBody: View {
-    let title: String
     let state: ConnectionsPageState
+    let actions: ConnectionsActions
 
     var body: some View {
         content
             .background(DishTheme.background)
-            .navigationTitle(title)
+            .navigationTitle(state.title)
             .navigationBarTitleDisplayMode(.large)
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button(state.add, systemImage: DishSymbol.add, action: actions.add)
+                }
+            }
     }
 
     @ViewBuilder private var content: some View {
-        switch state {
+        switch state.content {
         case let .denied(denied): NetworkDeniedView(state: denied)
         case let .empty(title, body): ContentUnavailableView(title, systemImage: satelliteSymbol, description: Text(body))
-        case let .list(list): ConnectionsList(state: list)
+        case let .list(list): ConnectionsList(state: list, actions: actions)
         }
     }
 }
@@ -41,12 +78,13 @@ struct ConnectionsPageBody: View {
 /// PAIRED, FOUND ON, Moonlight hosts and the footnote.
 private struct ConnectionsList: View {
     let state: ConnectionsListState
+    let actions: ConnectionsActions
 
     var body: some View {
         List {
             if let paired = state.paired {
                 Section {
-                    ForEach(paired.rows) { ConnectionRow(state: $0) }
+                    ForEach(paired.rows) { ConnectionRow(state: $0, open: actions.open, act: actions.act) }
                 } header: {
                     SectionEyebrow(title: paired.title, color: DishTheme.muted)
                 }
@@ -54,7 +92,7 @@ private struct ConnectionsList: View {
             }
             if let found = state.found {
                 Section {
-                    ForEach(found.rows) { ConnectionRow(state: $0) }
+                    ForEach(found.rows) { ConnectionRow(state: $0, open: actions.open, act: actions.act) }
                 } header: {
                     FoundHeader(state: found)
                 }
@@ -102,7 +140,7 @@ private struct ConnectionsList: View {
         setup: nil
     )
     NavigationStack {
-        ConnectionsPageBody(title: tabTitle(.connections), state: connectionsPageState(facts: facts, settingsURL: nil))
+        ConnectionsPageBody(state: connectionsPageState(facts: facts, settingsURL: nil), actions: .preview)
     }
 }
 
@@ -121,8 +159,8 @@ private struct ConnectionsList: View {
     )
     NavigationStack {
         ConnectionsPageBody(
-            title: tabTitle(.connections),
-            state: connectionsPageState(facts: facts, settingsURL: URL(string: "app-settings:"))
+            state: connectionsPageState(facts: facts, settingsURL: URL(string: "app-settings:")),
+            actions: .preview
         )
     }
 }

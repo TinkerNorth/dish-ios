@@ -95,4 +95,19 @@ final class AppModelPairingTests: XCTestCase {
         XCTAssertTrue(opened, "a reachable satellite with no key asks for a PIN")
         XCTAssertEqual(model.lastConnectionEvent, .pairingRequired(fixture.server))
     }
+
+    /// Rename this iPhone: the name the satellite sees changes, and the
+    /// request is filed again so the operator reads the new name.
+    func testRenamingThisIPhoneFilesAFreshRequestUnderTheNewName() async throws {
+        model.beginPairing(serverId: fixture.serverId)
+        let before = try XCTUnwrap(model.openPairing?.attempt.clientPin)
+        let filed = await fixture.waitUntil { self.fixture.satellite.lastClientPin == before }
+        XCTAssertTrue(filed)
+        model.renameThisIPhone(fixture.serverId, to: "Den iPhone")
+        XCTAssertEqual(model.shellFacts.preferences.deviceName, "Den iPhone")
+        let fresh = try XCTUnwrap(model.openPairing?.attempt.clientPin)
+        XCTAssertNotEqual(fresh, before, "a new code carries the new name")
+        let refiled = await fixture.waitUntil { self.fixture.satellite.lastClientPin == fresh }
+        XCTAssertTrue(refiled)
+    }
 }

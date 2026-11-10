@@ -188,6 +188,10 @@ What `AppModel` publishes today:
   shows) and `diagnosticsEvents` (the flight recorder's lines, fed by
   Observation of the connection rows and the controllers), ride
   `shellFacts` too.
+  `cancelPairing`, `renameThisIPhone`), `AppModel+Binding.swift` (`bind(slotId:to:)`,
+  `unbind(slotId:)`, `dismissApply`) and `AppModel+Session.swift`
+  (`reconnect`, `enteredBackground`, `enteredForeground`). A view calls these
+  and nothing else.
 
 ## Unidirectional flow: the rules
 
@@ -281,10 +285,12 @@ there (`Tests/DishCoreTests/SetupMachineTests.swift`) with no mocks.
 - Review's Bind emits `.bind(draft)` then `.ended(.bound)`. Skip anywhere emits
   `.ended(.skipped)`. Back walks one step; there is none from the welcome, and
   none from Input when the walk opened there ("Add a controller").
-- Nothing leaves the draft until Bind. Bind of a pad iOS sees to a
-  satellite writes the pick and the motion switch and binds it
-  (`bind(slotId:to:)`), which rides the session PUT, or the per-slot PUT
-  while live; the other ways in have no pad to bind yet.
+- Nothing leaves the draft until Bind. Bind of a pad iOS sees, or of the
+  on-screen gamepad, to the satellite the walk picked or the one added by
+  address (`AppModel.addedByAddress`) writes the pick and the motion switch
+  and binds it (`bind(slotId:to:)`), which rides the session PUT, or the
+  per-slot PUT while live; the wired and Bluetooth ways in have no pad to
+  bind yet, and a Moonlight host no satellite.
 
 `AppModel+Setup` applies the machine to the model's `setupSource` and runs the
 effects: `.askLocalNetwork` runs the first browse, which makes iOS put its
@@ -390,9 +396,9 @@ These are the rules the bridge and the wire keep, taken from dish-mac:
 Each entry names the decided shape, so a change lands on it. The row-by-row
 list, with where each lands, is [`../Tests/PARITY.md`](../Tests/PARITY.md).
 
-- **No page for pairing or a PC yet.** The engine pairs, binds and streams,
-  and publishes the card, the apply and the failures; the pair sheet, the PC
-  page, Forget and the controller page's Binding section are the next wave's.
+- **A PC added by address is listed only once paired.** The pool reaches
+  for it and its pairing card opens, but the Connections tab's rows are the
+  remembered and the heard satellites, so a cancelled pairing leaves no row.
 - **The Local Network status is the last scan's word.** iOS has no call that
   asks; the simulator does not enforce the permission, so the denied path is
   proved through the browser's documented policy error, not observed
