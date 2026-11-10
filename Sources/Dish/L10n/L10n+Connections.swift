@@ -19,6 +19,11 @@ extension L10n {
         catalog.text("Searching")
     }
 
+    /// Beside the list on an iPad, where a pull does not reach the refresh.
+    var scan: String {
+        catalog.text("Scan")
+    }
+
     var online: String {
         catalog.text("Online")
     }

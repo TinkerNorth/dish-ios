@@ -69,6 +69,7 @@ final class ConnectionsMappersTests: XCTestCase {
         let state = connectionsPageState(facts: FactsFixture.shell(), settingsURL: nil)
         XCTAssertEqual(state.title, "Connections")
         XCTAssertEqual(state.add, "Add a PC by address")
+        XCTAssertEqual(state.scan, "Scan", "beside the list on an iPad, where a pull does not reach the refresh")
     }
 
     func testWithLocalNetworkDeniedThePageExplainsAndOpensSettings() {
