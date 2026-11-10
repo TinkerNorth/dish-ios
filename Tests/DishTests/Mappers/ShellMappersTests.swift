@@ -96,3 +96,68 @@ final class ShellMappersTests: XCTestCase {
         XCTAssertEqual(pageTitle(.moonlightHosts), "Moonlight hosts")
     }
 }
+
+/// The shell on a regular width (an iPad): which tabs split into a list and
+/// the page it opens, what a row does in each, and what the detail column
+/// shows.
+final class ShellSplitMappersTests: XCTestCase {
+
+    private static let pad = ControllerFact(id: "pad", name: "DualSense", link: .usbC, batteryPercent: 84, destination: nil)
+    private static let den = ConnectionFact(id: "den", name: "Den PC", address: "192.168.1.40", kind: .satellite, state: .needsPairing)
+
+    func testOnARegularWidthControllersAndConnectionsSplitAndSettingsKeepsItsStack() {
+        XCTAssertEqual(Tab.allCases.map { tabLayout($0, width: .regular) }, [.split, .split, .stack])
+    }
+
+    func testOnACompactWidthEveryTabKeepsItsStack() {
+        XCTAssertEqual(Tab.allCases.map { tabLayout($0, width: .compact) }, [.stack, .stack, .stack])
+    }
+
+    func testARowPushesFromAStackAndIsSelectedBesideASplitsList() {
+        XCTAssertEqual(rowOpening(.controller(id: "pad"), layout: .stack), .push(.controller(id: "pad")))
+        XCTAssertEqual(rowOpening(.pcDetail(id: "den"), layout: .split), .select(.pcDetail(id: "den")))
+    }
+
+    func testOnlyASplitsListSelectsThePageBesideIt() {
+        let selection = Binding<Page?>.constant(.controller(id: "pad"))
+        XCTAssertNil(listSelection(selection, layout: .stack), "a stack's rows push")
+        XCTAssertEqual(listSelection(selection, layout: .split)?.wrappedValue, .controller(id: "pad"))
+    }
+
+    func testARowWithNoPageOpensNothingInEitherLayout() {
+        XCTAssertEqual(rowOpening(nil, layout: .stack), .inert)
+        XCTAssertEqual(rowOpening(nil, layout: .split), .inert)
+    }
+
+    func testTheDetailIsThePageTheListOpened() {
+        XCTAssertEqual(
+            tabDetailState(.controllers, opened: .controller(id: "pad"), facts: FactsFixture.shell()),
+            .page(.controller(id: "pad"))
+        )
+        XCTAssertEqual(
+            tabDetailState(.controllers, opened: .support, facts: FactsFixture.shell()),
+            .page(.support),
+            "the heart opens beside the list"
+        )
+    }
+
+    func testBeforeAControllerIsOpenedTheDetailInvitesAPick() {
+        let state = tabDetailState(.controllers, opened: nil, facts: FactsFixture.shell(controllers: [Self.pad]))
+        XCTAssertEqual(state, .pick(title: "Pick a controller", symbol: "gamecontroller"))
+    }
+
+    func testBeforeAPCIsOpenedTheDetailInvitesAPick() {
+        let state = tabDetailState(.connections, opened: nil, facts: FactsFixture.shell(paired: [Self.den]))
+        XCTAssertEqual(state, .pick(title: "Pick a PC", symbol: satelliteSymbol))
+    }
+
+    func testWithNothingToOpenTheDetailStaysBlank() {
+        XCTAssertEqual(tabDetailState(.controllers, opened: nil, facts: FactsFixture.shell()), .blank)
+        let unreadable = ControllerFact(id: "pad", name: "Pad", link: .bluetooth, batteryPercent: nil, destination: nil, supported: false)
+        let onlyUnreadable = FactsFixture.shell(controllers: [unreadable])
+        XCTAssertEqual(tabDetailState(.controllers, opened: nil, facts: onlyUnreadable), .blank, "a pad Dish cannot read opens nothing")
+        let onlyFound = FactsFixture.shell(found: [Self.den])
+        XCTAssertEqual(tabDetailState(.connections, opened: nil, facts: onlyFound), .blank, "a PC found but not paired opens nothing")
+        XCTAssertEqual(tabDetailState(.settings, opened: nil, facts: FactsFixture.shell(controllers: [Self.pad])), .blank)
+    }
+}

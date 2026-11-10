@@ -1,6 +1,6 @@
 # Contributing to Dish iOS
 
-Thanks for contributing to the iPhone client. This document captures the
+Thanks for contributing to the iPhone and iPad client. This document captures the
 conventions that are not obvious from reading the code: the gates, where code
 goes, the shape of the code, and what CI enforces.
 
@@ -13,8 +13,9 @@ participating, you agree to uphold it. Report unacceptable behavior to
 ## Getting set up
 
 ```bash
-# 1) Install Xcode 26.6 or newer (Swift 6.3, the iOS 26 SDK and an
-#    iPhone 17 Pro simulator; the tree is also verified on the newest Xcode)
+# 1) Install Xcode 26.6 or newer (Swift 6.3, the iOS 26 SDK, an iPhone 17
+#    Pro and an iPad Pro 11-inch (M5) simulator; the tree is also verified
+#    on the newest Xcode)
 # 2) Name the checkout folder dish-ios, as CI's is (see below)
 # 3) Point git at the in-tree pre-commit hook
 scripts/setup-hooks.sh
@@ -25,13 +26,17 @@ scripts/ci-local.sh
 `scripts/ci-local.sh` downloads the same SwiftFormat 0.61.1, SwiftLint 0.65.0
 and XcodeGen 2.46.0 release binaries CI pins (`scripts/tools.sh`, verified by
 SHA-256, into `.build/tools`), then runs the format check, the strict lint,
-the project drift check, `xcodebuild test` on a simulator and the Release
-build. A green run there is a green `ios-ci.yml` run. `--quick` skips the
-Release build, `--no-tests` builds the tests without running them, and
-`DISH_SIM_DESTINATION` overrides the destination (the default is
-`platform=iOS Simulator,name=iPhone 17 Pro`; pin an OS with
-`platform=iOS Simulator,OS=26.5,name=iPhone 17 Pro` when several runtimes are
-installed). Homebrew's SwiftFormat and SwiftLint track their latest and will
+the project drift check, `xcodebuild test` on an iPhone simulator, the UI
+tests again on an iPad simulator, and the Release build. A green run there is
+a green `ios-ci.yml` run. `--quick` skips the Release build, `--no-tests`
+builds the tests without running them, `DISH_SIM_DESTINATION` overrides the
+destination (the default is `platform=iOS Simulator,name=iPhone 17 Pro`; pin
+an OS with `platform=iOS Simulator,OS=26.5,name=iPhone 17 Pro` when several
+runtimes are installed), and `DISH_IPAD_DESTINATION` the iPad (default
+`platform=iOS Simulator,name=iPad Pro 11-inch (M5)`). The iPad's UI tests
+assume the full-screen mode a fresh iPad starts in: an iPad simulator once
+switched to windowed apps, or one that ran the app as an iPhone app, opens it
+in a small window, so erase it first (`xcrun simctl erase`). Homebrew's SwiftFormat and SwiftLint track their latest and will
 flag rules the pins do not know; use the script's copies. A pin bump is a
 deliberate commit that reformats or regenerates the tree with it, in
 `scripts/tools.sh`, `ios-ci.yml` and `THIRD_PARTY.md` together;
@@ -77,7 +82,7 @@ module may import.
 | a `(state, event) -> result` decision with no IO, a wire codec or a crypto primitive | `DishCore` (`Sources/DishCore`) | Foundation, CryptoKit |
 | a dataflow primitive | `DishKernel` (`Sources/DishKernel`) | Foundation, Observation |
 | a store, a seam to the platform, a clock, an intent, a socket or a request, or the composition root | `DishEngine` (`Sources/DishEngine`) | Foundation, Observation, os, Synchronization, GameController, CoreHaptics, Network, Security, CryptoKit, Darwin, DishCore, DishKernel; never SwiftUI or UIKit |
-| a view, a theme token, a localized word, a mapper, or the navigation | `Dish` (`Sources/Dish`) | SwiftUI, Observation, Foundation, the three modules; UIKit only in `UI/Theme.swift` and `DishScene.swift`; never Network, GameController, Security, CryptoKit |
+| a view, a theme token, a localized word, a mapper, or the navigation | `Dish` (`Sources/Dish`) | SwiftUI, Observation, Foundation, the three modules; UIKit only in `UI/Theme.swift`, `DishScene.swift` and `Scene/Orientation.swift`; never Network, GameController, Security, CryptoKit |
 | the `@main` | `App/Sources/DishApp.swift` | SwiftUI, Dish |
 
 Within the engine, pick the primitive that matches what the thing does:
@@ -137,9 +142,11 @@ a pure function under `Sources/Dish/UI/Mappers/<Page>Mappers.swift` returning
 an `Equatable` view-state struct whose last parameter is `words: L10n = .app`,
 tested in `Tests/DishTests/Mappers/<Page>MappersTests.swift`, one test per flow
 (empty, content, each variant). Never an expression inside a `body`:
-`ViewPurityTests` rules V1 to V12 read every view for a clock, IO, formatting,
-an engine object, a decision on a fact, a picked token, a boolean rule or a
-fallback word. Navigation is data: a view sends
+`ViewPurityTests` rules V1 to V13 read every view for a clock, IO, formatting,
+an engine object, a decision on a fact, a picked token, a boolean rule, a
+fallback word or a size class or idiom of its own: the scene reads the device
+and the window once and hands them down (`windowFacts`), and a page passes
+them to its mapper. Navigation is data: a view sends
 `navigation.send(.push(.deviceName))` and holds no `NavigationPath` or
 `isPresented` of its own for app navigation. The shell, the page rules and the
 kit rules are in [`docs/UI_CONTRACT.md`](docs/UI_CONTRACT.md); the design
@@ -298,9 +305,9 @@ Dish clients follow, so a fact ported between clients keeps its shape.
 | `Tests/DishCoreTests` | the setup machine: every step, event and Local Network branch | `DishCore` |
 | `Tests/DishKernelTests` | `StateSource` | `DishKernel` |
 | `Tests/DishEngineTests` | the preference stores, the clock against a `ManualTicker`, the controller bridge, the setup, connection, pairing, binding and session intents, the network engine against `FakeSatellite` (an in-process satellite on the loopback with its own crypto), the lock laws, and the env-gated driver against the real satellite; `TestDefaults` makes a fresh `UserDefaults` per test | `@testable import DishEngine` |
-| `Tests/DishTests` | the app layer where it decides: every mapper under `Mappers/`, the navigation machine and the navigation store under `Navigation/` | `@testable import Dish` |
+| `Tests/DishTests` | the app layer where it decides: every mapper under `Mappers/` (an iPad's states included), the navigation machine, the navigation store and the orientation per device under `Navigation/`, the scene's facts (the idiom, the lock's answer, the window's size classes and shape) under `Scene/` | `@testable import Dish` |
 | `Tests/ArchitectureTests` | the rules of the repository, read from the tree | the file system |
-| `App/UITests` (`DishUITests`, a target of the project, not the package) | the shell's critical path through the real app on the simulator: a first run under the welcome, Skip landing on Controllers, Add a controller opening the first step, Settings reopening the guide; the onboarding flag is set through launch arguments | the running app, by its labels |
+| `App/UITests` (`DishUITests`, a target of the project, not the package) | the shell's critical path through the real app on the simulator, an iPhone's and again an iPad's: a first run under the welcome, Skip landing on Controllers, Add a controller opening the first step, Settings reopening the guide, Add a PC by address; on an iPad, the sidebar's three tabs and the play cover on the iPad's side and upright (`IPadUITests`, skipped on an iPhone). The onboarding flag is set through launch arguments, and `ShellUI` finds a tab wherever the device draws it | the running app, by its labels |
 
 `Tests/ArchitectureTests` is where knowledge written twice is checked:
 
@@ -316,7 +323,8 @@ Dish clients follow, so a fact ported between clients keeps its shape.
 | `VersionConsistencyTests` | `VERSION` is `MAJOR.MINOR.PATCH`, `project.yml` carries it as `MARKETING_VERSION`, the changelog's newest heading names it or is `[Unreleased]`, the Info.plist reads both bundle versions from build settings |
 | `LocalizationTests` | the catalog and the funnel agree, in every language, with placeholders intact; no view holds an English literal |
 | `ThemeTokenTests` | no raw colour, font size or kit size; `DESIGN.md` lists every token; every token outside the shared palette is drawn |
-| `ViewPurityTests` | rules V1 to V12 of [`docs/UI_CONTRACT.md`](docs/UI_CONTRACT.md) |
+| `ViewPurityTests` | rules V1 to V13 of [`docs/UI_CONTRACT.md`](docs/UI_CONTRACT.md) |
+| `DeviceFamilyTests` | the app targets the iPhone and the iPad; the Info.plist turns an iPad all four ways and an iPhone upright or on its side; CI and `ci-local.sh` run the UI tests on the same iPad |
 | `NavigationCoverageTests` | every tab, page and cover is worded, built, tested and drawn |
 
 ### Test-driven, every flow
@@ -380,8 +388,10 @@ Build + style:
 - `ios-ci.yml`, on `macos-26`: the pinned tools, `swiftformat --lint`,
   `swiftlint --strict`, `scripts/generate-project.sh --check`,
   `xcodebuild test` of the `DishApp` scheme on an iPhone 17 Pro simulator
-  (every package test target and the UI tests), a Release build for the
-  simulator, and the `Dish.app` as an artifact. There is no build cache: a restored DerivedData
+  (every package test target and the UI tests), the UI tests again on an
+  iPad Pro 11-inch (M5) simulator (`-only-testing:DishUITests`, over the same
+  build), a Release build for the simulator, and the `Dish.app` as an
+  artifact. There is no build cache: a restored DerivedData
   carries the previous commit's objects and compiled resource bundles, which
   is how a stale catalog shadows the current one.
 - `version-consistency.yml`: `VERSION` is the source; `CHANGELOG.md`'s top
@@ -566,5 +576,5 @@ Ground rules:
 ## Reporting bugs
 
 Use the issue templates under `.github/ISSUE_TEMPLATE/`. Include the iOS
-version, iPhone model, controller make/model, and the relevant console
+version, iPhone or iPad model, controller make/model, and the relevant console
 excerpt around the misbehavior.

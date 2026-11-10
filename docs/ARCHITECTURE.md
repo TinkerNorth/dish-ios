@@ -64,6 +64,8 @@ own directory.
 | `DishKernel` | The dataflow primitive `StateSource` (below) | nothing | Foundation, Observation |
 | `DishEngine` | Everything that owns state or touches the platform: the preference stores (`Preferences/`), the minute clock (`Clock/`), the Local Network seam and its Bonjour implementation (`LocalNetwork/`), the GameController bridge and the hot path's pad side (`Input/`), the satellite pool, the REST control plane and the UDP data plane (`Network/`), the Moonlight hosts' edges (`Moonlight/`: the keychain identity, one-connection HTTP with mutual TLS, the pinning gateway, the host store, the RTSP handshake, the UDP control socket and media pinger, the control session that seals input onto the ENet link, the connection that holds a host's pads and live session, the feedback router and the manager that probes, pairs, converges the bindings onto one session per host and forgets), the facts the UI draws (`Models/`) and `AppModel`, the one composition root, with its intents by topic. | `DishCore`, `DishKernel` | Foundation, Observation, os, Synchronization, GameController, CoreHaptics, Network, Security, CryptoKit, Darwin, DishCore, DishKernel; never SwiftUI or UIKit |
 | `Dish` | The SwiftUI library: `DishScene` and `OrientationLock` (the two `public` types), the navigation machine and its store, the shell, the pages, the setup cover and the dim, the kit, the mappers, the theme, the localized words and their catalog | `DishEngine`, `DishCore`, `DishKernel` | Foundation, Observation, SwiftUI, UIKit (only `UI/Theme.swift` and `DishScene.swift`), the three modules |
+| `DishEngine` | Everything that owns state or touches the platform: the preference stores (`Preferences/`), the minute clock (`Clock/`), the Local Network seam and its Bonjour implementation (`LocalNetwork/`), the GameController bridge and the hot path's pad side (`Input/`), the satellite pool, the REST control plane and the UDP data plane (`Network/`), the facts the UI draws (`Models/`) and `AppModel`, the one composition root, with its intents by topic. | `DishCore`, `DishKernel` | Foundation, Observation, os, Synchronization, GameController, CoreHaptics, Network, Security, CryptoKit, Darwin, DishCore, DishKernel; never SwiftUI or UIKit |
+| `Dish` | The SwiftUI library: `DishScene` and `OrientationLock` (the two `public` types), the scene's seams under `Scene/` (the orientation lock, the window's reader), the navigation machine and its store, the shell, the pages, the setup cover and the dim, the kit, the mappers, the theme, the localized words and their catalog | `DishEngine`, `DishCore`, `DishKernel` | Foundation, Observation, SwiftUI, UIKit (only `UI/Theme.swift`, `DishScene.swift` and `Scene/Orientation.swift`), the three modules |
 
 `ImportBoundariesTests` fails the build when a file imports outside its row
 (`App/Sources` may import SwiftUI and `Dish` only); `PackageGraphTests` fails it
@@ -175,10 +177,17 @@ what each host is asked to carry.
 passes down the two values only UIKit can give (`settingsURL`, from
 `UIApplication.openSettingsURLString`, and `appVersion`, from the bundle),
 drives `preferredColorScheme` from the appearance fact and sets the idle timer
-from `idleTimerDisabled(facts:)`. It is the one file that reads
-`UIApplication.shared`, `UserDefaults.standard` and `Bundle.main`;
-`NoSuppressionsTests` pins that, and `ViewPurityTests` does not treat it as a
-view.
+from `idleTimerDisabled(facts:)`. It reads the device's idiom once
+(`deviceIdiom(_:)`), for the orientation lock: an iPhone stands upright but
+for play, an iPad follows the device on every screen. It puts `WindowReader`
+(`Scene/WindowReader.swift`) at the window's root, the one reader of the
+window's size classes and shape, which hands them down as `windowFacts`; the
+iPad's layouts (the split tabs, the setup cover's column, the gamepad's
+measures) are mappers over that fact. It is the one file that reads
+`UIApplication.shared`, `UserDefaults.standard`, `UIDevice.current` and
+`Bundle.main`; `NoSuppressionsTests` pins that, and `ViewPurityTests` does not
+treat it or its seams under `Scene/` as views, and holds every other file to
+reading no size class or idiom of its own (V13).
 
 What `AppModel` publishes today:
 
@@ -281,6 +290,12 @@ leave guard and the window gone.
 - A tap on the tab already on screen pops it to its root, as iOS does.
 - A page pushes onto the tab on screen; a pop the stack makes itself (the back
   button, a swipe) arrives as `pathChanged`, so the state follows the system.
+- A tab's list opens one of its pages with `show(page, in: tab)`: the tab's
+  path becomes that page alone. On a phone that is the push from the list;
+  on an iPad, where Controllers and Connections draw the list beside the
+  page, the first page of the path is the one beside the list (the list's
+  selection) and the rest is that column's own stack, so a second row
+  replaces the first rather than stacking on it.
 - Setup and the dim are covers. Setup replaces whatever covered the tabs, the
   dim included; the dim rises only over the tabs, because the accessory that
   asks for it is not on screen under a cover.
@@ -488,5 +503,9 @@ list, with where each lands, is [`../Tests/PARITY.md`](../Tests/PARITY.md).
   and the navigation's coverage (`NavigationCoverageTests`).
 - **The app layer is tested where it decides.** `Tests/DishTests/Mappers`
   covers every page's mapper, one test per flow (empty, content, each
-  variant), and `Tests/DishTests/Navigation` covers the machine and the store.
-  What a test cannot say, how it looks, is a `#Preview` per state.
+  variant, an iPad's included), `Tests/DishTests/Navigation` covers the
+  machine, the store and the orientation per device, and
+  `Tests/DishTests/Scene` the scene's facts: the idiom, the lock's answer
+  and the window's size classes and shape. What a test cannot say, how it
+  looks, is a `#Preview` per state, the iPad's on its side and upright
+  among them; the UI tests run on an iPhone and again on an iPad.

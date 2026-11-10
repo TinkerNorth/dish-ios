@@ -11,17 +11,11 @@ final class ConnectionsUITests: XCTestCase {
     private static let addByAddress = "Add a PC by address"
     private static let addressExample = "192.168.1.50"
 
-    private func launchOnTheTabs() -> XCUIApplication {
-        let app = XCUIApplication()
-        app.launchArguments = ["-onboarding_welcome_completed", "YES"]
-        app.launch()
-        return app
-    }
-
     func testThePlusOnConnectionsOpensAddAPCByAddressAndCancelLowersIt() {
-        let app = launchOnTheTabs()
-        XCTAssertTrue(app.tabBars.buttons["Connections"].waitForExistence(timeout: 10))
-        app.tabBars.buttons["Connections"].tap()
+        let app = ShellUI.launch(welcomeCompleted: true)
+        let connections = ShellUI.tab("Connections", in: app)
+        XCTAssertTrue(connections.waitForExistence(timeout: 10))
+        connections.tap()
         let add = app.buttons[Self.addByAddress].firstMatch
         XCTAssertTrue(add.waitForExistence(timeout: 5))
         add.tap()
@@ -30,6 +24,6 @@ final class ConnectionsUITests: XCTestCase {
         XCTAssertTrue(app.buttons["Connect"].firstMatch.exists)
         app.buttons["Cancel"].firstMatch.tap()
         XCTAssertFalse(field.waitForExistence(timeout: 2))
-        XCTAssertTrue(app.tabBars.buttons["Connections"].isSelected)
+        XCTAssertTrue(ShellUI.tab("Connections", in: app).isSelected)
     }
 }

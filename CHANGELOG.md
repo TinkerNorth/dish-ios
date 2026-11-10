@@ -22,12 +22,24 @@ lockstep across the repos share a version number.
 
 The shell, the protocol core, the controller bridge, the network engine,
 Moonlight hosts, the play screens, Help, Support, Licenses, Diagnostics, the
-pair sheet, the Connections rows and the PC's page are built: a Satellite or a
-Moonlight host is found, paired with from a row, from setup or by its address,
-bound to a pad or the on-screen gamepad, and streamed to. `Tests/PARITY.md`
-lists everything not built.
+pair sheet, the Connections rows and the PC's page are built, on the iPhone and
+the iPad: a Satellite or a Moonlight host is found, paired with from a row, from
+setup or by its address, bound to a pad or the on-screen gamepad, and streamed
+to. `Tests/PARITY.md` lists everything not built.
 
 ### Added
+
+- **The iPad.** Dish runs on the iPad as well as the iPhone, turning every
+  way on every screen. The tabs open into a sidebar from the bar along the
+  top; Controllers and Connections draw their list beside the controller's
+  or the PC's page, with "Pick a controller" and "Pick a PC" before one is
+  picked, while Settings keeps its stack; setup stands in a readable column;
+  the play screens fill the screen, the gamepad's sticks, faces, trigger
+  rails and d-pad larger on an iPad on its side, and along the bottom when
+  the iPad is held upright, since iPadOS will not turn it for play. The
+  device and the window's size classes are read by the scene alone and
+  handed down as facts. CI runs the UI tests again on an iPad Pro 11-inch
+  (M5), and `scripts/ci-local.sh` does the same.
 
 - **Pairing and connections.** The pair sheet (B5), from Pair on a found or
   revoked row, from Pick your PC, from Re-pair on a PC's page and from a PC
@@ -181,7 +193,7 @@ lists everything not built.
   Portuguese in one String Catalog, read through the `L10n` funnel.
 - **The architecture tests.** Import boundaries, the package graph, license
   headers, no suppressions, lint thresholds, tool and workflow pins, version
-  consistency, the catalog, the theme tokens, view purity (V1 to V12) and
+  consistency, the catalog, the theme tokens, view purity (V1 to V13) and
   navigation coverage, read from the tree.
 - **CI and release lanes.** `ios-ci.yml` (format, strict lint, project drift,
   tests on a simulator, Release build), `security.yml` and `codeql.yml`,

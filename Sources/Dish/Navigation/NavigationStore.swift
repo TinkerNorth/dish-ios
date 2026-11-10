@@ -74,6 +74,18 @@ final class NavigationStore {
         Binding(get: { self.state.path(of: tab) }, set: { self.send(.pathChanged(tab, $0)) })
     }
 
+    /// A split tab's list selection: the page beside the list. A selected
+    /// row is a `show`; a cleared selection closes the page.
+    func listSelection(of tab: Tab) -> Binding<Page?> {
+        Binding(get: { self.state.opened(in: tab) }, set: { self.listSelected($0, in: tab) })
+    }
+
+    /// A split tab's detail column: the pages pushed over the one its list
+    /// opened. A pop there stops at that page.
+    func detailPath(of tab: Tab) -> Binding<[Page]> {
+        Binding(get: { Array(self.state.path(of: tab).dropFirst()) }, set: { self.detailMoved($0, in: tab) })
+    }
+
     /// The cover on screen; a dismissal the system makes is `coverDismissed`.
     var cover: Binding<Cover?> {
         Binding(get: { self.state.cover }, set: { self.coverChanged($0) })
@@ -91,6 +103,18 @@ final class NavigationStore {
 
     private func coverChanged(_ cover: Cover?) {
         if cover == nil, state.cover != nil { send(.coverDismissed) }
+    }
+
+    private func listSelected(_ page: Page?, in tab: Tab) {
+        switch page {
+        case let page?: send(.show(page, in: tab))
+        case nil: send(.pathChanged(tab, []))
+        }
+    }
+
+    private func detailMoved(_ pages: [Page], in tab: Tab) {
+        let opened = state.path(of: tab).prefix(1)
+        send(.pathChanged(tab, Array(opened) + pages))
     }
 
     private func sheetChanged(_ sheet: Sheet?) {

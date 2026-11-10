@@ -5,8 +5,11 @@ import SwiftUI
 
 /// A stick: a round base and a thumb that follows the finger to the rim.
 /// It reports the finger's offset from its centre in radii, y down, and nil
-/// when the finger lifts; the reducer clamps it.
+/// when the finger lifts; the reducer clamps it. The page hands it the
+/// base's and the thumb's diameters, the phone's or an iPad's.
 struct PadStickControl: View {
+    let base: CGFloat
+    let thumb: CGFloat
     let onMove: (CGVector?) -> Void
 
     @GestureState private var touch: CGPoint?
@@ -19,17 +22,17 @@ struct PadStickControl: View {
                 .fill(DishTheme.padThumb)
                 .overlay(Circle().stroke(touch == nil ? DishTheme.outline : DishTheme.primary, lineWidth: DishSize.padHeldStroke))
                 .shadow(color: touch == nil ? Color.clear : DishTheme.padGlow, radius: DishSize.padGlow)
-                .frame(width: DishSize.padStickThumb, height: DishSize.padStickThumb)
+                .frame(width: thumb, height: thumb)
                 .offset(thumbOffset)
         }
-        .frame(width: DishSize.padStick, height: DishSize.padStick)
+        .frame(width: base, height: base)
         .contentShape(Circle())
         .gesture(DragGesture(minimumDistance: 0).updating($touch) { value, state, _ in state = value.location })
         .onChange(of: touch) { onMove(offset(of: $1)) }
     }
 
     private var radius: CGFloat {
-        DishSize.padStick / 2
+        base / 2
     }
 
     private func offset(of location: CGPoint?) -> CGVector? {
@@ -39,7 +42,7 @@ struct PadStickControl: View {
     /// The thumb stays inside the base, along the finger's direction.
     private var thumbOffset: CGSize {
         guard let vector = offset(of: touch) else { return .zero }
-        let travel = radius - DishSize.padStickThumb / 2
+        let travel = radius - thumb / 2
         let length = max(hypot(vector.dx, vector.dy), 1)
         return CGSize(width: vector.dx / length * travel, height: vector.dy / length * travel)
     }
@@ -50,6 +53,8 @@ struct PadStickControl: View {
 /// rail the finger is, 0 at the top and 1 at the bottom, and nil on release.
 struct TriggerRail: View {
     let title: String
+    /// The rail's breadth; it runs the height it is given.
+    let breadth: CGFloat
     let onPull: (Double?) -> Void
 
     @GestureState private var touch: CGPoint?
@@ -72,7 +77,7 @@ struct TriggerRail: View {
             .gesture(DragGesture(minimumDistance: 0).updating($touch) { value, state, _ in state = value.location })
             .onChange(of: touch) { onPull(railY($1, height: geometry.size.height)) }
         }
-        .frame(width: DishSize.padRail)
+        .frame(width: breadth)
     }
 
     private func railY(_ location: CGPoint?, height: CGFloat) -> Double? {
@@ -90,6 +95,8 @@ struct TriggerRail: View {
 /// arm to arm. It reports the finger's offset from the centre in arm
 /// lengths, y down, and nil on release; the reducer reads the directions.
 struct DirectionPad: View {
+    /// One arm's side; the cross is three arms across.
+    let key: CGFloat
     let onMove: (CGVector?) -> Void
 
     @GestureState private var touch: CGPoint?
@@ -103,7 +110,7 @@ struct DirectionPad: View {
             }
             GridRow {
                 arm("chevron.left", lit: lit.left)
-                Rectangle().fill(DishTheme.surfaceDim).frame(width: DishSize.padDpadKey, height: DishSize.padDpadKey)
+                Rectangle().fill(DishTheme.surfaceDim).frame(width: key, height: key)
                 arm("chevron.right", lit: lit.right)
             }
             GridRow {
@@ -119,14 +126,14 @@ struct DirectionPad: View {
     }
 
     private var side: CGFloat {
-        DishSize.padDpadKey * 3
+        key * 3
     }
 
     private func arm(_ symbol: String, lit: Bool) -> some View {
         Image(systemName: symbol)
             .font(DishFont.headline)
             .foregroundStyle(lit ? DishTheme.primary : DishTheme.muted)
-            .frame(width: DishSize.padDpadKey, height: DishSize.padDpadKey)
+            .frame(width: key, height: key)
             .background(RoundedRectangle(cornerRadius: DishSize.padCorner).fill(lit ? DishTheme.primaryFill : DishTheme.surfaceDim))
             .overlay(RoundedRectangle(cornerRadius: DishSize.padCorner).stroke(
                 lit ? DishTheme.primary : DishTheme.outline,

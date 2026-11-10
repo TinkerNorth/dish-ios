@@ -25,9 +25,10 @@ extension View {
 }
 
 /// A face button: a ring in the button's colour with its letter or glyph,
-/// filled while held.
+/// filled while held, as wide as the page hands it.
 struct FaceButton: View {
     let state: FaceButtonState
+    let size: CGFloat
     let onChange: (Bool) -> Void
 
     @State private var held = false
@@ -40,7 +41,7 @@ struct FaceButton: View {
             Circle().stroke(state.tint, lineWidth: DishSize.padHeldStroke)
             glyph.foregroundStyle(held ? DishTheme.onPrimary : state.tint)
         }
-        .frame(width: DishSize.padFace, height: DishSize.padFace)
+        .frame(width: size, height: size)
         .contentShape(Circle())
         .onHold(hold)
     }

@@ -1,8 +1,9 @@
 name: iOS CI
 
 # The merge gate for dish-ios: format, lint, project drift, the app build with
-# every package test target, and a Release build of the app. scripts/ci-local.sh
-# runs the same gates in the same order.
+# every package test target on an iPhone, the UI tests again on an iPad, and a
+# Release build of the app. scripts/ci-local.sh runs the same gates in the
+# same order.
 #
 # No build cache. The package has no dependencies, so there is nothing to
 # resolve or download, and a restored DerivedData carries the previous
@@ -30,15 +31,25 @@ jobs:
     # deployment floor; bump together with CONTRIBUTING.md.
     runs-on: macos-26
     timeout-minutes: 60
-    env:
-      SIM_DESTINATION: platform=iOS Simulator,name=iPhone 17 Pro
-
     steps:
       - name: Checkout code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Select Xcode
         run: sudo xcode-select -s /Applications/Xcode.app
+
+      - name: Create and boot the iPhone the tests run on
+        run: |
+          set -euo pipefail
+          runtime="$(xcrun simctl list runtimes -j | python3 -I -c '
+          import json, sys
+          runtimes = [r for r in json.load(sys.stdin)["runtimes"] if r["platform"] == "iOS" and r["isAvailable"]]
+          runtimes.sort(key=lambda r: tuple(int(part) for part in r["version"].split(".")))
+          print(runtimes[-1]["identifier"] if runtimes else "")
+          ')"
+          udid="$(xcrun simctl create "CI iPhone" "iPhone 17 Pro" "$runtime")"
+          xcrun simctl bootstatus "$udid" -b
+          echo "SIM_DESTINATION=platform=iOS Simulator,id=$udid" >> "$GITHUB_ENV"
 
       - name: Swift version
         run: swift --version
@@ -79,7 +90,16 @@ jobs:
           "$tools/xcodegen/bin/xcodegen" --version
 
       - name: SwiftFormat (check only)
-        run: swiftformat --lint .
+        run: |
+          set -uo pipefail
+          # A rule that times out on a loaded runner is not a finding, so the
+          # lint runs once more then; any other failure stands.
+          if ! output="$(swiftformat --lint . 2>&1)"; then
+            echo "$output"
+            grep -q "rule timed out" <<<"$output" || exit 1
+            echo "A rule timed out on a slow runner; linting once more."
+            swiftformat --lint .
+          fi
 
       - name: SwiftLint
         run: swiftlint lint --strict --reporter github-actions-logging
@@ -97,6 +117,39 @@ jobs:
             -project Dish.xcodeproj \
             -scheme DishApp \
             -destination "$SIM_DESTINATION" \
+            -enableCodeCoverage YES \
+            CODE_SIGNING_ALLOWED=NO
+
+      # The UI tests again on an iPad, where the tabs open into a sidebar,
+      # Controllers and Connections split, and the windows turn with the
+      # device. The package's suites do not depend on the device, so only the
+      # UI bundle runs, over the build above (same flags, no rebuild).
+      - name: Create and boot the iPad the UI tests run on
+        run: |
+          set -euo pipefail
+          runtime="$(xcrun simctl list runtimes -j | python3 -I -c '
+          import json, sys
+          runtimes = [r for r in json.load(sys.stdin)["runtimes"] if r["platform"] == "iOS" and r["isAvailable"]]
+          runtimes.sort(key=lambda r: tuple(int(part) for part in r["version"].split(".")))
+          print(runtimes[-1]["identifier"] if runtimes else "")
+          ')"
+          devicetype="$(xcrun simctl list devicetypes -j | python3 -I -c '
+          import json, sys
+          names = [d["identifier"] for d in json.load(sys.stdin)["devicetypes"] if d["name"].startswith("iPad Pro 11-inch")]
+          print(sorted(names)[-1] if names else "")
+          ')"
+          udid="$(xcrun simctl create "CI iPad" "$devicetype" "$runtime")"
+          xcrun simctl bootstatus "$udid" -b
+          echo "IPAD_DESTINATION=platform=iOS Simulator,id=$udid" >> "$GITHUB_ENV"
+
+      - name: UI tests on iPad
+        run: |
+          set -euo pipefail
+          xcodebuild test \
+            -project Dish.xcodeproj \
+            -scheme DishApp \
+            -destination "$IPAD_DESTINATION" \
+            -only-testing:DishUITests \
             -enableCodeCoverage YES \
             CODE_SIGNING_ALLOWED=NO
 
@@ -126,15 +179,25 @@ jobs:
     name: Lock statistics build and tests
     runs-on: macos-26
     timeout-minutes: 45
-    env:
-      SIM_DESTINATION: platform=iOS Simulator,name=iPhone 17 Pro
-
     steps:
       - name: Checkout code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Select Xcode
         run: sudo xcode-select -s /Applications/Xcode.app
+
+      - name: Create and boot the iPhone the tests run on
+        run: |
+          set -euo pipefail
+          runtime="$(xcrun simctl list runtimes -j | python3 -I -c '
+          import json, sys
+          runtimes = [r for r in json.load(sys.stdin)["runtimes"] if r["platform"] == "iOS" and r["isAvailable"]]
+          runtimes.sort(key=lambda r: tuple(int(part) for part in r["version"].split(".")))
+          print(runtimes[-1]["identifier"] if runtimes else "")
+          ')"
+          udid="$(xcrun simctl create "CI iPhone" "iPhone 17 Pro" "$runtime")"
+          xcrun simctl bootstatus "$udid" -b
+          echo "SIM_DESTINATION=platform=iOS Simulator,id=$udid" >> "$GITHUB_ENV"
 
       - name: Run the lock statistics tests
         run: |

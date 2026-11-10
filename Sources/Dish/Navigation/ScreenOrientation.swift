@@ -3,14 +3,33 @@
 
 import Foundation
 
-/// Which way the app may turn: the play screens are landscape only, every
-/// other screen portrait only. The scene turns the window to it.
+/// The device the app runs on, as the scene reads it once.
+enum DeviceIdiom: Equatable {
+    case phone
+    case pad
+}
+
+/// Which way the app may turn. The scene turns the window to it.
 enum ScreenOrientation: Equatable {
     case portrait
     case landscape
+    /// Any of the four: whichever way the device is held.
+    case any
 }
 
-func screenOrientation(for cover: Cover?) -> ScreenOrientation {
+/// An iPhone stands upright and lies on its side for play. An iPad follows
+/// the device on every screen, play included: iPadOS turns the window of an
+/// app that shares the screen with the device, whatever the app's mask
+/// says, and refuses it a turn of its own.
+func screenOrientation(for cover: Cover?, idiom: DeviceIdiom) -> ScreenOrientation {
+    switch idiom {
+    case .phone: phoneOrientation(for: cover)
+    case .pad: .any
+    }
+}
+
+/// The play screens are landscape, every other screen portrait.
+private func phoneOrientation(for cover: Cover?) -> ScreenOrientation {
     switch cover {
     case .play: .landscape
     case .setup, .dim, nil: .portrait

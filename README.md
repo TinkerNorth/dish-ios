@@ -1,9 +1,9 @@
 # Dish iOS
 
-The native iPhone client for the Satellite wireless-gamepad server, one of the
-Dish clients beside [dish-mac], [dish-android], [dish-windows] and
+The native iPhone and iPad client for the Satellite wireless-gamepad server,
+one of the Dish clients beside [dish-mac], [dish-android], [dish-windows] and
 [dish-linux]. It is meant to find a Satellite on the Wi-Fi, pair with it,
-declare the iPhone's controllers to the server and stream their input to the
+declare the device's controllers to the server and stream their input to the
 PC. The engine finds a Satellite, pairs with it and streams a bound
 controller to it; the pages for pairing and a PC are still to come. See
 [Status](#status) for what is built and what is not.
@@ -57,7 +57,10 @@ screens, Support Dish, Help & FAQ, Diagnostics and the rest.
 
 ## Requirements
 
-- iOS 26.0 or newer, iPhone only, portrait only in this wave. There is no
+- iOS 26.0 or newer, on an iPhone or an iPad (iPadOS 26.0). An iPhone stands
+  upright but for the play screens, which lie on their side; an iPad turns
+  every way on every screen, its tabs open into a sidebar, and Controllers
+  and Connections show their list beside the page it opens. There is no
   fallback for an older iOS anywhere.
 - Xcode 26.6 or newer (Swift 6.3) to build; CI builds on `macos-26` with its default Xcode 26.6, and the tree is also verified on Xcode 27.
 - To build from a clone, the checkout folder must be named `dish-ios`, as CI's
@@ -94,13 +97,21 @@ xcodebuild test -project Dish.xcodeproj -scheme DishApp \
 
 The scheme lists every test target of the package, and `PackageGraphTests`
 pins that list, so a new target that is not in `project.yml` fails the build.
+The UI tests run again on an iPad, where the sidebar and the split lists
+are, as CI runs them:
+
+```bash
+xcodebuild test -project Dish.xcodeproj -scheme DishApp \
+  -destination "platform=iOS Simulator,name=iPad Pro 11-inch (M5)" \
+  -only-testing:DishUITests
+```
 
 | Target | What it pins |
 |---|---|
 | `DishCoreTests` | The setup machine: every step, every event, the Local Network branches and the draft's defaults. |
 | `DishKernelTests` | `StateSource`: distinct-until-changed publishing. |
 | `DishEngineTests` | The preference stores, the clock, the setup intents, the Local Network seam, the binding record, the page lifecycle. |
-| `DishTests` | Every mapper flow (empty, content, each variant), the navigation machine and the navigation store. |
+| `DishTests` | Every mapper flow (empty, content, each variant, an iPad's included), the navigation machine and the navigation store, the orientation per device and the scene's facts. |
 | `ArchitectureTests` | Import boundaries, the package graph, license headers, no suppressions, lint thresholds, tool pins, workflow pins, the version mirrors, the catalog, the tokens, view purity, navigation coverage. |
 
 ## Development
@@ -117,7 +128,7 @@ scripts/setup-hooks.sh        # pre-commit: format + lint on staged Swift files
 
 `DISH_SIM_DESTINATION` overrides the simulator destination, for example
 `platform=iOS Simulator,OS=26.5,name=iPhone 17 Pro` when several runtimes are
-installed. [`CONTRIBUTING.md`](CONTRIBUTING.md) holds the rules: zero
+installed, and `DISH_IPAD_DESTINATION` the iPad the UI tests run on again. [`CONTRIBUTING.md`](CONTRIBUTING.md) holds the rules: zero
 warnings, the shape of the code, tests red first for every flow, where code
 goes, and how a release is cut.
 

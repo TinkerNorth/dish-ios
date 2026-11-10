@@ -122,12 +122,26 @@ enum SetupStepState: Equatable {
 struct SetupCoverState: Equatable {
     let chrome: SetupChromeState
     let step: SetupStepState
+    /// The readable column the steps stand in; nil fills the screen.
+    let column: CGFloat?
 }
 
-func setupCoverState(facts: ShellFacts, words: L10n = .app) -> SetupCoverState? {
+func setupCoverState(facts: ShellFacts, width: SizeClass, words: L10n = .app) -> SetupCoverState? {
     guard let walk = facts.setup else { return nil }
     let inputs = setupInputs(facts: facts)
-    return SetupCoverState(chrome: setupChromeState(walk, words: words), step: setupStepState(walk, inputs, words: words))
+    return SetupCoverState(
+        chrome: setupChromeState(walk, words: words),
+        step: setupStepState(walk, inputs, words: words),
+        column: setupColumn(width)
+    )
+}
+
+/// A phone's screen is the column; an iPad's is too wide to read across.
+func setupColumn(_ width: SizeClass) -> CGFloat? {
+    switch width {
+    case .compact: nil
+    case .regular: DishSize.setupColumn
+    }
 }
 
 func setupStepState(_ walk: SetupState, _ inputs: SetupInputs, words: L10n = .app) -> SetupStepState {

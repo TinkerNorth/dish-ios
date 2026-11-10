@@ -5,22 +5,28 @@ import DishEngine
 import SwiftUI
 
 /// The Controllers tab (A2): the pads iOS sees, then Add a controller on its
-/// own under the list. A row opens the controller's page.
+/// own under the list. A row opens the controller's page: pushed on a
+/// phone, beside the list on an iPad.
 struct ControllersPage: View {
     @Environment(AppModel.self) private var model
     @Environment(NavigationStore.self) private var navigation
+    @Environment(\.windowFacts) private var window
 
     var body: some View {
+        let layout = tabLayout(.controllers, width: window.width)
         ControllersPageBody(
             state: controllersPageState(controllers: model.shellFacts.controllers, apply: model.shellFacts.apply),
+            layout: layout,
+            selection: listSelection(navigation.listSelection(of: .controllers), layout: layout),
             add: addController,
             open: open,
             play: play
         )
     }
 
+    /// A row's page, or the heart's: alone on the tab.
     private func open(_ page: Page) {
-        navigation.send(.push(page))
+        navigation.send(.show(page, in: .controllers))
     }
 
     private func play() {
@@ -32,19 +38,23 @@ struct ControllersPage: View {
     }
 }
 
-/// The page over its state, so a preview can draw every content state.
+/// The page over its state, so a preview can draw every content state. On
+/// an iPad the list selects the controller shown beside it.
 struct ControllersPageBody: View {
     let state: ControllersPageState
+    var layout = TabLayout.stack
+    /// The page beside the list; nil while the list is a stack's.
+    var selection: Binding<Page?>?
     let add: () -> Void
     let open: @MainActor (Page) -> Void
     let play: @MainActor () -> Void
 
     var body: some View {
-        List {
+        List(selection: selection) {
             switch state.content {
             case let .list(rows):
                 Section {
-                    ForEach(rows) { ControllerRow(state: $0, open: open, play: play) }
+                    ForEach(rows) { ControllerRow(state: $0, layout: layout, open: open, play: play) }
                 }
                 .listRowBackground(DishTheme.surface)
             case let .empty(invitation):

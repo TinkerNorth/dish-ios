@@ -40,8 +40,17 @@ struct MouseCover: View {
 }
 
 #Preview("Mouse", traits: .landscapeLeft) {
-    MouseCover(state: playCoverState(facts: FactsPreview.playing(.mouse), screen: .mouse), actions: .preview)
-        .padding(.horizontal, DishSpace.page)
-        .background(DishTheme.background)
+    MouseCover(
+        state: playCoverState(facts: FactsPreview.playing(.mouse), screen: .mouse, window: PreviewWindow.phoneOnItsSide),
+        actions: .preview
+    )
+    .padding(.horizontal, DishSpace.page)
+    .background(DishTheme.background)
+    .environment(\.colorScheme, .dark)
+}
+
+#Preview("Mouse, iPad on its side", traits: .landscapeLeft) {
+    let state = playCoverState(facts: FactsPreview.playing(.mouse), screen: .mouse, window: PreviewWindow.iPadOnItsSide)
+    PlayCoverBody(state: state, actions: .preview)
         .environment(\.colorScheme, .dark)
 }

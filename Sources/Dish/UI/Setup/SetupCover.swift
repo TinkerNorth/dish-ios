@@ -7,18 +7,22 @@ import SwiftUI
 
 /// The setup cover: the model's walk, one step at a time, under the system
 /// toolbar's Back, title, step and Skip, and the sheets Pick your PC opens
-/// over it. Skip and Bind end the walk in the model and lower the cover
-/// through the navigation, landing on Controllers.
+/// over it, in a readable column on an iPad. Skip and Bind end the walk in
+/// the model and lower the cover through the navigation, landing on
+/// Controllers.
 struct SetupCover: View {
     @Environment(AppModel.self) private var model
     @Environment(NavigationStore.self) private var navigation
+    @Environment(\.windowFacts) private var window
 
     var body: some View {
-        let cover = setupCoverState(facts: model.shellFacts)
+        let cover = setupCoverState(facts: model.shellFacts, width: window.width)
         if let cover {
             NavigationStack {
                 step(cover.step)
                     .scrollContentBackground(.hidden)
+                    .frame(maxWidth: cover.column)
+                    .frame(maxWidth: .infinity)
                     .background(DishTheme.background)
                     .modifier(SetupTitles(title: cover.chrome.title, subtitle: cover.chrome.subtitle))
                     .toolbar { toolbar(cover.chrome) }
@@ -106,4 +110,18 @@ private struct SetupTitles: ViewModifier {
     SetupCover()
         .environment(PreviewSetup.model(at: .review))
         .environment(PreviewSetup.navigation())
+}
+
+#Preview("Welcome, iPad on its side", traits: .landscapeLeft) {
+    SetupCover()
+        .environment(PreviewSetup.model(at: .welcome))
+        .environment(PreviewSetup.navigation())
+        .environment(\.windowFacts, PreviewWindow.iPadOnItsSide)
+}
+
+#Preview("Input, iPad upright", traits: .portrait) {
+    SetupCover()
+        .environment(PreviewSetup.model(at: .input))
+        .environment(PreviewSetup.navigation())
+        .environment(\.windowFacts, PreviewWindow.iPadUpright)
 }

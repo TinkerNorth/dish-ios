@@ -4,6 +4,7 @@
 import DishCore
 import DishEngine
 import Foundation
+@testable import Dish
 
 /// Facts for the mapper tests: the engine's defaults with one thing changed
 /// at a time.
@@ -63,4 +64,14 @@ enum FactsFixture {
     }
 
     static let stopped = SessionFact(pcName: "Living Room PC", pads: 3, latencyMs: 4, phase: .stoppedResponding)
+}
+
+/// The windows the mapper tests lay out in, as the scene reads them.
+enum WindowFixture {
+    /// An iPhone on its side, as the play cover turns it.
+    static let phoneOnItsSide = WindowFacts(width: .compact, height: .compact, shape: .landscape)
+    /// An iPhone Pro Max on its side: regular across, compact down.
+    static let proMaxOnItsSide = WindowFacts(width: .regular, height: .compact, shape: .landscape)
+    static let iPadOnItsSide = WindowFacts(width: .regular, height: .regular, shape: .landscape)
+    static let iPadUpright = WindowFacts(width: .regular, height: .regular, shape: .portrait)
 }
