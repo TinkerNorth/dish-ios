@@ -156,17 +156,25 @@ extension SatelliteClient {
         datagram.withUnsafeBytes { (raw: UnsafeRawBufferPointer) in processIncoming(raw) }
     }
 
-    /// One datagram where it lies: the header read in place, the token
-    /// filter, the replay guard, the AEAD opened in place and bound to the
-    /// direction, counter and token, then the dispatch on a slice of the
-    /// plaintext. Every failure is a silent drop, as on the sibling clients.
+    /// One datagram where it lies, opened and dispatched on a slice of the
+    /// plaintext, or refused: every failure is a silent drop, as on the
+    /// sibling clients, and only a tally the Diagnostics page reads.
     func processIncoming(_ datagram: UnsafeRawBufferPointer) {
-        guard let header = PacketCodec.parseHeader(datagram) else { return }
+        guard let inner = openIncoming(datagram) else { return dropped.increment() }
+        received.increment()
+        dispatch(inner)
+    }
+
+    /// The header read in place, the token filter, the replay guard, the
+    /// AEAD opened in place and bound to the direction, counter and token;
+    /// nil for a datagram refused at any step.
+    private func openIncoming(_ datagram: UnsafeRawBufferPointer) -> PacketCodec.InnerMessage? {
+        guard let header = PacketCodec.parseHeader(datagram) else { return nil }
         if let fresh = generationMail.take() {
             receiveGeneration.replace(with: fresh)
             lastRecvCounter.set(0)
         }
-        guard let session = receiveGeneration.current, header.token == session.token else { return }
+        guard let session = receiveGeneration.current, header.token == session.token else { return nil }
         let lastRecv = UInt32(truncatingIfNeeded: lastRecvCounter.current())
         let replayed = lastRecv != 0 && header.counter <= lastRecv
         guard !replayed, let plain = try? SessionCrypto.open(
@@ -175,10 +183,9 @@ extension SatelliteClient {
             direction: .down,
             counter: header.counter,
             token: session.token
-        ) else { return }
+        ) else { return nil }
         lastRecvCounter.set(UInt64(header.counter))
-        guard let inner = PacketCodec.parseInnerInPlace(plain) else { return }
-        dispatch(inner)
+        return PacketCodec.parseInnerInPlace(plain)
     }
 
     /// One opened message, on the receive loop; the return paths post to the

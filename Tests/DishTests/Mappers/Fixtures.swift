@@ -23,7 +23,9 @@ enum FactsFixture {
         preferences: PreferencesFacts = preferences,
         now: Date = now,
         setup: SetupState? = nil,
-        play: PlayFacts? = nil
+        play: PlayFacts? = nil,
+        diagnostics: DiagnosticsSnapshot = DiagnosticsSnapshot(),
+        diagnosticsEvents: [DiagnosticsEvent] = []
     ) -> ShellFacts {
         ShellFacts(
             controllers: controllers,
@@ -36,7 +38,9 @@ enum FactsFixture {
             preferences: preferences,
             now: now,
             setup: setup,
-            play: play
+            play: play,
+            diagnostics: diagnostics,
+            diagnosticsEvents: diagnosticsEvents
         )
     }
 

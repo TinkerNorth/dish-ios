@@ -45,7 +45,7 @@ struct StreamingSection: View {
     }
 }
 
-/// SETUP & HELP › Setup guide, Help & FAQ.
+/// SETUP & HELP › Setup guide, Help & FAQ, Diagnostics.
 struct SetupHelpSection: View {
     let state: SetupHelpSectionState
     let actions: SettingsActions
@@ -62,6 +62,12 @@ struct SetupHelpSection: View {
                 HStack(spacing: DishSpace.s6) {
                     RowGlyph(symbol: state.helpSymbol)
                     SettingsLinkRow(title: state.help, value: nil)
+                }
+            }
+            Button(action: actions.openDiagnostics) {
+                HStack(spacing: DishSpace.s6) {
+                    RowGlyph(symbol: state.diagnosticsSymbol)
+                    SettingsLinkRow(title: state.diagnostics, value: nil)
                 }
             }
         } header: {

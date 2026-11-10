@@ -9,6 +9,7 @@ struct SettingsActions {
     let editDeviceName: @MainActor () -> Void
     let openGuide: @MainActor () -> Void
     let openHelp: @MainActor () -> Void
+    let openDiagnostics: @MainActor () -> Void
     let openSupport: @MainActor () -> Void
     let openLicenses: @MainActor () -> Void
     let open: @MainActor (URL?) -> Void
@@ -17,7 +18,7 @@ struct SettingsActions {
     let setAppearance: @MainActor (Appearance) -> Void
 }
 
-/// The Settings tab (D5). Diagnostics comes with its page.
+/// The Settings tab (D5).
 struct SettingsPage: View {
     @Environment(AppModel.self) private var model
     @Environment(NavigationStore.self) private var navigation
@@ -31,6 +32,7 @@ struct SettingsPage: View {
                 editDeviceName: editDeviceName,
                 openGuide: openGuide,
                 openHelp: { push(.help) },
+                openDiagnostics: { push(.diagnostics) },
                 openSupport: { push(.support) },
                 openLicenses: { push(.licenses) },
                 open: open,
@@ -89,6 +91,7 @@ struct SettingsPageBody: View {
                 editDeviceName: {},
                 openGuide: {},
                 openHelp: {},
+                openDiagnostics: {},
                 openSupport: {},
                 openLicenses: {},
                 open: { _ in },

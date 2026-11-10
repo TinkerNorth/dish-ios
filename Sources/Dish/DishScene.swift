@@ -22,7 +22,7 @@ public struct DishScene: Scene {
     /// `orientation` is the app delegate the `@main` app declared.
     public init(orientation: OrientationLock) {
         self.orientation = orientation
-        let model = AppModel(defaults: .standard)
+        let model = AppModel(defaults: .standard, pasteboard: SystemPasteboard())
         _model = State(initialValue: model)
         let navigation = NavigationStore(
             onboarding: model.onboarding,
@@ -88,4 +88,13 @@ private func refreshOrientations(_ controller: UIViewController) {
 /// The bundle's marketing version, empty when the bundle carries none.
 private func shortVersion(of bundle: Bundle) -> String {
     bundle.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? ""
+}
+
+/// The system clipboard behind the model's `Pasteboard` seam: the one
+/// place `UIPasteboard` is touched, so Diagnostics' Copy is an intent.
+@MainActor
+final class SystemPasteboard: Pasteboard {
+    func copy(_ text: String) {
+        UIPasteboard.general.string = text
+    }
 }

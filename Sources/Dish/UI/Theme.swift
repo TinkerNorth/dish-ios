@@ -75,6 +75,8 @@ enum DishSymbol {
     static let linkArrow = "arrow.down"
     /// Add a PC by address.
     static let add = "plus"
+    /// Settings › Setup & help › Diagnostics.
+    static let diagnostics = "waveform.path.ecg"
 }
 
 /// The images the views draw from the package's asset catalog.

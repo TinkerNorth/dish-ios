@@ -34,13 +34,15 @@ struct StreamingSectionState: Equatable {
     let footer: String
 }
 
-/// SETUP & HELP: Setup guide and Help & FAQ. Diagnostics comes with its page.
+/// SETUP & HELP: Setup guide, Help & FAQ and Diagnostics.
 struct SetupHelpSectionState: Equatable {
     let title: String
     let guide: String
     let guideSymbol: String
     let help: String
     let helpSymbol: String
+    let diagnostics: String
+    let diagnosticsSymbol: String
 }
 
 /// One Appearance choice.
@@ -99,7 +101,9 @@ func settingsPageState(preferences: PreferencesFacts, appVersion: String, words:
             guide: words.setupGuide,
             guideSymbol: "sparkles",
             help: words.helpAndFaq,
-            helpSymbol: "questionmark.circle"
+            helpSymbol: "questionmark.circle",
+            diagnostics: words.diagnostics,
+            diagnosticsSymbol: DishSymbol.diagnostics
         ),
         appearance: AppearanceSectionState(
             title: words.appearance,

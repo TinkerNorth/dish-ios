@@ -178,6 +178,7 @@ mapper, and the tab bar's from `tabSymbol` in `ShellMappers.swift`.
 | `DishSymbol.pc` | `desktopcomputer` | The PC over the Local Network primer |
 | `DishSymbol.linkArrow` | `arrow.down` | From the pad down to the PC on the review card |
 | `DishSymbol.add` | `plus` | Add a PC by address |
+| `DishSymbol.diagnostics` | `waveform.path.ecg` | The glyph of Settings › Setup & help › Diagnostics |
 
 SF Symbols has no satellite. The antenna, `antenna.radiowaves.left.and.right`
 (`satelliteSymbol` in `ShellMappers.swift`), stands in for it on the

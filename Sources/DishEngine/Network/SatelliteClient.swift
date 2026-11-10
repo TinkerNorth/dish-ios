@@ -60,6 +60,10 @@ package final class SatelliteClient: Sendable {
     /// The highest counter successfully opened, so a forged header cannot
     /// advance it; the first packet is exempt while it is zero.
     let lastRecvCounter = AtomicCounter()
+    /// Datagrams opened this session, and datagrams refused (a bad header,
+    /// another token, a replay, a failed AEAD): Diagnostics reads both.
+    let received = AtomicCounter()
+    let dropped = AtomicCounter()
     let receiveRunning = AtomicBool(false)
     /// Balances the receive loop, so `closeSocket` can join it (bounded by
     /// the 500 ms receive timeout) before the fd closes.
@@ -155,6 +159,8 @@ package final class SatelliteClient: Sendable {
         protocolVersionWord.store(Int64(protocolVersion))
         generationMail.post(fresh)
         lastRecvCounter.set(0)
+        received.reset()
+        dropped.reset()
         missedAcks.set(0)
         connectionAlive.set(true)
         heartbeatAckWord.store(0)
@@ -260,6 +266,15 @@ package final class SatelliteClient: Sendable {
         return latency.withLock { window in
             pairPendingAck(pending, into: &window)
             return (window.p50OneWayMs(), window.sampleCount)
+        }
+    }
+
+    /// The round trips the Diagnostics page shows beside the one-way figure.
+    func latencySummary() -> LatencySummary {
+        let pending = pendingAckMs
+        return latency.withLock { window in
+            pairPendingAck(pending, into: &window)
+            return window.summary()
         }
     }
 

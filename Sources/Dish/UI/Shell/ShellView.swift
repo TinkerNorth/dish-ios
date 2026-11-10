@@ -65,6 +65,7 @@ private struct PageView: View {
         case .help: HelpPage()
         case .licenses: LicensesPage()
         case .support: SupportPage()
+        case .diagnostics: DiagnosticsPage()
         }
     }
 }
