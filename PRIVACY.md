@@ -65,6 +65,7 @@ Beside them, for the PCs you pair:
 |---|---|---|---|
 | `deviceId` | `UserDefaults` | A random id made on first use, not derived from the device | The id the PC knows this iPhone by; it rides every request to the PC you paired, and it is not a secret |
 | `wifi_list` | `UserDefaults` | Each paired PC's name, its address and ports, and its machine id | Reconnecting to the PCs you paired, and finding one that moved address |
+| `wifi_binding_list` | `UserDefaults` | Which controller is bound to which paired PC | Binding a controller to its PC again when it returns after the app was closed; Unbind and Forget This PC erase it |
 | `wifi_last_seen:<PC>` | `UserDefaults` | When a session with that PC last ended | The "seen yesterday" line of an offline PC |
 | The pairing key | The Keychain, readable after the first unlock and never moved to another device (`com.tinkernorth.dish.ios.pairing-key`) | One 32-byte key per paired PC, which the PC handed over when you paired | Proving to that PC that this iPhone is the one you paired; the traffic itself is encrypted under a fresh key per session derived from it |
 | The certificate pins | `Application Support/Dish/cert-pins.json` in the app's container | Each PC's address and the SHA-256 fingerprint of the certificate it showed the first time; a Moonlight host's under `moonlight:<address>`, replaced by the one a pairing proves | Refusing a later certificate that differs, so nothing else on your network can pretend to be your PC (trust on first use) |

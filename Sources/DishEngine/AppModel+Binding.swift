@@ -46,8 +46,14 @@ package extension AppModel {
         guard let pad = bindablePad(slotId) else { return advanceApply(.padGone) }
         let path = applyPath(connectionId)
         endApplyWatch()
-        let pick = pads.types.typeFor(slotId) ?? pad.family
-        let bound = network.hub.bind(slotId: slotId, connectionId: connectionId, capabilities: pad.capabilities, emulateAs: pick)
+        let picked = pads.types.typeFor(slotId)
+        let bound = network.hub.bind(
+            slotId: slotId,
+            connectionId: connectionId,
+            capabilities: pad.capabilities,
+            emulateAs: picked ?? pad.family,
+            pick: picked
+        )
         advanceApply(.started(path))
         guard bound else { return advanceApply(.hostRejected) }
         refreshRouting()
@@ -181,7 +187,7 @@ package extension AppModel {
 
     /// The slots a binding may hold: the pads iOS lists, and the on-screen
     /// gamepad while it is one of the controllers.
-    private var presentSlotIds: Set<String> {
+    internal var presentSlotIds: Set<String> {
         let attached = Set(pads.source.slots.map(\.id))
         return onScreenListed.state ? attached.union([onScreenSlotId]) : attached
     }

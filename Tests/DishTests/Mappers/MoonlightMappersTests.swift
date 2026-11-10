@@ -20,6 +20,26 @@ final class MoonlightMappersTests: XCTestCase {
         ConnectionSummary(id: "mid:1", name: "Desk", live: .ready)
     }
 
+    func testAPadOnAHostOffersTheProtocolsFourAndSaysWhatAutoSends() {
+        XCTAssertEqual(moonlightEmulateOptions().map(\.label), ["Auto", "Xbox", "PlayStation", "Nintendo"])
+        XCTAssertEqual(moonlightEmulateOptions().map(\.id), [nil, 1, 2, 3], "the host protocol's numbering")
+        XCTAssertEqual(moonlightTypeName(MoonlightControllerType.xbox), "Xbox")
+        XCTAssertEqual(moonlightTypeName(MoonlightControllerType.unknown), "Xbox", "anything else a host plugs in as an Xbox pad")
+        let auto = HostEmulationFact(type: Int(MoonlightControllerType.auto), isOverride: false)
+        XCTAssertEqual(moonlightEmulateDetail(auto, hasMotion: true, host: "PC"), "Auto sends PlayStation for this controller.")
+        XCTAssertEqual(moonlightEmulateDetail(auto, hasMotion: false, host: "PC"), "Auto sends Xbox for this controller.")
+        let hostsOwn = HostEmulationFact(type: Int(MoonlightControllerType.nintendo), isOverride: false)
+        XCTAssertEqual(moonlightEmulateDetail(hostsOwn, hasMotion: true, host: "PC"), "Auto sends Nintendo for this controller.")
+        let picked = HostEmulationFact(type: Int(MoonlightControllerType.nintendo), isOverride: true)
+        XCTAssertEqual(
+            moonlightEmulateDetail(picked, hasMotion: true, host: "PC"),
+            "Dish asks PC to plug in this controller. Some hosts override the choice."
+        )
+        XCTAssertEqual(moonlightEmulateSelection(picked), 3)
+        XCTAssertNil(moonlightEmulateSelection(auto), "Auto is no pick")
+        XCTAssertNil(moonlightEmulateSelection(hostsOwn), "the host's own type is Auto too")
+    }
+
     func testThePageListsKnownHostsThenOnlyTheNewlyDiscovered() {
         let known = [satellite(), summary(.ready)]
         let other = MoonlightHost(name: "", address: "10.0.0.9")

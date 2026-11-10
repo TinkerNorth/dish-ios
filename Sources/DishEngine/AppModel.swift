@@ -105,6 +105,8 @@ package final class AppModel {
         wireNetwork()
         wireDiagnostics()
         wireMoonlight()
+        observeBindingMemory()
+        restoreStandingBindings()
     }
 
     /// Every store over the same defaults, the wall clock, the pads iOS

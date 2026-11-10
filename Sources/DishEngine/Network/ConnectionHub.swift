@@ -21,10 +21,17 @@ package final class ConnectionHub {
 
     @ObservationIgnored private let wifi: WifiConnectionManager
     @ObservationIgnored private let moonlight: MoonlightConnectionManager?
+    /// The satellite bindings kept across restarts; a Moonlight host's live
+    /// in its manager's store.
+    @ObservationIgnored private let memory: BindingMemoryStore
+    /// The pads whose standing binding was already tried while they stay
+    /// attached, so a refused one is not retried by every change.
+    @ObservationIgnored private var restoreTried: Set<String> = []
 
     package init(wifi: WifiConnectionManager, moonlight: MoonlightConnectionManager? = nil) {
         self.wifi = wifi
         self.moonlight = moonlight
+        memory = wifi.store.bindingMemory
     }
 
     /// A Moonlight host's id, as its store files it; a satellite's is the machine's.
@@ -128,20 +135,29 @@ package extension ConnectionHub {
     /// it: the pad's capabilities become the descriptor's claims, and its
     /// pick the catalog type it is emulated as. A Moonlight host's pad is
     /// composed by the app's converge; binding to a host is durable
-    /// interest in it, remembered with the pick the host's record holds.
+    /// interest in it. Every binding is remembered across restarts, one
+    /// record per pad of one kind; `pick` is the pad's own, nil while it
+    /// follows its family.
     @discardableResult
-    func bind(slotId: String, connectionId: String, capabilities: ControllerCapabilities, emulateAs: EmulatedPad) -> Bool {
+    func bind(
+        slotId: String,
+        connectionId: String,
+        capabilities: ControllerCapabilities,
+        emulateAs: EmulatedPad,
+        pick: EmulatedPad? = nil
+    ) -> Bool {
         let toHost = Self.isMoonlight(connectionId)
         guard toHost ? moonlight != nil : satelliteCanTake(connectionId, slotId: slotId) else { return false }
         if let prior = bindings[slotId], prior != connectionId {
             releaseSlot(slotId, from: prior)
         }
         if toHost {
-            rememberOnHost(slotId: slotId, hostId: connectionId)
+            rememberOnHost(slotId: slotId, hostId: connectionId, pick: pick)
         } else {
             guard attachToSatellite(slotId: slotId, connectionId: connectionId, capabilities: capabilities, emulateAs: emulateAs) else {
                 return false
             }
+            rememberOnSatellite(slotId: slotId, satelliteId: connectionId)
         }
         bindings[slotId] = connectionId
         return true
@@ -163,12 +179,24 @@ package extension ConnectionHub {
     }
 
     /// The host is remembered as interest, and the binding with the type
-    /// the host's own record picks, so a Forget names it.
-    private func rememberOnHost(slotId: String, hostId: String) {
+    /// its record already holds for this pad on this host, else the pad's
+    /// own pick, else the host's own, so a restart finds both.
+    private func rememberOnHost(slotId: String, hostId: String, pick: EmulatedPad?) {
+        memory.forget(slotId: slotId)
         guard let moonlight else { return }
         moonlight.rememberInterest(hostId: hostId)
+        let held = moonlight.rememberedBindings.first { $0.slotId == slotId && $0.hostId == hostId }
         let hostType = Int(moonlight.rememberedEmulatedType(hostId: hostId))
-        moonlight.rememberBinding(slotId: slotId, hostId: hostId, controllerType: hostType)
+        let type = held?.controllerType ?? pick.map { Int(MoonlightDesire.controllerType($0)) } ?? hostType
+        moonlight.rememberBinding(slotId: slotId, hostId: hostId, controllerType: type)
+    }
+
+    /// One record per pad, of one kind: a satellite's in `wifi_binding_list`,
+    /// a host's in `moonlight_binding_list`, so a pad that moved between the
+    /// kinds is never restored to both.
+    private func rememberOnSatellite(slotId: String, satelliteId: String) {
+        memory.remember(RememberedSatelliteBinding(slotId: slotId, satelliteId: satelliteId))
+        moonlight?.forgetBinding(slotId: slotId)
     }
 
     /// A satellite carries four pads; a slot it already carries rebinds in place.
@@ -178,37 +206,45 @@ package extension ConnectionHub {
     }
 
     /// The slot's connection lets go of it: a satellite detaches that pad
-    /// alone, a Moonlight host's pad leaves on the next converge.
+    /// alone and its motion word goes, a Moonlight host's pad leaves on the
+    /// next converge.
     private func releaseSlot(_ slotId: String, from connectionId: String) {
         wifi.get(connectionId)?.detachSlot(slotId)
-        moonlight?.forgetBinding(slotId: slotId)
+        wifi.motionStatus.clear(SlotKey(connectionId: connectionId, slotId: slotId))
     }
 
-    /// The user let the pad go.
+    /// The user let the pad go: the binding and its memory both end.
     func unbind(slotId: String) {
         release(slotId: slotId)
+        memory.forget(slotId: slotId)
         moonlight?.forgetBinding(slotId: slotId)
     }
 
-    /// The pad lets go: the user unbound it, it left, or its satellite
-    /// refused it.
+    /// The pad lets go: it left, or its satellite refused it, and its memory
+    /// stays for its return; the user's unbind ends the memory too.
     func release(slotId: String) {
         guard let connectionId = bindings.removeValue(forKey: slotId) else { return }
-        wifi.get(connectionId)?.detachSlot(slotId)
+        releaseSlot(slotId, from: connectionId)
     }
 
-    /// The pads attached now: a binding whose pad left is released.
+    /// The pads attached now: a binding whose pad left is released, its
+    /// memory kept, and its standing binding is due again when the pad returns.
     func keepPresent(_ present: Set<String>) {
+        restoreTried.formIntersection(present)
         for slotId in bindings.keys where !present.contains(slotId) {
             release(slotId: slotId)
         }
     }
 
     /// Forget: every pad bound to the connection lets go, and so does every
-    /// binding remembered for a host.
+    /// binding remembered for it, whether or not its pad is here.
     func forgetBindings(of connectionId: String) {
         for (slotId, bound) in bindings where bound == connectionId {
             unbind(slotId: slotId)
+        }
+        memory.forgetSatellite(connectionId)
+        for record in moonlight?.rememberedBindings ?? [] where record.hostId == connectionId {
+            moonlight?.forgetBinding(slotId: record.slotId)
         }
     }
 
@@ -226,6 +262,26 @@ package extension ConnectionHub {
         conn.setControllerType(wifi.resolveControllerType(for: connectionId, emulateAs: pad), for: slotId)
     }
 
+    /// The pick for a pad bound to a Moonlight host, in the protocol's own
+    /// numbering; nil returns the pad to the host's own type. It is kept
+    /// with the pad's binding and reaches the host on the next converge.
+    func setMoonlightEmulatedType(slotId: String, _ type: Int?) {
+        guard let connectionId = bindings[slotId], Self.isMoonlight(connectionId), let moonlight else { return }
+        let hostType = Int(moonlight.rememberedEmulatedType(hostId: connectionId))
+        moonlight.rememberBinding(slotId: slotId, hostId: connectionId, controllerType: type ?? hostType)
+    }
+
+    /// What a pad on a Moonlight host is emulated as: the type its binding
+    /// holds, a pick of its own only where it differs from the host's. Nil
+    /// for a pad bound to a satellite or to none.
+    func hostEmulation(slotId: String) -> HostEmulationFact? {
+        guard let connectionId = bindings[slotId], Self.isMoonlight(connectionId), let moonlight else { return nil }
+        let hostType = Int(moonlight.rememberedEmulatedType(hostId: connectionId))
+        let held = moonlight.rememberedBindings.first { $0.slotId == slotId && $0.hostId == connectionId }
+        let type = held.map { Int(MoonlightPadRules.migrateStoredType($0.controllerType)) } ?? hostType
+        return HostEmulationFact(type: type, isOverride: type != hostType)
+    }
+
     /// The bound pad's claims changed; its descriptor follows while live.
     func setCapabilities(slotId: String, _ capabilities: ControllerCapabilities) {
         guard let connectionId = bindings[slotId] else { return }
@@ -235,5 +291,39 @@ package extension ConnectionHub {
     func boundConnection(slotId: String) -> ConnectionSummary? {
         guard let connectionId = bindings[slotId] else { return nil }
         return summary(connectionId)
+    }
+}
+
+// MARK: - Memory across restarts
+
+/// A binding remembered from an earlier run, due to be bound again: the pad
+/// and its destination. The pick is the pad's own, or the host's record's.
+struct StandingBinding: Equatable {
+    let slotId: String
+    let connectionId: String
+}
+
+extension ConnectionHub {
+
+    /// The remembered bindings to bind now: each of a pad present and unbound
+    /// whose destination is known here (a satellite pooled or remembered, a
+    /// host on record), each tried once while its pad stays attached. A pad
+    /// that left is tried again when it returns.
+    func takeDueStandingBindings(present: Set<String>, satellites: Set<String>, hosts: Set<String>) -> [StandingBinding] {
+        restoreTried.formIntersection(present)
+        let known = satellites.union(hosts)
+        let due = standingBindings().filter { standing in
+            let waiting = present.contains(standing.slotId) && bindings[standing.slotId] == nil
+            return waiting && !restoreTried.contains(standing.slotId) && known.contains(standing.connectionId)
+        }
+        restoreTried.formUnion(due.map(\.slotId))
+        return due
+    }
+
+    /// Every remembered binding, of both kinds.
+    private func standingBindings() -> [StandingBinding] {
+        let satellites = memory.bindings().map { StandingBinding(slotId: $0.slotId, connectionId: $0.satelliteId) }
+        let hosts = (moonlight?.rememberedBindings ?? []).map { StandingBinding(slotId: $0.slotId, connectionId: $0.hostId) }
+        return satellites + hosts
     }
 }

@@ -269,4 +269,22 @@ extension L10n {
     func appNoLongerOn(_ app: String, _ host: String) -> String {
         catalog.format("%@ is no longer on %@. Pick another app.", app, host)
     }
+
+    // MARK: - The Emulate picker of a pad on a host
+
+    var xbox: String {
+        catalog.text("Xbox")
+    }
+
+    var playStation: String {
+        catalog.text("PlayStation")
+    }
+
+    func autoSends(_ typeName: String) -> String {
+        catalog.format("Auto sends %@ for this controller.", typeName)
+    }
+
+    func dishAsksHostToPlugIn(_ host: String) -> String {
+        catalog.format("Dish asks %@ to plug in this controller. Some hosts override the choice.", host)
+    }
 }

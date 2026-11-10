@@ -118,7 +118,7 @@ package extension AppModel {
             bindings: network.hub.bindings,
             hostIds: Set(types.keys).union(moonlight.connections.keys),
             slots: moonlightCarriableSlots,
-            picks: pads.types.state,
+            bindingTypes: Dictionary(moonlight.rememberedBindings.map { ($0.slotId, $0.controllerType) }) { _, last in last },
             hostTypes: { types[$0] ?? Int(MoonlightControllerType.auto) },
             preferences: pads.switches.state,
             global: pads.features.flags
@@ -144,6 +144,13 @@ package extension AppModel {
     }
 
     // MARK: - Intents
+
+    /// The controller page's Emulate as for a pad on a Moonlight host: the
+    /// protocol's own type, or nil for the host's own.
+    func setMoonlightEmulatedType(slotId: String, _ type: Int?) {
+        network.hub.setMoonlightEmulatedType(slotId: slotId, type)
+        refreshRouting()
+    }
 
     /// Pair with a host: without a PIN when it already trusts this device,
     /// else the PIN prompt follows.

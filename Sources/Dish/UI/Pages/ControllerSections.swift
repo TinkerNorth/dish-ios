@@ -39,15 +39,29 @@ struct ControllerBindingSection: View {
             if let apply {
                 ApplyRow(state: apply, retry: actions.bind)
             }
+            emulate
+        } header: {
+            SectionEyebrow(title: state.title, color: DishTheme.muted)
+        }
+        .listRowBackground(DishTheme.surface)
+    }
+
+    /// Dish's four pads, or the protocol's four while the pad is on a Moonlight host.
+    @ViewBuilder private var emulate: some View {
+        if let host = state.hostEmulate {
+            Picker(state.emulateTitle, selection: Binding(get: { host.selection }, set: { actions.setHostEmulateAs($0) })) {
+                ForEach(host.options) { Text($0.label).tag($0.id) }
+            }
+            .pickerStyle(.menu)
+            .foregroundStyle(DishTheme.onSurface)
+            Text(host.detail).font(DishFont.detail).foregroundStyle(DishTheme.muted)
+        } else {
             Picker(state.emulateTitle, selection: Binding(get: { state.emulateAs }, set: { actions.setEmulateAs($0) })) {
                 ForEach(state.emulateOptions) { Text($0.name).tag($0.pad) }
             }
             .pickerStyle(.menu)
             .foregroundStyle(DishTheme.onSurface)
-        } header: {
-            SectionEyebrow(title: state.title, color: DishTheme.muted)
         }
-        .listRowBackground(DishTheme.surface)
     }
 
     @ViewBuilder private var destination: some View {
@@ -126,7 +140,14 @@ struct ControllerFunctionsSection: View {
             ForEach(state.rows) { row in
                 Toggle(isOn: Binding(get: { row.isOn }, set: { setFeature(row.feature, $0) })) {
                     Label {
-                        Text(row.title).foregroundStyle(DishTheme.onSurface)
+                        VStack(alignment: .leading, spacing: DishSpace.s1) {
+                            Text(row.title).foregroundStyle(DishTheme.onSurface)
+                            if let status = row.status {
+                                Text(status.text)
+                                    .font(DishFont.detail)
+                                    .foregroundStyle(status.color)
+                            }
+                        }
                     } icon: {
                         Image(systemName: row.symbol).foregroundStyle(DishTheme.primary)
                     }

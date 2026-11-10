@@ -6,21 +6,30 @@ import DishKernel
 import Foundation
 
 /// One PC as Diagnostics reads it: the row the pages draw, its session's
-/// own account of itself and the data plane's counters.
+/// own account of itself and the data plane's counters, or a Moonlight
+/// host's session.
 package struct HostDiagnostics: Equatable, Identifiable {
     package let summary: ConnectionSummary
     /// The satellite session; resting for a PC with no connection in the pool.
     package let facts: HostSessionFacts
     package let counters: SessionCounters
+    /// The Moonlight session; nil for a satellite.
+    package let moonlight: MoonlightHostDiagnostics?
 
     package var id: String {
         summary.id
     }
 
-    package init(summary: ConnectionSummary, facts: HostSessionFacts, counters: SessionCounters) {
+    package init(
+        summary: ConnectionSummary,
+        facts: HostSessionFacts,
+        counters: SessionCounters,
+        moonlight: MoonlightHostDiagnostics? = nil
+    ) {
         self.summary = summary
         self.facts = facts
         self.counters = counters
+        self.moonlight = moonlight
     }
 }
 

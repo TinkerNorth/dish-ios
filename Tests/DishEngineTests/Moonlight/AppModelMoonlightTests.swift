@@ -108,6 +108,30 @@ final class AppModelMoonlightTests: XCTestCase {
         XCTAssertEqual(moonlight.rememberedBindings, [], "an unbound pad's binding is forgotten")
     }
 
+    func testThePickOfAPadOnAHostReachesTheHostsDesireAndTheFactAndLeavesThePadsOwnPickAlone() async {
+        XCTAssertNil(model.shellFacts.controllers.first?.hostEmulation, "unbound")
+        model.bind(slotId: "ds", to: host.id)
+        XCTAssertEqual(
+            model.shellFacts.controllers.first?.hostEmulation,
+            HostEmulationFact(type: Int(MoonlightControllerType.auto), isOverride: false)
+        )
+        model.setMoonlightEmulatedType(slotId: "ds", Int(MoonlightControllerType.nintendo))
+        XCTAssertEqual(moonlight.desired[host.id]?.first?.announced.type, MoonlightControllerType.nintendo)
+        XCTAssertEqual(
+            model.shellFacts.controllers.first?.hostEmulation,
+            HostEmulationFact(type: Int(MoonlightControllerType.nintendo), isOverride: true)
+        )
+        XCTAssertNil(model.pads.types.typeFor("ds"), "the pad's own pick is for the satellites")
+        model.setMoonlightEmulatedType(slotId: "ds", Int(MoonlightControllerType.xbox))
+        XCTAssertEqual(moonlight.desired[host.id]?.first?.announced.type, MoonlightControllerType.xbox)
+        model.setMoonlightEmulatedType(slotId: "ds", nil)
+        XCTAssertEqual(moonlight.desired[host.id]?.first?.announced.type, MoonlightControllerType.playStation, "Auto with motion")
+        XCTAssertEqual(model.shellFacts.controllers.first?.hostEmulation?.isOverride, false)
+        model.unbind(slotId: "ds")
+        XCTAssertNil(model.shellFacts.controllers.first?.hostEmulation)
+        await moonlight.awaitQuiet()
+    }
+
     func testThePinPromptFollowsThePairingAndTheIntentsReachTheManager() async {
         moonlight.emit(.pairingPinReady(host: host, pin: "0451"))
         XCTAssertEqual(model.moonlightPin, MoonlightPinPrompt(host: host, pin: "0451"))

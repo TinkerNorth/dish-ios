@@ -67,6 +67,8 @@ package final class WifiConnectionManager {
     package private(set) var rememberedServers: [RememberedWifi] = []
     /// Each satellite's pairing as the card shows it.
     package let pairingAttempts = PairingAttempts()
+    /// Each bound pad's motion word from its satellite's last apply.
+    package let motionStatus = MotionBackendStatusStore()
 
     /// A satellite that wants a PIN, or a failure; the app's to show.
     @ObservationIgnored var onEvent: (@MainActor (ConnectionEvent) -> Void)?
@@ -313,6 +315,7 @@ package final class WifiConnectionManager {
         store.forget(id)
         refreshRemembered()
         connections.removeValue(forKey: id)
+        motionStatus.clearConnection(id)
         catalogs.removeValue(forKey: id)
         capabilities.removeValue(forKey: id)
         clearStale(id)

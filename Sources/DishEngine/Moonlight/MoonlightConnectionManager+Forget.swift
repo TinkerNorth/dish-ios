@@ -44,6 +44,7 @@ extension MoonlightConnectionManager {
         // would write the host back as verified once answered.
         epochs[id, default: 0] += 1
         publishRemembered()
+        publishBindings()
         publishSessionHosts()
         onPoolChanged?()
     }

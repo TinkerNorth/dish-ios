@@ -56,11 +56,76 @@ func localNetworkText(_ status: LocalNetworkStatus, words: L10n = .app) -> Strin
     }
 }
 
+// MARK: - A Moonlight host
+
+/// The address and the tier, the session's standing, what the host said of
+/// itself, the app running, the control link's round trip, and a line per
+/// pad the host holds; a host nothing opened this run reads idle on its
+/// probe alone.
+func moonlightHostLines(_ host: HostDiagnostics, words: L10n = .app) -> [FactLine] {
+    let facts = host.moonlight ?? .resting(info: nil)
+    let opening = [
+        FactLine(key: words.address, value: connectionAddressLine(host.summary)),
+        FactLine(key: words.linkTier, value: linkTierText(host.summary.kind, words: words)),
+        FactLine(key: words.session, value: moonlightPhaseText(facts.phase, summary: host.summary, words: words))
+    ]
+    let said = facts.info.map { moonlightInfoLines($0, facts: facts, words: words) } ?? []
+    let roundTrip = FactLine(key: words.controlRoundTrip, value: moonlightRoundTripText(facts.controlRoundTripMs, words: words))
+    let pads = facts.pads.map { FactLine(key: words.padNumber(Int($0.number)), value: moonlightPadText($0, words: words)) }
+    return opening + said + [roundTrip] + pads
+}
+
+/// What the host's probe said: its name and versions where it gave them,
+/// then the app running.
+private func moonlightInfoLines(_ info: MoonlightServerInfo, facts: MoonlightHostDiagnostics, words: L10n) -> [FactLine] {
+    let named = [
+        (words.hostName, info.hostname),
+        (words.hostApp, info.appVersion ?? ""),
+        (words.gfeVersion, info.gfeVersion ?? "")
+    ]
+    let said = named.filter { !$0.1.isEmpty }.map { FactLine(key: $0.0, value: $0.1) }
+    return said + [FactLine(key: words.runningApp, value: moonlightRunningAppText(facts, info: info, words: words))]
+}
+
+/// Idle, launching and live as Android's Diagnostics names them; a failure
+/// in the words the host card already uses for it.
+func moonlightPhaseText(_ phase: MoonlightSessionPhase, summary: ConnectionSummary, words: L10n = .app) -> String {
+    switch phase {
+    case .idle: words.sessionIdle
+    case .checkingInfo, .launching, .rtsp, .controlConnecting: words.sessionLaunching
+    case .streaming: words.sessionLive
+    case .failed: moonlightStatusLine(summary, phase: phase, words: words) ?? words.sessionEnded
+    }
+}
+
+/// The app our session settled on; else the host's own current game, by its
+/// id, since the host names no title in /serverinfo; else none.
+func moonlightRunningAppText(_ facts: MoonlightHostDiagnostics, info: MoonlightServerInfo, words: L10n = .app) -> String {
+    if let app = facts.appName, !app.isEmpty { return app }
+    return info.currentGame == 0 ? words.none : String(info.currentGame)
+}
+
+func moonlightRoundTripText(_ ms: Int64?, words: L10n = .app) -> String {
+    ms.map { words.latency(Int($0)) } ?? words.unknown
+}
+
+/// The slot the pad belongs to, the type it was plugged in as, and the reports sent on it.
+func moonlightPadText(_ pad: MoonlightPadFacts, words: L10n = .app) -> String {
+    dotted(pad.slotId, moonlightTypeName(pad.type, words: words), words.reportsCount(pad.reports))
+}
+
 // MARK: - A PC
 
 /// The address and the tier, then the session's own account of itself and
 /// the data plane's counters, or the word for no session.
 func hostLines(_ host: HostDiagnostics, locale: Locale = .current, words: L10n = .app) -> [FactLine] {
+    switch host.summary.kind {
+    case .moonlight: moonlightHostLines(host, words: words)
+    case .satellite, .bluetooth: satelliteHostLines(host, locale: locale, words: words)
+    }
+}
+
+func satelliteHostLines(_ host: HostDiagnostics, locale: Locale = .current, words: L10n = .app) -> [FactLine] {
     let facts = host.facts
     let opening = [
         FactLine(key: words.address, value: connectionAddressLine(host.summary)),
@@ -101,8 +166,10 @@ func countText(_ count: UInt64, locale: Locale) -> String {
 /// The address line, numeric and untranslated: the satellite's IP and its
 /// UDP port.
 func connectionAddressLine(_ summary: ConnectionSummary) -> String {
-    guard let port = summary.udpPort else { return summary.address }
-    return dotted(summary.address, "UDP \(port)")
+    switch summary.kind {
+    case .satellite, .bluetooth: summary.udpPort.map { dotted(summary.address, "UDP \($0)") } ?? summary.address
+    case .moonlight: dotted(summary.address, "Moonlight")
+    }
 }
 
 /// The fleet's ladder, one word per rung.

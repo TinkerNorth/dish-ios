@@ -9,6 +9,8 @@ import SwiftUI
 struct ControllerActions {
     let setFeature: @MainActor (SlotSwitch, Bool) -> Void
     let setEmulateAs: @MainActor (EmulatedPad) -> Void
+    /// A pad on a Moonlight host: the protocol's type, nil for Auto.
+    let setHostEmulateAs: @MainActor (Int?) -> Void
     /// The on-screen controller's Open: its gamepad.
     let open: @MainActor () -> Void
     /// Bind to the PC, by its connection id; Try again binds to the same one.
@@ -16,7 +18,14 @@ struct ControllerActions {
     let unbind: @MainActor () -> Void
 
     /// Controls that do nothing, for a preview.
-    @MainActor static let preview = ControllerActions(setFeature: { _, _ in }, setEmulateAs: { _ in }, open: {}, bind: { _ in }, unbind: {})
+    @MainActor static let preview = ControllerActions(
+        setFeature: { _, _ in },
+        setEmulateAs: { _ in },
+        setHostEmulateAs: { _ in },
+        open: {},
+        bind: { _ in },
+        unbind: {}
+    )
 }
 
 /// Controllers › a controller (C1): the status card, BINDING with the PC it
@@ -36,7 +45,14 @@ struct ControllerPage: View {
                 apply: model.shellFacts.apply,
                 id: id
             ),
-            actions: ControllerActions(setFeature: setFeature, setEmulateAs: setEmulateAs, open: openGamepad, bind: bind, unbind: unbind)
+            actions: ControllerActions(
+                setFeature: setFeature,
+                setEmulateAs: setEmulateAs,
+                setHostEmulateAs: setHostEmulateAs,
+                open: openGamepad,
+                bind: bind,
+                unbind: unbind
+            )
         )
     }
 
@@ -46,6 +62,10 @@ struct ControllerPage: View {
 
     private func setEmulateAs(_ pad: EmulatedPad) {
         model.setEmulatedType(slotId: id, pad)
+    }
+
+    private func setHostEmulateAs(_ type: Int?) {
+        model.setMoonlightEmulatedType(slotId: id, type)
     }
 
     private func openGamepad() {

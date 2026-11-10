@@ -44,6 +44,32 @@ extension L10n {
         catalog.text("Player LEDs")
     }
 
+    // MARK: - The Motion row
+
+    var motionNoGyroscope: String {
+        catalog.text("Motion: no gyroscope")
+    }
+
+    var motionTurnedOff: String {
+        catalog.text("Motion: turned off")
+    }
+
+    var motionNotSent: String {
+        catalog.text("Motion: not sent")
+    }
+
+    var motionHostCannotReceive: String {
+        catalog.text("Motion: host can’t receive")
+    }
+
+    var motionServerCannotDeliver: String {
+        catalog.text("Motion: server can’t deliver")
+    }
+
+    var motionStreaming: String {
+        catalog.text("Motion: streaming")
+    }
+
     var noPadAudio: String {
         catalog.text("Microphone and controller speaker aren’t open to apps on iOS, so Dish leaves them out.")
     }

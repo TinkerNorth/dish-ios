@@ -61,6 +61,18 @@ miss. `Tests/PARITY.md` lists everything not built.
   a controller (pads pair in Settings › Bluetooth), at the pause button's
   way out of play and at the accessory's Dim, at most one a day, and each
   goes once the person has done what it points at.
+- **The parity sweep.** Bindings survive a restart: a pad's binding to a
+  Satellite (`wifi_binding_list`) or a Moonlight host
+  (`moonlight_binding_list`) is remembered when it is made, kept when the
+  pad leaves, and put back without you when the pad returns and its PC is
+  known; Unbind and Forget This PC erase it, and the on-screen gamepad is
+  put back once it is listed. The controller page's Motion row says why
+  motion does or does not reach the PC, from the Satellite's own answer to
+  the last apply. Diagnostics gives each Moonlight host a card beside the
+  Satellites': its session, name and versions, running app, control round
+  trip and each pad it carries. A pad bound to a Moonlight host offers the
+  protocol's Auto, Xbox, PlayStation and Nintendo under Emulate as, with the
+  line saying what Auto sends.
 - **Pairing and connections.** The pair sheet (B5), from Pair on a found or
   revoked row, from Pick your PC, from Re-pair on a PC's page and from a PC
   that asks for a PIN as it is connected to: the satellite's PIN typed into

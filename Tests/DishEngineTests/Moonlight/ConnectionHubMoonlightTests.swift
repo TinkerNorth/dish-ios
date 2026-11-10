@@ -131,6 +131,30 @@ final class ConnectionHubMoonlightTests: XCTestCase {
         XCTAssertEqual(moonlight.rememberedBindings.count, 1, "an unbound slot changes nothing")
     }
 
+    func testThePickOfAPadOnAHostIsTheProtocolsAndAutoReturnsToTheHostsOwn() {
+        remember(paired: true)
+        moonlight.setEmulatedType(hostId: host.id, type: MoonlightControllerType.playStation)
+        XCTAssertTrue(bind("a", to: host.id))
+        hub.setMoonlightEmulatedType(slotId: "a", Int(MoonlightControllerType.nintendo))
+        XCTAssertEqual(moonlight.rememberedBindings.first?.controllerType, Int(MoonlightControllerType.nintendo))
+        XCTAssertEqual(hub.hostEmulation(slotId: "a"), HostEmulationFact(type: Int(MoonlightControllerType.nintendo), isOverride: true))
+        hub.setMoonlightEmulatedType(slotId: "a", nil)
+        XCTAssertEqual(moonlight.rememberedBindings.first?.controllerType, Int(MoonlightControllerType.playStation), "the host's own")
+        XCTAssertEqual(hub.hostEmulation(slotId: "a"), HostEmulationFact(type: Int(MoonlightControllerType.playStation), isOverride: false))
+        hub.setMoonlightEmulatedType(slotId: "zz", Int(MoonlightControllerType.xbox))
+        XCTAssertEqual(moonlight.rememberedBindings.count, 1, "an unbound slot changes nothing")
+        XCTAssertNil(hub.hostEmulation(slotId: "zz"))
+    }
+
+    func testASatellitesPadHasNoHostEmulationAndTheProtocolsPickLeavesItAlone() {
+        let sat = satellite("30")
+        wifi.register(WifiConnection(id: sat.id, server: sat, tickIntervalNs: .max))
+        XCTAssertTrue(bind("a", to: sat.id))
+        hub.setMoonlightEmulatedType(slotId: "a", Int(MoonlightControllerType.nintendo))
+        XCTAssertNil(hub.hostEmulation(slotId: "a"))
+        XCTAssertEqual(moonlight.rememberedBindings, [])
+    }
+
     func testAHostInThePoolIsARowThatFollowsItsPhase() async {
         remember(paired: true)
         XCTAssertTrue(bind("a", to: host.id))
