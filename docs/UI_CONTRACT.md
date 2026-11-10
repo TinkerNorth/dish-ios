@@ -52,8 +52,9 @@ The three tabs, in tab-bar order: **Controllers** (`gamecontroller`),
 pushed from Settings), a **controller's page** (`Page.controller(id:)`,
 pushed from a Controllers row), **Help & FAQ** (`Page.help`, from Settings ›
 Setup & help), **Open source licenses** (`Page.licenses`, from Settings ›
-About) and **Support Dish** (`Page.support`, from the heart on the
-Controllers toolbar and from Settings › About). `NavigationCoverageTests` keeps the map whole.
+About), **Support Dish** (`Page.support`, from the heart on the
+Controllers toolbar and from Settings › About) and **Diagnostics**
+(`Page.diagnostics`, from Settings › Setup & help). `NavigationCoverageTests` keeps the map whole.
 
 ### The session accessory
 
@@ -142,7 +143,9 @@ any state without a model.
    `NavigationStore`.
 4. **Lifecycle hooks forward.** `onAppear` and `onDisappear` call
    `model.pageAppeared(...)` and `model.pageDisappeared(...)` and nothing else;
-   the Connections page runs the clock this way.
+   the Connections page runs the clock this way, and the Diagnostics page
+   the source that re-reads the sessions' words, the pads' rates and the
+   lock statistics once a second while it shows.
 5. **Every word is an `L10n` property**, in `Sources/Dish/L10n/L10n+<Screen>.swift`.
 6. **Use the system's controls.** `List` (`.insetGrouped`), `Section`, `Toggle`,
    `Picker`, `Menu`, `ContentUnavailableView` and toolbar items. No hard-coded
@@ -154,7 +157,8 @@ Today's pages and their mappers:
 |---|---|---|---|
 | `ControllersPage` | `ControllersPageState` (`ControllersContent`: `empty` or `list`) | `controllersPageState(controllers:words:)` | A list of controller rows (glyph tile, name, the destination line with a dot and the link word, battery) over a separate "Add a controller" button with its hint, which sends `openSetup(.addController)`; with no controllers, the invitation above the same button. A row pushes its controller's page; a pad Dish cannot read says "Not supported" and opens nothing. The heart on the toolbar (`DishTheme.pulse`) pushes Support Dish. |
 | `ConnectionsPage` | `ConnectionsPageState` (`denied`, `empty`, `list`) | `connectionsPageState(facts:settingsURL:words:)` | PAIRED and FOUND ON <Wi-Fi> sections, the Moonlight hosts row (not tappable yet) and a footnote; the empty state; and, when Local Network is denied, "Dish can't see your network" with Open Settings. The status never leaves `.unknown` today, so only the empty state is reachable at run time. |
-| `SettingsPage` | `SettingsPageState` | `settingsPageState(preferences:appVersion:words:)` | THIS IPHONE (Name on your PC, pushing `deviceName`), WHILE STREAMING (Keep screen on, Dim screen after), SETUP & HELP (Setup guide, sending `openSetup(.guide)`), APPEARANCE (System, Light, Dark) and ABOUT (Support Dish with the heart, the version, Website, Source code and Privacy policy through `openURL`, and Open source licenses). Diagnostics is not built and has no row. |
+| `SettingsPage` | `SettingsPageState` | `settingsPageState(preferences:appVersion:words:)` | THIS IPHONE (Name on your PC, pushing `deviceName`), WHILE STREAMING (Keep screen on, Dim screen after), SETUP & HELP (Setup guide, sending `openSetup(.guide)`; Help & FAQ and Diagnostics, each pushing its page), APPEARANCE (System, Light, Dark) and ABOUT (Support Dish with the heart, the version, Website, Source code and Privacy policy through `openURL`, and Open source licenses). |
+| `DiagnosticsPage` | `DiagnosticsPageState` | `diagnosticsPageState(facts:appVersion:locale:timeZone:words:)` | DISH (the app version, the protocol this build speaks, the Local Network status), CONNECTIONS (a card per paired or pooled PC: its address and link tier, and while a session is up its protocol, epoch and controller bitmap against what was applied, the virtual-controller backend, the round trips, the missed heartbeats and the counters: sent, received, dropped and the replay guard), CONTROLLERS (a card per controller with its health as the dot and chip: its link, report and motion rates, type, battery, binding and its side of the wire), LOCK STATISTICS only in a `LOCK_STATS` build, and EVENTS (the flight recorder's newest thirty lines, newest first). Copy hands the whole transcript to the pasteboard through the model (`copyToPasteboard`), Share to a `ShareLink`; `onAppear` sends `pageAppeared(.diagnostics)`, which starts the source's 1 Hz tick, and `onDisappear` stops it. |
 | `HelpPage` | `HelpPageState` | `helpPageState(words:)` | Walk me through setup (`openSetup(.guide)`), then CONCEPTS, BEST PERFORMANCE, TROUBLESHOOTING and ABOUT DISH as `DisclosureGroup`s, then LINKS. |
 | `SupportPage` | `SupportPageState` (`SupportShelfState`: `loading`, `tips`, `unavailable`; `SupportNoticeState`: `none`, `thanks`, `note`) | `supportPageState(support:words:)` | The heart, the pitch, the three tips with StoreKit's own prices (`model.tip`), the outcome, and Restore purchases (`model.restoreTips`); `onAppear` sends `pageAppeared(.support)`, which loads the shelf. |
 | `LicensesPage` | `LicensesPageState` (`LicensesContent`: `missing` or `notice`) | `licensesPageState(notice:appVersion:words:)` | The bundled `THIRD_PARTY.md`, handed down by the scene as `\.thirdPartyNotice`, then the LGPL notice and "Dish 0.1.0 · TinkerNorth · LGPL-3.0". |

@@ -28,6 +28,10 @@ package struct ShellFacts: Equatable {
     package let support: SupportFacts
     /// The play screen on display; nil while none is.
     package let play: PlayFacts?
+    /// What the Diagnostics page reads, re-read while it shows.
+    package let diagnostics: DiagnosticsSnapshot
+    /// The flight recorder's lines, oldest first.
+    package let diagnosticsEvents: [DiagnosticsEvent]
 
     package init(
         controllers: [ControllerFact],
@@ -41,7 +45,9 @@ package struct ShellFacts: Equatable {
         now: Date,
         setup: SetupState?,
         support: SupportFacts = .initial,
-        play: PlayFacts? = nil
+        play: PlayFacts? = nil,
+        diagnostics: DiagnosticsSnapshot = DiagnosticsSnapshot(),
+        diagnosticsEvents: [DiagnosticsEvent] = []
     ) {
         self.controllers = controllers
         self.attachedPads = attachedPads
@@ -55,5 +61,7 @@ package struct ShellFacts: Equatable {
         self.setup = setup
         self.support = support
         self.play = play
+        self.diagnostics = diagnostics
+        self.diagnosticsEvents = diagnosticsEvents
     }
 }

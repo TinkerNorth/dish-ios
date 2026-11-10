@@ -125,6 +125,19 @@ binding come next; `Tests/PARITY.md` lists everything not built.
   leave, which is why it dims), with questions of its own on connecting a
   controller, the Local Network, a missing pad, the screen staying on and
   what tips pay for. Settings › Setup & help › Help & FAQ opens it.
+- **Diagnostics.** Settings › Setup & help › Diagnostics shows what the app
+  sees right now: each paired PC's session as its heartbeat acks tell it
+  (protocol, epoch and controllers against what was applied, the
+  virtual-controller backend, the round trips, the missed heartbeats) with
+  the data plane's counters (sent, received, dropped and the replay guard)
+  and the link tier; each controller's report and motion rates, health,
+  type, battery, binding and its side of the wire; the Local Network status
+  and the app and protocol versions; the lock statistics in a `LOCK_STATS`
+  build; and a log of this run (links appearing, changing and going, pads
+  attaching, binding, unbinding and detaching), kept in memory only. Copy
+  puts the whole page on the pasteboard and Share hands it to the share
+  sheet. The satellite client now counts the datagrams it opens and refuses
+  beside the ones it sends.
 - **Open source licenses and the About links.** Settings › About gains
   Website, Source code, Privacy policy and Open source licenses, which draws
   the bundled copy of `THIRD_PARTY.md` (kept equal to the root's by

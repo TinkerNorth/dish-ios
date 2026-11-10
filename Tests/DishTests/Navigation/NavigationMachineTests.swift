@@ -50,6 +50,12 @@ final class NavigationMachineTests: XCTestCase {
         XCTAssertEqual(step.state.path(of: .settings), [.licenses], "a tap on Settings unwinds Help first")
     }
 
+    func testDiagnosticsPushesOntoSettings() {
+        let step = after(.select(.settings), .push(.diagnostics))
+        XCTAssertEqual(step.state.path(of: .settings), [.diagnostics])
+        XCTAssertEqual(step.effects, [], "a page starts nothing in the model; its appearance does")
+    }
+
     func testAPushLandsOnTheTabOnScreen() {
         let step = after(.select(.settings), .push(.deviceName))
         XCTAssertEqual(step.state.path(of: .settings), [.deviceName])

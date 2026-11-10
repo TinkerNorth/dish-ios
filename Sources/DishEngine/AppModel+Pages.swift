@@ -11,6 +11,9 @@ package enum ShownPage: Equatable {
     case support
     /// The low-power dim words the time.
     case dim
+    /// Diagnostics re-reads the sessions' words, the pads' rates and the
+    /// lock statistics once a second while it shows.
+    case diagnostics
 }
 
 /// The pages' lifecycle intents.
@@ -25,6 +28,9 @@ package extension AppModel {
             return nil
         case .support:
             return loadTips()
+        case .diagnostics:
+            diagnostics.start()
+            return nil
         }
     }
 
@@ -32,6 +38,7 @@ package extension AppModel {
         switch page {
         case .connections, .dim: clock.stop()
         case .support: break
+        case .diagnostics: diagnostics.stop()
         }
     }
 }

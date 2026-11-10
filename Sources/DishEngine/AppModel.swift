@@ -25,6 +25,14 @@ package final class AppModel {
     package let network: NetworkStack
     /// The App Store, for Support Dish.
     let tips: any TipStore
+    /// What the Diagnostics page reads, re-read once a second while it shows.
+    package let diagnostics: DiagnosticsSource
+    /// The flight recorder's lines.
+    package let diagnosticsLog: DiagnosticsLogStore
+    /// Feeds the flight recorder from the rows and the controllers.
+    @ObservationIgnored let recorder: DiagnosticsRecorder
+    /// The clipboard, the scene's to fill.
+    let pasteboard: any Pasteboard
     let setupSource = StateSource<SetupState?>(initial: nil)
     let supportSource = StateSource<SupportFacts>(initial: .initial)
     /// The on-screen controller's slot: its touches, its resend loop, its motion.
@@ -57,7 +65,9 @@ package final class AppModel {
         network: NetworkStack,
         tips: any TipStore,
         motionSensor: any MotionSensor,
-        resendTicker: any Ticker
+        resendTicker: any Ticker,
+        diagnostics: DiagnosticsSource = DiagnosticsSource(ticker: TimerTicker()),
+        pasteboard: any Pasteboard = InertPasteboard()
     ) {
         self.onboarding = onboarding
         self.appearance = appearance
@@ -68,11 +78,17 @@ package final class AppModel {
         self.pads = pads
         self.network = network
         self.tips = tips
+        self.diagnostics = diagnostics
+        self.pasteboard = pasteboard
+        let log = DiagnosticsLogStore()
+        diagnosticsLog = log
+        recorder = DiagnosticsRecorder(store: log)
         returnPaths = ReturnPathRouter(feedback: pads.source.feedback)
         onScreen = OnScreenPad(feed: pads.source.processor.feed(for: onScreenSlotId), ticker: resendTicker, sensor: motionSensor)
         applyStoredDeadzones()
         pads.source.processor.setDeadzones(deviceId: onScreenSlotId, GamepadInputProcessor.Deadzones())
         wireNetwork()
+        wireDiagnostics()
     }
 
     /// Every store over the same defaults, the wall clock, the pads iOS
@@ -87,7 +103,9 @@ package final class AppModel {
         tips: any TipStore = StoreKitTipStore(),
         controllerSource: any ControllerSource = GameControllerInput(),
         motionSensor: any MotionSensor = DeviceMotionSensor(),
-        resendTicker: any Ticker = TimerTicker()
+        resendTicker: any Ticker = TimerTicker(),
+        diagnostics: DiagnosticsSource = DiagnosticsSource(ticker: TimerTicker()),
+        pasteboard: any Pasteboard = InertPasteboard()
     ) {
         let device = DevicePreferenceStore(defaults: defaults)
         let network = NetworkStack(defaults: defaults, keyStore: keyStore, pins: pins) { wireDeviceName(device.state) }
@@ -102,7 +120,9 @@ package final class AppModel {
             network: network,
             tips: tips,
             motionSensor: motionSensor,
-            resendTicker: resendTicker
+            resendTicker: resendTicker,
+            diagnostics: diagnostics,
+            pasteboard: pasteboard
         )
     }
 
@@ -124,7 +144,9 @@ package final class AppModel {
             now: clock.state,
             setup: setup,
             support: supportSource.state,
-            play: playFacts
+            play: playFacts,
+            diagnostics: diagnostics.state,
+            diagnosticsEvents: diagnosticsLog.state
         )
     }
 

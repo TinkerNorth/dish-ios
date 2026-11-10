@@ -45,14 +45,17 @@ final class SettingsMappersTests: XCTestCase {
         XCTAssertEqual(page(chosen).streaming.dimAfter, .never)
     }
 
-    func testSetupAndHelpOffersTheGuideAndHelp() {
+    func testSetupAndHelpOffersTheGuideHelpAndDiagnostics() {
         XCTAssertEqual(page().help, SetupHelpSectionState(
             title: "Setup & help",
             guide: "Setup guide",
             guideSymbol: "sparkles",
             help: "Help & FAQ",
-            helpSymbol: "questionmark.circle"
+            helpSymbol: "questionmark.circle",
+            diagnostics: "Diagnostics",
+            diagnosticsSymbol: DishSymbol.diagnostics
         ))
+        XCTAssertEqual(DishSymbol.diagnostics, "waveform.path.ecg")
     }
 
     func testAppearanceOffersSystemLightAndDarkWithTheStoredOneSelected() {

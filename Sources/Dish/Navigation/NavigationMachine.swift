@@ -24,6 +24,8 @@ enum Page: Hashable {
     case licenses
     /// Support Dish: the Controllers tab's heart, and Settings › About.
     case support
+    /// Settings › Setup & help › Diagnostics.
+    case diagnostics
 }
 
 /// Where the setup cover opens.

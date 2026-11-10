@@ -71,6 +71,15 @@ Forget This PC removes that PC's row, key, pin and last sighting, after
 telling the PC to drop this iPhone. The setup walk keeps your answers in
 memory while it is open. No database or log is written by the app.
 
+Settings › Setup & help › Diagnostics shows what the app sees right now
+(each paired PC's session and its packet counters, each controller's rates
+and binding, the Local Network status, the app and protocol versions) and a
+log of this run of Dish: a PC's name and address, a controller's name, each
+change of a link's state and each binding, at most 200 lines, kept in
+memory only and gone when the app quits. Copy puts that page's text on the
+pasteboard and Share hands it to the share sheet, each only when you tap
+it; the app sends it nowhere on its own.
+
 ### 2.2 Sent to your own LAN, not to TinkerNorth
 
 Everything below goes only to the PC you chose, on your local network, and

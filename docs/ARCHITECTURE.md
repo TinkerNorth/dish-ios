@@ -74,7 +74,9 @@ not list every test target.
 Inside the engine the folders are the contract: `Models/` is the value types
 the UI binds, `Preferences/` the stores over `UserDefaults`, `Clock/` the
 wall-clock fact, `LocalNetwork/` the permission seam, `Input/` the pads,
-`Network/` the satellites, and `AppModel*.swift` the root and its intents. The engine's UI-facing
+`Network/` the satellites, `Diagnostics/` what the Diagnostics page reads
+(the session facts and counters, the rates, the flight recorder and the
+pasteboard seam), and `AppModel*.swift` the root and its intents. The engine's UI-facing
 surface is `package`-visible; everything else stays `internal`, and the tests
 reach it with `@testable import`. `public` is `DishScene` alone.
 
@@ -177,9 +179,15 @@ What `AppModel` publishes today:
   (`startScan`, `connect`, `disconnect`, `forget`, `addByAddress`),
   `AppModel+Pairing.swift` (`beginPairing(serverId:)`, `submitPin`, `newCode`,
   `cancelPairing`), `AppModel+Binding.swift` (`bind(slotId:to:)`,
-  `unbind(slotId:)`, `dismissApply`) and `AppModel+Session.swift`
-  (`reconnect`, `enteredBackground`, `enteredForeground`). A view calls these
-  and nothing else.
+  `unbind(slotId:)`, `dismissApply`), `AppModel+Session.swift`
+  (`reconnect`, `enteredBackground`, `enteredForeground`) and
+  `AppModel+Diagnostics.swift` (`copyToPasteboard`, through the
+  `Pasteboard` seam the scene fills with `UIPasteboard`). A view calls these
+  and nothing else. The Diagnostics page's facts, `diagnostics` (the
+  `DiagnosticsSource`'s snapshot, re-read once a second while the page
+  shows) and `diagnosticsEvents` (the flight recorder's lines, fed by
+  Observation of the connection rows and the controllers), ride
+  `shellFacts` too.
 
 ## Unidirectional flow: the rules
 

@@ -74,9 +74,10 @@ final class ShellMappersTests: XCTestCase {
         XCTAssertEqual(pageTitle(.deviceName), "Name on your PC")
     }
 
-    func testTheHelpSupportAndLicensesPagesAreTitled() {
+    func testTheHelpSupportLicensesAndDiagnosticsPagesAreTitled() {
         XCTAssertEqual(pageTitle(.help), "Help & FAQ")
         XCTAssertEqual(pageTitle(.support), "Support Dish")
         XCTAssertEqual(pageTitle(.licenses), "Open source licenses")
+        XCTAssertEqual(pageTitle(.diagnostics), "Diagnostics")
     }
 }
