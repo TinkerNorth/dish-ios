@@ -15,10 +15,9 @@ import UIKit
 @MainActor
 public struct DishScene: Scene {
 
-    @State private var model: AppModel
-    @State private var navigation: NavigationStore
-    /// What the App Intents post through, over the model and the store.
-    @State private var router: IntentRouter
+    /// The model, the navigation store and the router App Intents post
+    /// through, made the first time the kept build reads them.
+    @State private var root: OnFirstUse<SceneRoot>
     /// THIRD_PARTY.md from the package's resource bundle, for the licenses page.
     private let notice = thirdPartyNotice(in: L10n.app.catalog.bundle)
     private let orientation: OrientationLock
@@ -27,39 +26,35 @@ public struct DishScene: Scene {
     private let idiom: DeviceIdiom
     @Environment(\.scenePhase) private var scenePhase
 
-    /// `orientation` is the app delegate the `@main` app declared.
+    /// `orientation` is the app delegate the `@main` app declared. Nothing
+    /// is made here: SwiftUI calls this again on its own and keeps only the
+    /// first build's state, so the root is made on first use.
     public init(orientation: OrientationLock) {
         self.orientation = orientation
         let idiom = deviceIdiom(UIDevice.current.userInterfaceIdiom)
         self.idiom = idiom
-        TipKitTips.configure(hidden: UserDefaults.standard.bool(forKey: TipKitTips.hiddenKey))
-        let model = AppModel(defaults: .standard, pasteboard: SystemPasteboard())
-        _model = State(initialValue: model)
-        let navigation = NavigationStore(
-            onboarding: model.onboarding,
-            startSetup: { model.startSetup(setupStart($0)) },
-            endSetup: model.endSetup,
-            startPlay: model.openPlay,
-            endPlay: model.closePlay,
-            beginPairing: { model.beginPairing(serverId: $0) },
-            cancelPairing: model.cancelPairing,
-            connect: model.connect,
-            learned: TipKitTips.learned
-        )
-        _navigation = State(initialValue: navigation)
-        orientation.follow(screenOrientation(for: navigation.state.cover, idiom: idiom))
-        _router = State(initialValue: IntentRouter(send: { navigation.send($0) }, paired: { model.shellFacts.paired }))
+        _root = State(initialValue: OnFirstUse { SceneRoot(orientation: orientation, idiom: idiom) })
+    }
+
+    private var model: AppModel {
+        root.value.model
+    }
+
+    private var navigation: NavigationStore {
+        root.value.navigation
+    }
+
+    private var router: IntentRouter {
+        root.value.router
     }
 
     public var body: some Scene {
         windowHandingIntentsTheRouter()
     }
 
-    /// The window, once App Intents has the router. SwiftUI builds the scene
-    /// again on its own (a scene phase change does) and keeps only the first
-    /// build's model, store and router; the body it evaluates after a build
-    /// sees those, so the kept router is handed over here, once, before any
-    /// intent reaches the app.
+    /// The window, once App Intents has the router. The body reads the root
+    /// the kept build made, so the one router is handed over here, once,
+    /// before any intent reaches the app.
     private func windowHandingIntentsTheRouter() -> some Scene {
         router.register { AppDependencyManager.shared.add(dependency: $0) }
         return WindowGroup {
@@ -103,6 +98,37 @@ public struct DishScene: Scene {
             scene.requestGeometryUpdate(UIWindowScene.GeometryPreferences.iOS(interfaceOrientations: mask))
             scene.windows.compactMap(\.rootViewController).forEach(refreshOrientations)
         }
+    }
+}
+
+/// The composition root the scene keeps: the model over the device's
+/// stores and sockets, the navigation store over the model's intents, and
+/// the router App Intents post through. TipKit is configured and the window
+/// turned for the first time as it is made.
+@MainActor
+private struct SceneRoot {
+    let model: AppModel
+    let navigation: NavigationStore
+    let router: IntentRouter
+
+    init(orientation: OrientationLock, idiom: DeviceIdiom) {
+        TipKitTips.configure(hidden: UserDefaults.standard.bool(forKey: TipKitTips.hiddenKey))
+        let model = AppModel(defaults: .standard, pasteboard: SystemPasteboard())
+        let navigation = NavigationStore(
+            onboarding: model.onboarding,
+            startSetup: { model.startSetup(setupStart($0)) },
+            endSetup: model.endSetup,
+            startPlay: model.openPlay,
+            endPlay: model.closePlay,
+            beginPairing: { model.beginPairing(serverId: $0) },
+            cancelPairing: model.cancelPairing,
+            connect: model.connect,
+            learned: TipKitTips.learned
+        )
+        orientation.follow(screenOrientation(for: navigation.state.cover, idiom: idiom))
+        self.model = model
+        self.navigation = navigation
+        router = IntentRouter(send: { navigation.send($0) }, paired: { model.shellFacts.paired })
     }
 }
 
