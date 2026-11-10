@@ -6,17 +6,19 @@ import DishEngine
 import SwiftUI
 
 /// The play cover: the screen the navigation asked for, over the on-screen
-/// controller, in landscape (the scene turns the window), dark, with the
-/// status bar and the system's overlays hidden and its edge gestures held
-/// back so a swipe never leaves a game. The way out is the pause menu.
+/// controller, on its side on an iPhone (the scene turns the window) and
+/// the way an iPad is held, dark, with the status bar and the system's
+/// overlays hidden and its edge gestures held back so a swipe never leaves
+/// a game. The way out is the pause menu.
 struct PlayCover: View {
     let screen: PlayScreen
 
     @Environment(AppModel.self) private var model
     @Environment(NavigationStore.self) private var navigation
+    @Environment(\.windowFacts) private var window
 
     var body: some View {
-        PlayCoverBody(state: playCoverState(facts: model.shellFacts, screen: screen), actions: actions)
+        PlayCoverBody(state: playCoverState(facts: model.shellFacts, screen: screen, window: window), actions: actions)
             .statusBarHidden()
             .persistentSystemOverlays(.hidden)
             .defersSystemGestures(on: .all)
@@ -54,9 +56,15 @@ struct PlayCoverBody: View {
             .background(DishTheme.background.ignoresSafeArea())
     }
 
+    /// The gamepad fills the window on its side and stands in its band along
+    /// the bottom of an upright one; the touchpad and the mouse fill it
+    /// either way.
     @ViewBuilder private var screen: some View {
         switch state.screen {
-        case .gamepad: GamepadCover(state: state, actions: actions)
+        case .gamepad:
+            GamepadCover(state: state, actions: actions)
+                .frame(maxHeight: state.pad.band)
+                .frame(maxHeight: .infinity, alignment: .bottom)
         case .touchpad: TouchpadCover(state: state, actions: actions)
         case .mouse: MouseCover(state: state, actions: actions)
         }
@@ -64,6 +72,7 @@ struct PlayCoverBody: View {
 }
 
 #Preview("Pause menu", traits: .landscapeLeft) {
-    PlayCoverBody(state: playCoverState(facts: FactsPreview.playing(.gamepad, emulateAs: .dualSense), screen: .gamepad), actions: .preview)
+    let facts = FactsPreview.playing(.gamepad, emulateAs: .dualSense)
+    PlayCoverBody(state: playCoverState(facts: facts, screen: .gamepad, window: PreviewWindow.phoneOnItsSide), actions: .preview)
         .environment(\.colorScheme, .dark)
 }

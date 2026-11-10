@@ -15,9 +15,10 @@ final class PlayMappersTests: XCTestCase {
     private func cover(
         _ play: PlayFacts? = FactsFixture.play(),
         screen: PlayScreen = .gamepad,
-        session: SessionFact? = nil
+        session: SessionFact? = nil,
+        window: WindowFacts = WindowFixture.phoneOnItsSide
     ) -> PlayCoverState {
-        playCoverState(facts: FactsFixture.shell(session: session, play: play), screen: screen)
+        playCoverState(facts: FactsFixture.shell(session: session, play: play), screen: screen, window: window)
     }
 
     private func switches(_ play: PlayFacts) throws -> PauseSwitchesState {
@@ -159,6 +160,52 @@ final class PlayMappersTests: XCTestCase {
         for screen in PlayScreen.allCases {
             XCTAssertEqual(cover(screen: screen).screen, screen)
         }
+    }
+
+    // MARK: - The room the window gives
+
+    func testAPhoneOnItsSideKeepsThePhonesGamepad() {
+        XCTAssertEqual(cover(window: WindowFixture.phoneOnItsSide).pad, PadLayout(metrics: .compact, band: nil))
+        let phone = PadMetrics(
+            stick: DishSize.padStick,
+            stickThumb: DishSize.padStickThumb,
+            face: DishSize.padFace,
+            dpadKey: DishSize.padDpadKey,
+            rail: DishSize.padRail
+        )
+        XCTAssertEqual(PadMetrics.compact, phone)
+    }
+
+    func testAnIPadOnItsSideGrowsTheSticksFacesRailsAndDpad() {
+        XCTAssertEqual(cover(window: WindowFixture.iPadOnItsSide).pad, PadLayout(metrics: .regular, band: nil))
+        let iPad = PadMetrics(
+            stick: DishSize.padStickRegular,
+            stickThumb: DishSize.padStickThumbRegular,
+            face: DishSize.padFaceRegular,
+            dpadKey: DishSize.padDpadKeyRegular,
+            rail: DishSize.padRailRegular
+        )
+        XCTAssertEqual(PadMetrics.regular, iPad)
+        XCTAssertGreaterThan(iPad.stick, DishSize.padStick)
+        XCTAssertGreaterThan(iPad.face, DishSize.padFace)
+        XCTAssertGreaterThan(iPad.dpadKey, DishSize.padDpadKey)
+        XCTAssertGreaterThan(iPad.rail, DishSize.padRail)
+    }
+
+    func testAProMaxOnItsSideIsRegularAcrossButShortAndKeepsThePhonesGamepad() {
+        XCTAssertEqual(cover(window: WindowFixture.proMaxOnItsSide).pad, PadLayout(metrics: .compact, band: nil))
+    }
+
+    /// iPadOS will not turn an upright iPad's window, so the gamepad keeps
+    /// its landscape arrangement in a band along the bottom, where the hands
+    /// hold it.
+    func testAnUprightIPadStandsTheGamepadAlongTheBottom() {
+        XCTAssertEqual(cover(window: WindowFixture.iPadUpright).pad, PadLayout(metrics: .compact, band: DishSize.padUprightHeight))
+    }
+
+    func testTheTouchpadsClickZonesAreHalfAStick() {
+        XCTAssertEqual(PadMetrics.compact.clickZone, DishSize.padStick / 2)
+        XCTAssertEqual(PadMetrics.regular.clickZone, DishSize.padStickRegular / 2)
     }
 }
 

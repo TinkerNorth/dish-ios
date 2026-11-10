@@ -18,4 +18,14 @@ extension L10n {
     var settings: String {
         catalog.text("Settings")
     }
+
+    // MARK: - The page beside a list, on an iPad
+
+    var pickAController: String {
+        catalog.text("Pick a controller")
+    }
+
+    var pickAPC: String {
+        catalog.text("Pick a PC")
+    }
 }

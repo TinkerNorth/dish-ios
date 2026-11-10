@@ -6,17 +6,20 @@
 #  A green run here is a green `ios-ci.yml` run: the same pinned SwiftFormat,
 #  SwiftLint and XcodeGen release binaries (scripts/tools.sh downloads them
 #  once into .build/tools and verifies the SHA-256), then the project drift
-#  check, `xcodebuild test` on a simulator and the Release build.
+#  check, `xcodebuild test` on an iPhone simulator, the UI tests again on an
+#  iPad simulator, and the Release build.
 #
 #  Options:
 #    --quick     skip the Release build
 #    --no-tests  build the tests but do not run them
 #
 #  Environment:
-#    DISH_SIM_DESTINATION  the xcodebuild test destination; default
-#                          "platform=iOS Simulator,name=iPhone 17 Pro". Pin an
-#                          OS when several runtimes are installed, e.g.
-#                          "platform=iOS Simulator,OS=26.5,name=iPhone 17 Pro".
+#    DISH_SIM_DESTINATION   the xcodebuild test destination; default
+#                           "platform=iOS Simulator,name=iPhone 17 Pro". Pin an
+#                           OS when several runtimes are installed, e.g.
+#                           "platform=iOS Simulator,OS=26.5,name=iPhone 17 Pro".
+#    DISH_IPAD_DESTINATION  the iPad the UI tests run on again; default
+#                           "platform=iOS Simulator,name=iPad Pro 11-inch (M5)".
 # ============================================================================
 
 set -euo pipefail
@@ -36,6 +39,7 @@ for arg in "$@"; do
 done
 
 DESTINATION="${DISH_SIM_DESTINATION:-platform=iOS Simulator,name=iPhone 17 Pro}"
+IPAD_DESTINATION="${DISH_IPAD_DESTINATION:-platform=iOS Simulator,name=iPad Pro 11-inch (M5)}"
 
 fetch_swiftformat
 fetch_swiftlint
@@ -56,6 +60,16 @@ if [ "$RUN_TESTS" -eq 1 ]; then
         -project Dish.xcodeproj \
         -scheme DishApp \
         -destination "$DESTINATION" \
+        -enableCodeCoverage YES \
+        -quiet \
+        CODE_SIGNING_ALLOWED=NO
+
+    tools_log "xcodebuild test, the UI tests on an iPad ($IPAD_DESTINATION)"
+    xcodebuild test \
+        -project Dish.xcodeproj \
+        -scheme DishApp \
+        -destination "$IPAD_DESTINATION" \
+        -only-testing:DishUITests \
         -enableCodeCoverage YES \
         -quiet \
         CODE_SIGNING_ALLOWED=NO

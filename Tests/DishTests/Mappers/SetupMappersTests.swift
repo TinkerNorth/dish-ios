@@ -75,16 +75,26 @@ final class SetupMappersTests: XCTestCase {
     }
 
     func testWithoutAWalkThereIsNoCover() {
-        XCTAssertNil(setupCoverState(facts: facts(nil)))
+        XCTAssertNil(setupCoverState(facts: facts(nil), width: .compact))
     }
 
     func testTheCoverCarriesTheWalksChromeAndItsStepOverTheFacts() throws {
         let pad = AttachedPadFact(id: "pad-1", name: "DualSense", family: .dualSense, link: .usbC, batteryPercent: 84)
         let walk = SetupFixture.walk(.input, [])
         let facts = FactsFixture.shell(attachedPads: [pad], setup: walk)
-        let cover = try XCTUnwrap(setupCoverState(facts: facts))
+        let cover = try XCTUnwrap(setupCoverState(facts: facts, width: .compact))
         XCTAssertEqual(cover.chrome, setupChromeState(walk))
         XCTAssertEqual(cover.step, .input(inputStepState(setupInputs(facts: facts))))
+    }
+
+    func testOnACompactWidthSetupFillsTheScreen() throws {
+        let cover = try XCTUnwrap(setupCoverState(facts: facts(SetupFixture.walk(.welcome, [])), width: .compact))
+        XCTAssertNil(cover.column)
+    }
+
+    func testOnARegularWidthSetupStandsInAReadableColumn() throws {
+        let cover = try XCTUnwrap(setupCoverState(facts: facts(SetupFixture.walk(.welcome, [])), width: .regular))
+        XCTAssertEqual(cover.column, DishSize.setupColumn)
     }
 
     func testEveryStepDrawsItsOwnState() {

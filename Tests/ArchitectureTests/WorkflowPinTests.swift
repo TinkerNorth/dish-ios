@@ -66,4 +66,23 @@ final class WorkflowPinTests: XCTestCase {
         let zeros = try references().filter { ($0.reference + " ").range(of: Self.zeroPin, options: .regularExpression) != nil }
         XCTAssertEqual(zeros.map { "\($0.file):\($0.line)" }, [], "an all-zero pin is a placeholder, not a commit")
     }
+
+    /// GitHub refuses a whole workflow whose `env:` or `with:` is left empty
+    /// (a key whose block holds nothing), and runs none of its jobs.
+    func testNoMappingIsLeftEmpty() throws {
+        var empty: [String] = []
+        for file in try workflowFiles() {
+            let lines = try RepoFiles.read(file).components(separatedBy: "\n")
+            for (index, line) in lines.enumerated() {
+                let trimmed = line.trimmingCharacters(in: .whitespaces)
+                guard trimmed == "env:" || trimmed == "with:" else { continue }
+                let indent = line.prefix { $0 == " " }.count
+                let next = lines.dropFirst(index + 1).first { !$0.trimmingCharacters(in: .whitespaces).isEmpty } ?? ""
+                if next.prefix(while: { $0 == " " }).count <= indent {
+                    empty.append("\(file):\(index + 1) \(trimmed)")
+                }
+            }
+        }
+        XCTAssertEqual(empty, [], "a mapping with nothing under it fails the whole workflow")
+    }
 }

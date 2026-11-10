@@ -133,14 +133,14 @@ Points. Every size a kit component sets is one of these names.
 | `DishSize.primerTile` | 64 | The phone and PC tiles over the Local Network primer |
 | `DishSize.eyebrowTracking` | 1.4 | The tracking of a section eyebrow |
 | `DishSize.codeCorner` | 10 | The corner of a licence text's block on the licenses page |
-| `DishSize.padStick` | 128 | A stick's base on the on-screen gamepad |
-| `DishSize.padStickThumb` | 60 | A stick's thumb |
-| `DishSize.padFace` | 52 | A face button |
+| `DishSize.padStick` | 128 | A stick's base on the on-screen gamepad, on a phone and an upright iPad |
+| `DishSize.padStickThumb` | 60 | A stick's thumb, on a phone and an upright iPad |
+| `DishSize.padFace` | 52 | A face button, on a phone and an upright iPad |
 | `DishSize.padRound` | 44 | L3, R3, the pause button, the centre buttons and the play pill's height |
-| `DishSize.padDpadKey` | 44 | One arm of the d-pad |
+| `DishSize.padDpadKey` | 44 | One arm of the d-pad, on a phone and an upright iPad |
 | `DishSize.padCorner` | 12 | A d-pad arm's corner |
 | `DishSize.dpadDiagonal` | 0.3 | The minor axis's share of the major one before the d-pad lights a diagonal, the reducer's `dpadDiagonalThreshold` |
-| `DishSize.padRail` | 44 | A trigger rail's width |
+| `DishSize.padRail` | 44 | A trigger rail's width, on a phone and an upright iPad |
 | `DishSize.padShoulderWidth` | 112 | A shoulder button's width |
 | `DishSize.padShoulderHeight` | 36 | A shoulder button's height |
 | `DishSize.padStroke` | 1.5 | A control's outline, and a PIN cell's |
@@ -154,6 +154,26 @@ Points. Every size a kit component sets is one of these names.
 | `DishSize.pinCellCorner` | 12 | A PIN cell's corner |
 | `DishSize.clientPinTracking` | 4 | The tracking of this iPhone's code on the pair sheet |
 | `DishSize.cardCorner` | 16 | The corner of a card inside a sheet: the pair sheet's request |
+| `DishSize.padStickRegular` | 200 | A stick's base on an iPad on its side |
+| `DishSize.padStickThumbRegular` | 92 | A stick's thumb on an iPad on its side |
+| `DishSize.padFaceRegular` | 76 | A face button on an iPad on its side |
+| `DishSize.padDpadKeyRegular` | 64 | One arm of the d-pad on an iPad on its side |
+| `DishSize.padRailRegular` | 64 | A trigger rail's width on an iPad on its side |
+| `DishSize.padUprightHeight` | 440 | The band along the bottom the gamepad stands in when an iPad is held upright |
+| `DishSize.setupColumn` | 600 | The readable column the setup cover stands in on a regular width (an iPad) |
+
+The gamepad's measures come in two sets, the phone's (`padStick`,
+`padStickThumb`, `padFace`, `padDpadKey`, `padRail`) and an iPad's on its
+side (the same names with `Regular`). `padLayout` in `PlayMappers.swift`
+picks one from the window the scene reads (`WindowFacts`): the iPad's where
+both size classes are regular and the window is on its side; the phone's
+everywhere else, an iPhone Pro Max on its side included, which is regular
+across but compact down. iPadOS will not turn an upright iPad for the play
+cover, so there the gamepad keeps its landscape arrangement at the phone's
+measures in a band `padUprightHeight` tall along the bottom. The kit's
+controls (`PadStickControl`, `FaceButton`, `DirectionPad`, `TriggerRail`)
+take their measures as values and set none of their own; the touchpad's
+click zones are half a stick tall.
 
 ## Spacing (`DishSpace`)
 

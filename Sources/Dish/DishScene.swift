@@ -8,7 +8,8 @@ import UIKit
 /// The one scene. The composition root's objects are made here once and
 /// handed to the shell as environment values. It is not a view: the clock,
 /// the defaults and UIKit's shared objects are allowed here and nowhere
-/// under `UI/`, and it is the one place the window is turned.
+/// under `UI/`, it is the one place the window is turned, and with its
+/// `WindowReader` the one place the device and the window are read.
 @MainActor
 public struct DishScene: Scene {
 
@@ -17,11 +18,16 @@ public struct DishScene: Scene {
     /// THIRD_PARTY.md from the package's resource bundle, for the licenses page.
     private let notice = thirdPartyNotice(in: L10n.app.catalog.bundle)
     private let orientation: OrientationLock
+    /// The device, read once: an iPhone turns for play alone, an iPad with
+    /// the device.
+    private let idiom: DeviceIdiom
     @Environment(\.scenePhase) private var scenePhase
 
     /// `orientation` is the app delegate the `@main` app declared.
     public init(orientation: OrientationLock) {
         self.orientation = orientation
+        let idiom = deviceIdiom(UIDevice.current.userInterfaceIdiom)
+        self.idiom = idiom
         let model = AppModel(defaults: .standard, pasteboard: SystemPasteboard())
         _model = State(initialValue: model)
         let navigation = NavigationStore(
@@ -34,6 +40,7 @@ public struct DishScene: Scene {
             cancelPairing: model.cancelPairing
         )
         _navigation = State(initialValue: navigation)
+        orientation.follow(screenOrientation(for: navigation.state.cover, idiom: idiom))
     }
 
     public var body: some Scene {
@@ -44,9 +51,10 @@ public struct DishScene: Scene {
                 .environment(\.settingsURL, URL(string: UIApplication.openSettingsURLString))
                 .environment(\.appVersion, shortVersion(of: .main))
                 .environment(\.thirdPartyNotice, notice)
+                .modifier(WindowReader())
                 .preferredColorScheme(colorScheme(for: model.shellFacts.preferences.appearance))
                 .onChange(of: idleTimerDisabled(facts: model.shellFacts), initial: true) { holdScreenOn($1) }
-                .onChange(of: screenOrientation(for: navigation.state.cover), initial: true) { turn(to: $1) }
+                .onChange(of: screenOrientation(for: navigation.state.cover, idiom: idiom), initial: true) { turn(to: $1) }
                 .onChange(of: scenePhase) { scenePhaseChanged($1) }
         }
     }
@@ -70,8 +78,8 @@ public struct DishScene: Scene {
     /// The delegate answers with the new mask from now on, and every window
     /// turns to it: UIKit only rereads the mask when asked to.
     private func turn(to screenOrientation: ScreenOrientation) {
+        orientation.follow(screenOrientation)
         let mask = interfaceMask(screenOrientation)
-        orientation.mask = mask
         let scenes = UIApplication.shared.connectedScenes.compactMap { $0 as? UIWindowScene }
         for scene in scenes {
             scene.requestGeometryUpdate(UIWindowScene.GeometryPreferences.iOS(interfaceOrientations: mask))

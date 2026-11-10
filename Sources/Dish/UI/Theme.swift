@@ -193,6 +193,17 @@ enum DishSize {
     static let clientPinTracking: CGFloat = 4
     /// The corner of a card inside a sheet: the pair sheet's request.
     static let cardCorner: CGFloat = 16
+    /// The gamepad on an iPad on its side: a stick's base and thumb, a face
+    /// button, a d-pad arm and a trigger rail.
+    static let padStickRegular: CGFloat = 200
+    static let padStickThumbRegular: CGFloat = 92
+    static let padFaceRegular: CGFloat = 76
+    static let padDpadKeyRegular: CGFloat = 64
+    static let padRailRegular: CGFloat = 64
+    /// The band along the bottom the gamepad stands in on an upright iPad.
+    static let padUprightHeight: CGFloat = 440
+    /// The readable column setup stands in on a regular width.
+    static let setupColumn: CGFloat = 600
 }
 
 /// The spacing scale.

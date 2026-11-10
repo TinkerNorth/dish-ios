@@ -73,7 +73,7 @@ jobs:
             runtime="$(xcrun simctl list runtimes -j | python3 -I -c 'import json, sys; print([r for r in json.load(sys.stdin)["runtimes"] if r["platform"] == "iOS" and r["isAvailable"]][-1]["identifier"])')"
           fi
           udid="$(xcrun simctl create "e2e iPhone 17 Pro" "iPhone 17 Pro" "$runtime")"
-          xcrun simctl boot "$udid"
+          xcrun simctl bootstatus "$udid" -b
           xcrun simctl list devices booted
           echo "DISH_SIM_DESTINATION=platform=iOS Simulator,id=$udid" >> "$GITHUB_ENV"
 

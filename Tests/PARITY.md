@@ -15,15 +15,16 @@
 > bridge; wave C the network engine; wave E the play screens; wave F the
 > Moonlight hosts; wave G1 Support Dish, Help & FAQ, the licenses and the
 > About links; wave G2 Diagnostics; wave D the pair sheet, the Connections
-> rows, the PC's page, the controller page's Binding and Add a PC by address.
-> A Satellite or a Moonlight host is found, paired with, bound to a pad or the
-> on-screen gamepad and streamed to, from the app alone.
+> rows, the PC's page, the controller page's Binding and Add a PC by address;
+> wave H the iPad. A Satellite or a Moonlight host is found, paired with,
+> bound to a pad or the on-screen gamepad and streamed to, from the app alone,
+> on an iPhone or an iPad.
 
 ## 1. What is built in wave 1
 
 | Feature | Status | Where |
 |---|---|---|
-| iOS 26.0 floor, iPhone only, portrait only but for the play cover (landscape only), Swift 6 strict concurrency, Observation, no dependencies | built | `Package.swift`, `project.yml`; `PackageGraphTests` |
+| iOS 26.0 floor, the iPhone and the iPad (an iPhone upright but for the play cover, which lies on its side; an iPad every way on every screen), Swift 6 strict concurrency, Observation, no dependencies | built | `Package.swift`, `project.yml`, `App/Info.plist`; `PackageGraphTests`, `DeviceFamilyTests` |
 | Three tabs, each its own `NavigationStack`; navigation as data | built | `Navigation/NavigationMachine.swift`, `NavigationStore.swift`; `NavigationMachineTests`, `NavigationStoreTests`, `NavigationCoverageTests` |
 | The session accessory with its inline form | mapper only: it is attached only while a session exists, and no source publishes one | `UI/Kit/SessionBar.swift`, `ShellMappers.swift`; `ShellMappersTests` |
 | Setup: Welcome, Input (1 of 3), the Local Network primer and Pick your PC (2 of 3), Review and bind (3 of 3); Skip lands on Controllers | built; the pads and PCs it lists are empty today, and Bind records the request and sends nothing | `DishCore/Setup/SetupMachine.swift`, `UI/Setup/`, `Mappers/Setup*Mappers.swift`; `SetupMachineTests`, `Setup*MappersTests`, `AppModelSetupTests` |
@@ -40,7 +41,7 @@
 | Preference stores under the fleet's keys (`theme_mode`, `onboarding_welcome_completed`) and the iOS keys (`device_name`, `keep_screen_on`, `dim_after_seconds`) | built | `DishEngine/Preferences/`; the store tests |
 | Light, dark and system appearance | built; System by default (section 3) | `AppearancePreferenceStore`, `colorScheme(for:)` |
 | Six languages (en, bs, de, es, fr, pt-BR) through the `L10n` funnel | built; `%lld s` and `%lld min` carry no plural forms (section 2) | `Sources/Dish/L10n/`, `Localizable.xcstrings`; `LocalizationTests` |
-| Views are layout: one state per page from a pure mapper, intents only | built | `ViewPurityTests` (V1 to V12), `NavigationCoverageTests` |
+| Views are layout: one state per page from a pure mapper, intents only, the window's traits read by the scene alone | built | `ViewPurityTests` (V1 to V13), `NavigationCoverageTests` |
 | Keep screen on while a session streams | mapper only: `idleTimerDisabled(facts:)` is true only with a session | `ShellMappers.swift`; `ShellMappersTests` |
 | **The GameController bridge (wave B).** Attach and detach through the `GCController` messages and the launch sweep; each pad's handlers on its own serial `userInteractive` queue (`com.tinkernorth.dish.input.<slot id>`), set before any handler; the extended gamepad sampled into `PadSample` and `wireReport`; motion, the DualSense and DualShock 4 touchpad, battery on the 30 s cadence with the 3 s charging-state watch; the family from `productCategory`; a pad without the extended profile listed as "Not supported" and not read | built | `DishEngine/Input/GameControllerInput*.swift`; `GameControllerInputTests`, `MotionConversionTests` |
 | The hot path's pad side: `PadFeed` (route in a mailbox, dead zones in an atomic word, a repeated report dropped, the record under a seqlock, each motion sample's delta and each touch's instant stamped for the wire), `PadSink` for the sender, the routing table, and no lock on the Input thread | built | `DishEngine/Input/PadFeed.swift`, `PadRecord.swift`, `InputSink.swift`, `InputRouting.swift`, `Util/`; `PadFeedTests`, `GamepadInputProcessorTests`, `MailboxTests`, `AtomicWordTests`, `LockLawTests` |
@@ -64,6 +65,7 @@
 | **The controller page's Binding (wave D, C1).** The PC the pad sends to with Unbind, or Bind to a paired PC, with the apply drawn inline (applying, applied, failed with Try again) and on the Controllers row where setup's Bind lands | built | `UI/Pages/ControllerSections.swift`, `Mappers/ControllerMappers.swift`, `ControllersMappers.swift`, `Models/ConnectionFacts.swift` (`ApplyFact`); `ControllerMappersTests`, `ControllersMappersTests`, `AppModelBindingTests` |
 | **Add a PC by address (wave D).** A sheet from the Connections toolbar, the primer and Pick your PC: one field for the host or host:port, the default port named under it, Connect, the refusal of a text that is not an IPv4 address, the attempt's failure worded (every `ConnectionFailure` case has its words), and the pair sheet taking over when the PC asks for a PIN; Review names the PC once it is paired and setup's Bind binds it | built | `UI/Sheets/AddByAddressSheet.swift`, `Mappers/AddressMappers.swift`, `AppModel+Connections.swift` (`addedByAddress`), `AppModel+Setup.swift`; `AddressMappersTests`, `AppModelSetupTests`, `AppModelConnectionsTests`, `ConnectionsUITests` |
 | **Setup's Bind of the on-screen gamepad (wave D).** Review's Bind lists the on-screen gamepad and binds its slot like a pad's; the slot's binding survives a pad leaving and goes with Stop gamepad | built | `AppModel+Setup.swift`, `AppModel+Binding.swift`, `AppModel+Play.swift`; `AppModelSetupTests`, `AppModelBindingTests` |
+| **The iPad (wave H).** The app runs on the iPad (`TARGETED_DEVICE_FAMILY` 1,2), turning all four ways; the tabs are `sidebarAdaptable`, a bar along the top that opens into a sidebar of the three tabs; on a regular width Controllers and Connections draw their list beside the page it opens (`NavigationSplitView`, the list's selection the first page of the tab's path, "Pick a controller" and "Pick a PC" before one is opened) while Settings keeps its stack; the setup cover stands in a readable column; the play cover follows the device, the gamepad's sticks, faces, rails and d-pad larger on an iPad on its side and kept to a band along the bottom when it is upright; the device and the window are read by the scene alone and handed down as facts; the UI tests run again on an iPad in CI | built | `project.yml`, `App/Info.plist`, `Scene/Orientation.swift`, `Scene/WindowReader.swift`, `Navigation/ScreenOrientation.swift`, `NavigationMachine.swift` (`show`), `NavigationStore.swift`, `UI/Shell/ShellView.swift`, `Mappers/ShellMappers.swift`, `PlayMappers.swift` (`PadMetrics`, `padLayout`), `SetupMappers.swift` (`setupColumn`), `UI/Kit/PadSticks.swift`, `PadButtons.swift`, `.github/workflows/ios-ci.yml`, `scripts/ci-local.sh`; `ScreenOrientationTests`, `OrientationLockTests`, `WindowReaderTests`, `ShellSplitMappersTests`, `PlayMappersTests`, `SetupMappersTests`, `NavigationMachineTests`, `NavigationStoreTests`, `DeviceFamilyTests`, `ViewPurityTests` (V13), `IPadUITests` |
 | The `LOCK_STATS` lane: `LockLawTests` and the tracked-lock tests in a build that counts every tracked lock by thread role | built | `.github/workflows/ios-ci.yml` (`lock-stats`), `LockLawTests`, `LockLawSatelliteRun.swift`, `TrackedLockTests` |
 | The `LOCK_STATS` lane: `LockLawTests` and the tracked-lock tests in a build that counts every tracked lock by thread role | built | `.github/workflows/ios-ci.yml` (`lock-stats`), `LockLawTests`, `LockLawSatelliteRun.swift`, `LockLawMoonlightRun.swift`, `TrackedLockTests` |
 | **The Moonlight protocol core (wave F).** dish-mac's `DishCore/Moonlight/` under its names: the constants, the control seal (AES-128-GCM, the IV from the sequence's low byte), the CONTROLLER_*, mouse and keepalive packets, the host's events, the media ping, the five-phase PIN pairing with its AES-ECB over CommonCrypto, the certificate and XML codecs, the URLs, the RTSP text, the pad numbers, rules and table, the telemetry conversions, the session reducer, and the ENet client subset with an injected clock | built; pinned by Wolf's published vectors and captures, the same hex dish-mac pins | `Sources/DishCore/Moonlight/`, `Moonlight/Enet/`; every suite under `Tests/DishCoreTests/Moonlight/` |
@@ -97,7 +99,11 @@
 | **Moonlight hosts in Diagnostics.** dish-mac's `MoonlightHostDiagnostics` (each host's phase, its name and versions, the running app, the control link's report, the round trip and the pings, each pad's reports) has no card on the Diagnostics page; the hosts reach it only through the hub's rows. | `Diagnostics/MoonlightHostDiagnostics.swift` over the manager's `linkReport` and the pinger's count, and `moonlightHostLines` in `DiagnosticsMappers.swift` |
 | **The Moonlight measurement rigs.** dish-mac's `MoonlightPathRig`, `LoopbackMoonlightHost` and the bench's Moonlight lanes are not ported; the lock laws run against `FakeMoonlightHost` instead. | `tools/bench/`, with the bench row below |
 | **Long-press menus, swipe actions, pull to refresh.** No row has a context menu or a swipe action, and no list refreshes. | with the pages that own the actions (Unbind, Forget This PC, Rescan) |
-| **iPad, App Intents, TipKit.** iPhone only; no intents; no tips. | later waves; `TARGETED_DEVICE_FAMILY` in `project.yml` moves with iPad |
+| **App Intents, TipKit.** No intents; no tips. | later waves |
+| **An iPad's words.** The copy names the iPhone in 19 keys ("Turn your iPhone into a wireless PC gamepad", "Found on this iPhone", "This iPhone", "Rename this iPhone", "This iPhone has no motion sensors", the Help answers), and Name on your PC falls back to "iPhone"; an iPad reads them as they are. | the String Catalog's device variations (iPhone, iPad) for those keys with their five translations, and `LocalizationTests` reading the variations |
+| **An upright iPad's gamepad.** iPadOS will not turn an upright iPad for the play cover, so the gamepad keeps its landscape arrangement at the phone's measures in a band along the bottom; the boards draw no upright gamepad. On an iPad mini held upright (744 points across) that arrangement is 16 points wider than the window. | an upright arrangement on the boards, or a prompt to turn the iPad |
+| **An iPad's windows.** In iPadOS 26's windowed mode a window keeps its shape when the device turns, and a small one is compact both ways: its tabs keep their stack and the gamepad the phone's measures, which need a window about 760 points across. The UI tests assume the full-screen mode a fresh iPad starts in. | the gamepad measured against its window rather than its size classes |
+| **The dim and the pointer on an iPad.** The dim's session card spans the whole window, and Dish defines no hover effects or keyboard shortcuts of its own. | the setup cover's readable column for the dim's card; hover and shortcuts with the pages that own the actions |
 | **The kernel's other primitives.** Only `StateSource` is ported. `Composer`, `Controller`, `Repository` and `AsyncState` are not. | `Sources/DishKernel/`, each with its tests, in the wave that first needs it |
 | **The bench.** There is no bench and no measurements job (dish-mac's `DishBench` and its rigs). | `tools/bench/` over the hot path |
 | **App Store signing secrets and export compliance.** The six secrets are not set, so `release.yml` ships an unsigned IPA; the Info.plist carries no `ITSAppUsesNonExemptEncryption` answer, which App Store Connect asks once the wire's encryption ships. | repository secrets and variables, and `App/Info.plist` |
@@ -127,6 +133,21 @@ so the sanctioned path works alone.
 - **iOS 26 only.** The design handoff describes an iOS 18 fallback for the tab
   bar and the accessory. This client has none: no `if #available`, no custom
   session bar.
+- **An iPad's play cover follows the device.** On an iPhone the play cover
+  turns the window to landscape. iPadOS 26 turns the window of an app that
+  shares the screen with the device, whatever the app's mask says, and
+  refuses it a programmatic turn (`UISceneErrorDomain` 101, "The current
+  windowing mode does not allow for programmatic changes to interface
+  orientation"); `UIRequiresFullScreen`, deprecated in iPadOS 26, only shrinks
+  a landscape window into a letterboxed one over the Home Screen. So an
+  iPad's play cover opens the way the iPad is held, and upright the gamepad
+  keeps its landscape arrangement along the bottom (`padLayout`).
+- **The iPad's tabs open as a bar along the top.** `sidebarAdaptable` on
+  iPadOS 26 draws the three tabs as a bar along the top that opens into a
+  sidebar; opening the sidebar by default
+  (`defaultAdaptableTabBarPlacement(.sidebar)`) would lay it over the content
+  on an upright iPad, where the first tap only closes it, and three tabs do
+  not need a column of their own.
 - **One red for errors.** The design leaves a choice between `#FF6B5C` and
   `#E74C3C`; the code uses `#FF6B5C` in the dark palette
   (`DishTheme.error`).

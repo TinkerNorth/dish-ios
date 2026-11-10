@@ -100,6 +100,66 @@ struct TouchpadCoverState: Equatable {
     let hint: String
 }
 
+/// The gamepad's measures: a stick's base and thumb, a face button, a d-pad
+/// arm and a trigger rail.
+struct PadMetrics: Equatable {
+    let stick: CGFloat
+    let stickThumb: CGFloat
+    let face: CGFloat
+    let dpadKey: CGFloat
+    let rail: CGFloat
+
+    /// The touchpad's two click zones: half a stick tall.
+    var clickZone: CGFloat {
+        stick / 2
+    }
+
+    /// The phone's, from the boards.
+    static let compact = PadMetrics(
+        stick: DishSize.padStick,
+        stickThumb: DishSize.padStickThumb,
+        face: DishSize.padFace,
+        dpadKey: DishSize.padDpadKey,
+        rail: DishSize.padRail
+    )
+
+    /// An iPad's on its side, which has the room both ways.
+    static let regular = PadMetrics(
+        stick: DishSize.padStickRegular,
+        stickThumb: DishSize.padStickThumbRegular,
+        face: DishSize.padFaceRegular,
+        dpadKey: DishSize.padDpadKeyRegular,
+        rail: DishSize.padRailRegular
+    )
+}
+
+/// How the gamepad stands in its window: its measures, and the band along
+/// the bottom it keeps its landscape arrangement in when the window is
+/// upright.
+struct PadLayout: Equatable {
+    let metrics: PadMetrics
+    /// The band's height; nil fills the window.
+    let band: CGFloat?
+}
+
+/// On its side the gamepad fills the window, larger where both size classes
+/// are regular (an iPad; a Pro Max on its side is compact down). Upright,
+/// which iPadOS leaves an iPad's play cover, it keeps its landscape
+/// arrangement in a band along the bottom, at the phone's measures.
+func padLayout(_ window: WindowFacts) -> PadLayout {
+    switch window.shape {
+    case .landscape: PadLayout(metrics: landscapeMetrics(window), band: nil)
+    case .portrait: PadLayout(metrics: .compact, band: DishSize.padUprightHeight)
+    }
+}
+
+private func landscapeMetrics(_ window: WindowFacts) -> PadMetrics {
+    switch (window.width, window.height) {
+    case (.regular, .regular): .regular
+    case (.compact, _), (_, .compact): .compact
+    }
+}
+
 /// Everything a play cover draws, whichever screen is up.
 struct PlayCoverState: Equatable {
     let screen: PlayScreen
@@ -109,6 +169,8 @@ struct PlayCoverState: Equatable {
     let gamepad: GamepadCoverState
     let mouse: MouseCoverState
     let touchpad: TouchpadCoverState
+    /// How the gamepad stands in the window the scene read.
+    let pad: PadLayout
 }
 
 /// The SF Symbols the pause menu and the gamepad's centre draw.
@@ -126,7 +188,7 @@ enum PlaySymbol {
     static let scrollDown = "chevron.down"
 }
 
-func playCoverState(facts: ShellFacts, screen: PlayScreen, words: L10n = .app) -> PlayCoverState {
+func playCoverState(facts: ShellFacts, screen: PlayScreen, window: WindowFacts, words: L10n = .app) -> PlayCoverState {
     let emulateAs = facts.play?.emulateAs ?? InputKind.onScreen.defaultEmulation
     return PlayCoverState(
         screen: screen,
@@ -140,7 +202,8 @@ func playCoverState(facts: ShellFacts, screen: PlayScreen, words: L10n = .app) -
             right: words.mouseRight,
             hint: words.mouseHint
         ),
-        touchpad: TouchpadCoverState(eyebrow: words.carriesTouchpad, click: words.click, hint: words.touchpadHint)
+        touchpad: TouchpadCoverState(eyebrow: words.carriesTouchpad, click: words.click, hint: words.touchpadHint),
+        pad: padLayout(window)
     )
 }
 

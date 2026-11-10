@@ -70,6 +70,9 @@ enum NavigationEvent: Equatable {
     case select(Tab)
     /// Push onto the tab on screen.
     case push(Page)
+    /// A tab's list opens one of its pages, alone on the tab's stack: the
+    /// push from a phone's list, the page beside an iPad's.
+    case show(Page, in: Tab)
     /// The page on top leaves: Forget popped the PC's page.
     case pop
     /// A tab's stack moved on its own: the back button, a swipe, a system pop.
@@ -120,6 +123,12 @@ struct NavigationState: Equatable {
     func path(of tab: Tab) -> [Page] {
         paths[tab] ?? []
     }
+
+    /// The page a tab's list opened: beside the list on an iPad, the first
+    /// page pushed on a phone.
+    func opened(in tab: Tab) -> Page? {
+        path(of: tab).first
+    }
 }
 
 struct NavigationStep: Equatable {
@@ -128,14 +137,16 @@ struct NavigationStep: Equatable {
 }
 
 /// The shell's one navigation rule: each tab keeps its own stack, a tap on
-/// the tab on screen unwinds it, a page pushes onto it, setup, play and the
-/// dim cover everything, a cover replacing another ends it, a sheet rises
-/// over the tabs or the setup cover and goes with them, and leaving setup
-/// by any road lands on Controllers.
+/// the tab on screen unwinds it, a page pushes onto it, a list's page
+/// stands alone on it, setup, play and the dim cover everything, a cover
+/// replacing another ends it, a sheet rises over the tabs or the setup
+/// cover and goes with them, and leaving setup by any road lands on
+/// Controllers.
 func reduceNavigation(_ state: NavigationState, _ event: NavigationEvent) -> NavigationStep {
     switch event {
     case let .select(tab): selected(state, tab)
     case let .push(page): pushed(state, page)
+    case let .show(page, tab): shown(state, page, in: tab)
     case .pop: popped(state)
     case let .pathChanged(tab, path): pathMoved(state, tab, path)
     case let .openSetup(entry): setupOpened(state, entry)
@@ -177,6 +188,14 @@ private func selected(_ state: NavigationState, _ tab: Tab) -> NavigationStep {
 private func pushed(_ state: NavigationState, _ page: Page) -> NavigationStep {
     var next = state
     next.paths[state.tab] = state.path(of: state.tab) + [page]
+    return NavigationStep(state: next, effects: [])
+}
+
+/// A list's page stands alone on its tab: a second row replaces the first
+/// rather than stacking on it, and takes what was pushed over it along.
+private func shown(_ state: NavigationState, _ page: Page, in tab: Tab) -> NavigationStep {
+    var next = state
+    next.paths[tab] = [page]
     return NavigationStep(state: next, effects: [])
 }
 

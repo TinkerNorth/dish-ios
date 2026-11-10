@@ -4,25 +4,38 @@
 import SwiftUI
 
 /// One controller: its glyph, name, destination line and battery. A row
-/// with a page opens it; a pad Dish cannot read has none and no chevron.
-/// The on-screen controller also has Open, which raises its gamepad.
+/// with a page opens it, pushed with a chevron from a stack, selected beside
+/// a split's list; a pad Dish cannot read has none. The on-screen
+/// controller also has Open, which raises its gamepad.
 struct ControllerRow: View {
     let state: ControllerRowState
+    var layout = TabLayout.stack
     let open: @MainActor (Page) -> Void
     let play: @MainActor () -> Void
 
     var body: some View {
-        HStack(spacing: DishSpace.s6) {
-            if let page = state.page {
+        switch rowOpening(state.page, layout: layout) {
+        case let .push(page):
+            line {
                 Button {
                     open(page)
                 } label: {
                     ControllerRowContent(state: state, disclosure: true)
                 }
                 .buttonStyle(.borderless)
-            } else {
-                ControllerRowContent(state: state, disclosure: false)
             }
+        case let .select(page):
+            line { ControllerRowContent(state: state, disclosure: false) }
+                .tag(page)
+        case .inert:
+            line { ControllerRowContent(state: state, disclosure: false) }
+        }
+    }
+
+    /// The row's content, then the on-screen controller's Open.
+    private func line(@ViewBuilder _ content: () -> some View) -> some View {
+        HStack(spacing: DishSpace.s6) {
+            content()
             if let title = state.open {
                 Button(title, action: play)
                     .buttonStyle(.borderedProminent)

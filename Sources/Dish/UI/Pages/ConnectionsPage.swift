@@ -18,23 +18,29 @@ struct ConnectionsActions {
 
 /// The Connections tab (D1, D3): paired PCs, the ones found on the network,
 /// Moonlight hosts; or, with Local Network off, the way to turn it on. It
-/// looks for PCs as it opens.
+/// looks for PCs as it opens. A paired PC's page is pushed on a phone and
+/// shown beside the list on an iPad.
 struct ConnectionsPage: View {
     @Environment(AppModel.self) private var model
     @Environment(NavigationStore.self) private var navigation
     @Environment(\.settingsURL) private var settingsURL
+    @Environment(\.windowFacts) private var window
 
     var body: some View {
+        let layout = tabLayout(.connections, width: window.width)
         ConnectionsPageBody(
             state: connectionsPageState(facts: model.shellFacts, settingsURL: settingsURL),
+            layout: layout,
+            selection: listSelection(navigation.listSelection(of: .connections), layout: layout),
             actions: ConnectionsActions(open: open, act: act, add: addByAddress)
         )
         .onAppear { model.pageAppeared(.connections) }
         .onDisappear { model.pageDisappeared(.connections) }
     }
 
+    /// A paired row's page, alone on the tab.
     private func open(_ page: Page) {
-        navigation.send(.push(page))
+        navigation.send(.show(page, in: .connections))
     }
 
     private func act(_ action: ConnectionRowAction) {
@@ -49,9 +55,13 @@ struct ConnectionsPage: View {
     }
 }
 
-/// The page over its state, so a preview can draw every content state.
+/// The page over its state, so a preview can draw every content state. On
+/// an iPad the list selects the PC shown beside it.
 struct ConnectionsPageBody: View {
     let state: ConnectionsPageState
+    var layout = TabLayout.stack
+    /// The page beside the list; nil while the list is a stack's.
+    var selection: Binding<Page?>?
     let actions: ConnectionsActions
 
     var body: some View {
@@ -70,7 +80,7 @@ struct ConnectionsPageBody: View {
         switch state.content {
         case let .denied(denied): NetworkDeniedView(state: denied)
         case let .empty(title, body): ContentUnavailableView(title, systemImage: satelliteSymbol, description: Text(body))
-        case let .list(list): ConnectionsList(state: list, actions: actions)
+        case let .list(list): ConnectionsList(state: list, layout: layout, selection: selection, actions: actions)
         }
     }
 }
@@ -78,13 +88,15 @@ struct ConnectionsPageBody: View {
 /// PAIRED, FOUND ON, Moonlight hosts and the footnote.
 private struct ConnectionsList: View {
     let state: ConnectionsListState
+    let layout: TabLayout
+    let selection: Binding<Page?>?
     let actions: ConnectionsActions
 
     var body: some View {
-        List {
+        List(selection: selection) {
             if let paired = state.paired {
                 Section {
-                    ForEach(paired.rows) { ConnectionRow(state: $0, open: actions.open, act: actions.act) }
+                    ForEach(paired.rows) { ConnectionRow(state: $0, layout: layout, open: actions.open, act: actions.act) }
                 } header: {
                     SectionEyebrow(title: paired.title, color: DishTheme.muted)
                 }
@@ -92,7 +104,7 @@ private struct ConnectionsList: View {
             }
             if let found = state.found {
                 Section {
-                    ForEach(found.rows) { ConnectionRow(state: $0, open: actions.open, act: actions.act) }
+                    ForEach(found.rows) { ConnectionRow(state: $0, layout: layout, open: actions.open, act: actions.act) }
                 } header: {
                     FoundHeader(state: found)
                 }

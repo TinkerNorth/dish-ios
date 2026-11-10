@@ -4,24 +4,37 @@
 import SwiftUI
 
 /// One PC: its glyph, its name in mono, and its state under a dot. A paired
-/// row opens its PC's page; a row with a button pairs or connects.
+/// row opens its PC's page, pushed with a chevron from a stack, selected
+/// beside a split's list; a row with a button pairs or connects.
 struct ConnectionRow: View {
     let state: ConnectionRowState
+    var layout = TabLayout.stack
     let open: @MainActor (Page) -> Void
     let act: @MainActor (ConnectionRowAction) -> Void
 
     var body: some View {
-        HStack(spacing: DishSpace.s6) {
-            if let page = state.page {
+        switch rowOpening(state.page, layout: layout) {
+        case let .push(page):
+            line {
                 Button {
                     open(page)
                 } label: {
                     ConnectionRowContent(state: state, disclosure: true)
                 }
                 .buttonStyle(.borderless)
-            } else {
-                ConnectionRowContent(state: state, disclosure: false)
             }
+        case let .select(page):
+            line { ConnectionRowContent(state: state, disclosure: false) }
+                .tag(page)
+        case .inert:
+            line { ConnectionRowContent(state: state, disclosure: false) }
+        }
+    }
+
+    /// The row's content, then its Pair or Connect.
+    private func line(@ViewBuilder _ content: () -> some View) -> some View {
+        HStack(spacing: DishSpace.s6) {
+            content()
             if let button = state.button {
                 Button(button.title) { act(button.action) }
                     .buttonStyle(.bordered)

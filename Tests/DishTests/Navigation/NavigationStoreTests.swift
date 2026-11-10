@@ -166,6 +166,29 @@ final class NavigationStoreTests: XCTestCase {
         XCTAssertNil(store.state.sheet)
     }
 
+    func testASplitListsSelectionShowsItsPageAndClearingItClosesTheDetail() throws {
+        let store = try store(completedOnboarding())
+        let selection = store.listSelection(of: .controllers)
+        XCTAssertNil(selection.wrappedValue)
+        selection.wrappedValue = .controller(id: "a")
+        selection.wrappedValue = .controller(id: "b")
+        XCTAssertEqual(store.state.path(of: .controllers), [.controller(id: "b")], "a second row replaces the first")
+        XCTAssertEqual(selection.wrappedValue, .controller(id: "b"))
+        selection.wrappedValue = nil
+        XCTAssertEqual(store.state.path(of: .controllers), [])
+    }
+
+    func testTheDetailColumnHoldsWhatIsPushedOverThePageItsListOpened() throws {
+        let store = try store(completedOnboarding())
+        store.send(.show(.controller(id: "a"), in: .controllers))
+        let detail = store.detailPath(of: .controllers)
+        XCTAssertEqual(detail.wrappedValue, [])
+        store.send(.push(.support))
+        XCTAssertEqual(detail.wrappedValue, [.support])
+        detail.wrappedValue = []
+        XCTAssertEqual(store.state.path(of: .controllers), [.controller(id: "a")], "a pop in the detail stops at the opened page")
+    }
+
     func testTheSheetBindingIgnoresARedundantNil() throws {
         let pairing = PairingLog()
         let store = try store(completedOnboarding(), pairing: pairing)

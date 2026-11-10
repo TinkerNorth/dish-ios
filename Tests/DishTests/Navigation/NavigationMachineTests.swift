@@ -188,15 +188,6 @@ final class NavigationMachineTests: XCTestCase {
         XCTAssertEqual(step.effects, [.startPlay(.mouse), .endPlay])
     }
 
-    func testPlayIsLandscapeAndEveryOtherScreenPortrait() {
-        for screen in PlayScreen.allCases {
-            XCTAssertEqual(screenOrientation(for: .play(screen)), .landscape)
-        }
-        for cover in [Cover.setup(.firstRun), .dim, nil] {
-            XCTAssertEqual(screenOrientation(for: cover), .portrait)
-        }
-    }
-
     func testAControllerRowPushesItsPageOntoControllers() {
         let step = after(.select(.controllers), .push(.controller(id: "pad")))
         XCTAssertEqual(step.state.path(of: .controllers), [.controller(id: "pad")])
@@ -209,6 +200,38 @@ final class NavigationMachineTests: XCTestCase {
         XCTAssertEqual(popped.state.path(of: .connections), [])
         XCTAssertEqual(popped.effects, [])
         XCTAssertEqual(after(.pop).state, NavigationState(), "nothing to pop")
+    }
+
+    // MARK: - A list's pages, on a phone's stack and beside an iPad's list
+
+    func testAListShowsItsPageAloneSoASecondRowReplacesTheFirst() {
+        let step = after(.show(.controller(id: "a"), in: .controllers), .show(.controller(id: "b"), in: .controllers))
+        XCTAssertEqual(step.state.path(of: .controllers), [.controller(id: "b")], "beside the list, one page at a time")
+        XCTAssertEqual(step.effects, [])
+    }
+
+    func testShowingFromAPhonesListIsThePushFromItsRoot() {
+        let shown = after(.select(.connections), .show(.pcDetail(id: "den"), in: .connections))
+        let pushed = after(.select(.connections), .push(.pcDetail(id: "den")))
+        XCTAssertEqual(shown.state, pushed.state)
+    }
+
+    func testShowingDropsWhatWasPushedOverThePageItReplaces() {
+        let step = after(.show(.controller(id: "a"), in: .controllers), .push(.support), .show(.controller(id: "b"), in: .controllers))
+        XCTAssertEqual(step.state.path(of: .controllers), [.controller(id: "b")])
+    }
+
+    func testShowingNamesItsOwnTabAndLeavesTheOthers() {
+        let step = after(.select(.settings), .push(.help), .show(.pcDetail(id: "den"), in: .connections))
+        XCTAssertEqual(step.state.path(of: .connections), [.pcDetail(id: "den")])
+        XCTAssertEqual(step.state.path(of: .settings), [.help])
+        XCTAssertEqual(step.state.tab, .settings, "the list on screen is the tab on screen; showing selects nothing")
+    }
+
+    func testTheOpenedPageIsTheFirstOfItsTabsStack() {
+        let state = after(.show(.controller(id: "a"), in: .controllers), .push(.support)).state
+        XCTAssertEqual(state.opened(in: .controllers), .controller(id: "a"))
+        XCTAssertNil(state.opened(in: .connections))
     }
 
     // MARK: - Sheets

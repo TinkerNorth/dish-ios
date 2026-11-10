@@ -12,11 +12,13 @@ say, how it looks, is a `#Preview` per state.
 ## The shell
 
 [`ShellView`](../Sources/Dish/UI/Shell/ShellView.swift) is the scene's one
-content: a `TabView` of three `SwiftUI.Tab`s, each its own `NavigationStack`,
-with the session accessory under the tab bar and the covers over all of it.
-There is one window and no second scene. The tab bar, the toolbars and the
-glass are iOS 26's own and are not restyled. iPhone only, portrait only but
-for the play cover, which is landscape only.
+content: a `TabView` of three `SwiftUI.Tab`s in the `sidebarAdaptable` style,
+each its own `NavigationStack`, with the session accessory under the tab bar
+and the covers over all of it. There is one window and no second scene. The
+tab bar, the toolbars, the sidebar and the glass are iOS 26's own and are not
+restyled. On an iPhone every screen is portrait but the play cover, which is
+landscape; on an iPad every screen, the play cover included, follows the
+device ("On an iPad" below).
 
 Navigation is data.
 [`NavigationMachine.swift`](../Sources/Dish/Navigation/NavigationMachine.swift)
@@ -30,6 +32,7 @@ environment value and send it events; a view holds no `NavigationPath` or
 |---|---|
 | `select(Tab)` | Switch the tab. A tap on the tab already on screen **pops it to its root**, as iOS does. |
 | `push(Page)` | Push a page onto the tab on screen. |
+| `show(Page, in: Tab)` | A tab's list opens one of its pages, alone on that tab's stack: on a phone the push from the list, on an iPad the page beside it, so a second row replaces the first rather than stacking on it. Controllers' rows and heart, and Connections' paired rows, send it. |
 | `pop` | The page on top leaves: Forget pops the PC's page before the PC goes. |
 | `pathChanged(Tab, [Page])` | A stack moved on its own (the back button, a swipe, a system pop): the state follows it. |
 | `openSheet(Sheet)` | Raise a sheet over the tabs or the setup cover; refused over play and the dim. `pair(serverId:)` also starts the pairing (effect `beginPairing(serverId:)`). |
@@ -61,6 +64,54 @@ Setup & help), **Open source licenses** (`Page.licenses`, from Settings ›
 About), **Support Dish** (`Page.support`, from the heart on the
 Controllers toolbar and from Settings › About) and **Diagnostics**
 (`Page.diagnostics`, from Settings › Setup & help). `NavigationCoverageTests` keeps the map whole.
+
+### On an iPad
+
+The app runs on the iPhone and the iPad (`TARGETED_DEVICE_FAMILY` 1,2). The
+iPad shows the same shell, laid out from two facts the scene reads once and
+hands down, never read in a view (V13):
+
+- **The device**, `DeviceIdiom`, read by `DishScene` from
+  `UIDevice.current.userInterfaceIdiom` through `deviceIdiom(_:)`, for the
+  orientation lock alone. `screenOrientation(for:idiom:)` keeps an iPhone
+  upright but for play, and lets an iPad turn every way on every screen:
+  iPadOS 26 turns the window of an app that shares the screen with the
+  device, whatever the app's mask says, and refuses it a programmatic turn
+  (`UISceneErrorDomain` 101). `UIRequiresFullScreen`, deprecated in iPadOS
+  26, would only letterbox a landscape window on an upright screen, so it is
+  not used.
+- **The window**, `WindowFacts` (`\.windowFacts`): SwiftUI's size class
+  across and down, and whether the window is on its side, read by
+  `WindowReader` (`Sources/Dish/Scene/WindowReader.swift`), the modifier the
+  scene puts at the window's root.
+
+What changes with them:
+
+- **The tabs** are `sidebarAdaptable`: on an iPad they are a bar along the
+  top that opens into a sidebar of the three tabs ("Toggle sidebar"); on an
+  iPhone, the tab bar. The session accessory stays, along the bottom.
+- **Controllers and Connections** split on a regular width
+  (`tabLayout(_:width:)`): a `NavigationSplitView` in the balanced style,
+  the tab's page as the list, and beside it the page the list opened, in a
+  `NavigationStack` of its own for what that page pushes. The list selects
+  (`List(selection:)` over `navigation.listSelection(of:)`, the first page of
+  the tab's path); a selected row sends `show`, and the column's own pops
+  stop at the opened page (`navigation.detailPath(of:)`). A row is selected
+  rather than pushed and draws no chevron (`rowOpening(_:layout:)`); its
+  Open, Pair and Connect buttons stay buttons. Before anything is opened
+  the column invites a pick ("Pick a controller", "Pick a PC"), or stays
+  blank while the list has nothing to open (`tabDetailState`). Settings, and
+  every tab on a compact width (an iPad's narrow windows), keep their stack.
+- **The setup cover** stands in a readable column `DishSize.setupColumn`
+  wide on a regular width (`setupCoverState(facts:width:)`).
+- **The play cover** fills the window on its side, the gamepad at the iPad's
+  measures (`PadMetrics.regular`) where both size classes are regular; an
+  iPhone Pro Max on its side is regular across but compact down and keeps
+  the phone's. Upright, the gamepad keeps its landscape arrangement at the
+  phone's measures in a band `DishSize.padUprightHeight` tall along the
+  bottom, where the hands hold the iPad (`padLayout(_:)`). The touchpad and
+  the mouse fill the window either way.
+- **The sheets** are iPadOS's form sheets; the dim fills the screen.
 
 ### The session accessory
 
@@ -98,9 +149,10 @@ the `Cover` case and `NavigationCoverageTests` requires a
   `openPlay(screen)` raises it and starts the screen on the on-screen
   controller (effect `startPlay`); `closePlay`, Stop gamepad and a system
   dismissal lower it and release what it held (effect `endPlay`). A cover
-  replacing another ends it. The scene locks the window to landscape while
-  it is up (`screenOrientation(for:)`, the `OrientationLock` app delegate)
-  and to portrait otherwise. It is dark, hides the status bar and the
+  replacing another ends it. On an iPhone the scene locks the window to
+  landscape while it is up (`screenOrientation(for:idiom:)`, the
+  `OrientationLock` app delegate) and to portrait otherwise; an iPad's
+  window follows the device ("On an iPad"). It is dark, hides the status bar and the
   system's overlays and defers the system's edge gestures. The gamepad, the
   touchpad and the mouse are drawn from `playCoverState`; each control is a
   kit component tracking its own finger (`PadButtons`, `PadSticks`,
@@ -163,7 +215,11 @@ sheet its draft and whether the model refused it.
 give, so no view reads UIKit or a bundle), sets `.preferredColorScheme` from
 `shellFacts.preferences.appearance` through `colorScheme(for:)`, and sets
 `UIApplication.shared.isIdleTimerDisabled` from `idleTimerDisabled(facts:)`
-(a session is up and Keep screen on is set) in an `onChange`.
+(a session is up and Keep screen on is set) in an `onChange`. It reads the
+device's idiom once, gives the `OrientationLock` its first answer for that
+device before UIKit asks (`follow(_:)`), turns the window as the cover
+changes, and puts `WindowReader` at the window's root, the one reader of the
+window's size classes and shape, which hands them down as `windowFacts`.
 
 ## Pages
 
@@ -215,7 +271,7 @@ Today's pages and their mappers:
 | `DeviceNamePage` | `DeviceNamePageState` | `deviceNamePageState(preferences:words:)` | A text field whose draft is the page's own `@State`, committed with `setDeviceName`. |
 | `PairSheet` | `PairSheetState` (`card(PairCardState)` or `ended`) | `pairSheetState(pairing:serverId:deviceName:typed:words:)` | "The sheets" above: the cells, the request with its code, the outcomes and Rename this iPhone. |
 | `AddByAddressSheet` | `AddByAddressSheetState` | `addByAddressSheetState(draft:rejected:connecting:lastEvent:words:)` | "The sheets" above: the field, the default port, Connect with its spinner, the refusal or the failure. |
-| the shell | `[TabItemState]`, `SessionBarState?` | `tabItems(facts:words:)`, `sessionBarState(_:words:)` | The tab titles, symbols and the Connections badge; the accessory's two shapes. |
+| the shell | `[TabItemState]`, `SessionBarState?`, `TabLayout`, `RowOpening`, `TabDetailState` | `tabItems(facts:words:)`, `sessionBarState(_:words:)`, `tabLayout(_:width:)`, `rowOpening(_:layout:)`, `listSelection(_:layout:)`, `tabDetailState(_:opened:facts:words:)` | The tab titles, symbols and the Connections badge; the accessory's two shapes; on an iPad, which tabs split, what a row does in each layout, and the column beside a split's list. |
 
 ### The setup cover
 
@@ -253,7 +309,7 @@ by its mapper. Every setter a page reaches is an intent: Settings' are in
 [`ViewPurityTests`](../Tests/ArchitectureTests/ViewPurityTests.swift) holds
 every file under `Sources/Dish` that declares a `View` to these rules, line
 by line (a whole-line comment is not code), exactly as the test implements
-them:
+them; V13 holds every file under `Sources/Dish` but the scene's own:
 
 | # | Rule | Caught by | Where |
 |---|---|---|---|
@@ -269,6 +325,7 @@ them:
 | V10 | No token picked | a ternary between `DishTheme` / `DishFont` tokens or `Color.clear` | pages |
 | V11 | No boolean rules | `&&`, `\|\|` | pages |
 | V12 | No fallback words | `??`, `.isEmpty ?` | pages |
+| V13 | No window traits | `@Environment(\.horizontalSizeClass)`, `@Environment(\.verticalSizeClass)`, `userInterfaceIdiom` | every file under `Sources/Dish` but the scene and its seams (`DishScene.swift`, `Scene/`, `ShellEnvironment.swift`); a page takes `windowFacts` from the environment and hands it to its mapper |
 
 "Pages" are every view but the components, which own their states (K2): the
 kit and `Theme.swift`. A choice a page would have made is a mapper's: a colour
@@ -276,8 +333,9 @@ is a function returning the token (`destinationDot`, `connectionDot`), an
 enablement rule a flag in the state (`ReviewStepState.motionEnabled`), a
 fallback word the state's string (`deviceNameText`, which words "iPhone" when
 the stored name is empty). `DishScene.swift` is the scene, not a view, and the sweep checks it
-declares none; the environment keys it fills are in
-`UI/Shell/ShellEnvironment.swift`, which declares no view either.
+declares none; its seams under `Scene/` (the orientation lock, the window's
+reader, a modifier) declare none either, and the environment keys it fills
+are in `UI/Shell/ShellEnvironment.swift`, which declares no view.
 
 [`NavigationCoverageTests`](../Tests/ArchitectureTests/NavigationCoverageTests.swift)
 keeps the map whole: every `Tab` and `Page` case has its title worded in
@@ -311,13 +369,19 @@ the typing), and the play screens' controls:
 `PadStickControl`, `TriggerRail`, `DirectionPad`, `MovePad`, `ScrollStrip`,
 `TwoFingerSurface` and `PlayPill`, each reporting its own finger in its own
 units (a held flag, an offset in radii, a position across the surface) for
-the page to turn into the reducer's event. `SectionEyebrow` and `StatusDot` live
+the page to turn into the reducer's event. `PadStickControl`, `FaceButton`,
+`DirectionPad` and `TriggerRail` take their measures as values (a stick's
+base and thumb, a face's diameter, an arm's side, a rail's breadth), which
+the gamepad hands them from `PadMetrics`: the phone's, or an iPad's on its
+side. `SectionEyebrow` and `StatusDot` live
 in `Theme.swift` and follow the same rules. The setup chrome's own pieces are
 in `UI/Setup/SetupKit.swift` and are host views, not kit: they are built from
 a step's state and may use the environment's `openURL`.
 
 ## Keyboard
 
-Not applicable: iPhone only. VoiceOver labels are part of the views (the
-Dim and Play buttons name themselves, the glyph tiles hide from VoiceOver, the
-dim is an accessibility button), and every row text is a Dynamic Type style.
+No shortcuts of Dish's own. On an iPad with a keyboard the system's own
+focus moves through the sidebar and a split's list, which selects with it
+like a tap. VoiceOver labels are part of the views (the Dim and Play buttons
+name themselves, the glyph tiles hide from VoiceOver, the dim is an
+accessibility button), and every row text is a Dynamic Type style.

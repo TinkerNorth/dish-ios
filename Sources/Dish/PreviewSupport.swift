@@ -5,6 +5,14 @@ import DishCore
 import DishEngine
 import Foundation
 
+/// The windows the previews are drawn in, as the scene's reader would see
+/// them: a preview names the device it stands for, whatever the canvas is.
+enum PreviewWindow {
+    static let phoneOnItsSide = WindowFacts(width: .compact, height: .compact, shape: .landscape)
+    static let iPadOnItsSide = WindowFacts(width: .regular, height: .regular, shape: .landscape)
+    static let iPadUpright = WindowFacts(width: .regular, height: .regular, shape: .portrait)
+}
+
 /// What the setup previews are drawn over: the boards' pads and PCs, and a
 /// model walked to a step. Previews only; the app builds its own in the scene.
 @MainActor
@@ -43,6 +51,14 @@ enum PreviewSetup {
     /// A navigation whose setup hooks do nothing.
     static func navigation() -> NavigationStore {
         let onboarding = OnboardingPreferenceStore(defaults: UserDefaults())
+        return NavigationStore(onboarding: onboarding, startSetup: ignoreEntry, endSetup: ignoreEnd)
+    }
+
+    /// A navigation on the tabs, the welcome seen, so a shell preview opens
+    /// on Controllers.
+    static func tabsNavigation() -> NavigationStore {
+        let onboarding = OnboardingPreferenceStore(defaults: defaults)
+        onboarding.markWelcomeComplete()
         return NavigationStore(onboarding: onboarding, startSetup: ignoreEntry, endSetup: ignoreEnd)
     }
 

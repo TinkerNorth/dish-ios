@@ -35,6 +35,10 @@ import XCTest
 ///   tokens or `Color.clear`. Pages.
 /// - V11 no boolean rules: `&&`, `||`. Pages.
 /// - V12 no fallback words: `??`, `.isEmpty ?`. Pages.
+/// - V13 no window traits: `@Environment(\.horizontalSizeClass)`,
+///   `@Environment(\.verticalSizeClass)`, `userInterfaceIdiom`. Every file
+///   under `Sources/Dish` but the scene and its seams, which read them once
+///   and hand them down as `windowFacts` and the device's idiom.
 ///
 /// "Pages" are every view but the components, which own their states: the
 /// kit and the theme.
@@ -80,10 +84,14 @@ final class ViewPurityTests: XCTestCase {
     ]
 
     /// The scene and its seams are not views: they are where the host's
-    /// singletons are allowed to live.
+    /// singletons and the window's traits are allowed to be read.
     private static let notViews = [
-        "Sources/Dish/DishScene.swift", "Sources/Dish/Scene/Orientation.swift", "Sources/Dish/UI/Shell/ShellEnvironment.swift"
+        "Sources/Dish/DishScene.swift", "Sources/Dish/Scene/", "Sources/Dish/UI/Shell/ShellEnvironment.swift"
     ]
+
+    /// V13: what the window is (its size classes, the device) is read by the
+    /// scene alone; a page lays out from the facts it hands down.
+    private static let windowTraits = #"@Environment\(\s*\\\.(horizontalSizeClass|verticalSizeClass)\b|userInterfaceIdiom"#
 
     /// Components own their states and may pick a token by their own flag.
     private static let components = ["Sources/Dish/UI/Kit/", "Sources/Dish/UI/Theme.swift"]
@@ -139,6 +147,16 @@ final class ViewPurityTests: XCTestCase {
         let files = try viewFiles
         for rule in Self.rules {
             XCTAssertEqual(try offenders(of: rule, in: files), [], "\(rule.name): see CONTRIBUTING, Touching the UI")
+        }
+    }
+
+    func testOnlyTheSceneReadsTheWindowsTraits() throws {
+        let regex = try NSRegularExpression(pattern: Self.windowTraits)
+        let files = RepoFiles.swiftFiles(under: "Sources/Dish").filter { !Self.isNotAView($0) }
+        XCTAssertGreaterThan(files.count, 20, "the sweep must see the whole UI library")
+        for file in files {
+            let offenders = try RepoFiles.offendingLines(in: file) { Self.isCode($0) && Self.matches(regex, $0) }
+            XCTAssertEqual(offenders, [], "V13: \(file) reads the window's traits; take `windowFacts` from the environment")
         }
     }
 

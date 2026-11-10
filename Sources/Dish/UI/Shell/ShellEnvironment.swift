@@ -20,6 +20,11 @@ private struct ThirdPartyNoticeKey: EnvironmentKey {
     static let defaultValue: String? = nil
 }
 
+/// The window as the scene's reader saw it; an upright iPhone's until then.
+private struct WindowFactsKey: EnvironmentKey {
+    static let defaultValue = WindowFacts.phone
+}
+
 extension EnvironmentValues {
     var settingsURL: URL? {
         get { self[SettingsURLKey.self] }
@@ -34,5 +39,10 @@ extension EnvironmentValues {
     var thirdPartyNotice: String? {
         get { self[ThirdPartyNoticeKey.self] }
         set { self[ThirdPartyNoticeKey.self] = newValue }
+    }
+
+    var windowFacts: WindowFacts {
+        get { self[WindowFactsKey.self] }
+        set { self[WindowFactsKey.self] = newValue }
     }
 }

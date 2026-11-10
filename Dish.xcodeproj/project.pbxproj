@@ -9,8 +9,10 @@
 /* Begin PBXBuildFile section */
 		0DCB5DEA6411F3AC3ACBA358 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = ADAF4525ED27761494F19178 /* Assets.xcassets */; };
 		1B4DAB36CCAE75CFD88E16FF /* Dish in Frameworks */ = {isa = PBXBuildFile; productRef = A8F8E0CB192277B0567C6467 /* Dish */; };
+		8031E12A935A8787B3071B97 /* ShellUI.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2BBB5E16C969D53A9B7BBA5 /* ShellUI.swift */; };
 		BC266BCB654471AE0B9BAA0F /* DishApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C8916C2FE2E8337B08D0229 /* DishApp.swift */; };
 		C582B843305BB0AC6C486FA3 /* SetupFlowUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D89D88147D0B5DAEE26521B /* SetupFlowUITests.swift */; };
+		D9D95FEB1F8E59C09389AE42 /* IPadUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F46376963D77A9C96D41437 /* IPadUITests.swift */; };
 		EE07D14D29A9A3C09C1FC610 /* ConnectionsUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C7D8EAF12CE98C14C694464 /* ConnectionsUITests.swift */; };
 /* End PBXBuildFile section */
 
@@ -28,8 +30,10 @@
 		1C7D8EAF12CE98C14C694464 /* ConnectionsUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectionsUITests.swift; sourceTree = "<group>"; };
 		2785A047BC47F0C88A67176A /* dish-ios */ = {isa = PBXFileReference; lastKnownFileType = folder; name = "dish-ios"; path = .; sourceTree = SOURCE_ROOT; };
 		2852772D9CB3C8CF766600CC /* DishApp.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = DishApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		2F46376963D77A9C96D41437 /* IPadUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IPadUITests.swift; sourceTree = "<group>"; };
 		3D89D88147D0B5DAEE26521B /* SetupFlowUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetupFlowUITests.swift; sourceTree = "<group>"; };
 		6C8916C2FE2E8337B08D0229 /* DishApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DishApp.swift; sourceTree = "<group>"; };
+		A2BBB5E16C969D53A9B7BBA5 /* ShellUI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShellUI.swift; sourceTree = "<group>"; };
 		AB984DAE071C22BF828A6112 /* Dish.storekit */ = {isa = PBXFileReference; path = Dish.storekit; sourceTree = "<group>"; };
 		ADAF4525ED27761494F19178 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		ED58ABFDF5C0E2AE25948649 /* DishUITests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = DishUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -87,7 +91,9 @@
 			isa = PBXGroup;
 			children = (
 				1C7D8EAF12CE98C14C694464 /* ConnectionsUITests.swift */,
+				2F46376963D77A9C96D41437 /* IPadUITests.swift */,
 				3D89D88147D0B5DAEE26521B /* SetupFlowUITests.swift */,
+				A2BBB5E16C969D53A9B7BBA5 /* ShellUI.swift */,
 			);
 			path = UITests;
 			sourceTree = "<group>";
@@ -215,7 +221,9 @@
 			buildActionMask = 2147483647;
 			files = (
 				EE07D14D29A9A3C09C1FC610 /* ConnectionsUITests.swift in Sources */,
+				D9D95FEB1F8E59C09389AE42 /* IPadUITests.swift in Sources */,
 				C582B843305BB0AC6C486FA3 /* SetupFlowUITests.swift in Sources */,
+				8031E12A935A8787B3071B97 /* ShellUI.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -249,7 +257,7 @@
 				PRODUCT_NAME = Dish;
 				SDKROOT = iphoneos;
 				SUPPORTS_MACCATALYST = NO;
-				TARGETED_DEVICE_FAMILY = 1;
+				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Debug;
 		};
@@ -437,7 +445,7 @@
 				PRODUCT_NAME = Dish;
 				SDKROOT = iphoneos;
 				SUPPORTS_MACCATALYST = NO;
-				TARGETED_DEVICE_FAMILY = 1;
+				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Release;
 		};
