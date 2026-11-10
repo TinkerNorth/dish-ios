@@ -29,6 +29,15 @@ to. The rows answer a long press and a swipe, Siri and Shortcuts can open the
 play screens, dim and connect, and TipKit points at what a new person might
 miss. `Tests/PARITY.md` lists everything not built.
 
+### Fixed
+
+- **The scene builds its objects once.** SwiftUI calls the scene's
+  initializer again on its own (at launch and on a scene phase change) and
+  keeps only the first build's state; each extra call used to build a whole
+  model, which reached for the remembered PCs, and a navigation store, then
+  threw them away. The scene now holds its root in `OnFirstUse`, which makes
+  it the first time the kept build reads it, so a process makes one.
+
 ### Added
 
 - **The iPad.** Dish runs on the iPad as well as the iPhone, turning every
