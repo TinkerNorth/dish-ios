@@ -19,11 +19,14 @@ package struct SlotIndex: Hashable, ExpressibleByIntegerLiteral {
 }
 
 /// Where a pad's reports go. Called on the pad's handler queue; must not
-/// block, allocate or hop. The satellite's client conforms to it.
+/// block, allocate or hop. The satellite's client conforms to it. The feed
+/// stamps what the wire carries beside a sample: a motion sample's delta
+/// from the last one let through, and a touch's publish instant, since
+/// GameController surfaces no per-event timestamp.
 package protocol PadSink: Sendable {
     func send(_ report: GamepadReport, slot: SlotIndex)
-    func send(_ motion: MotionSample, slot: SlotIndex)
-    func send(_ touch: TouchpadSample, slot: SlotIndex)
+    func send(_ motion: MotionSample, timestampDeltaUs: UInt32, slot: SlotIndex)
+    func send(_ touch: TouchpadSample, eventTimeMs: UInt32, slot: SlotIndex)
     func send(battery: BatteryReading, slot: SlotIndex)
 }
 

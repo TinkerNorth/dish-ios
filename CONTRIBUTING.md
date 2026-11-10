@@ -76,7 +76,7 @@ module may import.
 |---|---|---|
 | a `(state, event) -> result` decision with no IO, a wire codec or a crypto primitive | `DishCore` (`Sources/DishCore`) | Foundation, CryptoKit |
 | a dataflow primitive | `DishKernel` (`Sources/DishKernel`) | Foundation, Observation |
-| a store, a seam to the platform, a clock, an intent, or the composition root | `DishEngine` (`Sources/DishEngine`) | Foundation, Observation, os, DishCore, DishKernel; never SwiftUI or UIKit |
+| a store, a seam to the platform, a clock, an intent, a socket or a request, or the composition root | `DishEngine` (`Sources/DishEngine`) | Foundation, Observation, os, Synchronization, GameController, CoreHaptics, Network, Security, CryptoKit, Darwin, DishCore, DishKernel; never SwiftUI or UIKit |
 | a view, a theme token, a localized word, a mapper, or the navigation | `Dish` (`Sources/Dish`) | SwiftUI, Observation, Foundation, the three modules; UIKit only in `UI/Theme.swift` and `DishScene.swift`; never Network, GameController, Security, CryptoKit |
 | the `@main` | `App/Sources/DishApp.swift` | SwiftUI, Dish |
 
@@ -297,7 +297,7 @@ Dish clients follow, so a fact ported between clients keeps its shape.
 |---|---|---|
 | `Tests/DishCoreTests` | the setup machine: every step, event and Local Network branch | `DishCore` |
 | `Tests/DishKernelTests` | `StateSource` | `DishKernel` |
-| `Tests/DishEngineTests` | the preference stores, the clock against a `ManualTicker`, the setup intents, the Local Network seam, the binding record, the page lifecycle; `TestDefaults` makes a fresh `UserDefaults` per test | `@testable import DishEngine` |
+| `Tests/DishEngineTests` | the preference stores, the clock against a `ManualTicker`, the controller bridge, the setup, connection, pairing, binding and session intents, the network engine against `FakeSatellite` (an in-process satellite on the loopback with its own crypto), the lock laws, and the env-gated driver against the real satellite; `TestDefaults` makes a fresh `UserDefaults` per test | `@testable import DishEngine` |
 | `Tests/DishTests` | the app layer where it decides: every mapper under `Mappers/`, the navigation machine and the navigation store under `Navigation/` | `@testable import Dish` |
 | `Tests/ArchitectureTests` | the rules of the repository, read from the tree | the file system |
 | `App/UITests` (`DishUITests`, a target of the project, not the package) | the shell's critical path through the real app on the simulator: a first run under the welcome, Skip landing on Controllers, Add a controller opening the first step, Settings reopening the guide; the onboarding flag is set through launch arguments | the running app, by its labels |
@@ -395,9 +395,17 @@ Security gates (also blocking):
 - `codeql.yml`: CodeQL `swift` analysis (security-extended +
   security-and-quality query packs) over the simulator build.
 
+- `ios-ci.yml`'s `lock-stats` job: `LockLawTests` and `TrackedLockTests` in a
+  build with `SWIFT_ACTIVE_COMPILATION_CONDITIONS='$(inherited) LOCK_STATS'`,
+  which counts every tracked lock by thread role.
+- `e2e.yml`: the real satellite, checked out at the release tag dish-mac's
+  lane pins and built with Homebrew's cmake, pkg-config, libsodium and opus,
+  driven over loopback by `scripts/e2e_local.sh` (run it locally the same
+  way; it uses `../satellite`'s built binary when there is one).
+
 If any step fails, the PR is blocked. `scripts/ci-local.sh` runs the build and
-style gates locally in the same order. There is no end-to-end lane and no
-bench yet; both are in `Tests/PARITY.md`.
+style gates locally in the same order; the end-to-end lane is its own script.
+There is no bench yet; `Tests/PARITY.md` says so.
 
 ## Security
 
@@ -501,18 +509,21 @@ build, re-sign it with your own certificate and provisioning profile first).
 The asset names `dish-X.Y.Z-unsigned.ipa`, `dish-ios.ipa` and `SHA256SUMS`
 are a permanent API.
 
-## Touching the hot path (later waves)
+## Touching the hot path
 
-The pad side of the hot path is built (`Sources/DishEngine/Input/`); the
-socket is not. These are the rules it keeps, taken from dish-mac;
-`LockLawTests` enforces the first in a `LOCK_STATS` build
-(`SWIFT_ACTIVE_COMPILATION_CONDITIONS='$(inherited) LOCK_STATS'`).
+The hot path is built: the pad side in `Sources/DishEngine/Input/`, the
+sender in `Sources/DishEngine/Network/SatelliteClient*.swift`. These are the
+rules it keeps, taken from dish-mac; `LockLawTests` enforces the first in a
+`LOCK_STATS` build (`SWIFT_ACTIVE_COMPILATION_CONDITIONS='$(inherited) LOCK_STATS'`),
+over a pad routed to a live client and a loopback satellite answering it.
 The controller's `valueChangedHandler` runs at the controller's polling rate
 and must never block.
 
 - No lock, no allocation and no main-actor hop on the send path: a report
-  leaves `sendto` on the controller's own `handlerQueue`, and the kernel is
-  never on that path.
+  is sealed from a stack buffer under the send gate (a compare-exchange
+  flag, not a lock) and leaves `sendto` on the controller's own
+  `handlerQueue`; CryptoKit's sealed box is the one allocation, and the
+  kernel is never on that path.
 - No `Task`, no `await`, no Observation on the per-event chain; direct calls
   only.
 - What the hot path shares with the main actor travels in atomic words and
@@ -534,20 +545,20 @@ The engine is shaped for it already: its stores publish through
 
 ## Touching the wire protocol
 
-Not yet. The wire protocol is a later wave and `DishCore` holds no codec today.
-The macOS, Android, Windows and Linux clients all talk to the same `satellite`
-server and must produce byte-identical traffic. The contract is specified in
-ONE place, `satellite/docs/contract.md`; this repo's
-[`docs/contract.md`](docs/contract.md) will map each concept to the Swift file
+The macOS, Android, Windows, Linux and iOS clients all talk to the same
+`satellite` server and must produce byte-identical traffic. The contract is
+specified in ONE place, `satellite/docs/contract.md`; this repo's
+[`docs/contract.md`](docs/contract.md) maps each concept to the Swift file
 implementing it. Never restate contract facts in code comments; link them.
 
-Ground rules for the wave that adds it:
+Ground rules:
 
 - All protocol logic that can be pure lives in `DishCore`, pinned by the
   cross-repo interop vectors, the same hex as the satellite and the sibling
   clients. If a vector test fails, you broke the protocol, not the test.
 - Sockets and REST live in `DishEngine/Network`, behind the same seams the
-  stores use, so the tests replace them.
+  stores use, so the tests replace them; `FakeSatellite` drives them in
+  process and `scripts/e2e_local.sh` against the real binary.
 - Any change here is `[wire-coordinated]` in `CHANGELOG.md` and lands with
   `dish-android`, `dish-mac`, `dish-linux`, `dish-windows` and `satellite` in
   the same release cycle, vectors updated in lockstep on every end.

@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 // Copyright (C) 2026 Dish contributors.
 
+import DishCore
 import DishEngine
 import SwiftUI
 
@@ -117,9 +118,11 @@ func connectionRow(_ connection: ConnectionFact, now: Date, words: L10n = .app) 
     )
 }
 
+/// The Bluetooth rung of the fleet's ladder is Android's own gamepad
+/// layer; no PC on iOS is one, so it draws as the client's own wire.
 func connectionSymbol(_ kind: ConnectionKind) -> String {
     switch kind {
-    case .satellite: satelliteSymbol
+    case .satellite, .bluetooth: satelliteSymbol
     case .moonlight: "desktopcomputer"
     }
 }

@@ -79,16 +79,18 @@ package final class PadFeed: Sendable {
     /// from the last emitted sample so a stream of drops never pushes the
     /// deadline forward.
     package func publishMotion(_ sample: MotionSample, nowNs: UInt64 = uptimeNs()) {
-        guard admitMotion(nowNs: nowNs) else { return }
+        guard let deltaUs = admitMotion(nowNs: nowNs) else { return }
         record.write(motion: sample)
         guard let route = currentRoute(), route.flags.motion else { return }
-        route.sink.send(sample, slot: route.slot)
+        route.sink.send(sample, timestampDeltaUs: deltaUs, slot: route.slot)
     }
 
-    package func publishTouchpad(_ sample: TouchpadSample) {
+    /// Stamped with the publish instant: the framework surfaces no
+    /// per-event timestamp.
+    package func publishTouchpad(_ sample: TouchpadSample, nowNs: UInt64 = uptimeNs()) {
         record.write(touch: sample)
         guard let route = currentRoute(), route.flags.touchpad else { return }
-        route.sink.send(sample, slot: route.slot)
+        route.sink.send(sample, eventTimeMs: UInt32(truncatingIfNeeded: nowNs / 1_000_000), slot: route.slot)
     }
 
     /// Advance both fingers' ids for one sample and return the ids to stamp
@@ -105,18 +107,21 @@ package final class PadFeed: Sendable {
         return route.current?.route
     }
 
-    /// Whether this sample is let through: the first one is, and after it
-    /// one per rate-limit window, never one whose clock did not advance.
-    private func admitMotion(nowNs: UInt64) -> Bool {
+    /// The microseconds since the last sample let through, or nil for one
+    /// held back: the first one goes with a zero delta, and after it one per
+    /// rate-limit window, never one whose clock did not advance.
+    private func admitMotion(nowNs: UInt64) -> UInt32? {
         let previous = lastMotionNs.loadRelaxed()
         let now = Int64(bitPattern: nowNs)
         guard previous != noMotionYet else {
             lastMotionNs.storeRelaxed(now)
-            return true
+            return 0
         }
-        guard now > previous, UInt64(now - previous) >= GamepadInputProcessor.motionMinIntervalNs else { return false }
+        guard now > previous else { return nil }
+        let elapsedNs = UInt64(now - previous)
+        guard elapsedNs >= GamepadInputProcessor.motionMinIntervalNs else { return nil }
         lastMotionNs.storeRelaxed(now)
-        return true
+        return UInt32(clamping: elapsedNs / 1000)
     }
 }
 

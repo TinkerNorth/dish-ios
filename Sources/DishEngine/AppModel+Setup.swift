@@ -3,6 +3,7 @@
 
 import DishCore
 import Foundation
+import Observation
 
 /// The setup cover's intents: each applies the setup machine to the walk and
 /// runs what it asks for. The walk's end is the navigation's business; the
@@ -67,12 +68,45 @@ package extension AppModel {
 
     private func run(_ effect: SetupEffect) {
         switch effect {
-        case .askLocalNetwork: localNetwork.ask()
+        case .askLocalNetwork: askLocalNetwork()
         case .scan: localNetwork.scan()
         case let .bind(draft):
-            bindings.record(draft)
             adoptOnScreen(draft)
+            bindDraft(draft)
         case .ended: break
         }
+    }
+
+    /// The first browse makes iOS put its question; the walk moves on when
+    /// the status leaves unknown.
+    private func askLocalNetwork() {
+        localNetwork.ask()
+        awaitLocalNetworkAnswer()
+    }
+
+    private func awaitLocalNetworkAnswer() {
+        withObservationTracking {
+            _ = localNetwork.status
+        } onChange: { [weak self] in
+            Task { @MainActor [weak self] in self?.localNetworkAnswered() }
+        }
+    }
+
+    private func localNetworkAnswered() {
+        switch localNetwork.status {
+        case .unknown: awaitLocalNetworkAnswer()
+        case .allowed: answerLocalNetwork(allowed: true)
+        case .denied: answerLocalNetwork(allowed: false)
+        }
+    }
+
+    /// Review's Bind: a pad iOS sees, bound to a satellite, with the pick and
+    /// the motion switch the walk chose. The other ways in have no pad to
+    /// bind yet, and a Moonlight host or an address has no satellite.
+    private func bindDraft(_ draft: SetupDraft) {
+        guard case let .detectedPad(slotId, _) = draft.input, case let .satellite(connectionId) = draft.destination else { return }
+        setEmulatedType(slotId: slotId, draft.emulateAs)
+        pads.switches.set(.motion, draft.motion, for: slotId)
+        bind(slotId: slotId, to: connectionId)
     }
 }

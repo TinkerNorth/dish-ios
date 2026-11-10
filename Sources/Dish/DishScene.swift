@@ -17,6 +17,7 @@ public struct DishScene: Scene {
     /// THIRD_PARTY.md from the package's resource bundle, for the licenses page.
     private let notice = thirdPartyNotice(in: L10n.app.catalog.bundle)
     private let orientation: OrientationLock
+    @Environment(\.scenePhase) private var scenePhase
 
     /// `orientation` is the app delegate the `@main` app declared.
     public init(orientation: OrientationLock) {
@@ -44,6 +45,18 @@ public struct DishScene: Scene {
                 .preferredColorScheme(colorScheme(for: model.shellFacts.preferences.appearance))
                 .onChange(of: idleTimerDisabled(facts: model.shellFacts), initial: true) { holdScreenOn($1) }
                 .onChange(of: screenOrientation(for: navigation.state.cover), initial: true) { turn(to: $1) }
+                .onChange(of: scenePhase) { scenePhaseChanged($1) }
+        }
+    }
+
+    /// iOS suspends Dish in the background, so its sessions close the
+    /// graceful way there and are reached for again on the way back.
+    private func scenePhaseChanged(_ phase: ScenePhase) {
+        switch phase {
+        case .background: model.enteredBackground()
+        case .active: model.enteredForeground()
+        case .inactive: break
+        @unknown default: break
         }
     }
 

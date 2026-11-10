@@ -14,13 +14,12 @@ private struct PlayModel {
     let recorder = InputRecorder()
     let ticker = ManualTicker()
     let sensor: FakeMotionSensor
-    let bindings = BindingRequests()
 
     init(_ test: XCTestCase, sensor: FakeMotionSensor = FakeMotionSensor()) throws {
         self.sensor = sensor
         model = try AppModel(
             defaults: TestDefaults.fresh(test),
-            bindings: bindings,
+            localNetwork: RecordedLocalNetworkAccess(),
             controllerSource: source,
             motionSensor: sensor,
             resendTicker: ticker

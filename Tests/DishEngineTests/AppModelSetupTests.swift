@@ -31,10 +31,24 @@ private final class AnsweredLocalNetworkAccess: LocalNetworkAccess {
 final class AppModelSetupTests: XCTestCase {
 
     private let pad = InputKind.detectedPad(id: "pad-1", family: .dualSense)
-    private let den = DestinationPick.satellite(id: "den")
+    private let den = DestinationPick.satellite(id: "mid:den")
 
-    private func model(_ access: AnsweredLocalNetworkAccess, bindings: BindingRequests = BindingRequests()) throws -> AppModel {
-        try AppModel(defaults: TestDefaults.fresh(self), localNetwork: access, bindings: bindings)
+    private func model(_ access: AnsweredLocalNetworkAccess) throws -> AppModel {
+        let defaults = try TestDefaults.fresh(self)
+        let source = FakeControllerSource(slots: [ControllerSlot(id: "pad-1", name: "DualSense", family: .dualSense)])
+        return AppModel(
+            onboarding: OnboardingPreferenceStore(defaults: defaults),
+            appearance: AppearancePreferenceStore(defaults: defaults),
+            device: DevicePreferenceStore(defaults: defaults),
+            streaming: StreamingPreferenceStore(defaults: defaults),
+            clock: ClockSource(ticker: ManualTicker(), now: Date.init),
+            localNetwork: access,
+            pads: ControllerStack(source: source, defaults: defaults),
+            network: TestNetwork.stack(defaults: defaults, remembered: [TestNetwork.satellite("den")]),
+            tips: RecordedTipStore(shelf: .success([])),
+            motionSensor: FakeMotionSensor(),
+            resendTicker: ManualTicker()
+        )
     }
 
     private func freshModel() throws -> AppModel {
@@ -62,8 +76,7 @@ final class AppModelSetupTests: XCTestCase {
 
     func testIntentsWithoutAWalkDoNothing() throws {
         let access = AnsweredLocalNetworkAccess(status: .unknown)
-        let bindings = BindingRequests()
-        let model = try model(access, bindings: bindings)
+        let model = try model(access)
         model.setupNext()
         model.setupBack()
         model.setupSkip()
@@ -75,7 +88,7 @@ final class AppModelSetupTests: XCTestCase {
         model.bindSetup()
         XCTAssertNil(model.setup)
         XCTAssertEqual(access.asks + access.scans, 0)
-        XCTAssertEqual(bindings.requests, [])
+        XCTAssertEqual(model.network.hub.bindings, [:])
     }
 
     func testNextAndBackWalkTheSteps() throws {
@@ -132,13 +145,32 @@ final class AppModelSetupTests: XCTestCase {
         XCTAssertEqual(model.setup?.draft, SetupDraft(input: pad, destination: den, emulateAs: .switchPro, motion: false))
     }
 
-    func testBindRecordsTheDraftOnce() throws {
-        let bindings = BindingRequests()
-        let model = try model(AnsweredLocalNetworkAccess(status: .allowed), bindings: bindings)
+    /// Review's Bind binds the pad it names to the satellite it picked,
+    /// with the walk's pick and motion switch, and reaches for the satellite.
+    func testBindBindsTheDetectedPadToThePickedSatelliteWithTheWalksChoices() throws {
+        let model = try model(AnsweredLocalNetworkAccess(status: .allowed))
         model.startSetup(.input)
         model.pickSetupInput(pad)
         model.pickSetupDestination(den)
+        model.setSetupEmulateAs(.switchPro)
+        model.setSetupMotion(false)
         model.bindSetup()
-        XCTAssertEqual(bindings.requests, [SetupDraft(input: pad, destination: den, emulateAs: .dualSense, motion: true)])
+        XCTAssertEqual(model.network.hub.bindings, ["pad-1": "mid:den"])
+        XCTAssertEqual(model.pads.types.typeFor("pad-1"), .switchPro)
+        XCTAssertFalse(model.pads.switches.preferences(for: "pad-1").isOn(.motion))
+        XCTAssertEqual(model.bindingProgress, .running(.binding), "no session yet, so the bind waits for the link")
+        XCTAssertEqual(model.network.wifi.get("mid:den")?.state, .linking, "the satellite is reached for")
+    }
+
+    /// The on-screen pad has no slot until the play wave; a bind without a
+    /// pad iOS sees binds nothing.
+    func testBindWithoutADetectedPadBindsNothing() throws {
+        let model = try model(AnsweredLocalNetworkAccess(status: .allowed))
+        model.startSetup(.input)
+        model.pickSetupInput(.onScreen)
+        model.pickSetupDestination(den)
+        model.bindSetup()
+        XCTAssertEqual(model.network.hub.bindings, [:])
+        XCTAssertEqual(model.bindingProgress, .idle)
     }
 }

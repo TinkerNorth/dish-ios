@@ -28,6 +28,10 @@ final class ImportBoundariesTests: XCTestCase {
                 "CoreHaptics",
                 "StoreKit",
                 "CoreMotion",
+                "Network",
+                "Security",
+                "CryptoKit",
+                "Darwin",
                 "DishCore",
                 "DishKernel"
             ]

@@ -118,3 +118,32 @@ jobs:
           path: build/Build/Products/Release-iphonesimulator/Dish.app
           if-no-files-found: error
           retention-days: 14
+
+  # The LOCK_STATS build counts every tracked lock by thread role; the
+  # lock-law test and the tracked-lock tests run only there. A cold build of
+  # its own, as the merge gate's is.
+  lock-stats:
+    name: Lock statistics build and tests
+    runs-on: macos-26
+    timeout-minutes: 45
+    env:
+      SIM_DESTINATION: platform=iOS Simulator,name=iPhone 17 Pro
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Select Xcode
+        run: sudo xcode-select -s /Applications/Xcode.app
+
+      - name: Run the lock statistics tests
+        run: |
+          set -euo pipefail
+          xcodebuild test \
+            -project Dish.xcodeproj \
+            -scheme DishApp \
+            -destination "$SIM_DESTINATION" \
+            -only-testing:DishEngineTests/LockLawTests \
+            -only-testing:DishEngineTests/TrackedLockTests \
+            CODE_SIGNING_ALLOWED=NO \
+            SWIFT_ACTIVE_COMPILATION_CONDITIONS='$(inherited) LOCK_STATS'
