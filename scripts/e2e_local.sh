@@ -59,7 +59,29 @@ DISH_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
 SATELLITE_REPO="${SATELLITE_REPO:-$(cd "${DISH_ROOT}/.." && pwd)/satellite}"
 SATELLITE_BUILD_DIR="${SATELLITE_BUILD_DIR:-build-e2e}"
 BUILD_TYPE="${BUILD_TYPE:-Release}"
-DESTINATION="${DISH_SIM_DESTINATION:-platform=iOS Simulator,name=iPhone 17 Pro}"
+# The newest available "iPhone 17 Pro" by id. A bare name means OS=latest,
+# which fails on a Mac whose newest runtime has no such device, and a runner
+# whose device set is not created yet lists none at all.
+default_destination() {
+    local udid
+    udid="$(xcrun simctl list devices available -j 2>/dev/null | python3 -I -c '
+import json, re, sys
+found = []
+for runtime, devices in json.load(sys.stdin)["devices"].items():
+    match = re.search(r"SimRuntime\.iOS-(\d+)-(\d+)$", runtime)
+    if match is None:
+        continue
+    version = (int(match.group(1)), int(match.group(2)))
+    found += [(version, d["udid"]) for d in devices if d.get("name") == "iPhone 17 Pro" and d.get("isAvailable")]
+print(max(found)[1] if found else "")
+')"
+    if [ -n "${udid}" ]; then
+        echo "platform=iOS Simulator,id=${udid}"
+    else
+        echo "platform=iOS Simulator,name=iPhone 17 Pro"
+    fi
+}
+DESTINATION="${DISH_SIM_DESTINATION:-$(default_destination)}"
 
 REST_PORT=9443   # compile-time constant in the satellite (DEFAULT_CLIENT_PORT)
 ADMIN_PORT=9877  # loopback admin surface (DEFAULT_WEB_PORT)

@@ -40,8 +40,8 @@ final class IntegrationLiveSatelliteE2ETests: XCTestCase {
     private var udpPort = 9876
     private var adminPort = 9877
 
-    override func setUpWithError() throws {
-        try super.setUpWithError()
+    override func setUp() async throws {
+        try await super.setUp()
         let env = ProcessInfo.processInfo.environment
         try XCTSkipUnless(
             env["DISH_E2E_LIVE"] == "1",
@@ -60,7 +60,7 @@ final class IntegrationLiveSatelliteE2ETests: XCTestCase {
         manager.onEvent = { [weak self] event in self?.events.append(event) }
     }
 
-    override func tearDown() {
+    override func tearDown() async throws {
         if let manager {
             for id in manager.connections.keys {
                 manager.disconnect(id: id)
@@ -69,7 +69,7 @@ final class IntegrationLiveSatelliteE2ETests: XCTestCase {
         if let defaults, let defaultsName {
             defaults.removePersistentDomain(forName: defaultsName)
         }
-        super.tearDown()
+        try await super.tearDown()
     }
 
     private var server: DiscoveredServer {

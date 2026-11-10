@@ -23,8 +23,8 @@ final class WifiConnectionManagerDataPlaneTests: XCTestCase {
     private var store: ConnectionStore!
     private var manager: WifiConnectionManager!
 
-    override func setUpWithError() throws {
-        try super.setUpWithError()
+    override func setUp() async throws {
+        try await super.setUp()
         satellite = try FakeSatellite()
         ports = try satellite.start()
         try satellite.requireHTTPSTransport()
@@ -38,13 +38,13 @@ final class WifiConnectionManagerDataPlaneTests: XCTestCase {
         store.setSharedKey(keyHex, for: server.id)
     }
 
-    override func tearDown() {
+    override func tearDown() async throws {
         for id in manager.connections.keys {
             manager.disconnect(id: id)
         }
         satellite.stop()
         defaults.removePersistentDomain(forName: defaultsName)
-        super.tearDown()
+        try await super.tearDown()
     }
 
     private var server: DiscoveredServer {

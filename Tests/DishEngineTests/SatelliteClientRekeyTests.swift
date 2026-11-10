@@ -94,9 +94,9 @@ final class SatelliteClientRekeyTests: XCTestCase {
 
     // MARK: - Concurrent draws
 
-    private static let drawsPerThread = 4000
-    private static let threads = 4
-    private static let generations = 200
+    private nonisolated static let drawsPerThread = 4000
+    private nonisolated static let threads = 4
+    private nonisolated static let generations = 200
 
     /// Four threads draw send material as fast as they can.
     private func drawConcurrently(_ client: SatelliteClient) -> (DispatchGroup, Locked<[(UInt32, UInt64)]>) {

@@ -13,8 +13,8 @@ import XCTest
 /// socket refuses is dropped without holding up the next.
 final class SatelliteClientSendGateTests: XCTestCase {
 
-    private static let senders = 4
-    private static let sendsEach = 500
+    private nonisolated static let senders = 4
+    private nonisolated static let sendsEach = 500
 
     func testConcurrentSendersLeaveInCounterOrder() throws {
         let (fd, port) = try bigLoopbackSocket()
@@ -89,21 +89,19 @@ final class SatelliteClientSendGateTests: XCTestCase {
 
     func testTheGateAdmitsOneHolderAtATime() {
         let gate = SendGate()
-        let tally = UnsafeMutablePointer<Int>.allocate(capacity: 1)
-        tally.initialize(to: 0)
-        defer { tally.deallocate() }
+        let tally = GateGuardedCount()
         let group = DispatchGroup()
         for _ in 0 ..< Self.senders {
             group.enter()
             Thread {
                 for _ in 0 ..< 20000 {
-                    gate.hold { tally.pointee += 1 }
+                    gate.hold { tally.value += 1 }
                 }
                 group.leave()
             }.start()
         }
         XCTAssertEqual(group.wait(timeout: .now() + 20), .success)
-        XCTAssertEqual(tally.pointee, Self.senders * 20000)
+        XCTAssertEqual(tally.value, Self.senders * 20000)
         XCTAssertFalse(gate.isTaken)
     }
 
@@ -140,4 +138,10 @@ final class SatelliteClientSendGateTests: XCTestCase {
         }
         return datagrams
     }
+}
+
+/// A count the gate alone guards. The box tells the compiler so; an atomic
+/// would hide a broken gate, this shows it as a wrong count.
+private final class GateGuardedCount: @unchecked Sendable {
+    var value = 0
 }

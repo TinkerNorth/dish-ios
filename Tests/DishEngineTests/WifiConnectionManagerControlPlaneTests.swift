@@ -22,8 +22,8 @@ final class WifiConnectionManagerControlPlaneTests: XCTestCase {
     private var manager: WifiConnectionManager!
     private var events: [ConnectionEvent] = []
 
-    override func setUpWithError() throws {
-        try super.setUpWithError()
+    override func setUp() async throws {
+        try await super.setUp()
         satellite = try FakeSatellite()
         ports = try satellite.start()
         try satellite.requireHTTPSTransport()
@@ -36,13 +36,13 @@ final class WifiConnectionManagerControlPlaneTests: XCTestCase {
         manager.onEvent = { [weak self] event in self?.events.append(event) }
     }
 
-    override func tearDown() {
+    override func tearDown() async throws {
         for id in manager.connections.keys {
             manager.disconnect(id: id)
         }
         satellite.stop()
         defaults.removePersistentDomain(forName: defaultsName)
-        super.tearDown()
+        try await super.tearDown()
     }
 
     /// The satellite as discovery would present it — machineId included, so

@@ -21,8 +21,8 @@ final class ConnectionHubTests: XCTestCase {
     private var wifi: WifiConnectionManager!
     private var hub: ConnectionHub!
 
-    override func setUp() {
-        super.setUp()
+    override func setUp() async throws {
+        try await super.setUp()
         defaultsName = "dish.test.\(UUID().uuidString)"
         defaults = UserDefaults(suiteName: defaultsName)
         store = ConnectionStore(defaults: defaults, keyStore: InMemoryKeyStore(), pins: CertPins(file: nil))
@@ -30,9 +30,9 @@ final class ConnectionHubTests: XCTestCase {
         hub = ConnectionHub(wifi: wifi)
     }
 
-    override func tearDown() {
+    override func tearDown() async throws {
         defaults.removePersistentDomain(forName: defaultsName)
-        super.tearDown()
+        try await super.tearDown()
     }
 
     /// The store remembers the satellite and the manager's mirror follows,
