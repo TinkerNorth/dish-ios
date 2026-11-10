@@ -6,12 +6,13 @@ import SwiftUI
 /// One controller: its glyph, name, destination line and battery. A row
 /// with a page opens it, pushed with a chevron from a stack, selected beside
 /// a split's list; a pad Dish cannot read has none. The on-screen
-/// controller also has Open, which raises its gamepad.
+/// controller also has Open, which raises its gamepad. A long press and a
+/// swipe offer the row's actions.
 struct ControllerRow: View {
     let state: ControllerRowState
     var layout = TabLayout.stack
     let open: @MainActor (Page) -> Void
-    let play: @MainActor () -> Void
+    let act: @MainActor (ControllerRowAction) -> Void
 
     var body: some View {
         switch rowOpening(state.page, layout: layout) {
@@ -43,6 +44,11 @@ struct ControllerRow: View {
                     .font(DishFont.headline)
             }
         }
+        .modifier(RowActions(state: state.actions, perform: act))
+    }
+
+    private func play() {
+        act(.open)
     }
 }
 
@@ -106,10 +112,11 @@ struct ControllersInvitation: View {
 }
 
 /// Add a controller: a full-width capsule on the dim surface, the accent
-/// label with a plus, and the hint under it.
+/// label with a plus, the hint under it, and TipKit's hint beside it.
 struct AddControllerButton: View {
     let title: String
     let hint: String
+    let tipKitHint: HintState
     let action: () -> Void
 
     var body: some View {
@@ -124,6 +131,7 @@ struct AddControllerButton: View {
                     .contentShape(Capsule())
             }
             .buttonStyle(.plain)
+            .hint(tipKitHint)
             Text(hint).font(DishFont.detail).foregroundStyle(DishTheme.muted)
         }
     }

@@ -108,12 +108,7 @@ private struct PcSections: View {
                     .foregroundStyle(DishTheme.primary)
             }
             Button(state.forget.button, role: .destructive, action: askForget)
-                .confirmationDialog(state.forget.title, isPresented: $forgetAsked, titleVisibility: .visible) {
-                    Button(state.forget.confirm, role: .destructive, action: actions.forget)
-                    Button(state.forget.cancel, role: .cancel) {}
-                } message: {
-                    Text(state.forget.message)
-                }
+                .modifier(ForgetDialog(state: state.forget, isPresented: $forgetAsked, forget: actions.forget))
         }
         .listRowBackground(DishTheme.surface)
     }

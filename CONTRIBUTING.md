@@ -84,6 +84,9 @@ module may import.
 | a store, a seam to the platform, a clock, an intent, a socket or a request, or the composition root | `DishEngine` (`Sources/DishEngine`) | Foundation, Observation, os, Synchronization, GameController, CoreHaptics, Network, Security, CryptoKit, Darwin, DishCore, DishKernel; never SwiftUI or UIKit |
 | a view, a theme token, a localized word, a mapper, or the navigation | `Dish` (`Sources/Dish`) | SwiftUI, Observation, Foundation, the three modules; UIKit only in `UI/Theme.swift`, `DishScene.swift` and `Scene/Orientation.swift`; never Network, GameController, Security, CryptoKit |
 | the `@main` | `App/Sources/DishApp.swift` | SwiftUI, Dish |
+| a view, a theme token, a localized word, a mapper, or the navigation | `Dish` (`Sources/Dish`) | SwiftUI, Observation, Foundation, the three modules; UIKit only in `UI/Theme.swift` and `DishScene.swift`; TipKit only in the kit's `HintTip.swift` and `Scene/TipKitTips.swift`; never Network, GameController, Security, CryptoKit |
+| an App Intent (it is a navigation event) | `Sources/Dish/Intents/`, `public` so the app target can name it; its App Shortcut in `App/Sources/DishShortcuts.swift` | AppIntents, besides the `Dish` imports |
+| the `@main`, and the App Shortcuts provider | `App/Sources/DishApp.swift`, `App/Sources/DishShortcuts.swift` | SwiftUI, AppIntents, Dish |
 
 Within the engine, pick the primitive that matches what the thing does:
 
@@ -178,6 +181,17 @@ not read English. Copy rules from the design: no emoji, no exclamation marks,
 no em dashes, and the fleet's terms spelled as the design spells them
 (Controllers, Connections, Settings, Bind, Unbind, Emulate as, Satellite,
 Moonlight host, Reconnect, Forget This PC).
+
+The App Intents' words are the one exception to the funnel. Siri, Spotlight
+and the Shortcuts app read them from the app bundle's own tables, never from
+the package's catalog, and App Intents extracts them at build time from
+literals, so they are not `L10n` properties: an intent's title, description,
+parameter and summary, the PC's type name and each App Shortcut's short
+title are keys of `App/Resources/Localizable.xcstrings`, and each App
+Shortcut's phrase (which names the app as `${applicationName}`) a key of
+`App/Resources/AppShortcuts.xcstrings`. `AppIntentsLocalizationTests` holds
+both catalogs to the funnel's rules: every literal a key, every key used,
+all five translations marked translated, placeholders intact.
 
 ## License headers
 
@@ -308,12 +322,14 @@ Dish clients follow, so a fact ported between clients keeps its shape.
 | `Tests/DishTests` | the app layer where it decides: every mapper under `Mappers/` (an iPad's states included), the navigation machine, the navigation store and the orientation per device under `Navigation/`, the scene's facts (the idiom, the lock's answer, the window's size classes and shape) under `Scene/` | `@testable import Dish` |
 | `Tests/ArchitectureTests` | the rules of the repository, read from the tree | the file system |
 | `App/UITests` (`DishUITests`, a target of the project, not the package) | the shell's critical path through the real app on the simulator, an iPhone's and again an iPad's: a first run under the welcome, Skip landing on Controllers, Add a controller opening the first step, Settings reopening the guide, Add a PC by address; on an iPad, the sidebar's three tabs and the play cover on the iPad's side and upright (`IPadUITests`, skipped on an iPhone). The onboarding flag is set through launch arguments, and `ShellUI` finds a tab wherever the device draws it | the running app, by its labels |
+| `Tests/DishTests` | the app layer where it decides: every mapper under `Mappers/`, the navigation machine and the navigation store under `Navigation/`, the App Intents' events and their router under `Intents/` | `@testable import Dish` |
+| `App/UITests` (`DishUITests`, a target of the project, not the package) | the shell's critical path through the real app on the simulator: a first run under the welcome, Skip landing on Controllers, Add a controller opening the first step, Settings reopening the guide, Add a PC by address, a swipe on a paired PC's row revealing Forget This PC, and a pull on the empty Connections page; the onboarding flag, TipKit's switch (`-tips_hidden YES`) and a remembered PC (`wifi_list`) are set through launch arguments | the running app, by its labels |
 
 `Tests/ArchitectureTests` is where knowledge written twice is checked:
 
 | Test class | Rule |
 |---|---|
-| `ImportBoundariesTests` | each layer imports only its allowlist; the engine never imports SwiftUI or UIKit; the UI layer does no IO; only the scene and the theme import UIKit; a kit component imports only SwiftUI and Foundation and reads no model |
+| `ImportBoundariesTests` | each layer imports only its allowlist; the engine never imports SwiftUI or UIKit; the UI layer does no IO; only the scene and the theme import UIKit; AppIntents only in `Intents/`, the scene and the app target, TipKit only in the kit's hint and the scene's switch; a kit component imports only SwiftUI and Foundation (and TipKit for the hint) and reads no model |
 | `PackageGraphTests` | core and kernel depend on nothing, the engine on both, the UI library on all three; no third-party package; every target treats warnings as errors; Swift 6 mode, iOS 26, tools-version 6.2; the scheme lists every test target |
 | `LicenseHeaderTests` | the two-line SPDX header on every Swift file and on the manifest |
 | `NoSuppressionsTests` | no lint suppression, no deferred-work comment, no mutable static, no host singleton outside the scene, no unchecked concurrency |
@@ -322,6 +338,7 @@ Dish clients follow, so a fact ported between clients keeps its shape.
 | `WorkflowPinTests` | every `uses:` is a 40-character commit SHA (the SLSA generator's release tag is the one exception) |
 | `VersionConsistencyTests` | `VERSION` is `MAJOR.MINOR.PATCH`, `project.yml` carries it as `MARKETING_VERSION`, the changelog's newest heading names it or is `[Unreleased]`, the Info.plist reads both bundle versions from build settings |
 | `LocalizationTests` | the catalog and the funnel agree, in every language, with placeholders intact; no view holds an English literal |
+| `AppIntentsLocalizationTests` | the App Intents' words and the App Shortcuts' phrases are keys of the app target's two catalogs, every key is used, in every language, with placeholders intact |
 | `ThemeTokenTests` | no raw colour, font size or kit size; `DESIGN.md` lists every token; every token outside the shared palette is drawn |
 | `ViewPurityTests` | rules V1 to V13 of [`docs/UI_CONTRACT.md`](docs/UI_CONTRACT.md) |
 | `DeviceFamilyTests` | the app targets the iPhone and the iPad; the Info.plist turns an iPad all four ways and an iPhone upright or on its side; CI and `ci-local.sh` run the UI tests on the same iPad |

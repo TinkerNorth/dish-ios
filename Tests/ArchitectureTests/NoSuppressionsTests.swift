@@ -6,11 +6,14 @@ import XCTest
 /// The rules that keep a finding fixed at its cause (CONTRIBUTING, "Zero
 /// warnings" and "Shape of the code"): no lint suppressions, no deferred
 /// work left as a comment, no mutable statics, no unchecked concurrency, and
-/// the shared singletons of UIKit and Foundation read only by the scene.
+/// the shared singletons of UIKit, Foundation and App Intents read only by
+/// the scene.
 final class NoSuppressionsTests: XCTestCase {
 
     private static let scene = "Sources/Dish/DishScene.swift"
-    private static let singletons = ["UIApplication.shared", "UIDevice.current", "UserDefaults.standard", "Bundle.main"]
+    private static let singletons = [
+        "UIApplication.shared", "UIDevice.current", "UserDefaults.standard", "Bundle.main", "AppDependencyManager.shared"
+    ]
     private static let unsafeConcurrency = ["nonisolated(unsafe)", "@unchecked Sendable"]
 
     private var allSources: [String] {

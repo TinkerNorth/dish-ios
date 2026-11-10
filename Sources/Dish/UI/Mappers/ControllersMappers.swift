@@ -12,6 +12,14 @@ enum DestinationLine: Equatable {
     case note(String)
 }
 
+/// What a controller row's menu, swipes and Open do.
+enum ControllerRowAction: Hashable {
+    /// The on-screen controller's gamepad.
+    case open
+    case bind(slotId: String, connectionId: String)
+    case unbind(slotId: String)
+}
+
 /// One controller row (A2).
 struct ControllerRowState: Equatable, Identifiable {
     let id: String
@@ -27,6 +35,8 @@ struct ControllerRowState: Equatable, Identifiable {
     let page: Page?
     /// The on-screen controller's Open, which raises its gamepad; nil for a pad.
     let open: String?
+    /// The long-press menu and the swipes.
+    let actions: RowActionsState<ControllerRowAction>
 }
 
 /// What sits above the Add button: the rows, or an invitation.
@@ -42,6 +52,15 @@ struct ToolbarLinkState: Equatable {
     let page: Page
 }
 
+/// The hints TipKit points at on the Controllers tab.
+struct ControllersHints: Equatable {
+    /// The heart's; nil while no controller is listed, so it waits until
+    /// Dish is set up.
+    let support: HintState?
+    /// Add a controller's.
+    let add: HintState
+}
+
 /// The Controllers tab.
 struct ControllersPageState: Equatable {
     let title: String
@@ -50,29 +69,53 @@ struct ControllersPageState: Equatable {
     let addHint: String
     /// The heart on the toolbar: Support Dish.
     let support: ToolbarLinkState
+    let hints: ControllersHints
 }
 
 /// The level at and below which a battery reads in the error colour.
 private let lowBatteryPercent = 15
 
 /// `apply` is the bind in flight or just ended, which speaks on its pad's
-/// row in place of the destination.
-func controllersPageState(controllers: [ControllerFact], apply: ApplyFact? = nil, words: L10n = .app) -> ControllersPageState {
+/// row in place of the destination; `paired` are the PCs a row's Bind to
+/// offers.
+func controllersPageState(
+    controllers: [ControllerFact],
+    apply: ApplyFact? = nil,
+    paired: [ConnectionFact] = [],
+    words: L10n = .app
+) -> ControllersPageState {
     ControllersPageState(
         title: words.controllers,
-        content: controllersContent(controllers, apply: apply, words: words),
+        content: controllersContent(controllers, apply: apply, paired: paired, words: words),
         addTitle: words.addAController,
         addHint: words.addAControllerHint,
-        support: ToolbarLinkState(title: words.supportDish, symbol: heartSymbol, page: .support)
+        support: ToolbarLinkState(title: words.supportDish, symbol: heartSymbol, page: .support),
+        hints: controllersHints(listed: !controllers.isEmpty, words: words)
     )
 }
 
-private func controllersContent(_ controllers: [ControllerFact], apply: ApplyFact?, words: L10n) -> ControllersContent {
-    guard !controllers.isEmpty else { return .empty(invitation: words.noControllersInvitation) }
-    return .list(controllers.map { controllerRow($0, apply: apply, words: words) })
+/// The heart's hint waits until a controller is listed, so a new person
+/// meets Add a controller's first.
+private func controllersHints(listed: Bool, words: L10n) -> ControllersHints {
+    ControllersHints(support: listed ? hintState(.supportDish, words: words) : nil, add: hintState(.addController, words: words))
 }
 
-func controllerRow(_ controller: ControllerFact, apply: ApplyFact? = nil, words: L10n = .app) -> ControllerRowState {
+private func controllersContent(
+    _ controllers: [ControllerFact],
+    apply: ApplyFact?,
+    paired: [ConnectionFact],
+    words: L10n
+) -> ControllersContent {
+    guard !controllers.isEmpty else { return .empty(invitation: words.noControllersInvitation) }
+    return .list(controllers.map { controllerRow($0, apply: apply, paired: paired, words: words) })
+}
+
+func controllerRow(
+    _ controller: ControllerFact,
+    apply: ApplyFact? = nil,
+    paired: [ConnectionFact] = [],
+    words: L10n = .app
+) -> ControllerRowState {
     let line = rowLine(controller, apply: apply, words: words)
     return ControllerRowState(
         id: controller.id,
@@ -83,8 +126,64 @@ func controllerRow(_ controller: ControllerFact, apply: ApplyFact? = nil, words:
         battery: controller.batteryPercent.map(words.batteryPercent),
         batteryColor: batteryColor(controller.batteryPercent),
         page: controller.supported ? .controller(id: controller.id) : nil,
-        open: opensPlay(controller.link) ? words.open : nil
+        open: opensPlay(controller.link) ? words.open : nil,
+        actions: controllerRowActions(controller, paired: paired, words: words)
     )
+}
+
+/// Open for the on-screen controller, also under a swipe from the leading
+/// edge; Unbind for a bound controller, also under a swipe from the
+/// trailing edge, or Bind to with each paired PC for an unbound one. A pad
+/// Dish cannot read offers nothing.
+func controllerRowActions(
+    _ controller: ControllerFact,
+    paired: [ConnectionFact],
+    words: L10n = .app
+) -> RowActionsState<ControllerRowAction> {
+    guard controller.supported else { return .none }
+    let open = opensPlay(controller.link) ? [openItem(words: words)] : []
+    switch controller.destination {
+    case .some: return boundActions(controller.id, open: open, words: words)
+    case nil: return unboundActions(controller.id, open: open, paired: paired, words: words)
+    }
+}
+
+private func openItem(words: L10n) -> RowActionItem<ControllerRowAction> {
+    RowActionItem(action: .open, title: words.open, symbol: RowActionSymbol.open, destructive: false)
+}
+
+private func boundActions(
+    _ slotId: String,
+    open: [RowActionItem<ControllerRowAction>],
+    words: L10n
+) -> RowActionsState<ControllerRowAction> {
+    let unbind = RowActionItem(
+        action: ControllerRowAction.unbind(slotId: slotId),
+        title: words.unbind,
+        symbol: RowActionSymbol.unbind,
+        destructive: true
+    )
+    return RowActionsState(menu: (open + [unbind]).map(RowMenuEntry.item), leading: open, trailing: [unbind])
+}
+
+/// Bind to is a submenu of the paired PCs; with none paired there is
+/// nothing to bind to.
+private func unboundActions(
+    _ slotId: String,
+    open: [RowActionItem<ControllerRowAction>],
+    paired: [ConnectionFact],
+    words: L10n
+) -> RowActionsState<ControllerRowAction> {
+    let choices = paired.map { pc in
+        RowActionItem(
+            action: ControllerRowAction.bind(slotId: slotId, connectionId: pc.id),
+            title: connectionTitle(pc),
+            symbol: connectionSymbol(pc.kind),
+            destructive: false
+        )
+    }
+    let bindTo = choices.isEmpty ? [] : [RowMenuEntry.submenu(title: words.bindTo, symbol: RowActionSymbol.bind, items: choices)]
+    return RowActionsState(menu: open.map(RowMenuEntry.item) + bindTo, leading: open, trailing: [])
 }
 
 /// A row's second line and its dot.

@@ -19,6 +19,35 @@ private enum ControllerFixture {
     }
 }
 
+/// The paired PCs a row's Bind to offers, and the menu and swipe items the
+/// tests expect.
+private enum RowItems {
+    static let living = ConnectionFact(
+        id: "lr",
+        name: "Living Room PC",
+        address: "192.168.1.24",
+        kind: .satellite,
+        state: .online(latencyMs: 4, controllers: 1)
+    )
+    static let nameless = ConnectionFact(id: "office", name: "", address: "192.168.1.31", kind: .satellite, state: .offline(lastSeen: nil))
+    static let open = RowActionItem(action: ControllerRowAction.open, title: "Open", symbol: RowActionSymbol.open, destructive: false)
+    static let unbind = RowActionItem(
+        action: ControllerRowAction.unbind(slotId: "pad"),
+        title: "Unbind",
+        symbol: RowActionSymbol.unbind,
+        destructive: true
+    )
+
+    static func bind(_ connectionId: String, _ name: String) -> RowActionItem<ControllerRowAction> {
+        RowActionItem(
+            action: .bind(slotId: "pad", connectionId: connectionId),
+            title: name,
+            symbol: "antenna.radiowaves.left.and.right",
+            destructive: false
+        )
+    }
+}
+
 /// The Controllers tab (A2, D4).
 final class ControllersMappersTests: XCTestCase {
 
@@ -45,7 +74,8 @@ final class ControllersMappersTests: XCTestCase {
             battery: "84%",
             batteryColor: DishTheme.muted,
             page: .controller(id: "pad"),
-            open: nil
+            open: nil,
+            actions: RowActionsState(menu: [.item(RowItems.unbind)], leading: [], trailing: [RowItems.unbind])
         )
         XCTAssertEqual(state.content, .list([row]))
     }
@@ -128,5 +158,61 @@ final class ControllersMappersTests: XCTestCase {
         let other = row(apply: ApplyFact(slotId: "other", connectionId: "lr", progress: .failed(.rejected)))
         XCTAssertEqual(other?.destination, .note("Connection lost"))
         XCTAssertEqual(row(apply: nil)?.destination, .note("Connection lost"))
+    }
+
+    // MARK: - The long-press menu and the swipes
+
+    func testABoundControllerOffersUnbindInItsMenuAndUnderATrailingSwipe() {
+        let actions = controllerRowActions(ControllerFixture.pad(), paired: [RowItems.living])
+        XCTAssertEqual(actions, RowActionsState(menu: [.item(RowItems.unbind)], leading: [], trailing: [RowItems.unbind]))
+    }
+
+    func testTheOnScreenControllerAlsoOffersOpenUnderALeadingSwipe() {
+        let actions = controllerRowActions(ControllerFixture.pad(name: "", link: .onScreen, battery: nil), paired: [])
+        XCTAssertEqual(
+            actions,
+            RowActionsState(menu: [.item(RowItems.open), .item(RowItems.unbind)], leading: [RowItems.open], trailing: [RowItems.unbind])
+        )
+    }
+
+    /// Bind to is a submenu of the paired PCs, each by its name, or its
+    /// address when it never advertised one; there is nothing to swipe.
+    func testAnUnboundControllerOffersBindToEachPairedPC() {
+        let actions = controllerRowActions(ControllerFixture.pad(destination: nil), paired: [RowItems.living, RowItems.nameless])
+        let bindTo = RowMenuEntry.submenu(
+            title: "Bind to",
+            symbol: RowActionSymbol.bind,
+            items: [RowItems.bind("lr", "Living Room PC"), RowItems.bind("office", "192.168.1.31")]
+        )
+        XCTAssertEqual(actions, RowActionsState(menu: [bindTo], leading: [], trailing: []))
+    }
+
+    func testWithNoPairedPCThereIsNothingToBindTo() {
+        XCTAssertEqual(controllerRowActions(ControllerFixture.pad(destination: nil), paired: []), .none)
+        let onScreen = controllerRowActions(ControllerFixture.pad(name: "", link: .onScreen, battery: nil, destination: nil), paired: [])
+        XCTAssertEqual(onScreen, RowActionsState(menu: [.item(RowItems.open)], leading: [RowItems.open], trailing: []))
+    }
+
+    func testAPadDishCannotReadOffersNothing() {
+        let actions = controllerRowActions(ControllerFixture.pad(destination: nil, supported: false), paired: [RowItems.living])
+        XCTAssertEqual(actions, .none)
+    }
+
+    func testTheRowsOfferThePagesPairedPCs() {
+        let state = controllersPageState(controllers: [ControllerFixture.pad(destination: nil)], paired: [RowItems.living])
+        guard case let .list(rows) = state.content else { return XCTFail("a controller is listed") }
+        let bindTo = RowMenuEntry.submenu(title: "Bind to", symbol: RowActionSymbol.bind, items: [RowItems.bind("lr", "Living Room PC")])
+        XCTAssertEqual(rows.first?.actions.menu, [bindTo])
+    }
+
+    // MARK: - Hints
+
+    /// The heart's hint waits until a controller is listed, so a new
+    /// person meets Add a controller's first.
+    func testTheHeartsHintWaitsUntilAControllerIsListed() {
+        let empty = controllersPageState(controllers: [])
+        XCTAssertEqual(empty.hints, ControllersHints(support: nil, add: hintState(.addController)))
+        let listed = controllersPageState(controllers: [ControllerFixture.pad()])
+        XCTAssertEqual(listed.hints, ControllersHints(support: hintState(.supportDish), add: hintState(.addController)))
     }
 }

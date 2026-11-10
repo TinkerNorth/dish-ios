@@ -54,6 +54,8 @@ struct PauseMenuState: Equatable {
     /// Nil on the touchpad and the mouse, which have none.
     let switches: PauseSwitchesState?
     let stop: String
+    /// TipKit's hint on the pause button: Stop gamepad is the way out.
+    let hint: HintState
 }
 
 /// What a face button shows: a letter, or a PlayStation glyph.
@@ -225,7 +227,8 @@ func pauseMenuState(play: PlayFacts?, screen: PlayScreen, words: L10n = .app) ->
         resume: words.resume,
         screens: PlayScreen.allCases.filter { $0 != screen }.map { pauseScreenItem($0, words: words) },
         switches: pauseSwitches(play: play, screen: screen, words: words),
-        stop: words.stopGamepad
+        stop: words.stopGamepad,
+        hint: hintState(.stopGamepad, words: words)
     )
 }
 

@@ -3,6 +3,7 @@
 
 import DishCore
 import Foundation
+import Observation
 
 /// The Connections tab's facts and intents: the paired and found PCs from
 /// the pool, a scan, a connect, a graceful disconnect, a Forget that
@@ -72,6 +73,25 @@ package extension AppModel {
     /// The person's own scan: it may raise iOS's Local Network question.
     func startScan() {
         localNetwork.scan()
+    }
+
+    /// Pull to refresh on Connections: the person's own scan, and the wait
+    /// until discovery has adopted it, so the spinner stays while it looks.
+    func refreshConnections() async {
+        startScan()
+        while network.wifi.isScanning {
+            await nextScanningChange()
+        }
+    }
+
+    /// Returns once the manager's scanning flag next changes. Observation
+    /// calls before the change lands; the caller reads the flag again.
+    private func nextScanningChange() async {
+        let wifi = network.wifi
+        await withCheckedContinuation { continuation in
+            // The read registers the observation; the loop reads the flag itself.
+            _ = withObservationTracking { wifi.isScanning } onChange: { continuation.resume() }
+        }
     }
 
     /// Connect a paired or found satellite at its freshest known address; a

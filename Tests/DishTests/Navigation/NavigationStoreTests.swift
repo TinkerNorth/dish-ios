@@ -50,6 +50,21 @@ private final class PairingLog {
     }
 }
 
+/// What the store asked of the model's connect and told the hints.
+@MainActor
+private final class ReachLog {
+    private(set) var connected: [String] = []
+    private(set) var learned: [Hint] = []
+
+    func connect(_ id: String) {
+        connected.append(id)
+    }
+
+    func learn(_ hint: Hint) {
+        learned.append(hint)
+    }
+}
+
 @MainActor
 final class NavigationStoreTests: XCTestCase {
 
@@ -194,5 +209,35 @@ final class NavigationStoreTests: XCTestCase {
         let store = try store(completedOnboarding(), pairing: pairing)
         store.tabsSheet.wrappedValue = nil
         XCTAssertEqual(pairing.cancelled, [])
+    }
+
+    private func store(_ onboarding: OnboardingPreferenceStore, reach: ReachLog) -> NavigationStore {
+        NavigationStore(
+            onboarding: onboarding,
+            startSetup: SetupLog().start,
+            endSetup: SetupLog().end,
+            connect: reach.connect,
+            learned: reach.learn
+        )
+    }
+
+    func testConnectingFromAnIntentReachesForThePCThroughTheModel() throws {
+        let reach = ReachLog()
+        let store = try store(completedOnboarding(), reach: reach)
+        store.send(.connectTo(id: "lr"))
+        XCTAssertEqual(reach.connected, ["lr"])
+        XCTAssertEqual(store.state.path(of: .connections), [.pcDetail(id: "lr")])
+    }
+
+    /// TipKit hears each hint the person no longer needs, once, as it happens.
+    func testTheHintsHearWhatThePersonDid() throws {
+        let reach = ReachLog()
+        let store = try store(completedOnboarding(), reach: reach)
+        store.send(.push(.support))
+        store.send(.select(.settings))
+        store.send(.dim)
+        store.send(.wake)
+        store.send(.openSetup(.addController))
+        XCTAssertEqual(reach.learned, [.supportDish, .dim, .addController])
     }
 }

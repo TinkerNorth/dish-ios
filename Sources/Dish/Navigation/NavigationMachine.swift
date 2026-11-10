@@ -96,6 +96,8 @@ enum NavigationEvent: Equatable {
     /// The model's pairing card opened on a satellite, or closed: the pair
     /// sheet follows it.
     case pairingChanged(serverId: String?)
+    /// Siri, Spotlight or Shortcuts asked to connect to a paired PC.
+    case connectTo(id: String)
 }
 
 enum NavigationEffect: Equatable {
@@ -112,6 +114,8 @@ enum NavigationEffect: Equatable {
     case beginPairing(serverId: String)
     /// The model closes its card: no poll and no typed PIN outlive the sheet.
     case cancelPairing(serverId: String)
+    /// The model reaches for the PC.
+    case connect(id: String)
 }
 
 struct NavigationState: Equatable {
@@ -159,6 +163,7 @@ func reduceNavigation(_ state: NavigationState, _ event: NavigationEvent) -> Nav
     case let .openSheet(sheet): sheetOpened(state, sheet)
     case .closeSheet: sheetDropped(state)
     case let .pairingChanged(serverId): pairingChanged(state, serverId)
+    case let .connectTo(id): connectedTo(state, id)
     }
 }
 
@@ -342,4 +347,25 @@ private func pairSheetLowered(_ sheet: Sheet?) -> Sheet? {
     case .pair: nil
     case .addByAddress, nil: sheet
     }
+}
+
+/// An intent's Connect to PC: the model reaches for the PC, and while the
+/// tabs or the dim are on screen the PC's page shows alone on Connections,
+/// the dim waking and a sheet going. Under play or setup nothing moves.
+private func connectedTo(_ state: NavigationState, _ id: String) -> NavigationStep {
+    let reach = NavigationEffect.connect(id: id)
+    switch state.cover {
+    case .setup, .play: return NavigationStep(state: state, effects: [reach])
+    case .dim, nil: return pcPageShown(state, id, then: reach)
+    }
+}
+
+/// The PC's page alone on Connections, over whatever covered the tabs.
+private func pcPageShown(_ state: NavigationState, _ id: String, then reach: NavigationEffect) -> NavigationStep {
+    let lowered = sheetDropped(state)
+    var next = lowered.state
+    next.cover = nil
+    next.tab = .connections
+    next.paths[.connections] = [.pcDetail(id: id)]
+    return NavigationStep(state: next, effects: lowered.effects + [reach])
 }

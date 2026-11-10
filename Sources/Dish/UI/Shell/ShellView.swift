@@ -144,7 +144,7 @@ private struct SessionAccessory: ViewModifier {
     func body(content: Content) -> some View {
         if let state {
             content.tabViewBottomAccessory {
-                SessionBar(state: state, dim: dim, play: play, reconnect: reconnect)
+                SessionBar(state: state, dim: dim, play: play, reconnect: reconnect, dimHint: hintState(.dim))
             }
         } else {
             content

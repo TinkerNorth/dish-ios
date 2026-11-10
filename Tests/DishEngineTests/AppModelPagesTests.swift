@@ -78,4 +78,12 @@ final class AppModelPagesTests: XCTestCase {
         XCTAssertNil(clocked.model.lastConnectionEvent)
         XCTAssertEqual((clocked.model.localNetwork as? RecordedLocalNetworkAccess)?.scans, 0, "the sheet runs no scan")
     }
+
+    /// Pull to refresh is the person's own scan, through the seam; with no
+    /// discovery running behind it there is nothing to wait for.
+    func testPullToRefreshLooksForPCsThroughTheSeam() async throws {
+        let clocked = try ClockedModel(self)
+        await clocked.model.refreshConnections()
+        XCTAssertEqual((clocked.model.localNetwork as? RecordedLocalNetworkAccess)?.scans, 1)
+    }
 }

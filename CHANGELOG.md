@@ -25,7 +25,9 @@ Moonlight hosts, the play screens, Help, Support, Licenses, Diagnostics, the
 pair sheet, the Connections rows and the PC's page are built, on the iPhone and
 the iPad: a Satellite or a Moonlight host is found, paired with from a row, from
 setup or by its address, bound to a pad or the on-screen gamepad, and streamed
-to. `Tests/PARITY.md` lists everything not built.
+to. The rows answer a long press and a swipe, Siri and Shortcuts can open the
+play screens, dim and connect, and TipKit points at what a new person might
+miss. `Tests/PARITY.md` lists everything not built.
 
 ### Added
 
@@ -41,6 +43,22 @@ to. `Tests/PARITY.md` lists everything not built.
   handed down as facts. CI runs the UI tests again on an iPad Pro 11-inch
   (M5), and `scripts/ci-local.sh` does the same.
 
+- **Row actions and pull to refresh.** A long press on a Controllers row
+  offers Open for the on-screen controller, Unbind for a bound controller or
+  Bind to each paired PC for an unbound one; on a Connections row, Connect or
+  Disconnect, Re-pair and Forget This PC for a paired PC and Pair for a found
+  one. A swipe offers the quickest of them and never runs one on its own, and
+  Forget This PC still asks first. Pulling Connections down looks for PCs
+  again, the empty and denied pages included, and lets go once the scan is in.
+- **App Intents.** Open the gamepad, Open the touchpad, Open the mouse, Dim
+  the screen and Connect to a PC, for Siri, Spotlight and the Shortcuts app,
+  each an App Shortcut with its phrase in all six languages. Connect to a PC
+  offers the paired PCs and shows the one picked on its page. The intents
+  donate nothing.
+- **Hints.** TipKit points at the heart once a controller is listed, at Add
+  a controller (pads pair in Settings › Bluetooth), at the pause button's
+  way out of play and at the accessory's Dim, at most one a day, and each
+  goes once the person has done what it points at.
 - **Pairing and connections.** The pair sheet (B5), from Pair on a found or
   revoked row, from Pick your PC, from Re-pair on a PC's page and from a PC
   that asks for a PIN as it is connected to: the satellite's PIN typed into

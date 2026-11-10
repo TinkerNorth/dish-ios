@@ -52,7 +52,12 @@ bundle id `com.tinkernorth.dish.ios`). `App/Sources/DishApp.swift` is the
 `@main`: it declares the one app delegate, `OrientationLock` (SwiftUI takes a
 delegate adaptor only from the `App` itself), and calls
 `DishScene(orientation:)`; the Info.plist, the entitlements and the asset
-catalog (icon, accent, launch background) live under `App/`. The project sits
+catalog (icon, accent, launch background) live under `App/`. So do the App
+Shortcuts (`App/Sources/DishShortcuts.swift`) and the two catalogs the
+system reads the App Intents' words from (`App/Resources/Localizable.xcstrings`
+and `AppShortcuts.xcstrings`): App Intents reads a provider and its words only
+from the app's own target and bundle, and the intents it names are the
+package's (`Sources/Dish/Intents/`). The project sits
 at the repository root because Xcode resolves a local package at the project's
 own directory.
 
@@ -66,9 +71,10 @@ own directory.
 | `Dish` | The SwiftUI library: `DishScene` and `OrientationLock` (the two `public` types), the navigation machine and its store, the shell, the pages, the setup cover and the dim, the kit, the mappers, the theme, the localized words and their catalog | `DishEngine`, `DishCore`, `DishKernel` | Foundation, Observation, SwiftUI, UIKit (only `UI/Theme.swift` and `DishScene.swift`), the three modules |
 | `DishEngine` | Everything that owns state or touches the platform: the preference stores (`Preferences/`), the minute clock (`Clock/`), the Local Network seam and its Bonjour implementation (`LocalNetwork/`), the GameController bridge and the hot path's pad side (`Input/`), the satellite pool, the REST control plane and the UDP data plane (`Network/`), the facts the UI draws (`Models/`) and `AppModel`, the one composition root, with its intents by topic. | `DishCore`, `DishKernel` | Foundation, Observation, os, Synchronization, GameController, CoreHaptics, Network, Security, CryptoKit, Darwin, DishCore, DishKernel; never SwiftUI or UIKit |
 | `Dish` | The SwiftUI library: `DishScene` and `OrientationLock` (the two `public` types), the scene's seams under `Scene/` (the orientation lock, the window's reader), the navigation machine and its store, the shell, the pages, the setup cover and the dim, the kit, the mappers, the theme, the localized words and their catalog | `DishEngine`, `DishCore`, `DishKernel` | Foundation, Observation, SwiftUI, UIKit (only `UI/Theme.swift`, `DishScene.swift` and `Scene/Orientation.swift`), the three modules |
+| `Dish` | The SwiftUI library: `DishScene` and `OrientationLock` (the two `public` types), the navigation machine and its store, the shell, the pages, the setup cover and the dim, the kit, the mappers, the theme, the localized words and their catalog | `DishEngine`, `DishCore`, `DishKernel` | Foundation, Observation, SwiftUI, UIKit (only `UI/Theme.swift` and `DishScene.swift`), AppIntents (only `Intents/` and `DishScene.swift`), TipKit (only the kit's `HintTip.swift` and `Scene/TipKitTips.swift`), the three modules |
 
 `ImportBoundariesTests` fails the build when a file imports outside its row
-(`App/Sources` may import SwiftUI and `Dish` only); `PackageGraphTests` fails it
+(`App/Sources` may import SwiftUI, AppIntents and `Dish` only); `PackageGraphTests` fails it
 when a dependency points the wrong way, when a third-party package appears,
 when a target lets a warning through, or when the scheme in `project.yml` does
 not list every test target.
@@ -82,7 +88,10 @@ pasteboard seam), and `AppModel*.swift` the root and its intents. The engine's U
 `Network/` the satellites and the hub whose rows carry both kinds of PC,
 `Moonlight/` the Moonlight hosts, and `AppModel*.swift` the root and its intents. The engine's UI-facing
 surface is `package`-visible; everything else stays `internal`, and the tests
-reach it with `@testable import`. `public` is `DishScene` alone.
+reach it with `@testable import`. `public` is `DishScene` and its
+`OrientationLock` alone, and the App Intents the app target's App Shortcuts
+name (`OpenGamepadIntent` and the four beside it), which App Intents reads
+from the app's own target.
 
 ## The kernel primitive
 
@@ -210,7 +219,7 @@ What `AppModel` publishes today:
   `setKeepScreenOn`, `setDimAfter`, `setAppearance`), `AppModel+Pages.swift`
   (`pageAppeared`, `pageDisappeared`), `AppModel+Controllers.swift` (the
   switches, the pick, the dead zones), `AppModel+Connections.swift`
-  (`startScan`, `connect`, `disconnect`, `forget`, `addByAddress`),
+  (`startScan`, `refreshConnections`, `connect`, `disconnect`, `forget`, `addByAddress`),
   `AppModel+Pairing.swift` (`beginPairing(serverId:)`, `submitPin`, `newCode`,
   `cancelPairing`), `AppModel+Binding.swift` (`bind(slotId:to:)`,
   `unbind(slotId:)`, `dismissApply`), `AppModel+Session.swift`
@@ -305,6 +314,13 @@ leave guard and the window gone.
   the dim as a wake.
 - On a first run the store raises the setup cover before anything is drawn and
   starts the walk, so the tabs never flash.
+- An App Intent is a navigation event, posted through the `IntentRouter` the
+  scene registers with App Intents: the play screens and the dim are the
+  accessory's own events, and Connect to a PC is `connectTo(id:)`, which shows
+  the PC's page alone on Connections unless play or setup covers the tabs, and
+  hands the model the connect as an effect.
+- After each event the store tells TipKit which hint the person no longer
+  needs (`learnedHint(_:from:to:)`), so the hints are put to rest as data too.
 
 `NavigationCoverageTests` keeps the map whole: every `Tab` and `Page` case has
 its worded title in `ShellMappers.swift`, its `<Name>Page.swift`, its

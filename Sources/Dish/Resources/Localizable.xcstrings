@@ -4425,6 +4425,40 @@
         }
       }
     },
+    "Dim the screen while you play" : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zatamnite ekran dok igrate"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dunkle den Bildschirm beim Spielen ab"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Atenúa la pantalla mientras juegas"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Assombrissez l’écran pendant que vous jouez"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Escureça a tela enquanto joga"
+          }
+        }
+      }
+    },
     "Disconnect" : {
       "localizations" : {
         "bs" : {
@@ -7184,6 +7218,40 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Gorjeta grande"
+          }
+        }
+      }
+    },
+    "Leave through the pause menu" : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Izađite kroz meni pauze"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Verlasse das Spiel über das Pausenmenü"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sal desde el menú de pausa"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Quittez par le menu pause"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Saia pelo menu de pausa"
           }
         }
       }
@@ -12480,6 +12548,40 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Parar o controle"
+          }
+        }
+      }
+    },
+    "Stop gamepad in this menu takes you back to Dish." : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zaustavi gamepad u ovom meniju vraća vas u Dish."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gamepad beenden in diesem Menü bringt dich zurück zu Dish."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Detener el mando, en este menú, te devuelve a Dish."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Arrêter la manette, dans ce menu, vous ramène à Dish."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Parar o controle, neste menu, leva você de volta ao Dish."
           }
         }
       }

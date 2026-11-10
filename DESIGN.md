@@ -230,8 +230,11 @@ Also in `Theme.swift`:
 The kit lives in `Sources/Dish/UI/Kit` and follows the kit rules in
 [docs/UI_CONTRACT.md](docs/UI_CONTRACT.md): `Chip` (BEST, FASTEST, FAST),
 `RowGlyph` (the rounded tile at the head of a row), `SessionBar` (the
-session accessory) and `PinCells` (a PIN's digits in a row of cells, the
-caret's cell outlined in the focus colour).
+session accessory), `PinCells` (a PIN's digits in a row of cells, the
+caret's cell outlined in the focus colour), `RowActions` (a row's long-press
+menu and swipes; a destructive swipe wears `DishTheme.error`, any other
+`DishTheme.primary`), `ForgetDialog` (Forget This PC's question) and
+`HintTip` (a hint as TipKit's own popover, which iOS draws).
 
 Words are not design values but follow the same rule: a view reads them from
 `L10n` ([Sources/Dish/L10n](Sources/Dish/L10n)), never from a literal, and the
