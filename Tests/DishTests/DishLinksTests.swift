@@ -8,7 +8,7 @@ import XCTest
 /// App Store, so no donation site is linked.
 final class DishLinksTests: XCTestCase {
 
-    private let links = [DishLinks.website, DishLinks.source, DishLinks.privacy, DishLinks.satellite]
+    private let links = [DishLinks.website, DishLinks.source, DishLinks.privacy, DishLinks.satellite, DishLinks.sunshine]
 
     func testEveryLinkIsTheFleetsOwnPage() {
         XCTAssertEqual(DishLinks.website?.absoluteString, "https://dish.tinkernorth.com")
@@ -17,8 +17,12 @@ final class DishLinksTests: XCTestCase {
         XCTAssertEqual(DishLinks.satellite?.absoluteString, "https://dish.tinkernorth.com/downloads/satellite")
     }
 
+    func testTheMoonlightHostOnOfferIsSunshinesOwnPage() {
+        XCTAssertEqual(DishLinks.sunshine?.absoluteString, "https://github.com/LizardByte/Sunshine")
+    }
+
     func testEveryLinkIsHTTPS() {
-        XCTAssertEqual(links.compactMap { $0?.scheme }, ["https", "https", "https", "https"])
+        XCTAssertEqual(links.compactMap { $0?.scheme }, ["https", "https", "https", "https", "https"])
     }
 
     func testNoLinkLeadsToADonationSite() {

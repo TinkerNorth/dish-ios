@@ -74,20 +74,22 @@ struct FoundHeader: View {
     }
 }
 
-/// Moonlight hosts: Sunshine, Apollo or Wolf. Not tappable yet.
+/// Moonlight hosts: Sunshine, Apollo or Wolf. A tap pushes their page.
 struct MoonlightHostsRow: View {
     let title: String
     let hint: String
 
     var body: some View {
-        HStack(spacing: DishSpace.s6) {
-            RowGlyph(symbol: connectionSymbol(.moonlight))
-            VStack(alignment: .leading, spacing: DishSpace.s1) {
-                Text(title).font(DishFont.body).foregroundStyle(DishTheme.onSurface)
-                Text(hint).font(DishFont.detail).foregroundStyle(DishTheme.muted)
+        NavigationLink(value: Page.moonlightHosts) {
+            HStack(spacing: DishSpace.s6) {
+                RowGlyph(symbol: connectionSymbol(.moonlight))
+                VStack(alignment: .leading, spacing: DishSpace.s1) {
+                    Text(title).font(DishFont.body).foregroundStyle(DishTheme.onSurface)
+                    Text(hint).font(DishFont.detail).foregroundStyle(DishTheme.muted)
+                }
             }
+            .accessibilityElement(children: .combine)
         }
-        .accessibilityElement(children: .combine)
     }
 }
 

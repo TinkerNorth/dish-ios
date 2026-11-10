@@ -85,3 +85,53 @@ data-plane, approval, hub, model and `Integration*` suites drive it.
   `enteredBackground()` closes every session the graceful way and
   `enteredForeground()` reaches for the remembered satellites again, as
   `DishScene` calls them on the scene phase.
+
+## Moonlight hosts: the other protocol
+
+A Moonlight host (Sunshine, Apollo, Wolf) is not a satellite and speaks
+nothing of the contract above: it speaks GameStream, learned from Wolf's
+documentation and MIT source (`THIRD_PARTY.md`, sections 2b and 2c), and
+Dish uses it for input only, as dish-mac does. The pure half is
+`Sources/DishCore/Moonlight/`, pinned by Wolf's published vectors; the edges
+are `Sources/DishEngine/Moonlight/`. What is not built is in
+[`Tests/PARITY.md`](../Tests/PARITY.md).
+
+| Moonlight concept | dish-ios home |
+|---|---|
+| Ports (HTTP 47989, HTTPS 47984, RTSP 48010, the control, video and audio ports the host names), the input and event types, the button bits, the capabilities and the controller types | `Sources/DishCore/Moonlight/MoonlightProtocol.swift`; `MoonlightProtocolTests` |
+| `/serverinfo`, `/pair`, `/applist`, `/launch`, `/resume`, `/cancel` and their XML replies, whose verdict is the `status_code` in the body, not the status line | `MoonlightUrls.swift`, `MoonlightXml.swift`; `MoonlightUrlsTests`, `MoonlightXmlTests` |
+| The five-phase PIN pairing: the AES key from the salt and the PIN, the challenges and the signed secrets, phase 5 over mutual TLS trusting the certificate phases 1 to 4 proved | `MoonlightPairing.swift`, `MoonlightPairingCrypto.swift` (CommonCrypto's AES-ECB), `MoonlightCertificate.swift`; the manager's `+Pairing`; `MoonlightPairingTests`, `MoonlightPairingCryptoTests`, `MoonlightManagerPairingTests` |
+| The client identity: RSA-2048 and a self-signed `NVIDIA GameStream Client` certificate, minted once in the Keychain, presented on every mutual-TLS connection | `Sources/DishEngine/Moonlight/MoonlightIdentityStore.swift`, `MoonlightAsn1.swift`, `MoonlightHttpTransport.swift`; `MoonlightIdentityStoreTests`, `MoonlightHttpTransportTests` |
+| The host's certificate: pinned on first use under `moonlight:<address>`, replaced by the one a pairing proves, a different one refused inside the handshake | `MoonlightGateway.swift` over `CertPins`; `MoonlightGatewayTests` |
+| RTSP: OPTIONS, DESCRIBE, SETUP audio, video and control, ANNOUNCE and PLAY, one connection per message; the ports, the connect token and the ping payload read back | `MoonlightRtsp.swift`, `MoonlightRtspClient.swift`; `MoonlightRtspTests`, `MoonlightRtspClientTests` |
+| ENet, the client subset the control stream needs: connect, reliable send and receive on one channel, acknowledgements, ping and disconnect | `Sources/DishCore/Moonlight/Enet/`; `EnetClientTests` |
+| The control seal (AES-128-GCM, the IV from the sequence's low byte, the tag before the ciphertext) and the packets (CONTROLLER_MULTI, ARRIVAL, TOUCH, MOTION, BATTERY, the periodic ping, TERMINATION) | `MoonlightControlSeal.swift`, `MoonlightInput.swift`, `MoonlightControlSession.swift`; `MoonlightControlSealTests`, `MoonlightControlPacketTests`, `MoonlightInputTests`, `MoonlightControlSessionTests`, `MoonlightControlSessionLockTests` |
+| The host's events (rumble, trigger rumble, a motion request, the RGB LED, termination) and where they land | `MoonlightEvent.swift`, `MoonlightFeedbackRouter.swift`; `MoonlightEventTests`, `MoonlightFeedbackRouterTests` |
+| The media pings that keep the host's video and audio ports open | `MoonlightMediaPing.swift`, `MoonlightUdp.swift`; `MoonlightMediaPingTests`, `MoonlightUdpTests` |
+| Pad numbers and the active mask, what an arrival declares, and the touch, motion and battery conversions | `MoonlightPadSlots.swift`, `MoonlightPadRules.swift`, `MoonlightPadTable.swift`, `MoonlightTelemetry.swift`; their tests, `MoonlightPadLinkTests` |
+| The session's lifecycle: probe, launch or resume, RTSP, control, streaming, and each refusal | `MoonlightSessionMachine.swift` (`reduceMoonlightSession`, `moonlightConverge`); the manager's `+Session`; `MoonlightSessionMachineTests`, `MoonlightManagerSessionTests` |
+| Discovery: mDNS `_nvstream._tcp`, and a host added by address | `MoonlightDiscovery.swift` over `BonjourScan`; the manager's `startDiscovery` and `addManualHost`; `MoonlightManagerTrustTests` |
+
+The behaviours the hosts require:
+
+- **One session per host**, owned by every binding that points at it: the
+  first pad launches the app, a later one arrives on the live link, the last
+  one leaving a live session hands the app back with `/cancel`. A drop or the
+  host's own ending leaves the app alone, and a disconnect keeps it for the
+  next session to resume.
+- **The PIN is Dish's**: minted for each attempt, shown in the host's row,
+  typed into the host's own page. Cancel, a forget and every refused phase
+  write nothing.
+- **Trust is told over mutual TLS only**: the plaintext `PairStatus` says
+  nothing about this device, and a host that answers under another uniqueid
+  is a host that was replaced.
+- **Forget** cancels a live session's app while the pin still opens the
+  connection, then drops the record, the bindings and the pin. The protocol
+  has no unpair verb, so the host keeps its own record of this device.
+
+Test double: `Tests/DishEngineTests/Moonlight/FakeMoonlightHost.swift` is
+dish-mac's loopback host, ported: plain HTTP and mutual TLS with a PKCS#12
+identity, the five phases answered by a reference host built from the same
+primitives, an RTSP host that hands out its own ports, the media ports, and
+a control port that opens every sealed packet. `IntegrationMoonlightFakeHostTests`
+drives the real manager and sockets against it.

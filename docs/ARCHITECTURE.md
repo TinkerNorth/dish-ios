@@ -60,9 +60,9 @@ own directory.
 
 | Module | Role | Depends on | May import |
 |---|---|---|---|
-| `DishCore` | The pure core: the setup machine (`Setup/`), the protocol constants (`ProtocolConstants.swift`), the wire codecs and the session crypto (`Wire/`) and the policy reducers (`Reducers/`), ported from dish-mac under its names and pinned by the fleet's vectors. | nothing | Foundation, CryptoKit |
+| `DishCore` | The pure core: the setup machine (`Setup/`), the protocol constants (`ProtocolConstants.swift`), the wire codecs and the session crypto (`Wire/`), the policy reducers (`Reducers/`), and under `Moonlight/` the Moonlight host protocol's pure half (the wire formats and the control seal, the PIN pairing, the host's XML replies and the RTSP text, the controller numbers, what a pad's arrival declares, the pad table the hot path reads, the session reducer and the telemetry conversions) with the ENet client the control stream rides on (`Moonlight/Enet/`, a pure state machine with an injected clock), ported from dish-mac under its names and pinned by the fleet's vectors and Wolf's. | nothing | Foundation, CryptoKit, CommonCrypto (the pairing's AES-ECB, which CryptoKit does not offer) |
 | `DishKernel` | The dataflow primitive `StateSource` (below) | nothing | Foundation, Observation |
-| `DishEngine` | Everything that owns state or touches the platform: the preference stores (`Preferences/`), the minute clock (`Clock/`), the Local Network seam and its Bonjour implementation (`LocalNetwork/`), the GameController bridge and the hot path's pad side (`Input/`), the satellite pool, the REST control plane and the UDP data plane (`Network/`), the facts the UI draws (`Models/`) and `AppModel`, the one composition root, with its intents by topic. | `DishCore`, `DishKernel` | Foundation, Observation, os, Synchronization, GameController, CoreHaptics, Network, Security, CryptoKit, Darwin, DishCore, DishKernel; never SwiftUI or UIKit |
+| `DishEngine` | Everything that owns state or touches the platform: the preference stores (`Preferences/`), the minute clock (`Clock/`), the Local Network seam and its Bonjour implementation (`LocalNetwork/`), the GameController bridge and the hot path's pad side (`Input/`), the satellite pool, the REST control plane and the UDP data plane (`Network/`), the Moonlight hosts' edges (`Moonlight/`: the keychain identity, one-connection HTTP with mutual TLS, the pinning gateway, the host store, the RTSP handshake, the UDP control socket and media pinger, the control session that seals input onto the ENet link, the connection that holds a host's pads and live session, the feedback router and the manager that probes, pairs, converges the bindings onto one session per host and forgets), the facts the UI draws (`Models/`) and `AppModel`, the one composition root, with its intents by topic. | `DishCore`, `DishKernel` | Foundation, Observation, os, Synchronization, GameController, CoreHaptics, Network, Security, CryptoKit, Darwin, DishCore, DishKernel; never SwiftUI or UIKit |
 | `Dish` | The SwiftUI library: `DishScene` and `OrientationLock` (the two `public` types), the navigation machine and its store, the shell, the pages, the setup cover and the dim, the kit, the mappers, the theme, the localized words and their catalog | `DishEngine`, `DishCore`, `DishKernel` | Foundation, Observation, SwiftUI, UIKit (only `UI/Theme.swift` and `DishScene.swift`), the three modules |
 
 `ImportBoundariesTests` fails the build when a file imports outside its row
@@ -77,6 +77,8 @@ wall-clock fact, `LocalNetwork/` the permission seam, `Input/` the pads,
 `Network/` the satellites, `Diagnostics/` what the Diagnostics page reads
 (the session facts and counters, the rates, the flight recorder and the
 pasteboard seam), and `AppModel*.swift` the root and its intents. The engine's UI-facing
+`Network/` the satellites and the hub whose rows carry both kinds of PC,
+`Moonlight/` the Moonlight hosts, and `AppModel*.swift` the root and its intents. The engine's UI-facing
 surface is `package`-visible; everything else stays `internal`, and the tests
 reach it with `@testable import`. `public` is `DishScene` alone.
 
@@ -126,6 +128,21 @@ The network engine has these, under dish-mac's names:
 | `SatelliteClient` (`+IO`, `+Streams`, `SendGate`, `ReceiveHandlers`) | gateway, and the hot path's sink | The UDP data plane: one POSIX socket, the session key, the counters, the replay guard, the heartbeat and the receive thread. It is the `PadSink` a bound pad's feed sends to. |
 | `BonjourScan`, `MdnsBrowser`, `LocalNetworkProbe` | gateways | The `_satellite._udp` browse, and what it says about the Local Network permission. |
 
+The Moonlight hosts have these, under dish-mac's names, in `Moonlight/`:
+
+| Object | Kind | What it does |
+|---|---|---|
+| `MoonlightConnectionManager` (`+Pairing`, `+Probe`, `+Session`, `+Memory`, `+Forget`) | coordinator | The hosts: the `_nvstream._tcp` scan and the typed address, the five-phase PIN pairing, the probe that tells paired from trust lost from replaced, one session per host converged from what the bindings ask, the app pick, and forget. `@Observable`; it tells the model what happened through `onEvent` and that its pool or records moved through `onPoolChanged`. |
+| `MoonlightConnection` | the per-host state the manager drives | The session reducer's state, the pads the host carries (`MoonlightPadLink`, the hot path's half) and the live control session with its clock. |
+| `MoonlightHostStore`, `MoonlightIdentityStore` | stores | The remembered hosts, the remembered bindings and the client id in `UserDefaults` under the fleet's keys; the RSA identity and its self-signed certificate in the Keychain, minted once off the main actor. |
+| `MoonlightGateway`, `MoonlightHttpTransport` | gateways | One `NWConnection` per request, mutual TLS with the identity, the host's certificate pinned on first use in `CertPins` and replaced by the one a pairing proves. |
+| `MoonlightRtspClient`, `UdpControlTransport`, `MoonlightMediaPinger`, `MoonlightControlSession` | gateways | The RTSP handshake, the control socket, the pings that keep the media ports open, and the control stream: input sealed under AES-GCM and carried on the ENet client. |
+| `MoonlightFeedbackRouter` | router | A host's rumble and light, folded per motor and gated by the switches, posted to the pad bound to the number it names. |
+
+The manager's seams are protocols too: `MoonlightHostGateway`
+(`ScriptedMoonlightGateway` in the tests), `MoonlightSessionEdges` (the live
+sockets, or `FakeMoonlightEdges`) and the discovery closure.
+
 The seams are protocols with one production implementation each, so a test
 replaces them: `LocalNetworkAccess` (`BonjourLocalNetworkAccess`, the scan;
 `RecordedLocalNetworkAccess` for tests), `Ticker`, `ControllerSource`,
@@ -141,11 +158,16 @@ convenience initializer takes a `UserDefaults` and builds the real set: the four
 preference stores over those defaults, a `ClockSource` over a `TimerTicker`,
 the pads (`ControllerStack` over `GameControllerInput`), the satellite pool
 (`NetworkStack`: the manager over a `ConnectionStore` with its keys in the
-Keychain and its pins in Application Support, and the hub over it) and the
-Bonjour scan as its `LocalNetworkAccess`. The root wires the pool's signals
-to itself once (`wireNetwork`), so a refused slot lets its binding go, a
-client that comes or goes moves the pads' routes, and a satellite that wants
-a PIN opens its pairing card.
+Keychain and its pins in Application Support, the Moonlight manager over its
+host store and the pinning gateway, and the hub over both) and the Bonjour
+scan as its `LocalNetworkAccess`; the Moonlight identity is minted off the
+main actor and handed to the manager and the gateway when it is ready. The
+root wires the pool's signals to itself once (`wireNetwork`), so a refused
+slot lets its binding go, a client that comes or goes moves the pads'
+routes, and a satellite that wants a PIN opens its pairing card; and the
+hosts' once (`wireMoonlight`), so a host's word reaches the page, its PIN
+card follows the pairing, and a pool or records change moves the routes and
+what each host is asked to carry.
 
 `DishScene` is the composition root of the app layer. It makes `AppModel` and
 `NavigationStore` once, as `@State`, hands the store the model's
@@ -169,6 +191,9 @@ What `AppModel` publishes today:
   (the clock) and `setup` (the walk, nil while the cover is down). Beside it,
   for the pages the next wave draws: `openPairing` (the card),
   `bindingProgress` (the apply) and `lastConnectionEvent` (a failure to word).
+  For the Moonlight hosts page, `moonlightFacts`: the hub's rows for the
+  hosts, the scan, the pairings in flight, each session's phase, the apps a
+  probe listed, the pick per host, the PIN a host waits for and its last word.
 - the intents, in extensions by topic: `AppModel+Setup.swift` (`startSetup`,
   `endSetup`, `setupNext`, `setupBack`, `setupSkip`, `pickSetupInput`,
   `answerLocalNetwork`, `pickSetupDestination`, `setSetupEmulateAs`,
@@ -192,6 +217,11 @@ What `AppModel` publishes today:
   `unbind(slotId:)`, `dismissApply`) and `AppModel+Session.swift`
   (`reconnect`, `enteredBackground`, `enteredForeground`). A view calls these
   and nothing else.
+  `AppModel+Moonlight.swift` (`pairMoonlight`, `cancelMoonlightPairing`,
+  `newMoonlightCode`, `addMoonlightHost`, `scanMoonlightHosts`,
+  `leftMoonlightHosts`, `pickMoonlightApp`, `performMoonlight`,
+  `quitMoonlightApp`, `retryMoonlightSessions`, `disconnectMoonlightHost`,
+  `forgetMoonlightHost`). A view calls these and nothing else.
 
 ## Unidirectional flow: the rules
 
@@ -341,6 +371,25 @@ Receive and Feedback threads to no tracked lock and the Heartbeat to the
 latency window's alone, over a pad routed to a live client and a loopback
 satellite answering it. Everything else in the engine is `@MainActor`.
 
+A pad bound to a Moonlight host routes to a `MoonlightPadSink`: the host's
+`MoonlightPadLink` builds the frame under its lock (the pad table, the click's
+replay, the touches, motion and battery) and hands it to the
+`MoonlightControlSession`, which seals it under the next control sequence,
+claimed atomically, before it takes its own lock for the ENet bookkeeping
+alone; the datagram leaves through `UdpControlTransport`, whose send counts
+its datagrams in flight in atomic words. The control socket's queue
+(`ThreadRole.moonlightUdp`) acknowledges the host under the session's lock,
+opens the host's events after it, and posts rumble and light through
+`MoonlightFeedbackRouter` to the pad's feedback, the routes the main actor
+last built read under a lock of their own; the session's clock ticks on a
+`ThreadRole.heartbeat` queue. `LockLawTests` holds that path to its own lists,
+from a run against a loopback host: Input to the link's and the session's
+locks, MoonlightUdp to the session's, the link's (a motion request) and the
+feedback path's three, Heartbeat to the session's; nothing held across a
+blocking call, nothing nested. dish-mac's path also takes its transport's
+lock, which is atomic words here, and its forwarding gate and routing table,
+whose part the router's own routes play here.
+
 These are the rules the bridge and the wire keep, taken from dish-mac:
 
 - Every controller event takes one path and takes no lock on it. A
@@ -399,6 +448,12 @@ list, with where each lands, is [`../Tests/PARITY.md`](../Tests/PARITY.md).
 - **A PC added by address is listed only once paired.** The pool reaches
   for it and its pairing card opens, but the Connections tab's rows are the
   remembered and the heard satellites, so a cancelled pairing leaves no row.
+- **A Moonlight host carries input only.** The session asks the host for no
+  video or audio: the control stream carries the pads, and the media pings
+  only keep the host's ports open, as dish-mac's do.
+- **A Moonlight binding is remembered, not restored.** The bindings are
+  written under the fleet's `moonlight_binding_list`, so Forget names them,
+  but a pad that returns after a restart is not put back on its host.
 - **The Local Network status is the last scan's word.** iOS has no call that
   asks; the simulator does not enforce the permission, so the denied path is
   proved through the browser's documented policy error, not observed
@@ -419,7 +474,11 @@ list, with where each lands, is [`../Tests/PARITY.md`](../Tests/PARITY.md).
   over a `ManualTicker`, the pads over `FakeControllerSource`, and the network
   against `FakeSatellite`, an in-process satellite on the loopback with its
   own crypto; the model's intents run over a scripted LAN and an in-memory
-  key store. `IntegrationLiveSatelliteE2ETests`, gated on `DISH_E2E_LIVE=1`,
+  key store. The Moonlight manager runs over a scripted gateway and session
+  edges, and `IntegrationMoonlightFakeHostTests` drives it over the real
+  sockets against `FakeMoonlightHost`, a loopback host that pairs, answers
+  over mutual TLS with a PKCS#12 identity, hands out its RTSP ports and opens
+  every sealed control packet. `IntegrationLiveSatelliteE2ETests`, gated on `DISH_E2E_LIVE=1`,
   drives the real satellite binary through `scripts/e2e_local.sh` and
   `e2e.yml`.
 - **The rules are tested.** `Tests/ArchitectureTests` reads the tree: import

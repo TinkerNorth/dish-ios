@@ -28,6 +28,8 @@ enum Page: Hashable {
     case support
     /// Settings › Setup & help › Diagnostics.
     case diagnostics
+    /// Connections › Moonlight hosts.
+    case moonlightHosts
 }
 
 /// Where the setup cover opens.

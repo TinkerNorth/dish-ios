@@ -1,0 +1,220 @@
+// SPDX-License-Identifier: LGPL-3.0-or-later
+// Copyright (C) 2026 Dish contributors.
+
+import DishCore
+import DishEngine
+import Foundation
+import SwiftUI
+
+// MARK: - The Moonlight hosts page's rows
+
+/// A row of the Moonlight hosts page: a host the records or the pool know,
+/// or one a scan found that they do not.
+enum MoonlightHostEntry: Equatable {
+    case known(ConnectionSummary)
+    case discovered(MoonlightHost)
+
+    var key: String {
+        switch self {
+        case let .known(summary): summary.id
+        case let .discovered(host): host.id
+        }
+    }
+}
+
+/// Known hosts first, then the discovered ones not already among them.
+func moonlightRows(known: [ConnectionSummary], discovered: [MoonlightHost]) -> [MoonlightHostEntry] {
+    let hosts = known.filter { $0.kind == .moonlight }
+    let knownIds = Set(hosts.map(\.id))
+    return hosts.map(MoonlightHostEntry.known) + discovered.filter { !knownIds.contains($0.id) }.map(MoonlightHostEntry.discovered)
+}
+
+/// A host's display name: its advertised name, or its address when it has none.
+func moonlightHostTitle(_ host: MoonlightHost) -> String {
+    host.name.isEmpty ? host.address : host.name
+}
+
+/// The trust word beside a host, never a liveness light: paired and seen,
+/// paired and out of sight, or not paired (the records hold no pairing, or
+/// the host refused the one they held).
+func moonlightTrustText(_ state: LinkState, words: L10n = .app) -> String {
+    switch moonlightTrust(state) {
+    case .paired: words.paired
+    case .remembered: words.moonlightRemembered
+    case .notPaired: words.moonlightNotPaired
+    }
+}
+
+enum MoonlightTrust: Equatable {
+    case paired
+    case remembered
+    case notPaired
+}
+
+func moonlightTrust(_ state: LinkState) -> MoonlightTrust {
+    switch state {
+    case .ready, .connecting, .connected, .unstable: .paired
+    case .saved: .remembered
+    case .stale: .notPaired
+    }
+}
+
+/// The dot beside the trust word: green while a paired host answers or
+/// streams, amber while a session comes up or falters, muted while the
+/// host is out of sight or not paired. A remembered host is one switched
+/// off, not a fault.
+func moonlightDot(_ state: LinkState) -> Color {
+    switch state {
+    case .ready, .connected: DishTheme.success
+    case .connecting, .unstable: DishTheme.warning
+    case .saved, .stale: DishTheme.muted
+    }
+}
+
+/// How many controllers the host carries; nothing while none is bound.
+func moonlightControllersText(_ summary: ConnectionSummary, words: L10n = .app) -> String? {
+    summary.boundSlotIds.isEmpty ? nil : words.controllerCount(summary.boundSlotIds.count)
+}
+
+// MARK: - A host's actions and status
+
+/// Pairing while trust is missing (again when the records held one), the
+/// session's way out of where it stands, and nothing while the bindings
+/// drive it or a session is coming up.
+func moonlightRowActions(_ summary: ConnectionSummary, phase: MoonlightSessionPhase?) -> [MoonlightRowAction] {
+    switch phase {
+    case .streaming: [.disconnect]
+    case .checkingInfo, .launching, .rtsp, .controlConnecting: []
+    case .failed(.dropped): [.reconnect]
+    case .failed(.hostEnded): [.startSession]
+    case .failed(.appAlreadyRunning), .failed(.resumeFailed): [.quitApp, .retry]
+    case .failed(.launchRejected), .failed(.rtspRejected), .failed(.controlLost), .failed(.noApps), .failed(.appRemoved),
+         .failed(.unreachable): [.retry]
+    case .failed(.trustLost), .failed(.hostReplaced): [.rePair]
+    case .failed(.notPaired): [.pair]
+    case .idle, nil: summary.live == .stale ? [.pair] : []
+    }
+}
+
+func moonlightActionText(_ action: MoonlightRowAction, host: String, words: L10n = .app) -> String {
+    switch action {
+    case .pair: words.moonlightPairNow
+    case .rePair: words.moonlightRePair
+    case .disconnect: words.moonlightDisconnect
+    case .reconnect: words.reconnect
+    case .startSession: words.startASession
+    case .retry: words.moonlightRetry
+    case .quitApp: words.closeTheAppOn(host)
+    }
+}
+
+/// The line under the row: why the session is not up, when the trust word
+/// alone does not say; nil while the word says it all.
+func moonlightStatusLine(_ summary: ConnectionSummary, phase: MoonlightSessionPhase?, words: L10n = .app) -> String? {
+    let host = summary.recordName
+    switch phase {
+    case .failed(.notPaired): return words.notPairedYet
+    case .failed(.trustLost): return words.noLongerRecognises(host)
+    case .failed(.hostReplaced): return words.wasReset(host)
+    case .failed(.unreachable): return words.isNotAnswering(host)
+    case .failed(.dropped): return words.sessionOnHostEnded(host)
+    case .failed(.hostEnded): return words.hostEndedTheSession(host)
+    case .failed(.appAlreadyRunning): return words.anotherDeviceIsUsing(host)
+    case .failed(.resumeFailed): return words.couldNotRejoin(host)
+    case .failed(.launchRejected): return words.refusedTheSessionNoReason(host)
+    case .failed(.rtspRejected), .failed(.controlLost): return words.couldNotFinishTheSession(host)
+    case .failed(.noApps): return words.noAppsOnThisHost
+    case .failed(.appRemoved), .checkingInfo, .launching, .rtsp, .controlConnecting, .streaming: return nil
+    case .idle, nil: return summary.live == .stale ? words.notPairedYet : nil
+    }
+}
+
+// MARK: - What a host's events say
+
+/// How loud a host's word is drawn.
+enum MoonlightNoticeSeverity: Equatable {
+    case info
+    case success
+    case warning
+    case error
+}
+
+/// A host's event as the page's notice: its severity and words, and the
+/// host whose app a tap closes when the way out is to close it.
+struct MoonlightNotice: Equatable {
+    let severity: MoonlightNoticeSeverity
+    let title: String
+    var body: String?
+    var quitHost: MoonlightHost?
+    let key: String
+}
+
+/// The PIN is its row's card, not a notice; every other event is worded here.
+func moonlightNotice(for event: MoonlightConnectionEvent, words: L10n = .app) -> MoonlightNotice? {
+    switch event {
+    case .pairingPinReady:
+        return nil
+    case let .paired(host):
+        return MoonlightNotice(
+            severity: .success,
+            title: words.pairedWithHost(moonlightHostTitle(host)),
+            body: words.pairedBody,
+            key: "moonlight.pair"
+        )
+    case let .pairingFailed(host, reason):
+        return MoonlightNotice(
+            severity: .error,
+            title: words.didNotAcceptThePin(moonlightHostTitle(host)),
+            body: pairingFailureBody(reason, words: words),
+            key: "moonlight.pair"
+        )
+    case let .hostReplaced(host):
+        return hostNotice(.warning, host, words.wasReset(moonlightHostTitle(host)), words.newIdentityBody)
+    case let .appAlreadyRunning(host, _):
+        let name = moonlightHostTitle(host)
+        return hostNotice(.warning, host, words.anotherDeviceIsUsing(name), words.runningAnAppForAnotherDevice(name), quit: true)
+    case let .rejoinRefused(host):
+        let name = moonlightHostTitle(host)
+        return hostNotice(.warning, host, words.couldNotRejoin(name), words.hostWouldNotHandItBack(name), quit: true)
+    case let .launchRefused(host, message):
+        let name = moonlightHostTitle(host)
+        let title = message.isEmpty ? words.refusedTheSessionNoReason(name) : words.refusedTheSession(name, message)
+        return hostNotice(.error, host, title, words.addTheControllerAnyway)
+    case let .setupFailed(host):
+        return hostNotice(.error, host, words.couldNotFinishTheSession(moonlightHostTitle(host)), words.theStreamDidNotComeUp)
+    case let .hostFull(host):
+        let name = moonlightHostTitle(host)
+        return hostNotice(.warning, host, words.hostIsFull(name), words.fourControllersAtMost(name))
+    case let .endedByHost(host):
+        return hostNotice(.info, host, words.hostEndedTheSession(moonlightHostTitle(host)), words.theAppClosedOnTheHost)
+    case let .appCloseRequested(host):
+        return hostNotice(.info, host, words.askedToCloseTheApp(moonlightHostTitle(host)), nil)
+    case let .noHostAnswered(address):
+        return MoonlightNotice(severity: .error, title: words.noMoonlightHostAnsweredAt(address), key: "moonlight.add")
+    case let .noAppsAvailable(host):
+        return hostNotice(.warning, host, words.noAppsAvailableOn(moonlightHostTitle(host)), nil)
+    case let .appRemoved(host, appName):
+        return hostNotice(.warning, host, words.appNoLongerOn(appName, moonlightHostTitle(host)), nil)
+    }
+}
+
+/// Which step gave up, in the host's words when it had any; a wrong PIN or a
+/// forged host reads the same, as neither is this device's to fix differently.
+private func pairingFailureBody(_ reason: MoonlightPairingFailure, words: L10n) -> String {
+    switch reason.kind {
+    case .noIdentity: words.noPairingIdentityYet
+    case .noCertificate, .noChallengeResponse, .noPairingSecret, .hostNotAuthentic, .notConfirmed:
+        reason.hostSaid.isEmpty ? words.checkTheCodeWentIntoTheRightHost : reason.hostSaid
+    }
+}
+
+/// One notice per host: a newer word about the same host replaces the last.
+private func hostNotice(
+    _ severity: MoonlightNoticeSeverity,
+    _ host: MoonlightHost,
+    _ title: String,
+    _ body: String?,
+    quit: Bool = false
+) -> MoonlightNotice {
+    MoonlightNotice(severity: severity, title: title, body: body, quitHost: quit ? host : nil, key: "moonlight.\(host.id)")
+}

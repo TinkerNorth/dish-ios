@@ -1,6 +1,6 @@
 # Dish for iOS: Privacy Policy
 
-**Effective date:** 2026-11-09.
+**Effective date:** 2026-11-10.
 **Canonical copy:** this file, at
 [`https://github.com/TinkerNorth/dish-ios/blob/main/PRIVACY.md`](https://github.com/TinkerNorth/dish-ios/blob/main/PRIVACY.md).
 
@@ -13,9 +13,10 @@ policy. The other clients have their own policies and different behaviour, so
 do not read one as describing another.
 
 This policy describes the app as it is today: it finds a Satellite on your
-Wi-Fi, pairs with it and streams a controller's input to it. Section 2.2
-says exactly what crosses your network; this file changes in the same commit
-as the code that makes it untrue.
+Wi-Fi, pairs with it and streams a controller's input to it, and it does the
+same with a Moonlight host (Sunshine, Apollo or Wolf) on your network.
+Section 2.2 says exactly what crosses your network; this file changes in the
+same commit as the code that makes it untrue.
 
 ---
 
@@ -25,15 +26,16 @@ as the code that makes it untrue.
   wireless gamepad for a `satellite` server on your own network. TinkerNorth
   does not operate a server for Dish at all.
 - **Everything the app sends stays on your local network**, between this
-  iPhone and the PC you paired (section 2.2). It has no account, no analytics
+  iPhone and the PC you paired, a Satellite or a Moonlight host (section 2.2). It has no account, no analytics
   SDK, no telemetry, no advertising identifier, no usage reporting and no
   crash reporting. It sends nothing to TinkerNorth or to anyone else. The one
   exception is Apple's: Support Dish asks the App Store, through StoreKit, for
   the price of its three tips, and a tip you choose is an App Store purchase
   (section 2.3).
 - It stores its preferences, the PCs you paired and a device id on your
-  iPhone (section 2.1), each PC's pairing key in the Keychain, and each PC's
-  certificate fingerprint in a file in the app's own container. Nothing is
+  iPhone (section 2.1), each PC's pairing key and the app's Moonlight
+  identity in the Keychain, and each PC's certificate fingerprint in a file
+  in the app's own container. Nothing is
   synced to a cloud account by the app.
 - iOS asks for the Local Network permission the first time Dish looks for
   your PC, after the setup flow has explained why (section 4).
@@ -65,10 +67,17 @@ Beside them, for the PCs you pair:
 | `wifi_list` | `UserDefaults` | Each paired PC's name, its address and ports, and its machine id | Reconnecting to the PCs you paired, and finding one that moved address |
 | `wifi_last_seen:<PC>` | `UserDefaults` | When a session with that PC last ended | The "seen yesterday" line of an offline PC |
 | The pairing key | The Keychain, readable after the first unlock and never moved to another device (`com.tinkernorth.dish.ios.pairing-key`) | One 32-byte key per paired PC, which the PC handed over when you paired | Proving to that PC that this iPhone is the one you paired; the traffic itself is encrypted under a fresh key per session derived from it |
-| The certificate pins | `Application Support/Dish/cert-pins.json` in the app's container | Each PC's address and the SHA-256 fingerprint of the certificate it showed the first time | Refusing a later certificate that differs, so nothing else on your network can pretend to be your PC (trust on first use) |
+| The certificate pins | `Application Support/Dish/cert-pins.json` in the app's container | Each PC's address and the SHA-256 fingerprint of the certificate it showed the first time; a Moonlight host's under `moonlight:<address>`, replaced by the one a pairing proves | Refusing a later certificate that differs, so nothing else on your network can pretend to be your PC (trust on first use) |
+| `moonlight_host_list` | `UserDefaults` | Each Moonlight host you added or paired with: its name, address, HTTP and HTTPS ports, the id it answers with, the app and the controller type picked for it, and whether it accepted this iPhone | Pairing with and starting sessions on those hosts |
+| `moonlight_binding_list` | `UserDefaults` | Which controller is bound to which Moonlight host, and the type it is plugged in as | Forgetting a host's bindings with it |
+| `moonlight_uniqueid` | `UserDefaults` | A random sixteen-character id made on first use, not derived from the device | The name a Moonlight host files this iPhone under |
+| The Moonlight identity | The Keychain, labelled "Dish Moonlight client key" and "Dish Moonlight client certificate", readable after the first unlock and never moved to another device | An RSA key and the self-signed certificate around it, made once | Presented to every Moonlight host on every connection: it is how a host recognises the iPhone it paired with |
 
 Forget This PC removes that PC's row, key, pin and last sighting, after
-telling the PC to drop this iPhone. The setup walk keeps your answers in
+telling the PC to drop this iPhone. Forgetting a Moonlight host removes its
+record, its bindings and its pin, after closing the app a live session of
+yours started on it; the protocol has no way to unpair, so the host keeps its
+own record of this iPhone until you remove it there. The setup walk keeps your answers in
 memory while it is open. No database or log is written by the app.
 
 Settings › Setup & help › Diagnostics shows what the app sees right now
@@ -103,6 +112,24 @@ nothing of it leaves that network:
   player-light commands for the controller.
 - **Forget This PC** sends that PC one request to drop this iPhone from its
   paired list.
+- **Moonlight discovery**: a Bonjour browse for `_nvstream._tcp` when the
+  Moonlight hosts page opens and when you tap Scan there, which sends nothing
+  of yours and reads the hosts' announcements.
+- **Moonlight probes and pairing**: HTTP on port 47989 to the host you chose
+  or typed, asking what it is (`/serverinfo`) and pairing with it, carrying
+  your `moonlight_uniqueid`, the device name the protocol fixes (`roth`), the
+  app's certificate, and a salt and challenges derived from the PIN the app
+  showed you; the PIN itself never crosses the wire. The last pairing step and
+  everything after it use HTTPS on port 47984 with mutual TLS, presenting the
+  app's certificate.
+- **Moonlight sessions**: over that HTTPS, the app to start or close and a key
+  made for the session; RTSP on the port the host names (48010 by default);
+  UDP pings to the host's video and audio ports, which keep them open (no video
+  or audio is asked for); and the control stream, UDP to the host's control
+  port encrypted with that session's key: each bound controller's type and
+  features, its buttons, sticks and triggers, its motion and touchpad when you
+  left them on, its battery level, and a keepalive every half second. The host
+  sends back rumble, light-bar and motion requests for the controller.
 
 ### 2.3 Sent to TinkerNorth or a third party
 
@@ -120,8 +147,9 @@ and does not store. A tip unlocks nothing.
 The only way this app causes a request to a TinkerNorth or third-party address
 is if you tap a link, which hands the URL to your default browser and is then
 between you and that site. Today those links are Satellite's download page
-from the setup flow, Dish's page in the Settings app, and Settings › About's
-and Help & FAQ's links to the website, the source code and this policy.
+from the setup flow, Sunshine's project page from the Moonlight hosts page,
+Dish's page in the Settings app, and Settings › About's and Help & FAQ's links
+to the website, the source code and this policy.
 
 ---
 
@@ -138,8 +166,8 @@ Improvements; that is Apple's mechanism and policy, not the app's.
 
 | Capability | Why |
 |---|---|
-| Local network access and Bonjour (`_satellite._udp`, `_nvstream._tcp`), declared in `App/Info.plist` with the usage text "Dish finds Satellite on your Wi‑Fi and sends controller input straight to your PC." | Finding PCs on your Wi-Fi and talking to the one you chose; everything stays on your LAN. iOS asks once, at the first scan, which the setup flow's primer runs after it has explained why; if you refuse, the Connections page says so and points to Settings. The Moonlight service is declared and not yet browsed. |
-| The Keychain | One item per paired PC, holding its pairing key (section 2.1). |
+| Local network access and Bonjour (`_satellite._udp`, `_nvstream._tcp`), declared in `App/Info.plist` with the usage text "Dish finds Satellite on your Wi‑Fi and sends controller input straight to your PC." | Finding PCs on your Wi-Fi and talking to the one you chose; everything stays on your LAN. iOS asks once, at the first scan, which the setup flow's primer runs after it has explained why; if you refuse, the Connections page says so and points to Settings. The Moonlight service is browsed when the Moonlight hosts page opens. |
+| The Keychain | One item per paired PC, holding its pairing key, and the Moonlight identity, a key and its certificate (section 2.1). |
 | Keeping the screen on (the idle timer) | Held off only while a session is up and Keep screen on is set, so that iOS does not lock the screen and suspend Dish mid-game. There is no session in this version, so it is never held. |
 
 The app asks for no other permission. It does not use the camera, the
@@ -157,10 +185,13 @@ permission, and writes rumble and light commands back to them.
   Local Network (or from Dish's page in Settings); the Connections page then
   says it cannot see your network.
 - **Forget a PC** to remove its row, its pairing key and its pin, after the
-  app tells the PC to drop this iPhone.
+  app tells the PC to drop this iPhone; a Moonlight host's record, bindings
+  and pin go the same way.
 - **Reset everything** by deleting the app. Its preferences and files go
   with it; iOS keeps an app's Keychain items after the app is deleted, so
-  Forget each PC first to remove its pairing key too.
+  Forget each PC first to remove its pairing key too. The Moonlight identity
+  is not removed by a Forget: it stays in the Keychain, and a Moonlight host
+  you paired keeps recognising this iPhone until you remove it there.
 
 ---
 
