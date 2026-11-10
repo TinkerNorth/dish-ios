@@ -37,21 +37,21 @@ private struct BindablePad {
 /// the satellite's session comes up and cleared when it goes down.
 package extension AppModel {
 
-    /// Bind the pad, or the on-screen gamepad while it is listed, to the
-    /// satellite. A satellite with no session is reached for; the bind rides
-    /// its session PUT.
+    /// Bind the pad, or the on-screen gamepad while it is listed, to the PC.
+    /// A satellite with no session is reached for and the bind rides its
+    /// session PUT; a Moonlight host takes the pad when its session next
+    /// converges, so the bind is done at once.
     func bind(slotId: String, to connectionId: String) {
         applyTarget = ApplyTarget(slotId: slotId, connectionId: connectionId)
         guard let pad = bindablePad(slotId) else { return advanceApply(.padGone) }
-        let path: ApplyPath = sessionIsUp(network.hub.summary(connectionId)?.live) ? .hostLive : .waitingForLink
+        let path = applyPath(connectionId)
         endApplyWatch()
         let pick = pads.types.typeFor(slotId) ?? pad.family
         let bound = network.hub.bind(slotId: slotId, connectionId: connectionId, capabilities: pad.capabilities, emulateAs: pick)
         advanceApply(.started(path))
         guard bound else { return advanceApply(.hostRejected) }
-        watchApply(slotId: slotId, connectionId: connectionId)
         refreshRouting()
-        if path == .waitingForLink { reachFor(connectionId) }
+        follow(path, slotId: slotId, connectionId: connectionId)
     }
 
     /// A pad iOS lists, or the on-screen gamepad while it is one of the
@@ -70,9 +70,29 @@ package extension AppModel {
         return ApplyFact(slotId: target.slotId, connectionId: target.connectionId, progress: bindingProgress)
     }
 
-    /// The pad lets go of its satellite; its route clears.
+    /// A Moonlight binding is a durable intent; a satellite's session takes
+    /// the PUT at once when up, else its link has to come up first.
+    private func applyPath(_ connectionId: String) -> ApplyPath {
+        guard !ConnectionHub.isMoonlight(connectionId) else { return .durable }
+        return sessionIsUp(network.hub.summary(connectionId)?.live) ? .hostLive : .waitingForLink
+    }
+
+    private func follow(_ path: ApplyPath, slotId: String, connectionId: String) {
+        switch path {
+        case .durable:
+            break
+        case .hostLive:
+            watchApply(slotId: slotId, connectionId: connectionId)
+        case .waitingForLink:
+            watchApply(slotId: slotId, connectionId: connectionId)
+            reachFor(connectionId)
+        }
+    }
+
+    /// The pad lets go of its PC; its route clears, and a Moonlight host
+    /// forgets the binding it remembered for it.
     func unbind(slotId: String) {
-        network.hub.release(slotId: slotId)
+        network.hub.unbind(slotId: slotId)
         refreshRouting()
     }
 
@@ -92,28 +112,46 @@ package extension AppModel {
 
     /// One snapshot from the bindings and the live clients: every bound pad
     /// on a live satellite gets that client as its sink under the index it
-    /// holds, the return paths get the same table, and each connection's
-    /// descriptors take the pads' switches.
+    /// holds, every pad bound to a Moonlight host its link, the return paths
+    /// of both kinds get the same table, each satellite's descriptors take
+    /// the pads' switches, and the hosts are asked for what the bindings want.
     internal func refreshRouting() {
         let snapshot = currentRoutingSnapshot()
         routing.publish(snapshot, to: pads.source.processor)
         returnPaths.wire(network.wifi.connections.mapValues { $0 as any FeedbackRouteTarget })
         returnPaths.route(snapshot, global: pads.features.flags)
+        moonlightFeedback.route(snapshot, global: pads.features.flags)
         pushSlotFlags()
+        refreshMoonlightDesire()
     }
 
     private func currentRoutingSnapshot() -> RoutingSnapshot {
         var snapshot = RoutingSnapshot()
         for (slotId, connectionId) in network.hub.bindings {
-            guard let conn = network.wifi.get(connectionId), let index = conn.controllerIndex(of: slotId) else { continue }
             let flags = forwardingFlags(slotId: slotId)
-            if let client = conn.client {
-                snapshot.bySlot[slotId] = Route(sink: client, slot: SlotIndex(index), flags: flags)
+            if let conn = network.wifi.get(connectionId) {
+                addSatelliteRoute(&snapshot, slotId: slotId, conn: conn, flags: flags)
+            } else if let host = network.moonlight.connections[connectionId] {
+                let number = host.link.pad(for: slotId)?.number ?? 0
+                snapshot.bySlot[slotId] = Route(
+                    sink: MoonlightPadSink(link: host.link, slotId: slotId),
+                    slot: SlotIndex(Int(number)),
+                    flags: flags
+                )
             }
-            let pad = SatellitePadKey(connectionId: connectionId, controllerIndex: index)
-            snapshot.bySatellitePad[pad] = BoundSlotRoute(slotId: slotId, flags: flags)
         }
         return snapshot
+    }
+
+    /// The satellite's live client under the index the pad holds there, and
+    /// the way back to the pad from that index.
+    private func addSatelliteRoute(_ snapshot: inout RoutingSnapshot, slotId: String, conn: WifiConnection, flags: ForwardingFlags) {
+        guard let index = conn.controllerIndex(of: slotId) else { return }
+        if let client = conn.client {
+            snapshot.bySlot[slotId] = Route(sink: client, slot: SlotIndex(index), flags: flags)
+        }
+        let pad = SatellitePadKey(connectionId: conn.id, controllerIndex: index)
+        snapshot.bySatellitePad[pad] = BoundSlotRoute(slotId: slotId, flags: flags)
     }
 
     private func pushSlotFlags() {

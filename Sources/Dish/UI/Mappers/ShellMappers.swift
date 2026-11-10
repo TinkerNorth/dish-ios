@@ -56,6 +56,7 @@ func pageTitle(_ page: Page, words: L10n = .app) -> String {
     case .licenses: words.openSourceLicenses
     case .support: words.supportDish
     case .diagnostics: words.diagnostics
+    case .moonlightHosts: words.moonlightHosts
     }
 }
 

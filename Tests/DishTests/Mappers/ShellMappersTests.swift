@@ -91,4 +91,8 @@ final class ShellMappersTests: XCTestCase {
         XCTAssertEqual(pairingSheetId(OpenPairing(server: server, attempt: PairingAttempt(phase: .awaiting))), "mid:den")
         XCTAssertNil(pairingSheetId(nil))
     }
+
+    func testTheMoonlightHostsPageIsTitledAsItsConnectionsRow() {
+        XCTAssertEqual(pageTitle(.moonlightHosts), "Moonlight hosts")
+    }
 }

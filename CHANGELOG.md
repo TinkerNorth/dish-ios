@@ -20,11 +20,12 @@ lockstep across the repos share a version number.
 
 ## [Unreleased]
 
-The shell, the protocol core, the controller bridge, the network engine, the
-play screens, Help, Support and Licenses, the pair sheet, the Connections
-rows and the PC's page are built: a PC is found, paired with from a row, from
-setup or by its address, bound to a pad or the on-screen gamepad, and streamed
-to. `Tests/PARITY.md` lists everything not built.
+The shell, the protocol core, the controller bridge, the network engine,
+Moonlight hosts, the play screens, Help, Support, Licenses, Diagnostics, the
+pair sheet, the Connections rows and the PC's page are built: a Satellite or a
+Moonlight host is found, paired with from a row, from setup or by its address,
+bound to a pad or the on-screen gamepad, and streamed to. `Tests/PARITY.md`
+lists everything not built.
 
 ### Added
 
@@ -64,6 +65,20 @@ to. `Tests/PARITY.md` lists everything not built.
   under its names, driven by its in-process `FakeSatellite`, and verified
   against the real satellite binary by `scripts/e2e_local.sh` and the
   `e2e.yml` lane. The `lock-stats` job in `ios-ci.yml` runs the lock laws.
+
+- **Moonlight hosts: a pad can now be bound to Sunshine, Apollo or Wolf.**
+  The Connections tab's Moonlight hosts row opens their page: the hosts a
+  `_nvstream._tcp` scan finds or an address names, each with its trust word,
+  its session's state and the way out of it, the app its session starts, and
+  Forget behind a menu that asks first. Pairing is the protocol's own: Dish
+  shows a PIN in the host's row, the person types it into the host's page, and
+  the five phases run under the RSA identity Dish mints once in the Keychain,
+  over mutual TLS with the host's certificate pinned. A host carries up to four
+  pads in one session, opened when the first is bound and handed back when the
+  last leaves; input rides the ENet control stream sealed with AES-GCM, and the
+  host's rumble and light come back to the pad. Ported from dish-mac under its
+  names, pinned by Wolf's vectors, proved end to end against a loopback host,
+  and held to its own lock laws.
 
 - **The shell.** Three tabs, Controllers, Connections and Settings, each its
   own `NavigationStack`, with the session accessory

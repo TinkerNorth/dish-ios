@@ -74,6 +74,7 @@ private struct PageView: View {
         case .licenses: LicensesPage()
         case .support: SupportPage()
         case .diagnostics: DiagnosticsPage()
+        case .moonlightHosts: MoonlightHostsPage()
         }
     }
 }

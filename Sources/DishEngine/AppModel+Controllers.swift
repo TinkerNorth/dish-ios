@@ -41,12 +41,17 @@ package extension AppModel {
     }
 
     /// The family's own pick is no pick: the stored entry goes, so a pad
-    /// follows its family again.
+    /// follows its family again. A pad on a Moonlight host is re-announced
+    /// by the converge the routing refresh asks for.
     func setEmulatedType(slotId: String, _ pad: EmulatedPad) {
         network.hub.setEmulatedType(slotId: slotId, pad)
         let family = pads.source.slots.first { $0.id == slotId }?.family.emulatedPad
-        guard pad != family else { return pads.types.clear(slotId) }
-        pads.types.setType(pad, for: slotId)
+        if pad == family {
+            pads.types.clear(slotId)
+        } else {
+            pads.types.setType(pad, for: slotId)
+        }
+        refreshRouting()
     }
 
     func setStickDeadzone(percent: Int, slotId: String) {

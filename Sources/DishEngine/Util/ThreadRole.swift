@@ -5,16 +5,18 @@ import Foundation
 
 /// The job of the thread a tracked lock is taken on. A queue is marked where
 /// it is made and an owned thread where it starts; only LOCK_STATS reads it.
-/// dish-mac's Direct reader, audio and Moonlight roles have no thread here.
+/// dish-mac's Direct reader and audio roles have no thread here.
 package enum ThreadRole: Int, CaseIterable {
     /// GameController's handler queue.
     case input
     /// The satellite's receive loop.
     case receive
-    /// The satellite's heartbeat.
+    /// The satellite's heartbeat and the Moonlight session's tick.
     case heartbeat
     /// The queue that drives the pads' actuators.
     case feedback
+    /// The Moonlight control socket's queue.
+    case moonlightUdp
     /// The main thread, and so the main actor.
     case main
     /// Anything unmarked.
@@ -26,6 +28,7 @@ package enum ThreadRole: Int, CaseIterable {
         case .receive: "Receive"
         case .heartbeat: "Heartbeat"
         case .feedback: "Feedback"
+        case .moonlightUdp: "MoonlightUdp"
         case .main: "Main"
         case .other: "Other"
         }

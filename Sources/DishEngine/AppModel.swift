@@ -45,8 +45,18 @@ package final class AppModel {
     @ObservationIgnored let routing = InputRouting()
     /// The satellites' return paths to the pads bound on them.
     @ObservationIgnored let returnPaths: ReturnPathRouter
+    /// The Moonlight hosts' feedback onto the pads bound to them.
+    @ObservationIgnored let moonlightFeedback: MoonlightFeedbackRouter
+    /// What each Moonlight host was last asked to carry, so an unrelated
+    /// change converges nothing.
+    @ObservationIgnored var lastDesired: [String: [MoonlightPadRequest]] = [:]
     /// The satellite whose pairing card is open.
     package internal(set) var pairingTarget: DiscoveredServer?
+    /// The Moonlight host that minted a PIN for the person to type into it;
+    /// the hosts page shows the card in its row.
+    package internal(set) var moonlightPin: MoonlightPinPrompt?
+    /// The last thing a Moonlight host had to say; the hosts page words it.
+    package internal(set) var lastMoonlightEvent: MoonlightConnectionEvent?
     /// The last thing the pool had to say: a failure, or a satellite that
     /// wants a PIN. The pages word it.
     package internal(set) var lastConnectionEvent: ConnectionEvent?
@@ -88,11 +98,13 @@ package final class AppModel {
         diagnosticsLog = log
         recorder = DiagnosticsRecorder(store: log)
         returnPaths = ReturnPathRouter(feedback: pads.source.feedback)
+        moonlightFeedback = MoonlightFeedbackRouter(feedback: pads.source.feedback)
         onScreen = OnScreenPad(feed: pads.source.processor.feed(for: onScreenSlotId), ticker: resendTicker, sensor: motionSensor)
         applyStoredDeadzones()
         pads.source.processor.setDeadzones(deviceId: onScreenSlotId, GamepadInputProcessor.Deadzones())
         wireNetwork()
         wireDiagnostics()
+        wireMoonlight()
     }
 
     /// Every store over the same defaults, the wall clock, the pads iOS
@@ -128,6 +140,22 @@ package final class AppModel {
             diagnostics: diagnostics,
             pasteboard: pasteboard
         )
+        Self.mintMoonlightIdentity(into: network)
+    }
+
+    /// The dish's Moonlight identity, RSA-2048 born in the keychain: minted
+    /// off the main actor, since a first launch generates a key, then
+    /// adopted by the manager and the gateway it pairs and calls through.
+    private static func mintMoonlightIdentity(into network: NetworkStack) {
+        guard let gateway = network.moonlightGateway else { return }
+        let manager = network.moonlight
+        Task.detached(priority: .utility) {
+            guard let identity = MoonlightIdentityStore.loadOrCreate() else { return }
+            await MainActor.run {
+                manager.adoptIdentity(identity)
+                gateway.adoptIdentity(identity)
+            }
+        }
     }
 
     /// The setup walk on screen; nil while the cover is down.

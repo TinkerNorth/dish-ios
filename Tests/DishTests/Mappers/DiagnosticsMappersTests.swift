@@ -253,7 +253,10 @@ final class DiagnosticsMappersTests: XCTestCase {
             FactLine(key: "satellite.latency · Heartbeat", value: "42 taken · 1 contended"),
             FactLine(key: "routing.table · Main", value: "3 taken · 0 contended")
         ])
-        XCTAssertEqual(ThreadRole.allCases.map { threadRoleText($0) }, ["Input", "Receive", "Heartbeat", "Feedback", "Main", "Other"])
+        XCTAssertEqual(
+            ThreadRole.allCases.map { threadRoleText($0) },
+            ["Input", "Receive", "Heartbeat", "Feedback", "Moonlight control", "Main", "Other"]
+        )
     }
 
     // MARK: - The events

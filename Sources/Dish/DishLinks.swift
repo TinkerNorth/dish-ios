@@ -14,6 +14,9 @@ enum DishLinks {
     static let privacy = URL(string: "https://github.com/TinkerNorth/dish-ios/blob/main/PRIVACY.md")
     /// The free Satellite host app, as the desktops' wizard offers it.
     static let satellite = URL(string: "https://dish.tinkernorth.com/downloads/satellite")
+    /// Sunshine's project page: the Moonlight host the hosts page offers
+    /// when the scan finds none, as dish-mac's does.
+    static let sunshine = URL(string: "https://github.com/LizardByte/Sunshine")
 }
 
 /// A link a page opens through `openURL`.

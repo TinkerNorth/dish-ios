@@ -325,6 +325,11 @@ extension L10n {
         catalog.text("Other")
     }
 
+    /// The Moonlight control socket's queue.
+    var roleMoonlightControl: String {
+        catalog.text("Moonlight control")
+    }
+
     // MARK: - The events
 
     func eventLinkAppeared(_ subject: String, _ state: String) -> String {

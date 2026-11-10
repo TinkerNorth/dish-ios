@@ -314,6 +314,7 @@ func threadRoleText(_ role: ThreadRole, words: L10n = .app) -> String {
     case .receive: words.roleReceive
     case .heartbeat: words.roleHeartbeat
     case .feedback: words.roleFeedback
+    case .moonlightUdp: words.roleMoonlightControl
     case .main: words.roleMain
     case .other: words.roleOther
     }

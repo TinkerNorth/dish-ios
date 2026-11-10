@@ -45,6 +45,14 @@ final class NavigationMachineTests: XCTestCase {
         XCTAssertEqual(fromSettings.state.path(of: .controllers), [])
     }
 
+    func testTheMoonlightHostsPushOntoConnectionsAndBackComesOff() {
+        let pushed = after(.select(.connections), .pathChanged(.connections, [.moonlightHosts]))
+        XCTAssertEqual(pushed.state.path(of: .connections), [.moonlightHosts], "the row's link moves the stack")
+        let back = after(.pathChanged(.connections, []), from: pushed.state)
+        XCTAssertEqual(back.state.path(of: .connections), [])
+        XCTAssertEqual(back.effects, [])
+    }
+
     func testHelpAndTheLicensesPushOntoSettings() {
         let step = after(.select(.settings), .push(.help), .select(.settings), .push(.licenses))
         XCTAssertEqual(step.state.path(of: .settings), [.licenses], "a tap on Settings unwinds Help first")

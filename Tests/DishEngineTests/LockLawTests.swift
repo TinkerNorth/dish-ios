@@ -13,9 +13,14 @@ import XCTest
 /// main actor republishing the routing table every 100 ms and reading the
 /// tally; and the satellite path's own run, a pad routed to a live client,
 /// its heartbeat, and its receive loop opening a loopback satellite's
-/// return commands. The lists are a ratchet: a lock that appears fails, and
-/// so does a listed one no longer observed until it is deleted. No hot
-/// thread takes a lock; the heartbeat takes the latency window's.
+/// return commands; and the Moonlight path's own run, a pad routed to a
+/// host's link, the control socket's queue opening the host's events, and
+/// the session's clock. The lists are a ratchet: a lock that appears fails,
+/// and so does a listed one no longer observed until it is deleted. No
+/// satellite hot thread takes a lock; the heartbeat takes the latency
+/// window's. The Moonlight path's threads hold the session's lock for the
+/// ENet bookkeeping, by design, and the link's and the feedback path's as
+/// debt, as dish-mac's do.
 @MainActor
 final class LockLawTests: XCTestCase {
 
@@ -53,6 +58,43 @@ final class LockLawTests: XCTestCase {
         expectExactly("Heartbeat may acquire", observed: snapshot.acquired(by: .heartbeat), listed: ["satellite.latency"])
         expectExactly("held across a blocking call", observed: Set(snapshot.blocking.keys.map(label)), listed: [])
         expectExactly("taken inside another", observed: Set(snapshot.edges.keys.map(label)), listed: [])
+    }
+
+    /// The Moonlight path: the pad's reports, motion and touches leave
+    /// through the host's link on the input queue, the control socket's
+    /// queue acknowledges the host and opens its rumble, light and motion
+    /// requests into the pad's feedback, and the session's clock ticks the
+    /// ENet bookkeeping; the main actor rebuilds the feedback routes under
+    /// their lock.
+    func testTheMoonlightThreadsTakeExactlyTheLocksOnTheirLists() async throws {
+        let run = try await LockLawMoonlightRun.run()
+        XCTAssertGreaterThan(run.frames, 0, "the pad's frames reached the host")
+        XCTAssertGreaterThan(run.motions, 0, "the host asked for motion and got it")
+        XCTAssertGreaterThan(run.rumbles, 0, "the host's rumble reached the actuators")
+        XCTAssertGreaterThan(run.lamps, 0, "the host's light reached the actuators")
+        let snapshot = run.snapshot
+        XCTAssertTrue(
+            snapshot.acquired(by: .main).contains("moonlight.feedbackRoutes"),
+            "the main actor rebuilt the routes under their lock"
+        )
+        expectExactly(
+            "Input may acquire on the Moonlight path",
+            observed: snapshot.acquired(by: .input),
+            listed: MoonlightLockLaws.inputMayAcquire
+        )
+        expectExactly(
+            "MoonlightUdp may acquire",
+            observed: snapshot.acquired(by: .moonlightUdp),
+            listed: MoonlightLockLaws.moonlightUdpMayAcquire
+        )
+        expectExactly(
+            "Heartbeat may acquire on the Moonlight path",
+            observed: snapshot.acquired(by: .heartbeat),
+            listed: MoonlightLockLaws.heartbeatMayAcquire
+        )
+        expectExactly("Feedback may acquire on the Moonlight path", observed: snapshot.acquired(by: .feedback), listed: [])
+        expectExactly("held across a blocking call on the Moonlight path", observed: Set(snapshot.blocking.keys.map(label)), listed: [])
+        expectExactly("taken inside another on the Moonlight path", observed: Set(snapshot.edges.keys.map(label)), listed: [])
     }
 
     private struct HotRun {
@@ -152,6 +194,25 @@ final class LockLawTests: XCTestCase {
 }
 
 #if LOCK_STATS
+/// Today's locks on the Moonlight path, exactly, from its own run.
+private enum MoonlightLockLaws {
+    /// The link's table under its lock, then the session's ENet bookkeeping:
+    /// the report is sealed before it and only framed and tracked under it.
+    static let inputMayAcquire: Set = ["moonlight.padLink", "moonlight.session"]
+    /// The acknowledgements and the payloads come out under the session's
+    /// lock and the open is after it; the handler, the mixes and the routes
+    /// are the feedback path's, the link's is a motion request landing.
+    static let moonlightUdpMayAcquire: Set = [
+        "moonlight.feedbackHandler",
+        "moonlight.feedbackRoutes",
+        "moonlight.padLink",
+        "moonlight.rumbleMixes",
+        "moonlight.session"
+    ]
+    /// The clock retransmits and keeps alive under the session's lock.
+    static let heartbeatMayAcquire: Set = ["moonlight.session"]
+}
+
 /// The run's shape: long enough for many main-actor republishes to land
 /// while the pad and the receive thread are busy.
 private enum LockLawRun {

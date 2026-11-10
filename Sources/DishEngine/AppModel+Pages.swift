@@ -17,6 +17,8 @@ package enum ShownPage: Equatable {
     case diagnostics
     /// The Add a PC by address sheet words only its own attempt's failure.
     case addByAddress
+    /// Browses for Moonlight hosts as it opens, and ends a pairing it leaves behind.
+    case moonlightHosts
 }
 
 /// The pages' lifecycle intents.
@@ -41,6 +43,9 @@ package extension AppModel {
         case .addByAddress:
             lastConnectionEvent = nil
             return nil
+        case .moonlightHosts:
+            scanMoonlightHosts()
+            return nil
         }
     }
 
@@ -49,6 +54,7 @@ package extension AppModel {
         case .connections, .dim: clock.stop()
         case .support, .addByAddress: break
         case .diagnostics: diagnostics.stop()
+        case .moonlightHosts: leftMoonlightHosts()
         }
     }
 }
