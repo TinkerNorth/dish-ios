@@ -133,6 +133,12 @@ so the sanctioned path works alone.
 
 ## 4. Decided differences
 
+- **Pull to refresh on an iPad becomes Scan.** iPadOS 26 does not let a pull
+  reach `.refreshable` in a `NavigationSplitView`'s list column (a probe
+  counted no refresh, with the scroll view always bouncing and with the
+  refresh on the scroll view itself), so on an iPad the Connections column's
+  toolbar offers Scan beside Add, which runs the same scan; the phone keeps
+  the pull. `ConnectionsUITests` covers each.
 - **Appearance defaults to the system's, not dark.** The design handoff calls
   dark "the default" palette; the Settings › Appearance picker (System, Light,
   Dark) stores dish-mac's `ThemeMode` raw values under `theme_mode`, and a

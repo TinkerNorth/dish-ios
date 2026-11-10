@@ -75,6 +75,8 @@ enum DishSymbol {
     static let linkArrow = "arrow.down"
     /// Add a PC by address.
     static let add = "plus"
+    /// Scan beside the Connections list on an iPad.
+    static let rescan = "arrow.clockwise"
     /// Settings › Setup & help › Diagnostics.
     static let diagnostics = "waveform.path.ecg"
     /// The X that closes the pair sheet.

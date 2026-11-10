@@ -86,6 +86,8 @@ enum ConnectionsContent: Equatable {
 struct ConnectionsPageState: Equatable {
     let title: String
     let add: String
+    /// Scan, which the split layout's toolbar offers.
+    let scan: String
     let content: ConnectionsContent
 }
 
@@ -95,6 +97,7 @@ func connectionsPageState(facts: ShellFacts, settingsURL: URL?, words: L10n = .a
     ConnectionsPageState(
         title: tabTitle(.connections, words: words),
         add: words.addAPCByAddress,
+        scan: words.scan,
         content: connectionsContent(facts, settingsURL: settingsURL, words: words)
     )
 }

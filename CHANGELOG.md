@@ -50,6 +50,8 @@ miss. `Tests/PARITY.md` lists everything not built.
   one. A swipe offers the quickest of them and never runs one on its own, and
   Forget This PC still asks first. Pulling Connections down looks for PCs
   again, the empty and denied pages included, and lets go once the scan is in.
+  On an iPad, where a pull does not reach the list column's refresh, Scan
+  sits beside Add in that column's toolbar.
 - **App Intents.** Open the gamepad, Open the touchpad, Open the mouse, Dim
   the screen and Connect to a PC, for Siri, Spotlight and the Shortcuts app,
   each an App Shortcut with its phrase in all six languages. Connect to a PC

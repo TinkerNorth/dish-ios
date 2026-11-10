@@ -13,9 +13,11 @@ struct ConnectionsActions {
     let act: @MainActor (ConnectionRowAction) -> Void
     let add: @MainActor () -> Void
     let refresh: @MainActor () async -> Void
+    /// A scan without the wait, for the split layout's Scan.
+    let rescan: @MainActor () -> Void
 
     /// Controls that do nothing, for a preview.
-    @MainActor static let preview = ConnectionsActions(open: { _ in }, act: { _ in }, add: {}, refresh: {})
+    @MainActor static let preview = ConnectionsActions(open: { _ in }, act: { _ in }, add: {}, refresh: {}, rescan: {})
 }
 
 /// The Connections tab (D1, D3): paired PCs, the ones found on the network,
@@ -34,7 +36,7 @@ struct ConnectionsPage: View {
             state: connectionsPageState(facts: model.shellFacts, settingsURL: settingsURL),
             layout: layout,
             selection: listSelection(navigation.listSelection(of: .connections), layout: layout),
-            actions: ConnectionsActions(open: open, act: act, add: addByAddress, refresh: refresh)
+            actions: ConnectionsActions(open: open, act: act, add: addByAddress, refresh: refresh, rescan: model.startScan)
         )
         .onAppear { model.pageAppeared(.connections) }
         .onDisappear { model.pageDisappeared(.connections) }
@@ -82,6 +84,11 @@ struct ConnectionsPageBody: View {
             .navigationTitle(state.title)
             .navigationBarTitleDisplayMode(.large)
             .toolbar {
+                if layout == .split {
+                    ToolbarItem(placement: .topBarTrailing) {
+                        Button(state.scan, systemImage: DishSymbol.rescan, action: actions.rescan)
+                    }
+                }
                 ToolbarItem(placement: .topBarTrailing) {
                     Button(state.add, systemImage: DishSymbol.add, action: actions.add)
                 }

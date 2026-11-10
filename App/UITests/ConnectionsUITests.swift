@@ -69,7 +69,11 @@ final class ConnectionsUITests: XCTestCase {
 
     /// The empty page scrolls, so a pull reaches the refresh: the scan runs
     /// ("Searching") and the page comes back as it was.
-    func testPullingTheEmptyPageLooksForPCsAgain() {
+    func testPullingTheEmptyPageLooksForPCsAgain() throws {
+        try XCTSkipIf(
+            UIDevice.current.userInterfaceIdiom == .pad,
+            "an iPad's list column does not take a pull to refresh on iPadOS 26; its Scan button is tested instead"
+        )
         let app = launchOnConnections()
         let empty = app.staticTexts["No PCs yet"].firstMatch
         XCTAssertTrue(empty.waitForExistence(timeout: 20), "the opening scan ends on the empty page when no PC answers")
@@ -81,5 +85,20 @@ final class ConnectionsUITests: XCTestCase {
         XCTAssertTrue(empty.waitForExistence(timeout: 20))
         XCTAssertEqual(app.state, .runningForeground)
         XCTAssertTrue(ShellUI.tab("Connections", in: app).isSelected)
+    }
+
+    /// On an iPad the list is a column beside the PC's page, which iPadOS 26
+    /// does not let a pull refresh; Scan in the column's toolbar looks for
+    /// PCs again.
+    func testOnAnIPadScanBesideTheListLooksForPCsAgain() throws {
+        try XCTSkipUnless(UIDevice.current.userInterfaceIdiom == .pad, "the phone's list takes a pull instead")
+        let app = launchOnConnections()
+        let empty = app.staticTexts["No PCs yet"].firstMatch
+        XCTAssertTrue(empty.waitForExistence(timeout: 20), "the opening scan ends on the empty page when no PC answers")
+        let scan = app.buttons["Scan"].firstMatch
+        XCTAssertTrue(scan.waitForExistence(timeout: 5))
+        scan.tap()
+        XCTAssertTrue(app.staticTexts["Searching"].firstMatch.waitForExistence(timeout: 5), "Scan ran a scan")
+        XCTAssertTrue(empty.waitForExistence(timeout: 20))
     }
 }

@@ -203,9 +203,9 @@ mapper, and the tab bar's from `tabSymbol` in `ShellMappers.swift`.
 | `DishSymbol.phone` | `iphone` | The phone over the Local Network primer |
 | `DishSymbol.pc` | `desktopcomputer` | The PC over the Local Network primer |
 | `DishSymbol.linkArrow` | `arrow.down` | From the pad down to the PC on the review card |
-| `DishSymbol.add` | `plus` | Add a PC by address |
 | `DishSymbol.diagnostics` | `waveform.path.ecg` | The glyph of Settings › Setup & help › Diagnostics |
 | `DishSymbol.add` | `plus` | Add a PC by address, on the Connections toolbar and Pick your PC |
+| `DishSymbol.rescan` | `arrow.clockwise` | Scan beside the Connections list on an iPad |
 | `DishSymbol.close` | `xmark` | The X that closes the pair sheet |
 
 SF Symbols has no satellite. The antenna, `antenna.radiowaves.left.and.right`
