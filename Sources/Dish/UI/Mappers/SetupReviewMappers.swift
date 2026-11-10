@@ -110,13 +110,17 @@ private func reviewPC(_ pick: DestinationPick, _ inputs: SetupInputs, words: L10
     switch pick {
     case let .satellite(id): foundPC(id: id, symbol: setupPCSymbol(.satellite), inputs, words: words)
     case let .moonlightHost(id): foundPC(id: id, symbol: setupPCSymbol(.moonlightHost), inputs, words: words)
-    case .byAddress: ReviewEndState(
-            symbol: "network",
-            name: words.aPCByAddress,
-            detail: words.setupNeedsPairing,
-            dot: DishTheme.warning
-        )
+    case .byAddress: addedByAddressPC(inputs, words: words)
     }
+}
+
+/// The PC added by address, named once Dish knows it as a paired
+/// satellite; until then the generic PC, still to pair.
+private func addedByAddressPC(_ inputs: SetupInputs, words: L10n) -> ReviewEndState {
+    guard let id = inputs.addedByAddress, inputs.found.contains(where: { $0.id == id }) else {
+        return ReviewEndState(symbol: "network", name: words.aPCByAddress, detail: words.setupNeedsPairing, dot: DishTheme.warning)
+    }
+    return foundPC(id: id, symbol: setupPCSymbol(.satellite), inputs, words: words)
 }
 
 /// A PC that went quiet keeps its place as "Your PC", still to be paired.
@@ -190,7 +194,9 @@ private func getsBackColumn(_ pad: EmulatedPad, words: L10n) -> CarryColumn {
     ])
 }
 
-private func carryRow(_ title: String, carried: Bool) -> CarryRow {
+/// A capability row, green and checked while carried; the PC's page draws
+/// them too.
+func carryRow(_ title: String, carried: Bool) -> CarryRow {
     CarryRow(
         title: title,
         carried: carried,

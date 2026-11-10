@@ -77,15 +77,13 @@ final class PairingClient: Sendable {
     /// format so the two screens read identically when the operator compares
     /// them. The generator is injectable so tests can pin the shape.
     static func generateClientPin(using generator: inout some RandomNumberGenerator) -> String {
-        (0 ..< clientPinDigits).map { _ in String(Int.random(in: 0 ... 9, using: &generator)) }.joined()
+        (0 ..< pairingPinDigits).map { _ in String(Int.random(in: 0 ... 9, using: &generator)) }.joined()
     }
 
     static func generateClientPin() -> String {
         var generator = SystemRandomNumberGenerator()
         return generateClientPin(using: &generator)
     }
-
-    private static let clientPinDigits = 4
 
     // MARK: - Transport
 

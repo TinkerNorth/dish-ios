@@ -9,13 +9,29 @@ import SwiftUI
 // MARK: - What setup reads
 
 /// What the setup pages read beside the walk itself: the pads iOS sees, the
-/// PCs discovery heard, whether it is looking, and the Local Network answer.
-/// Plain values, so the pages do not depend on the engine's fact types.
+/// PCs discovery heard, whether it is looking, the Local Network answer,
+/// and the PC added by address, by id, once there is one. Plain values, so
+/// the pages do not depend on the engine's fact types.
 struct SetupInputs: Equatable {
     let detectedPads: [SetupPadInput]
     let found: [SetupPCInput]
     let scanning: Bool
     let localNetwork: LocalNetworkStatus
+    let addedByAddress: String?
+
+    init(
+        detectedPads: [SetupPadInput],
+        found: [SetupPCInput],
+        scanning: Bool,
+        localNetwork: LocalNetworkStatus,
+        addedByAddress: String? = nil
+    ) {
+        self.detectedPads = detectedPads
+        self.found = found
+        self.scanning = scanning
+        self.localNetwork = localNetwork
+        self.addedByAddress = addedByAddress
+    }
 }
 
 /// How a seen pad reaches the iPhone.
@@ -57,7 +73,8 @@ func setupInputs(facts: ShellFacts) -> SetupInputs {
         detectedPads: facts.attachedPads.map(setupPadInput),
         found: paired + found,
         scanning: facts.scanning,
-        localNetwork: facts.localNetwork
+        localNetwork: facts.localNetwork,
+        addedByAddress: facts.addedByAddress
     )
 }
 

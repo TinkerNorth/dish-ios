@@ -130,4 +130,51 @@ final class AppModelBindingTests: XCTestCase {
         let retyped = await fixture.waitUntil { self.fixture.satellite.appliedControllers.first?["type"] as? Int == 0 }
         XCTAssertTrue(retyped, "the pick re-sent the pad's descriptor")
     }
+
+    /// The apply fact names the pad and the PC and follows the progress,
+    /// and the overlay's dismissal clears it.
+    func testTheApplyFactNamesThePadAndThePCAndFollowsTheProgress() async {
+        XCTAssertNil(model.shellFacts.apply, "nothing in flight")
+        let live = await fixture.connectPaired()
+        XCTAssertTrue(live)
+        model.bind(slotId: "pad", to: fixture.serverId)
+        XCTAssertEqual(
+            model.shellFacts.apply,
+            ApplyFact(slotId: "pad", connectionId: fixture.serverId, progress: .running(.applyingOnHost))
+        )
+        let done = await fixture.waitUntil { self.model.shellFacts.apply?.progress == .done }
+        XCTAssertTrue(done, "\(model.bindingProgress)")
+        model.dismissApply()
+        XCTAssertNil(model.shellFacts.apply)
+    }
+
+    /// The on-screen gamepad binds like a pad: its route reaches the
+    /// satellite, its row names the PC, a pad leaving does not unbind it,
+    /// and Stop gamepad lets its binding go.
+    func testTheOnScreenGamepadBindsLikeAPadAndStopGamepadReleasesIt() async {
+        let live = await fixture.connectPaired()
+        XCTAssertTrue(live)
+        model.openGamepad()
+        model.bind(slotId: onScreenSlotId, to: fixture.serverId)
+        let done = await fixture.waitUntil { self.model.bindingProgress == .done }
+        XCTAssertTrue(done, "\(model.bindingProgress)")
+        let onScreen = model.shellFacts.controllers.first { $0.id == onScreenSlotId }
+        XCTAssertEqual(onScreen?.destination, DestinationFact(name: "Den PC", health: .online))
+        XCTAssertNotNil(model.routing.table.get(onScreenSlotId), "the slot's feed has its route")
+
+        fixture.source.slots = []
+        let padGone = await fixture.waitUntil { self.model.shellFacts.controllers.map(\.id) == [onScreenSlotId] }
+        XCTAssertTrue(padGone)
+        XCTAssertEqual(model.network.hub.bindings, [onScreenSlotId: fixture.serverId], "a pad leaving unbinds only itself")
+
+        model.stopOnScreenGamepad()
+        XCTAssertEqual(model.network.hub.bindings, [:])
+        XCTAssertNil(model.routing.table.get(onScreenSlotId))
+    }
+
+    /// The on-screen gamepad cannot be bound while it is not listed.
+    func testBindingAnUnlistedOnScreenGamepadFails() {
+        model.bind(slotId: onScreenSlotId, to: fixture.serverId)
+        XCTAssertEqual(model.bindingProgress, .failed(.padGone))
+    }
 }

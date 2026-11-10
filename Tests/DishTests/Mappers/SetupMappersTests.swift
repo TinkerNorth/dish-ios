@@ -18,9 +18,10 @@ enum SetupFixture {
         pads: [SetupPadInput] = [],
         found: [SetupPCInput] = [],
         scanning: Bool = false,
-        localNetwork: LocalNetworkStatus = .allowed
+        localNetwork: LocalNetworkStatus = .allowed,
+        byAddress: String? = nil
     ) -> SetupInputs {
-        SetupInputs(detectedPads: pads, found: found, scanning: scanning, localNetwork: localNetwork)
+        SetupInputs(detectedPads: pads, found: found, scanning: scanning, localNetwork: localNetwork, addedByAddress: byAddress)
     }
 
     static func walk(_ start: SetupStart, _ events: [SetupEvent], localNetwork: LocalNetworkStatus = .allowed) -> SetupState {
@@ -59,6 +60,12 @@ final class SetupMappersTests: XCTestCase {
         XCTAssertEqual(inputs.found.first?.address, "192.168.1.31")
         XCTAssertTrue(inputs.scanning)
         XCTAssertEqual(inputs.localNetwork, .allowed)
+        XCTAssertNil(inputs.addedByAddress)
+    }
+
+    func testThePCAddedByAddressReachesSetup() {
+        let facts = FactsFixture.shell(addedByAddress: "wifi:192.168.1.50:9876")
+        XCTAssertEqual(setupInputs(facts: facts).addedByAddress, "wifi:192.168.1.50:9876")
     }
 
     // MARK: - The cover

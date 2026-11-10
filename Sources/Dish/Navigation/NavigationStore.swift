@@ -7,9 +7,10 @@ import SwiftUI
 
 /// The navigation machine at the app layer: it applies events, runs the
 /// effects the machine returns (the welcome's completion persists; the
-/// model's setup walk and play screens start and end), and hands `TabView`, each
-/// `NavigationStack` and the `fullScreenCover` their bindings. On a first run
-/// it raises the setup cover before anything is drawn, and starts the walk.
+/// model's setup walk, play screens and pairing start and end), and hands
+/// `TabView`, each `NavigationStack`, the `fullScreenCover` and the sheets
+/// their bindings. On a first run it raises the setup cover before anything
+/// is drawn, and starts the walk.
 @MainActor
 @Observable
 final class NavigationStore {
@@ -21,19 +22,25 @@ final class NavigationStore {
     @ObservationIgnored private let endSetup: () -> Void
     @ObservationIgnored private let startPlay: (PlayScreen) -> Void
     @ObservationIgnored private let endPlay: () -> Void
+    @ObservationIgnored private let beginPairing: (String) -> Void
+    @ObservationIgnored private let cancelPairing: (String) -> Void
 
     init(
         onboarding: OnboardingPreferenceStore,
         startSetup: @escaping (SetupEntry) -> Void,
         endSetup: @escaping () -> Void,
         startPlay: @escaping (PlayScreen) -> Void = { _ in },
-        endPlay: @escaping () -> Void = {}
+        endPlay: @escaping () -> Void = {},
+        beginPairing: @escaping (String) -> Void = { _ in },
+        cancelPairing: @escaping (String) -> Void = { _ in }
     ) {
         self.onboarding = onboarding
         self.startSetup = startSetup
         self.endSetup = endSetup
         self.startPlay = startPlay
         self.endPlay = endPlay
+        self.beginPairing = beginPairing
+        self.cancelPairing = cancelPairing
         let firstRun = !onboarding.state.welcomeCompleted
         state = NavigationState(cover: firstRun ? .setup(.firstRun) : nil)
         if firstRun { startSetup(.firstRun) }
@@ -52,6 +59,8 @@ final class NavigationStore {
         case .endSetup: endSetup()
         case let .startPlay(screen): startPlay(screen)
         case .endPlay: endPlay()
+        case let .beginPairing(serverId): beginPairing(serverId)
+        case let .cancelPairing(serverId): cancelPairing(serverId)
         }
     }
 
@@ -70,7 +79,21 @@ final class NavigationStore {
         Binding(get: { self.state.cover }, set: { self.coverChanged($0) })
     }
 
+    /// The sheet the tabs present while no cover is up; a swipe down closes it.
+    var tabsSheet: Binding<Sheet?> {
+        Binding(get: { presentedSheet(self.state, by: .tabs) }, set: { self.sheetChanged($0) })
+    }
+
+    /// The sheet the setup cover presents while it is up.
+    var setupSheet: Binding<Sheet?> {
+        Binding(get: { presentedSheet(self.state, by: .setup) }, set: { self.sheetChanged($0) })
+    }
+
     private func coverChanged(_ cover: Cover?) {
         if cover == nil, state.cover != nil { send(.coverDismissed) }
+    }
+
+    private func sheetChanged(_ sheet: Sheet?) {
+        if sheet == nil, state.sheet != nil { send(.closeSheet) }
     }
 }

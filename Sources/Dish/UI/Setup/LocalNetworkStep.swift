@@ -5,11 +5,13 @@ import DishEngine
 import SwiftUI
 
 /// B3, Destination · 2 of 3: why iOS is about to ask, before it does.
-/// Continue lets iOS put its question; a PC can be added by address instead.
+/// Continue lets iOS put its question; a PC can be added by address
+/// instead, which opens its sheet.
 struct LocalNetworkStep: View {
     let state: LocalNetworkStepState
 
     @Environment(AppModel.self) private var model
+    @Environment(NavigationStore.self) private var navigation
 
     var body: some View {
         List {
@@ -37,6 +39,7 @@ struct LocalNetworkStep: View {
 
     private func addByAddress() {
         model.pickSetupDestination(.byAddress)
+        navigation.send(.openSheet(.addByAddress))
     }
 }
 
@@ -79,4 +82,5 @@ private struct PrimerTile: View {
 #Preview {
     LocalNetworkStep(state: localNetworkStepState())
         .environment(PreviewSetup.emptyModel())
+        .environment(PreviewSetup.navigation())
 }

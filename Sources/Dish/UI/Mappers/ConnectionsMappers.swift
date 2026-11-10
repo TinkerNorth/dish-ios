@@ -5,13 +5,30 @@ import DishCore
 import DishEngine
 import SwiftUI
 
-/// One PC row (D1). Connect and Pair arrive with the pairing wave.
+/// What a row's button does: Pair opens the sheet, Connect reaches for the PC.
+enum ConnectionRowAction: Equatable {
+    case pair(serverId: String)
+    case connect(id: String)
+}
+
+/// A row's one button, when its state calls for one.
+struct ConnectionRowButton: Equatable {
+    let title: String
+    let action: ConnectionRowAction
+}
+
+/// One PC row (D1): a paired row opens its page; a found or resting one
+/// carries a button.
 struct ConnectionRowState: Equatable, Identifiable {
     let id: String
     let symbol: String
     let name: String
     let line: String
     let dot: Color
+    /// Nil while the row needs no button: a paired PC whose session is up.
+    let button: ConnectionRowButton?
+    /// The PC's page; nil for a PC Dish has not paired with.
+    let page: Page?
 }
 
 /// PAIRED and its rows.
@@ -49,16 +66,32 @@ struct NetworkDeniedState: Equatable {
     let caption: String
 }
 
-/// The Connections tab.
-enum ConnectionsPageState: Equatable {
+/// What the Connections tab shows under its title.
+enum ConnectionsContent: Equatable {
     case denied(NetworkDeniedState)
     case empty(title: String, body: String)
     case list(ConnectionsListState)
 }
 
+/// The Connections tab: its title, the toolbar's Add a PC by address, and
+/// the content.
+struct ConnectionsPageState: Equatable {
+    let title: String
+    let add: String
+    let content: ConnectionsContent
+}
+
 /// `facts.now` words an offline PC's last sighting; `settingsURL` is where
 /// Open Settings goes.
 func connectionsPageState(facts: ShellFacts, settingsURL: URL?, words: L10n = .app) -> ConnectionsPageState {
+    ConnectionsPageState(
+        title: tabTitle(.connections, words: words),
+        add: words.addAPCByAddress,
+        content: connectionsContent(facts, settingsURL: settingsURL, words: words)
+    )
+}
+
+private func connectionsContent(_ facts: ShellFacts, settingsURL: URL?, words: L10n) -> ConnectionsContent {
     switch facts.localNetwork {
     case .denied: .denied(networkDenied(settingsURL: settingsURL, words: words))
     case .unknown, .allowed: reachablePage(facts, words: words)
@@ -66,7 +99,7 @@ func connectionsPageState(facts: ShellFacts, settingsURL: URL?, words: L10n = .a
 }
 
 /// With nothing paired, found or being looked for, a short empty state.
-private func reachablePage(_ facts: ShellFacts, words: L10n) -> ConnectionsPageState {
+private func reachablePage(_ facts: ShellFacts, words: L10n) -> ConnectionsContent {
     let nothingYet = facts.paired.isEmpty && facts.found.isEmpty && !facts.scanning
     guard !nothingYet else { return .empty(title: words.noPCsYet, body: words.noPCsYetBody) }
     return .list(connectionsList(facts, now: facts.now, words: words))
@@ -94,7 +127,7 @@ private func connectionsList(_ facts: ShellFacts, now: Date, words: L10n) -> Con
 
 private func pairedSection(_ paired: [ConnectionFact], now: Date, words: L10n) -> PairedSectionState? {
     guard !paired.isEmpty else { return nil }
-    return PairedSectionState(title: words.paired, rows: paired.map { connectionRow($0, now: now, words: words) })
+    return PairedSectionState(title: words.paired, rows: paired.map { connectionRow($0, now: now, paired: true, words: words) })
 }
 
 /// The network's name is not readable yet, so the title says "your Wi-Fi".
@@ -108,14 +141,31 @@ private func foundSection(_ facts: ShellFacts, now: Date, words: L10n) -> FoundS
     )
 }
 
-func connectionRow(_ connection: ConnectionFact, now: Date, words: L10n = .app) -> ConnectionRowState {
+func connectionRow(_ connection: ConnectionFact, now: Date, paired: Bool = false, words: L10n = .app) -> ConnectionRowState {
     ConnectionRowState(
         id: connection.id,
         symbol: connectionSymbol(connection.kind),
-        name: connection.name,
+        name: connectionTitle(connection),
         line: connectionLine(connection, now: now, words: words),
-        dot: connectionDot(connection.state)
+        dot: connectionDot(connection.state),
+        button: rowButton(connection, paired: paired, words: words),
+        page: paired ? .pcDetail(id: connection.id) : nil
     )
+}
+
+/// A PC's name, or its address when it never advertised one.
+func connectionTitle(_ connection: ConnectionFact) -> String {
+    connection.name.isEmpty ? connection.address : connection.name
+}
+
+/// Pair for a PC that wants a PIN, Connect for a paired one that rests, and
+/// nothing while its session is up.
+private func rowButton(_ connection: ConnectionFact, paired: Bool, words: L10n) -> ConnectionRowButton? {
+    switch connection.state {
+    case .online: nil
+    case .offline: paired ? ConnectionRowButton(title: words.connect, action: .connect(id: connection.id)) : nil
+    case .needsPairing: ConnectionRowButton(title: words.pair, action: .pair(serverId: connection.id))
+    }
 }
 
 /// The Bluetooth rung of the fleet's ladder is Android's own gamepad
@@ -127,7 +177,9 @@ func connectionSymbol(_ kind: ConnectionKind) -> String {
     }
 }
 
-private func connectionLine(_ connection: ConnectionFact, now: Date, words: L10n) -> String {
+/// A row's second line: the link with its latency and pads, when the PC was
+/// last seen, or that it wants a PIN at its address.
+func connectionLine(_ connection: ConnectionFact, now: Date, words: L10n = .app) -> String {
     switch connection.state {
     case let .online(latencyMs, controllers):
         [words.online, words.latency(latencyMs), words.controllerCount(controllers)].joined(separator: lineSeparator)

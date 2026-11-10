@@ -33,7 +33,8 @@ final class SetupDestinationMappersTests: XCTestCase {
                 name: "Living Room PC",
                 detail: "Needs pairing · 192.168.1.24",
                 dot: DishTheme.warning,
-                pick: .satellite(id: "lr")
+                pick: .satellite(id: "lr"),
+                pairServerId: "lr"
             ),
             SetupPCRow(
                 id: "office",
@@ -41,7 +42,8 @@ final class SetupDestinationMappersTests: XCTestCase {
                 name: "Office PC",
                 detail: "Paired · 192.168.1.31",
                 dot: DishTheme.success,
-                pick: .satellite(id: "office")
+                pick: .satellite(id: "office"),
+                pairServerId: nil
             )
         ]))
     }
@@ -55,6 +57,7 @@ final class SetupDestinationMappersTests: XCTestCase {
         XCTAssertEqual(state.moonlight.body, "Sunshine, Apollo or Wolf. No Satellite needed.")
         XCTAssertEqual(state.moonlight.hosts.map(\.pick), [.moonlightHost(id: "den")])
         XCTAssertEqual(state.moonlight.hosts.map(\.detail), ["Needs pairing · 192.168.1.40"])
+        XCTAssertEqual(state.moonlight.hosts.map(\.pairServerId), [nil], "a Moonlight host pairs its own way")
     }
 
     func testNoMoonlightHostHeardLeavesTheRowAlone() {
@@ -83,7 +86,8 @@ final class SetupDestinationMappersTests: XCTestCase {
                 name: "Office PC",
                 detail: "Paired · 192.168.1.31",
                 dot: DishTheme.success,
-                pick: .satellite(id: "office")
+                pick: .satellite(id: "office"),
+                pairServerId: nil
             )
         ]))
     }

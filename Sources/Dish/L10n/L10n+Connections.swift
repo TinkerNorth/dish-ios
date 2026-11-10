@@ -82,4 +82,78 @@ extension L10n {
     var localNetworkSettingsPath: String {
         catalog.text("Settings › Dish › Local Network")
     }
+
+    // MARK: - A row's button and a PC's page
+
+    var pair: String {
+        catalog.text("Pair")
+    }
+
+    var connect: String {
+        catalog.text("Connect")
+    }
+
+    var disconnect: String {
+        catalog.text("Disconnect")
+    }
+
+    var repair: String {
+        catalog.text("Re-pair")
+    }
+
+    var forgetThisPC: String {
+        catalog.text("Forget This PC")
+    }
+
+    var forget: String {
+        catalog.text("Forget")
+    }
+
+    var pairingKeyIsDeleted: String {
+        catalog.text("Its pairing key is deleted.")
+    }
+
+    /// Plural: "1 controller stops streaming", "3 controllers stop streaming".
+    func controllersStopStreaming(_ controllers: Int) -> String {
+        catalog.format("%lld controllers stop streaming, and you’ll need the PIN again.", controllers)
+    }
+
+    var youNeedThePinAgain: String {
+        catalog.text("You’ll need the PIN again.")
+    }
+
+    var carrying: String {
+        catalog.text("Carrying")
+    }
+
+    /// "2 of 4": the controllers a PC carries of the four it can.
+    func countOf(_ count: Int, _ limit: Int) -> String {
+        catalog.format("%lld of %lld", count, limit)
+    }
+
+    /// The index a controller holds on the PC, counted from one.
+    func slot(_ index: Int) -> String {
+        catalog.format("Slot %lld", index)
+    }
+
+    var nothingBoundYet: String {
+        catalog.text("Nothing bound yet")
+    }
+
+    func satelliteVersion(_ version: String) -> String {
+        catalog.format("Satellite %@", version)
+    }
+
+    func protocolVersion(_ version: Int) -> String {
+        catalog.format("Protocol %lld", version)
+    }
+
+    var pcNoLongerRemembered: String {
+        catalog.text("This PC is no longer remembered.")
+    }
+
+    /// A PC page's title while its PC is gone.
+    var pc: String {
+        catalog.text("PC")
+    }
 }

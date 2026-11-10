@@ -162,15 +162,57 @@ final class AppModelSetupTests: XCTestCase {
         XCTAssertEqual(model.network.wifi.get("mid:den")?.state, .linking, "the satellite is reached for")
     }
 
-    /// The on-screen pad has no slot until the play wave; a bind without a
-    /// pad iOS sees binds nothing.
-    func testBindWithoutADetectedPadBindsNothing() throws {
+    /// Review's Bind of the on-screen gamepad lists it and binds its own
+    /// slot to the satellite, with the pick the walk chose.
+    func testBindOfTheOnScreenGamepadBindsItsSlotToThePickedSatellite() throws {
         let model = try model(AnsweredLocalNetworkAccess(status: .allowed))
         model.startSetup(.input)
         model.pickSetupInput(.onScreen)
         model.pickSetupDestination(den)
+        model.setSetupEmulateAs(.dualSense)
         model.bindSetup()
-        XCTAssertEqual(model.network.hub.bindings, [:])
-        XCTAssertEqual(model.bindingProgress, .idle)
+        XCTAssertEqual(model.network.hub.bindings, [onScreenSlotId: "mid:den"])
+        XCTAssertEqual(model.shellFacts.controllers.map(\.id), ["pad-1", onScreenSlotId], "the on-screen gamepad joins the controllers")
+        XCTAssertEqual(model.pads.types.typeFor(onScreenSlotId), .dualSense)
+        XCTAssertEqual(model.bindingProgress, .running(.binding))
+    }
+
+    /// A PC added by address on the primer is the one Bind binds to.
+    func testBindOfAPCAddedByAddressBindsThePadToIt() throws {
+        let model = try model(AnsweredLocalNetworkAccess(status: .unknown))
+        model.startSetup(.input)
+        model.pickSetupInput(pad)
+        model.pickSetupDestination(.byAddress)
+        XCTAssertEqual(model.setup?.step, .review)
+        XCTAssertTrue(model.addByAddress("192.0.2.77"))
+        model.bindSetup()
+        XCTAssertEqual(model.network.hub.bindings, ["pad-1": "wifi:192.0.2.77:9876"])
+        XCTAssertEqual(model.bindingProgress, .running(.binding))
+    }
+
+    /// A way in with no pad yet, a destination with no PC yet, and a
+    /// Moonlight host each bind nothing.
+    func testBindWithoutAPadOrAPCBindsNothing() throws {
+        let noPad = try model(AnsweredLocalNetworkAccess(status: .allowed))
+        noPad.startSetup(.input)
+        noPad.pickSetupInput(.wired)
+        noPad.pickSetupDestination(den)
+        noPad.bindSetup()
+        XCTAssertEqual(noPad.network.hub.bindings, [:])
+
+        let noAddress = try model(AnsweredLocalNetworkAccess(status: .allowed))
+        noAddress.startSetup(.input)
+        noAddress.pickSetupInput(.onScreen)
+        noAddress.pickSetupDestination(.byAddress)
+        noAddress.bindSetup()
+        XCTAssertEqual(noAddress.network.hub.bindings, [:])
+
+        let moonlight = try model(AnsweredLocalNetworkAccess(status: .allowed))
+        moonlight.startSetup(.input)
+        moonlight.pickSetupInput(pad)
+        moonlight.pickSetupDestination(.moonlightHost(id: "den"))
+        moonlight.bindSetup()
+        XCTAssertEqual(moonlight.network.hub.bindings, [:])
+        XCTAssertEqual(moonlight.bindingProgress, .idle)
     }
 }

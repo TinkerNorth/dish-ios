@@ -12,7 +12,7 @@ struct ControllersPage: View {
 
     var body: some View {
         ControllersPageBody(
-            state: controllersPageState(controllers: model.shellFacts.controllers),
+            state: controllersPageState(controllers: model.shellFacts.controllers, apply: model.shellFacts.apply),
             add: addController,
             open: open,
             play: play

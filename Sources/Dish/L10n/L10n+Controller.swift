@@ -47,4 +47,42 @@ extension L10n {
     var noPadAudio: String {
         catalog.text("Microphone and controller speaker aren’t open to apps on iOS, so Dish leaves them out.")
     }
+
+    // MARK: - Binding
+
+    var unbind: String {
+        catalog.text("Unbind")
+    }
+
+    var bindTo: String {
+        catalog.text("Bind to")
+    }
+
+    var pairAPCToBind: String {
+        catalog.text("Pair a PC on the Connections tab to bind this controller.")
+    }
+
+    var applyingBinding: String {
+        catalog.text("Applying binding…")
+    }
+
+    var bindingApplied: String {
+        catalog.text("Binding applied")
+    }
+
+    var pcRefusedTheController: String {
+        catalog.text("The PC refused the controller.")
+    }
+
+    var pcDidNotAnswer: String {
+        catalog.text("The PC didn’t answer in time.")
+    }
+
+    var controllerLeftBeforeApplied: String {
+        catalog.text("The controller left before the binding was applied.")
+    }
+
+    var bindingCancelled: String {
+        catalog.text("Binding cancelled.")
+    }
 }

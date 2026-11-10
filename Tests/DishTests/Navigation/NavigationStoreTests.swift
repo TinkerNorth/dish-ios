@@ -35,6 +35,21 @@ private final class PlayLog {
     }
 }
 
+/// What the store asked of the model's pairing.
+@MainActor
+private final class PairingLog {
+    private(set) var begun: [String] = []
+    private(set) var cancelled: [String] = []
+
+    func begin(_ serverId: String) {
+        begun.append(serverId)
+    }
+
+    func cancel(_ serverId: String) {
+        cancelled.append(serverId)
+    }
+}
+
 @MainActor
 final class NavigationStoreTests: XCTestCase {
 
@@ -121,5 +136,40 @@ final class NavigationStoreTests: XCTestCase {
         store.send(.select(.settings))
         store.cover.wrappedValue = nil
         XCTAssertEqual(store.state.tab, .settings, "nothing was lowered, so nothing moved")
+    }
+
+    private func store(_ onboarding: OnboardingPreferenceStore, pairing: PairingLog) -> NavigationStore {
+        NavigationStore(
+            onboarding: onboarding,
+            startSetup: SetupLog().start,
+            endSetup: SetupLog().end,
+            beginPairing: pairing.begin,
+            cancelPairing: pairing.cancel
+        )
+    }
+
+    func testTheSheetBindingsPresentFromTheTabsOrTheCoverAndADismissalCloses() throws {
+        let pairing = PairingLog()
+        let store = try store(completedOnboarding(), pairing: pairing)
+        store.send(.openSheet(.pair(serverId: "den")))
+        XCTAssertEqual(store.tabsSheet.wrappedValue, .pair(serverId: "den"))
+        XCTAssertNil(store.setupSheet.wrappedValue)
+        XCTAssertEqual(pairing.begun, ["den"])
+        store.tabsSheet.wrappedValue = nil
+        XCTAssertNil(store.state.sheet, "a swipe down closes the sheet")
+        XCTAssertEqual(pairing.cancelled, ["den"])
+        store.send(.openSetup(.guide))
+        store.send(.openSheet(.addByAddress))
+        XCTAssertEqual(store.setupSheet.wrappedValue, .addByAddress)
+        XCTAssertNil(store.tabsSheet.wrappedValue)
+        store.setupSheet.wrappedValue = nil
+        XCTAssertNil(store.state.sheet)
+    }
+
+    func testTheSheetBindingIgnoresARedundantNil() throws {
+        let pairing = PairingLog()
+        let store = try store(completedOnboarding(), pairing: pairing)
+        store.tabsSheet.wrappedValue = nil
+        XCTAssertEqual(pairing.cancelled, [])
     }
 }

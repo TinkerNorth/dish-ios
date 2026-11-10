@@ -3,9 +3,39 @@
 
 import SwiftUI
 
-/// One PC: its glyph, its name in mono, and its state under a dot.
+/// One PC: its glyph, its name in mono, and its state under a dot. A paired
+/// row opens its PC's page; a row with a button pairs or connects.
 struct ConnectionRow: View {
     let state: ConnectionRowState
+    let open: @MainActor (Page) -> Void
+    let act: @MainActor (ConnectionRowAction) -> Void
+
+    var body: some View {
+        HStack(spacing: DishSpace.s6) {
+            if let page = state.page {
+                Button {
+                    open(page)
+                } label: {
+                    ConnectionRowContent(state: state, disclosure: true)
+                }
+                .buttonStyle(.borderless)
+            } else {
+                ConnectionRowContent(state: state, disclosure: false)
+            }
+            if let button = state.button {
+                Button(button.title) { act(button.action) }
+                    .buttonStyle(.bordered)
+                    .buttonBorderShape(.capsule)
+                    .font(DishFont.headline)
+            }
+        }
+    }
+}
+
+/// The row's own layout.
+private struct ConnectionRowContent: View {
+    let state: ConnectionRowState
+    let disclosure: Bool
 
     var body: some View {
         HStack(spacing: DishSpace.s6) {
@@ -18,7 +48,12 @@ struct ConnectionRow: View {
                 }
             }
             .lineLimit(1)
+            Spacer(minLength: DishSpace.s4)
+            if disclosure {
+                Image(systemName: DishSymbol.disclosure).font(DishFont.detail).foregroundStyle(DishTheme.muted)
+            }
         }
+        .contentShape(Rectangle())
         .accessibilityElement(children: .combine)
     }
 }

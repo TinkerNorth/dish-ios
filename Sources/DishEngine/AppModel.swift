@@ -52,7 +52,11 @@ package final class AppModel {
     package internal(set) var lastConnectionEvent: ConnectionEvent?
     /// The one bind in flight and where it stands.
     package internal(set) var bindingProgress = ApplyProgress.idle
+    /// The pad and the PC of the last bind asked for; the apply fact names them.
+    var applyTarget: ApplyTarget?
     @ObservationIgnored var applyWatch: ApplyWatch?
+    /// The PC the person typed by its address this run.
+    package internal(set) var addedByAddress: DiscoveredServer?
 
     package init(
         onboarding: OnboardingPreferenceStore,
@@ -146,7 +150,9 @@ package final class AppModel {
             support: supportSource.state,
             play: playFacts,
             diagnostics: diagnostics.state,
-            diagnosticsEvents: diagnosticsLog.state
+            diagnosticsEvents: diagnosticsLog.state,
+            apply: applyFact,
+            addedByAddress: addedByAddress?.id
         )
     }
 

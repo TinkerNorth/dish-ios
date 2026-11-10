@@ -6,8 +6,9 @@ import DishEngine
 import SwiftUI
 
 /// The setup cover: the model's walk, one step at a time, under the system
-/// toolbar's Back, title, step and Skip. Skip and Bind end the walk in the
-/// model and lower the cover through the navigation, landing on Controllers.
+/// toolbar's Back, title, step and Skip, and the sheets Pick your PC opens
+/// over it. Skip and Bind end the walk in the model and lower the cover
+/// through the navigation, landing on Controllers.
 struct SetupCover: View {
     @Environment(AppModel.self) private var model
     @Environment(NavigationStore.self) private var navigation
@@ -22,6 +23,7 @@ struct SetupCover: View {
                     .modifier(SetupTitles(title: cover.chrome.title, subtitle: cover.chrome.subtitle))
                     .toolbar { toolbar(cover.chrome) }
             }
+            .sheet(item: navigation.setupSheet) { ShellSheet(sheet: $0) }
         }
     }
 

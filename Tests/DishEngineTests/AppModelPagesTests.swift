@@ -60,4 +60,22 @@ final class AppModelPagesTests: XCTestCase {
         let clocked = try ClockedModel(self)
         XCTAssertEqual(clocked.ticker.starts, [])
     }
+
+    /// The Connections tab looks for PCs as it opens, through the seam.
+    func testConnectionsAppearingLooksForPCs() throws {
+        let clocked = try ClockedModel(self)
+        clocked.model.pageAppeared(.connections)
+        XCTAssertEqual((clocked.model.localNetwork as? RecordedLocalNetworkAccess)?.scans, 1)
+        clocked.model.pageDisappeared(.connections)
+        XCTAssertEqual((clocked.model.localNetwork as? RecordedLocalNetworkAccess)?.scans, 1, "one scan per appearance")
+    }
+
+    /// The address sheet words only what happens to its own attempt.
+    func testTheAddressSheetAppearingClearsTheLastConnectionEvent() throws {
+        let clocked = try ClockedModel(self)
+        clocked.model.lastConnectionEvent = .failure(.noServersFound)
+        clocked.model.pageAppeared(.addByAddress)
+        XCTAssertNil(clocked.model.lastConnectionEvent)
+        XCTAssertEqual((clocked.model.localNetwork as? RecordedLocalNetworkAccess)?.scans, 0, "the sheet runs no scan")
+    }
 }

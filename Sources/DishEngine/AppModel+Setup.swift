@@ -100,13 +100,33 @@ package extension AppModel {
         }
     }
 
-    /// Review's Bind: a pad iOS sees, bound to a satellite, with the pick and
-    /// the motion switch the walk chose. The other ways in have no pad to
-    /// bind yet, and a Moonlight host or an address has no satellite.
+    /// Review's Bind: the pad the walk names, a pad iOS sees or the on-screen
+    /// gamepad, bound to the PC it picked or added by address, with the pick
+    /// and the motion switch the walk chose. A way in with no pad yet, and a
+    /// Moonlight host, bind nothing.
     private func bindDraft(_ draft: SetupDraft) {
-        guard case let .detectedPad(slotId, _) = draft.input, case let .satellite(connectionId) = draft.destination else { return }
+        guard let slotId = draftSlotId(draft.input), let connectionId = draftConnectionId(draft.destination) else { return }
         setEmulatedType(slotId: slotId, draft.emulateAs)
         pads.switches.set(.motion, draft.motion, for: slotId)
         bind(slotId: slotId, to: connectionId)
+    }
+
+    /// The slot the draft names; the wired and Bluetooth ways in have no pad yet.
+    private func draftSlotId(_ input: InputKind?) -> String? {
+        switch input {
+        case let .detectedPad(id, _): id
+        case .onScreen: onScreenSlotId
+        case .wired, .bluetooth, nil: nil
+        }
+    }
+
+    /// The PC the draft names: the satellite it picked, or the one added by
+    /// address; a Moonlight host has no satellite to bind to.
+    private func draftConnectionId(_ destination: DestinationPick?) -> String? {
+        switch destination {
+        case let .satellite(id): id
+        case .byAddress: addedByAddress?.id
+        case .moonlightHost, nil: nil
+        }
     }
 }

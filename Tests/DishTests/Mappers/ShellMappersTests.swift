@@ -80,4 +80,15 @@ final class ShellMappersTests: XCTestCase {
         XCTAssertEqual(pageTitle(.licenses), "Open source licenses")
         XCTAssertEqual(pageTitle(.diagnostics), "Diagnostics")
     }
+
+    func testAPushedPCPageFallsBackToTheGenericTitle() {
+        XCTAssertEqual(pageTitle(.pcDetail(id: "den")), "PC")
+    }
+
+    /// The model's card names the sheet the shell raises; none closes it.
+    func testTheModelsCardNamesTheSheetToRaise() {
+        let server = DiscoveredServer(name: "Den PC", ip: "192.168.1.40", machineId: "den")
+        XCTAssertEqual(pairingSheetId(OpenPairing(server: server, attempt: PairingAttempt(phase: .awaiting))), "mid:den")
+        XCTAssertNil(pairingSheetId(nil))
+    }
 }

@@ -29,7 +29,9 @@ public struct DishScene: Scene {
             startSetup: { model.startSetup(setupStart($0)) },
             endSetup: model.endSetup,
             startPlay: model.openPlay,
-            endPlay: model.closePlay
+            endPlay: model.closePlay,
+            beginPairing: { model.beginPairing(serverId: $0) },
+            cancelPairing: model.cancelPairing
         )
         _navigation = State(initialValue: navigation)
     }

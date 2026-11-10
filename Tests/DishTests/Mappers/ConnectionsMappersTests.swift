@@ -16,8 +16,8 @@ private enum ConnectionsFixture {
         ConnectionFact(id: name, name: name, address: "192.168.1.40", kind: kind, state: state)
     }
 
-    static func page(_ facts: ShellFacts) -> ConnectionsPageState {
-        connectionsPageState(facts: facts, settingsURL: settings)
+    static func page(_ facts: ShellFacts) -> ConnectionsContent {
+        connectionsPageState(facts: facts, settingsURL: settings).content
     }
 
     static func list(_ facts: ShellFacts) throws -> ConnectionsListState {
@@ -31,6 +31,12 @@ private struct NotAList: Error {}
 
 /// The Connections tab (D1, D3).
 final class ConnectionsMappersTests: XCTestCase {
+
+    func testThePageIsTitledAndItsToolbarAddsAPCByAddress() {
+        let state = connectionsPageState(facts: FactsFixture.shell(), settingsURL: nil)
+        XCTAssertEqual(state.title, "Connections")
+        XCTAssertEqual(state.add, "Add a PC by address")
+    }
 
     func testWithLocalNetworkDeniedThePageExplainsAndOpensSettings() {
         let state = ConnectionsFixture.page(FactsFixture.shell(
@@ -82,16 +88,43 @@ final class ConnectionsMappersTests: XCTestCase {
         XCTAssertNil(list.found, "not scanning and nothing found")
     }
 
-    func testAFoundPCThatNeedsPairingShowsItsAddress() throws {
+    func testAFoundPCThatNeedsPairingShowsItsAddressAndOffersPair() throws {
         let list = try ConnectionsFixture.list(FactsFixture.shell(found: [ConnectionsFixture.pc("Den PC", state: .needsPairing)]))
         let row = ConnectionRowState(
             id: "Den PC",
             symbol: "antenna.radiowaves.left.and.right",
             name: "Den PC",
             line: "Needs pairing · 192.168.1.40",
-            dot: DishTheme.warning
+            dot: DishTheme.warning,
+            button: ConnectionRowButton(title: "Pair", action: .pair(serverId: "Den PC")),
+            page: nil
         )
         XCTAssertEqual(list.found, FoundSectionState(title: "Found on your Wi‑Fi", searching: nil, rows: [row]))
+    }
+
+    /// A paired row opens its PC's page; one that is offline offers Connect
+    /// and one whose key the PC revoked offers Pair.
+    func testPairedRowsOpenTheirPageAndOfferConnectOrPair() throws {
+        let list = try ConnectionsFixture.list(FactsFixture.shell(paired: [
+            ConnectionsFixture.pc("Living Room PC", state: .online(latencyMs: 4, controllers: 3)),
+            ConnectionsFixture.pc("Office PC", state: .offline(lastSeen: nil)),
+            ConnectionsFixture.pc("Den PC", state: .needsPairing)
+        ]))
+        let rows = try XCTUnwrap(list.paired?.rows)
+        XCTAssertEqual(rows.map(\.page), [.pcDetail(id: "Living Room PC"), .pcDetail(id: "Office PC"), .pcDetail(id: "Den PC")])
+        XCTAssertEqual(rows.map(\.button), [
+            nil,
+            ConnectionRowButton(title: "Connect", action: .connect(id: "Office PC")),
+            ConnectionRowButton(title: "Pair", action: .pair(serverId: "Den PC"))
+        ])
+    }
+
+    /// A satellite that never advertised a name is known by its address.
+    func testANamelessPCIsKnownByItsAddress() {
+        let pc = ConnectionFact(id: "wifi:192.168.1.50:9876", name: "", address: "192.168.1.50", kind: .satellite, state: .needsPairing)
+        XCTAssertEqual(connectionTitle(pc), "192.168.1.50")
+        XCTAssertEqual(connectionRow(pc, now: FactsFixture.now).name, "192.168.1.50")
+        XCTAssertEqual(connectionTitle(ConnectionsFixture.pc("Den PC", state: .needsPairing)), "Den PC")
     }
 
     /// The fleet's ladder has a Bluetooth rung, Android's own gamepad layer;

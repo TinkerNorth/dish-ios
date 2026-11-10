@@ -55,33 +55,58 @@ struct ControllersPageState: Equatable {
 /// The level at and below which a battery reads in the error colour.
 private let lowBatteryPercent = 15
 
-func controllersPageState(controllers: [ControllerFact], words: L10n = .app) -> ControllersPageState {
+/// `apply` is the bind in flight or just ended, which speaks on its pad's
+/// row in place of the destination.
+func controllersPageState(controllers: [ControllerFact], apply: ApplyFact? = nil, words: L10n = .app) -> ControllersPageState {
     ControllersPageState(
         title: words.controllers,
-        content: controllersContent(controllers, words: words),
+        content: controllersContent(controllers, apply: apply, words: words),
         addTitle: words.addAController,
         addHint: words.addAControllerHint,
         support: ToolbarLinkState(title: words.supportDish, symbol: heartSymbol, page: .support)
     )
 }
 
-private func controllersContent(_ controllers: [ControllerFact], words: L10n) -> ControllersContent {
+private func controllersContent(_ controllers: [ControllerFact], apply: ApplyFact?, words: L10n) -> ControllersContent {
     guard !controllers.isEmpty else { return .empty(invitation: words.noControllersInvitation) }
-    return .list(controllers.map { controllerRow($0, words: words) })
+    return .list(controllers.map { controllerRow($0, apply: apply, words: words) })
 }
 
-func controllerRow(_ controller: ControllerFact, words: L10n = .app) -> ControllerRowState {
-    ControllerRowState(
+func controllerRow(_ controller: ControllerFact, apply: ApplyFact? = nil, words: L10n = .app) -> ControllerRowState {
+    let line = rowLine(controller, apply: apply, words: words)
+    return ControllerRowState(
         id: controller.id,
         symbol: controllerSymbol(controller.link),
         name: controllerName(controller, words: words),
-        destination: destinationLine(controller, words: words),
-        dot: destinationDot(controller.destination?.health),
+        destination: line.destination,
+        dot: line.dot,
         battery: controller.batteryPercent.map(words.batteryPercent),
         batteryColor: batteryColor(controller.batteryPercent),
         page: controller.supported ? .controller(id: controller.id) : nil,
         open: opensPlay(controller.link) ? words.open : nil
     )
+}
+
+/// A row's second line and its dot.
+private struct RowLine {
+    let destination: DestinationLine
+    let dot: Color
+}
+
+/// A bind that waits for its link would read lost, so the apply in flight
+/// or failed for this pad speaks first (B6); a done one leaves the PC's
+/// own line.
+private func rowLine(_ controller: ControllerFact, apply: ApplyFact?, words: L10n) -> RowLine {
+    guard let apply, apply.slotId == controller.id else { return pcLine(controller, words: words) }
+    switch apply.progress {
+    case .running: return RowLine(destination: .note(words.applyingBinding), dot: DishTheme.muted)
+    case let .failed(failure): return RowLine(destination: .note(applyFailureText(failure, words: words)), dot: DishTheme.error)
+    case .idle, .done: return pcLine(controller, words: words)
+    }
+}
+
+private func pcLine(_ controller: ControllerFact, words: L10n) -> RowLine {
+    RowLine(destination: destinationLine(controller, words: words), dot: destinationDot(controller.destination?.health))
 }
 
 /// A pad's own name; the on-screen controller is worded here.

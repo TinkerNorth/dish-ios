@@ -5,6 +5,10 @@ import DishCore
 import DishKernel
 import Foundation
 
+/// The satellite rotates four-digit PINs, and the client PIN has the same
+/// shape; the card draws that many cells.
+package let pairingPinDigits = 4
+
 /// Why a typed satellite PIN did not pair, for the card's inline error.
 package enum PinRejection: Equatable {
     /// The satellite refused the PIN.
