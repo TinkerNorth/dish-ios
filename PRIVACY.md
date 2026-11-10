@@ -79,6 +79,18 @@ record, its bindings and its pin, after closing the app a live session of
 yours started on it; the protocol has no way to unpair, so the host keeps its
 own record of this iPhone until you remove it there. The setup walk keeps your answers in
 memory while it is open. No database or log is written by the app.
+telling the PC to drop this iPhone. The setup walk keeps your answers in
+memory while it is open. No database or log is written by the app, beside
+TipKit's own store: Apple's TipKit framework keeps, in the app's container,
+which of the app's four hints were shown, closed or no longer needed, so a
+hint does not come back. It holds no name, address or controller.
+
+Siri, Spotlight and the Shortcuts app can open the play screens, dim the
+screen and connect to a paired PC through the app's App Intents. The app
+donates nothing to them: it records no shortcut, activity or entity. When
+you set up Connect to a PC in Shortcuts, the app answers with the names of
+the PCs you paired, on the iPhone, so you can pick one; Apple's handling of
+your shortcuts is under Apple's privacy policy.
 
 Settings › Setup & help › Diagnostics shows what the app sees right now
 (each paired PC's session and its packet counters, each controller's rates
@@ -169,6 +181,8 @@ Improvements; that is Apple's mechanism and policy, not the app's.
 | Local network access and Bonjour (`_satellite._udp`, `_nvstream._tcp`), declared in `App/Info.plist` with the usage text "Dish finds Satellite on your Wi‑Fi and sends controller input straight to your PC." | Finding PCs on your Wi-Fi and talking to the one you chose; everything stays on your LAN. iOS asks once, at the first scan, which the setup flow's primer runs after it has explained why; if you refuse, the Connections page says so and points to Settings. The Moonlight service is browsed when the Moonlight hosts page opens. |
 | The Keychain | One item per paired PC, holding its pairing key, and the Moonlight identity, a key and its certificate (section 2.1). |
 | Keeping the screen on (the idle timer) | Held off only while a session is up and Keep screen on is set, so that iOS does not lock the screen and suspend Dish mid-game. There is no session in this version, so it is never held. |
+| App Intents (Siri, Spotlight, the Shortcuts app) | Five actions (open the gamepad, the touchpad or the mouse, dim the screen, connect to a paired PC) that open the app; no permission is asked and nothing is donated (section 2.1). |
+| TipKit | Four hints about the app's own controls, remembered on the iPhone (section 2.1). |
 
 The app asks for no other permission. It does not use the camera, the
 microphone, location, contacts, photos, notifications or tracking. It reads

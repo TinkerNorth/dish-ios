@@ -46,6 +46,15 @@ final class AppModelConnectionsTests: XCTestCase {
         XCTAssertEqual(facts.paired, [])
     }
 
+    /// Pull to refresh on Connections holds its spinner until discovery has
+    /// adopted the scan, so it lets go with the PCs it heard on the page.
+    func testPullToRefreshReturnsOnceTheScanIsAdopted() async {
+        await fixture.model.refreshConnections()
+        let facts = fixture.model.shellFacts
+        XCTAssertFalse(facts.scanning, "the spinner stays while the scan runs")
+        XCTAssertEqual(facts.found.map(\.name), ["Den PC"])
+    }
+
     func testAScanHeldOnThePolicyReadsDenied() async throws {
         let defaults = try TestDefaults.fresh(self)
         let wifi = WifiConnectionManager(

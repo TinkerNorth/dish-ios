@@ -5,21 +5,23 @@ import DishEngine
 import SwiftUI
 
 /// What the Connections rows and toolbar do: a paired row opens its PC's
-/// page, Pair opens the sheet, Connect reaches for the PC, and the toolbar's
-/// plus adds a PC by address.
+/// page, Pair opens the sheet, Connect and Disconnect move the session,
+/// Forget drops the PC, the toolbar's plus adds a PC by address, and a pull
+/// looks again.
 struct ConnectionsActions {
     let open: @MainActor (Page) -> Void
     let act: @MainActor (ConnectionRowAction) -> Void
     let add: @MainActor () -> Void
+    let refresh: @MainActor () async -> Void
 
     /// Controls that do nothing, for a preview.
-    @MainActor static let preview = ConnectionsActions(open: { _ in }, act: { _ in }, add: {})
+    @MainActor static let preview = ConnectionsActions(open: { _ in }, act: { _ in }, add: {}, refresh: {})
 }
 
 /// The Connections tab (D1, D3): paired PCs, the ones found on the network,
 /// Moonlight hosts; or, with Local Network off, the way to turn it on. It
-/// looks for PCs as it opens. A paired PC's page is pushed on a phone and
-/// shown beside the list on an iPad.
+/// looks for PCs as it opens and when pulled. A paired PC's page is pushed
+/// on a phone and shown beside the list on an iPad.
 struct ConnectionsPage: View {
     @Environment(AppModel.self) private var model
     @Environment(NavigationStore.self) private var navigation
@@ -32,7 +34,7 @@ struct ConnectionsPage: View {
             state: connectionsPageState(facts: model.shellFacts, settingsURL: settingsURL),
             layout: layout,
             selection: listSelection(navigation.listSelection(of: .connections), layout: layout),
-            actions: ConnectionsActions(open: open, act: act, add: addByAddress)
+            actions: ConnectionsActions(open: open, act: act, add: addByAddress, refresh: refresh)
         )
         .onAppear { model.pageAppeared(.connections) }
         .onDisappear { model.pageDisappeared(.connections) }
@@ -43,20 +45,29 @@ struct ConnectionsPage: View {
         navigation.send(.show(page, in: .connections))
     }
 
+    /// A row's button, menu and swipes, through the same intents the PC's
+    /// page calls.
     private func act(_ action: ConnectionRowAction) {
         switch action {
         case let .pair(serverId): navigation.send(.openSheet(.pair(serverId: serverId)))
         case let .connect(id): model.connect(id)
+        case let .disconnect(id): model.disconnect(id)
+        case let .forget(id): model.forget(id)
         }
     }
 
     private func addByAddress() {
         navigation.send(.openSheet(.addByAddress))
     }
+
+    private func refresh() async {
+        await model.refreshConnections()
+    }
 }
 
 /// The page over its state, so a preview can draw every content state. On
-/// an iPad the list selects the PC shown beside it.
+/// an iPad the list selects the PC shown beside it. Every state takes a pull
+/// to refresh, the empty ones included.
 struct ConnectionsPageBody: View {
     let state: ConnectionsPageState
     var layout = TabLayout.stack
@@ -66,6 +77,7 @@ struct ConnectionsPageBody: View {
 
     var body: some View {
         content
+            .refreshable { await actions.refresh() }
             .background(DishTheme.background)
             .navigationTitle(state.title)
             .navigationBarTitleDisplayMode(.large)
@@ -78,9 +90,24 @@ struct ConnectionsPageBody: View {
 
     @ViewBuilder private var content: some View {
         switch state.content {
-        case let .denied(denied): NetworkDeniedView(state: denied)
-        case let .empty(title, body): ContentUnavailableView(title, systemImage: satelliteSymbol, description: Text(body))
-        case let .list(list): ConnectionsList(state: list, layout: layout, selection: selection, actions: actions)
+        case let .denied(denied):
+            PullableEmptyState { NetworkDeniedView(state: denied) }
+        case let .empty(title, body):
+            PullableEmptyState { ContentUnavailableView(title, systemImage: satelliteSymbol, description: Text(body)) }
+        case let .list(list):
+            ConnectionsList(state: list, layout: layout, selection: selection, actions: actions)
+        }
+    }
+}
+
+/// An empty state that fills the page and still scrolls, so a pull reaches
+/// the refresh.
+private struct PullableEmptyState<Content: View>: View {
+    @ViewBuilder let content: Content
+
+    var body: some View {
+        ScrollView {
+            content.containerRelativeFrame([.horizontal, .vertical])
         }
     }
 }

@@ -296,6 +296,42 @@ final class NavigationMachineTests: XCTestCase {
         XCTAssertEqual(playOverSheet.effects, [.startPlay(.gamepad)])
     }
 
+    // MARK: - App Intents
+
+    /// Siri, Spotlight or Shortcuts' Connect to a PC: the PC's page alone
+    /// on Connections, while the model reaches for it.
+    func testConnectingFromAnIntentShowsThePCsPageAloneOnConnectionsAndReachesForIt() {
+        let step = after(.select(.settings), .push(.deviceName), .select(.connections), .push(.pcDetail(id: "den")), .connectTo(id: "lr"))
+        XCTAssertEqual(step.state.tab, .connections)
+        XCTAssertEqual(step.state.path(of: .connections), [.pcDetail(id: "lr")])
+        XCTAssertEqual(step.state.path(of: .settings), [.deviceName], "the other stacks wait")
+        XCTAssertEqual(step.effects, [.connect(id: "lr")])
+    }
+
+    func testConnectingFromAnIntentWakesTheDimAndTakesASheetWithIt() {
+        let overDim = after(.dim, .connectTo(id: "lr"))
+        XCTAssertNil(overDim.state.cover)
+        XCTAssertEqual(overDim.state.path(of: .connections), [.pcDetail(id: "lr")])
+        XCTAssertEqual(overDim.effects, [.connect(id: "lr")])
+        let overSheet = after(.openSheet(.pair(serverId: "den")), .connectTo(id: "lr"))
+        XCTAssertNil(overSheet.state.sheet)
+        XCTAssertEqual(overSheet.effects, [.beginPairing(serverId: "den"), .cancelPairing(serverId: "den"), .connect(id: "lr")])
+    }
+
+    /// Under play or the setup walk the screen stays as it is; the PC is
+    /// still reached for.
+    func testConnectingFromAnIntentUnderPlayOrSetupOnlyReachesForThePC() {
+        let underPlay = after(.openPlay(.gamepad), .connectTo(id: "lr"))
+        XCTAssertEqual(underPlay.state.cover, .play(.gamepad))
+        XCTAssertEqual(underPlay.state.path(of: .connections), [])
+        XCTAssertEqual(underPlay.effects, [.startPlay(.gamepad), .connect(id: "lr")])
+        let underSetup = after(.openSetup(.firstRun), .openSheet(.addByAddress), .connectTo(id: "lr"))
+        XCTAssertEqual(underSetup.state.cover, .setup(.firstRun))
+        XCTAssertEqual(underSetup.state.sheet, .addByAddress, "the walk's sheet stays")
+        XCTAssertEqual(underSetup.state.tab, .controllers)
+        XCTAssertEqual(underSetup.effects, [.startSetup(.firstRun), .connect(id: "lr")])
+    }
+
     func testTheSheetIsPresentedByTheTabsOrTheSetupCover() {
         let tabs = after(.openSheet(.addByAddress)).state
         XCTAssertEqual(presentedSheet(tabs, by: .tabs), .addByAddress)

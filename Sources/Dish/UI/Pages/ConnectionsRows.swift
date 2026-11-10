@@ -5,12 +5,15 @@ import SwiftUI
 
 /// One PC: its glyph, its name in mono, and its state under a dot. A paired
 /// row opens its PC's page, pushed with a chevron from a stack, selected
-/// beside a split's list; a row with a button pairs or connects.
+/// beside a split's list; a row with a button pairs or connects. A long
+/// press and a swipe offer the row's actions; Forget This PC asks first.
 struct ConnectionRow: View {
     let state: ConnectionRowState
     var layout = TabLayout.stack
     let open: @MainActor (Page) -> Void
     let act: @MainActor (ConnectionRowAction) -> Void
+
+    @State private var forgetAsked = false
 
     var body: some View {
         switch rowOpening(state.page, layout: layout) {
@@ -42,6 +45,20 @@ struct ConnectionRow: View {
                     .font(DishFont.headline)
             }
         }
+        .modifier(RowActions(state: state.actions, perform: perform))
+        .modifier(ForgetDialog(state: state.forget, isPresented: $forgetAsked, forget: forget))
+    }
+
+    /// Forget This PC asks first; every other action is the page's at once.
+    private func perform(_ action: ConnectionRowAction) {
+        switch action {
+        case .forget: forgetAsked = true
+        case .pair, .connect, .disconnect: act(action)
+        }
+    }
+
+    private func forget() {
+        act(.forget(id: state.id))
     }
 }
 

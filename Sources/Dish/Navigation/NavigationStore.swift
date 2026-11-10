@@ -24,7 +24,11 @@ final class NavigationStore {
     @ObservationIgnored private let endPlay: () -> Void
     @ObservationIgnored private let beginPairing: (String) -> Void
     @ObservationIgnored private let cancelPairing: (String) -> Void
+    @ObservationIgnored private let connect: (String) -> Void
+    @ObservationIgnored private let learned: (Hint) -> Void
 
+    /// `learned` hears which hint the person no longer needs, so TipKit
+    /// puts it to rest.
     init(
         onboarding: OnboardingPreferenceStore,
         startSetup: @escaping (SetupEntry) -> Void,
@@ -32,7 +36,9 @@ final class NavigationStore {
         startPlay: @escaping (PlayScreen) -> Void = { _ in },
         endPlay: @escaping () -> Void = {},
         beginPairing: @escaping (String) -> Void = { _ in },
-        cancelPairing: @escaping (String) -> Void = { _ in }
+        cancelPairing: @escaping (String) -> Void = { _ in },
+        connect: @escaping (String) -> Void = { _ in },
+        learned: @escaping (Hint) -> Void = { _ in }
     ) {
         self.onboarding = onboarding
         self.startSetup = startSetup
@@ -41,15 +47,19 @@ final class NavigationStore {
         self.endPlay = endPlay
         self.beginPairing = beginPairing
         self.cancelPairing = cancelPairing
+        self.connect = connect
+        self.learned = learned
         let firstRun = !onboarding.state.welcomeCompleted
         state = NavigationState(cover: firstRun ? .setup(.firstRun) : nil)
         if firstRun { startSetup(.firstRun) }
     }
 
     func send(_ event: NavigationEvent) {
-        let step = reduceNavigation(state, event)
+        let before = state
+        let step = reduceNavigation(before, event)
         state = step.state
         step.effects.forEach(run)
+        if let hint = learnedHint(event, from: before, to: step.state) { learned(hint) }
     }
 
     private func run(_ effect: NavigationEffect) {
@@ -61,6 +71,7 @@ final class NavigationStore {
         case .endPlay: endPlay()
         case let .beginPairing(serverId): beginPairing(serverId)
         case let .cancelPairing(serverId): cancelPairing(serverId)
+        case let .connect(id): connect(id)
         }
     }
 

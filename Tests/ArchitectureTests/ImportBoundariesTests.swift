@@ -40,9 +40,9 @@ final class ImportBoundariesTests: XCTestCase {
         ),
         Layer(
             directory: "Sources/Dish",
-            allowed: ["Foundation", "Observation", "SwiftUI", "UIKit", "DishCore", "DishEngine", "DishKernel"]
+            allowed: ["Foundation", "Observation", "SwiftUI", "UIKit", "AppIntents", "TipKit", "DishCore", "DishEngine", "DishKernel"]
         ),
-        Layer(directory: "App/Sources", allowed: ["SwiftUI", "Dish"])
+        Layer(directory: "App/Sources", allowed: ["SwiftUI", "AppIntents", "Dish"])
     ]
 
     /// The only files of the UI library that may import UIKit: the theme's
@@ -51,6 +51,13 @@ final class ImportBoundariesTests: XCTestCase {
     private static let uikitFiles: Set = [
         "Sources/Dish/UI/Theme.swift", "Sources/Dish/DishScene.swift", "Sources/Dish/Scene/Orientation.swift"
     ]
+    /// Where App Intents may be imported: the intents themselves (an intent
+    /// is a navigation event), the scene that hands them their router, and
+    /// the app target, which App Intents reads the App Shortcuts from.
+    private static let appIntentsHomes = ["Sources/Dish/Intents/", "Sources/Dish/DishScene.swift", "App/Sources/"]
+    /// The only files that may import TipKit: the kit's hint, which draws a
+    /// hint as TipKit's popover, and the scene's switch for TipKit itself.
+    private static let tipKitFiles: Set = ["Sources/Dish/UI/Kit/HintTip.swift", "Sources/Dish/Scene/TipKitTips.swift"]
     private static let kit = "Sources/Dish/UI/Kit"
 
     func testEveryLayerHasSources() {
@@ -95,9 +102,24 @@ final class ImportBoundariesTests: XCTestCase {
         }
     }
 
+    func testAppIntentsStaysWithTheIntentsTheSceneAndTheAppTarget() throws {
+        let files = RepoFiles.swiftFiles(under: "Sources/Dish") + RepoFiles.swiftFiles(under: "App/Sources")
+        for file in files where !Self.appIntentsHomes.contains(where: { file.hasPrefix($0) }) {
+            let imports = try RepoFiles.imports(of: RepoFiles.read(file))
+            XCTAssertFalse(imports.contains("AppIntents"), "\(file) imports AppIntents; an intent lives in Sources/Dish/Intents")
+        }
+    }
+
+    func testTipKitStaysWithTheKitsHintAndTheScenesSwitch() throws {
+        for file in RepoFiles.swiftFiles(under: "Sources/Dish") where !Self.tipKitFiles.contains(file) {
+            let imports = try RepoFiles.imports(of: RepoFiles.read(file))
+            XCTAssertFalse(imports.contains("TipKit"), "\(file) imports TipKit; a page points a hint with .hint(_:)")
+        }
+    }
+
     /// A kit component takes values and closures, never the domain: it
-    /// imports only SwiftUI and Foundation and observes no model, so it can
-    /// be drawn from any page's state.
+    /// imports only SwiftUI and Foundation (and TipKit, for the hint) and
+    /// observes no model, so it can be drawn from any page's state.
     func testAKitComponentReadsNoDomain() throws {
         let kit = RepoFiles.swiftFiles(under: Self.kit)
         XCTAssertFalse(kit.isEmpty, "the kit has components")
@@ -105,7 +127,7 @@ final class ImportBoundariesTests: XCTestCase {
         for file in kit {
             let source = try RepoFiles.read(file)
             let imports = RepoFiles.imports(of: source)
-            XCTAssertEqual(imports.filter { !["Foundation", "SwiftUI"].contains($0) }, [], "\(file) reaches past values")
+            XCTAssertEqual(imports.filter { !["Foundation", "SwiftUI", "TipKit"].contains($0) }, [], "\(file) reaches past values")
             let environment = modelEnvironment.firstMatch(in: source, range: NSRange(source.startIndex..., in: source))
             XCTAssertNil(environment, "\(file) reads a model from the environment")
             XCTAssertFalse(source.contains("@Bindable"), "\(file) binds to a model")

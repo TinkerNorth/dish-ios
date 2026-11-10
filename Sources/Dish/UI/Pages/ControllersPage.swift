@@ -15,12 +15,16 @@ struct ControllersPage: View {
     var body: some View {
         let layout = tabLayout(.controllers, width: window.width)
         ControllersPageBody(
-            state: controllersPageState(controllers: model.shellFacts.controllers, apply: model.shellFacts.apply),
+            state: controllersPageState(
+                controllers: model.shellFacts.controllers,
+                apply: model.shellFacts.apply,
+                paired: model.shellFacts.paired
+            ),
             layout: layout,
             selection: listSelection(navigation.listSelection(of: .controllers), layout: layout),
             add: addController,
             open: open,
-            play: play
+            act: act
         )
     }
 
@@ -29,8 +33,14 @@ struct ControllersPage: View {
         navigation.send(.show(page, in: .controllers))
     }
 
-    private func play() {
-        navigation.send(.openPlay(.gamepad))
+    /// A row's Open, menu and swipes: the gamepad, or the binding through
+    /// the same intents the controller's page calls.
+    private func act(_ action: ControllerRowAction) {
+        switch action {
+        case .open: navigation.send(.openPlay(.gamepad))
+        case let .bind(slotId, connectionId): model.bind(slotId: slotId, to: connectionId)
+        case let .unbind(slotId): model.unbind(slotId: slotId)
+        }
     }
 
     private func addController() {
@@ -47,14 +57,14 @@ struct ControllersPageBody: View {
     var selection: Binding<Page?>?
     let add: () -> Void
     let open: @MainActor (Page) -> Void
-    let play: @MainActor () -> Void
+    let act: @MainActor (ControllerRowAction) -> Void
 
     var body: some View {
         List(selection: selection) {
             switch state.content {
             case let .list(rows):
                 Section {
-                    ForEach(rows) { ControllerRow(state: $0, layout: layout, open: open, play: play) }
+                    ForEach(rows) { ControllerRow(state: $0, layout: layout, open: open, act: act) }
                 }
                 .listRowBackground(DishTheme.surface)
             case let .empty(invitation):
@@ -64,7 +74,7 @@ struct ControllersPageBody: View {
                 .listRowBackground(EmptyView())
             }
             Section {
-                AddControllerButton(title: state.addTitle, hint: state.addHint, action: add)
+                AddControllerButton(title: state.addTitle, hint: state.addHint, tipKitHint: state.hints.add, action: add)
             }
             .listRowBackground(EmptyView())
             .listRowInsets(EdgeInsets())
@@ -80,6 +90,7 @@ struct ControllersPageBody: View {
                     Image(systemName: state.support.symbol).foregroundStyle(DishTheme.pulse)
                 }
                 .accessibilityLabel(state.support.title)
+                .hint(state.hints.support)
             }
         }
     }
@@ -93,7 +104,7 @@ struct ControllersPageBody: View {
         ControllerFact(id: "3", name: "On-screen gamepad", link: .onScreen, batteryPercent: nil, destination: living)
     ]
     NavigationStack {
-        ControllersPageBody(state: controllersPageState(controllers: controllers), add: {}, open: { _ in }, play: {})
+        ControllersPageBody(state: controllersPageState(controllers: controllers), add: {}, open: { _ in }, act: { _ in })
     }
 }
 
@@ -111,12 +122,12 @@ struct ControllersPageBody: View {
         )
     ]
     NavigationStack {
-        ControllersPageBody(state: controllersPageState(controllers: controllers), add: {}, open: { _ in }, play: {})
+        ControllersPageBody(state: controllersPageState(controllers: controllers), add: {}, open: { _ in }, act: { _ in })
     }
 }
 
 #Preview("Empty") {
     NavigationStack {
-        ControllersPageBody(state: controllersPageState(controllers: []), add: {}, open: { _ in }, play: {})
+        ControllersPageBody(state: controllersPageState(controllers: []), add: {}, open: { _ in }, act: { _ in })
     }
 }

@@ -173,7 +173,7 @@ private func pcActions(_ state: ConnectionState, words: L10n) -> [PcActionState]
 }
 
 /// Forget asks first and names what stops: the controllers the PC carries.
-private func forgetState(bound: Int, words: L10n) -> ForgetPcState {
+func forgetState(bound: Int, words: L10n = .app) -> ForgetPcState {
     let stops = bound > 0 ? words.controllersStopStreaming(bound) : words.youNeedThePinAgain
     return ForgetPcState(
         button: words.forgetThisPC,

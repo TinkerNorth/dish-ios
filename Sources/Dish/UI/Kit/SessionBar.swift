@@ -6,12 +6,13 @@ import SwiftUI
 /// The session accessory: the PC, how the link is doing, Dim and Play, or
 /// Reconnect once the PC stops responding. While the tab bar is minimized
 /// the accessory is inline and carries the short line alone. A nil action
-/// leaves its button out.
+/// leaves its button out; TipKit's hint, when given, points at Dim.
 struct SessionBar: View {
     let state: SessionBarState
     let dim: () -> Void
     let play: (() -> Void)?
     let reconnect: (() -> Void)?
+    var dimHint: HintState?
 
     @Environment(\.tabViewBottomAccessoryPlacement) private var placement
 
@@ -30,6 +31,7 @@ struct SessionBar: View {
                 SessionBarTitles(pcName: pcName, line: line, lineFont: DishFont.monoDetail, lineColor: DishTheme.muted)
                 Spacer(minLength: DishSpace.s4)
                 SessionRoundButton(title: dimTitle, symbol: "moon.fill", tint: DishTheme.onSurface, fill: DishTheme.surfaceDim, action: dim)
+                    .hint(dimHint)
                 if let play {
                     SessionRoundButton(
                         title: playTitle,

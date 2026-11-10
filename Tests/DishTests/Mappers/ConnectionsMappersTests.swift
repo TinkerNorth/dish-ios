@@ -29,6 +29,39 @@ private enum ConnectionsFixture {
 /// The page drew an empty state where the test expected sections.
 private struct NotAList: Error {}
 
+/// The menu and swipe items the row tests expect.
+private enum ConnectionItems {
+    static func pair(_ id: String) -> RowActionItem<ConnectionRowAction> {
+        RowActionItem(action: .pair(serverId: id), title: "Pair", symbol: RowActionSymbol.pair, destructive: false)
+    }
+
+    static func repair(_ id: String) -> RowActionItem<ConnectionRowAction> {
+        RowActionItem(action: .pair(serverId: id), title: "Re-pair", symbol: RowActionSymbol.repair, destructive: false)
+    }
+
+    static func connect(_ id: String) -> RowActionItem<ConnectionRowAction> {
+        RowActionItem(action: .connect(id: id), title: "Connect", symbol: RowActionSymbol.connect, destructive: false)
+    }
+
+    static func disconnect(_ id: String) -> RowActionItem<ConnectionRowAction> {
+        RowActionItem(action: .disconnect(id: id), title: "Disconnect", symbol: RowActionSymbol.disconnect, destructive: false)
+    }
+
+    static func forget(_ id: String) -> RowActionItem<ConnectionRowAction> {
+        RowActionItem(action: .forget(id: id), title: "Forget This PC", symbol: RowActionSymbol.forget, destructive: true)
+    }
+
+    /// A paired PC's menu: its first action, Re-pair, then Forget This PC;
+    /// the first also under a leading swipe, Forget under a trailing one.
+    static func paired(_ first: RowActionItem<ConnectionRowAction>, _ id: String) -> RowActionsState<ConnectionRowAction> {
+        RowActionsState(
+            menu: [.item(first), .item(repair(id)), .item(forget(id))],
+            leading: [first],
+            trailing: [forget(id)]
+        )
+    }
+}
+
 /// The Connections tab (D1, D3).
 final class ConnectionsMappersTests: XCTestCase {
 
@@ -90,6 +123,7 @@ final class ConnectionsMappersTests: XCTestCase {
 
     func testAFoundPCThatNeedsPairingShowsItsAddressAndOffersPair() throws {
         let list = try ConnectionsFixture.list(FactsFixture.shell(found: [ConnectionsFixture.pc("Den PC", state: .needsPairing)]))
+        let pair = ConnectionItems.pair("Den PC")
         let row = ConnectionRowState(
             id: "Den PC",
             symbol: "antenna.radiowaves.left.and.right",
@@ -97,7 +131,9 @@ final class ConnectionsMappersTests: XCTestCase {
             line: "Needs pairing · 192.168.1.40",
             dot: DishTheme.warning,
             button: ConnectionRowButton(title: "Pair", action: .pair(serverId: "Den PC")),
-            page: nil
+            page: nil,
+            actions: RowActionsState(menu: [.item(pair)], leading: [pair], trailing: []),
+            forget: nil
         )
         XCTAssertEqual(list.found, FoundSectionState(title: "Found on your Wi‑Fi", searching: nil, rows: [row]))
     }
@@ -133,5 +169,53 @@ final class ConnectionsMappersTests: XCTestCase {
         XCTAssertEqual(connectionSymbol(.satellite), satelliteSymbol)
         XCTAssertEqual(connectionSymbol(.moonlight), "desktopcomputer")
         XCTAssertEqual(connectionSymbol(.bluetooth), satelliteSymbol)
+    }
+
+    // MARK: - The long-press menu and the swipes
+
+    func testAnOnlinePairedRowOffersDisconnectRepairAndForget() {
+        let row = connectionRow(
+            ConnectionsFixture.pc("Living Room PC", state: .online(latencyMs: 4, controllers: 1)),
+            now: FactsFixture.now,
+            paired: true
+        )
+        XCTAssertEqual(row.actions, ConnectionItems.paired(ConnectionItems.disconnect("Living Room PC"), "Living Room PC"))
+    }
+
+    func testARestingPairedRowOffersConnectFirst() {
+        let row = connectionRow(ConnectionsFixture.pc("Office PC", state: .offline(lastSeen: nil)), now: FactsFixture.now, paired: true)
+        XCTAssertEqual(row.actions, ConnectionItems.paired(ConnectionItems.connect("Office PC"), "Office PC"))
+    }
+
+    /// A paired PC that revoked its key offers Re-pair, as its page does.
+    func testARevokedPairedRowOffersRepairAndForget() {
+        let row = connectionRow(ConnectionsFixture.pc("Den PC", state: .needsPairing), now: FactsFixture.now, paired: true)
+        let repair = ConnectionItems.repair("Den PC")
+        let forget = ConnectionItems.forget("Den PC")
+        XCTAssertEqual(row.actions, RowActionsState(menu: [.item(repair), .item(forget)], leading: [repair], trailing: [forget]))
+    }
+
+    /// Forget This PC asks first, in the words of the PC's page: what goes,
+    /// and how many controllers stop streaming. A found PC has nothing to forget.
+    func testAPairedRowsForgetAsksFirstAndNamesWhatStops() {
+        let bound = ConnectionFact(
+            id: "lr",
+            name: "Living Room PC",
+            address: "192.168.1.24",
+            kind: .satellite,
+            state: .online(latencyMs: 4, controllers: 2),
+            boundControllerIds: ["pad", "on-screen"]
+        )
+        let row = connectionRow(bound, now: FactsFixture.now, paired: true)
+        XCTAssertEqual(row.forget, ForgetPcState(
+            button: "Forget This PC",
+            title: "Forget This PC",
+            message: "Its pairing key is deleted. 2 controllers stop streaming, and you’ll need the PIN again.",
+            confirm: "Forget",
+            cancel: "Cancel"
+        ))
+        let resting = connectionRow(ConnectionsFixture.pc("Office PC", state: .offline(lastSeen: nil)), now: FactsFixture.now, paired: true)
+        XCTAssertEqual(resting.forget?.message, "Its pairing key is deleted. You’ll need the PIN again.")
+        XCTAssertNil(connectionRow(ConnectionsFixture.pc("Den PC", state: .needsPairing), now: FactsFixture.now).forget)
     }
 }

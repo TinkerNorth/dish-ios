@@ -9,10 +9,13 @@
 /* Begin PBXBuildFile section */
 		0DCB5DEA6411F3AC3ACBA358 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = ADAF4525ED27761494F19178 /* Assets.xcassets */; };
 		1B4DAB36CCAE75CFD88E16FF /* Dish in Frameworks */ = {isa = PBXBuildFile; productRef = A8F8E0CB192277B0567C6467 /* Dish */; };
+		7A7D6A4F8000EB3ECBE17BEF /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 647EFCB1A6D036C44E3449F9 /* Localizable.xcstrings */; };
 		8031E12A935A8787B3071B97 /* ShellUI.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2BBB5E16C969D53A9B7BBA5 /* ShellUI.swift */; };
 		BC266BCB654471AE0B9BAA0F /* DishApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C8916C2FE2E8337B08D0229 /* DishApp.swift */; };
 		C582B843305BB0AC6C486FA3 /* SetupFlowUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D89D88147D0B5DAEE26521B /* SetupFlowUITests.swift */; };
+		C81D9C1C5EA5421D26EEFEFE /* DishShortcuts.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9DEE456CC6EFCD104DFB6505 /* DishShortcuts.swift */; };
 		D9D95FEB1F8E59C09389AE42 /* IPadUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F46376963D77A9C96D41437 /* IPadUITests.swift */; };
+		DC738C39541EB10597967D71 /* AppShortcuts.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = F89EF8DC884C7879E2C4407F /* AppShortcuts.xcstrings */; };
 		EE07D14D29A9A3C09C1FC610 /* ConnectionsUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C7D8EAF12CE98C14C694464 /* ConnectionsUITests.swift */; };
 /* End PBXBuildFile section */
 
@@ -32,11 +35,14 @@
 		2852772D9CB3C8CF766600CC /* DishApp.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = DishApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		2F46376963D77A9C96D41437 /* IPadUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IPadUITests.swift; sourceTree = "<group>"; };
 		3D89D88147D0B5DAEE26521B /* SetupFlowUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetupFlowUITests.swift; sourceTree = "<group>"; };
+		647EFCB1A6D036C44E3449F9 /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
 		6C8916C2FE2E8337B08D0229 /* DishApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DishApp.swift; sourceTree = "<group>"; };
+		9DEE456CC6EFCD104DFB6505 /* DishShortcuts.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DishShortcuts.swift; sourceTree = "<group>"; };
 		A2BBB5E16C969D53A9B7BBA5 /* ShellUI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShellUI.swift; sourceTree = "<group>"; };
 		AB984DAE071C22BF828A6112 /* Dish.storekit */ = {isa = PBXFileReference; path = Dish.storekit; sourceTree = "<group>"; };
 		ADAF4525ED27761494F19178 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		ED58ABFDF5C0E2AE25948649 /* DishUITests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = DishUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		F89EF8DC884C7879E2C4407F /* AppShortcuts.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = AppShortcuts.xcstrings; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -75,6 +81,7 @@
 			isa = PBXGroup;
 			children = (
 				6C8916C2FE2E8337B08D0229 /* DishApp.swift */,
+				9DEE456CC6EFCD104DFB6505 /* DishShortcuts.swift */,
 			);
 			path = Sources;
 			sourceTree = "<group>";
@@ -82,7 +89,9 @@
 		A1558B517A15D0F664634E16 /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				F89EF8DC884C7879E2C4407F /* AppShortcuts.xcstrings */,
 				ADAF4525ED27761494F19178 /* Assets.xcassets */,
+				647EFCB1A6D036C44E3449F9 /* Localizable.xcstrings */,
 			);
 			path = Resources;
 			sourceTree = "<group>";
@@ -178,7 +187,12 @@
 			hasScannedForEncodings = 0;
 			knownRegions = (
 				Base,
+				bs,
+				de,
 				en,
+				es,
+				fr,
+				"pt-BR",
 			);
 			mainGroup = F59BBD93EF8827ACD4319580;
 			minimizedProjectReferenceProxies = 1;
@@ -201,7 +215,9 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				DC738C39541EB10597967D71 /* AppShortcuts.xcstrings in Resources */,
 				0DCB5DEA6411F3AC3ACBA358 /* Assets.xcassets in Resources */,
+				7A7D6A4F8000EB3ECBE17BEF /* Localizable.xcstrings in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -213,6 +229,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				BC266BCB654471AE0B9BAA0F /* DishApp.swift in Sources */,
+				C81D9C1C5EA5421D26EEFEFE /* DishShortcuts.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

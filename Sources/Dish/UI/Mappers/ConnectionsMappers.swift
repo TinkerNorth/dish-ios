@@ -5,10 +5,14 @@ import DishCore
 import DishEngine
 import SwiftUI
 
-/// What a row's button does: Pair opens the sheet, Connect reaches for the PC.
-enum ConnectionRowAction: Equatable {
+/// What a row's button, menu and swipes do: Pair (and Re-pair) opens the
+/// sheet, Connect reaches for the PC, Disconnect closes its session, and
+/// Forget drops it once the person confirmed.
+enum ConnectionRowAction: Hashable {
     case pair(serverId: String)
     case connect(id: String)
+    case disconnect(id: String)
+    case forget(id: String)
 }
 
 /// A row's one button, when its state calls for one.
@@ -29,6 +33,10 @@ struct ConnectionRowState: Equatable, Identifiable {
     let button: ConnectionRowButton?
     /// The PC's page; nil for a PC Dish has not paired with.
     let page: Page?
+    /// The long-press menu and the swipes.
+    let actions: RowActionsState<ConnectionRowAction>
+    /// What Forget This PC asks first; nil for a PC Dish has not paired with.
+    let forget: ForgetPcState?
 }
 
 /// PAIRED and its rows.
@@ -149,8 +157,61 @@ func connectionRow(_ connection: ConnectionFact, now: Date, paired: Bool = false
         line: connectionLine(connection, now: now, words: words),
         dot: connectionDot(connection.state),
         button: rowButton(connection, paired: paired, words: words),
-        page: paired ? .pcDetail(id: connection.id) : nil
+        page: paired ? .pcDetail(id: connection.id) : nil,
+        actions: connectionRowActions(connection, paired: paired, words: words),
+        forget: paired ? forgetState(bound: connection.boundControllerIds.count, words: words) : nil
     )
+}
+
+/// A paired PC: Connect while it rests or Disconnect while its session is
+/// up, Re-pair, and Forget This PC; the first of them also under a swipe
+/// from the leading edge, Forget under one from the trailing edge. A PC
+/// found on the network: Pair, also under a leading swipe.
+func connectionRowActions(_ connection: ConnectionFact, paired: Bool, words: L10n = .app) -> RowActionsState<ConnectionRowAction> {
+    guard paired else { return foundActions(connection.id, words: words) }
+    let first = pairedFirstAction(connection, words: words)
+    let repair = RowActionItem(
+        action: ConnectionRowAction.pair(serverId: connection.id),
+        title: words.repair,
+        symbol: RowActionSymbol.repair,
+        destructive: false
+    )
+    let forget = RowActionItem(
+        action: ConnectionRowAction.forget(id: connection.id),
+        title: words.forgetThisPC,
+        symbol: RowActionSymbol.forget,
+        destructive: true
+    )
+    let menu = (first + [repair, forget]).map(RowMenuEntry.item)
+    return RowActionsState(menu: menu, leading: first.isEmpty ? [repair] : first, trailing: [forget])
+}
+
+private func foundActions(_ id: String, words: L10n) -> RowActionsState<ConnectionRowAction> {
+    let pair = RowActionItem(
+        action: ConnectionRowAction.pair(serverId: id),
+        title: words.pair,
+        symbol: RowActionSymbol.pair,
+        destructive: false
+    )
+    return RowActionsState(menu: [.item(pair)], leading: [pair], trailing: [])
+}
+
+/// Disconnect while the session is up, Connect while the PC rests, and
+/// neither while its key was revoked, as on the PC's page.
+private func pairedFirstAction(_ connection: ConnectionFact, words: L10n) -> [RowActionItem<ConnectionRowAction>] {
+    switch connection.state {
+    case .online:
+        [RowActionItem(
+            action: .disconnect(id: connection.id),
+            title: words.disconnect,
+            symbol: RowActionSymbol.disconnect,
+            destructive: false
+        )]
+    case .offline:
+        [RowActionItem(action: .connect(id: connection.id), title: words.connect, symbol: RowActionSymbol.connect, destructive: false)]
+    case .needsPairing:
+        []
+    }
 }
 
 /// A PC's name, or its address when it never advertised one.

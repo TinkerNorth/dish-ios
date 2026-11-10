@@ -16,26 +16,15 @@ final class LocalizationTests: XCTestCase {
     private static let catalogPath = "Sources/Dish/Resources/Localizable.xcstrings"
     private static let allowedSpecifiers: Set = ["%%", "%@", "%lld"]
 
-    private struct Entry {
-        let key: String
-        /// language → the value of a plain entry.
-        let plain: [String: String]
-        /// language → CLDR plural category → value.
-        let plural: [String: [String: String]]
-        let states: [String]
-
-        var languages: Set<String> {
-            Set(plain.keys).union(plural.keys)
-        }
-    }
-
     private var usedKeys: Set<String> = []
-    private var entries: [Entry] = []
+    private var entries: [StringCatalogFile.Entry] = []
     private var sourceLanguage = ""
 
     override func setUpWithError() throws {
         usedKeys = try Set(RepoFiles.swiftFiles(under: Self.funnel).flatMap { try Self.keysUsed(in: RepoFiles.read($0)) })
-        (sourceLanguage, entries) = try Self.parseCatalog(RepoFiles.read(Self.catalogPath))
+        let catalog = try StringCatalogFile(Self.catalogPath)
+        sourceLanguage = catalog.sourceLanguage
+        entries = catalog.entries
     }
 
     // MARK: - Reading the two sources
@@ -46,38 +35,6 @@ final class LocalizationTests: XCTestCase {
         let regex = try NSRegularExpression(pattern: #"catalog\s*\.\s*(?:text|format)\s*\(\s*"((?:[^"\\]|\\.)*)""#)
         let matches = regex.matches(in: source, range: NSRange(source.startIndex..., in: source))
         return Set(matches.compactMap { match in Range(match.range(at: 1), in: source).map { String(source[$0]) } })
-    }
-
-    private static func parseCatalog(_ json: String) throws -> (String, [Entry]) {
-        let root = try XCTUnwrap(JSONSerialization.jsonObject(with: Data(json.utf8)) as? [String: Any])
-        let strings = try XCTUnwrap(root["strings"] as? [String: Any])
-        let entries = try strings.map { key, raw in try parseEntry(key: key, raw) }.sorted { $0.key < $1.key }
-        return (root["sourceLanguage"] as? String ?? "", entries)
-    }
-
-    private static func parseEntry(key: String, _ raw: Any) throws -> Entry {
-        let entry = try XCTUnwrap(raw as? [String: Any], key)
-        let localizations = try XCTUnwrap(entry["localizations"] as? [String: Any], key)
-        var plain: [String: String] = [:]
-        var plural: [String: [String: String]] = [:]
-        var states: [String] = []
-        for (code, rawLocalization) in localizations {
-            let localization = try XCTUnwrap(rawLocalization as? [String: Any], "\(key) in \(code)")
-            if let unit = localization["stringUnit"] as? [String: Any] {
-                plain[code] = unit["value"] as? String ?? ""
-                states.append(unit["state"] as? String ?? "")
-            }
-            guard let variations = localization["variations"] as? [String: Any],
-                  let forms = variations["plural"] as? [String: Any] else { continue }
-            var byForm: [String: String] = [:]
-            for (form, rawForm) in forms {
-                let unit = (rawForm as? [String: Any])?["stringUnit"] as? [String: Any]
-                byForm[form] = unit?["value"] as? String ?? ""
-                states.append(unit?["state"] as? String ?? "")
-            }
-            plural[code] = byForm
-        }
-        return Entry(key: key, plain: plain, plural: plural, states: states)
     }
 
     /// The format specifiers of a string, in order. An unknown specifier

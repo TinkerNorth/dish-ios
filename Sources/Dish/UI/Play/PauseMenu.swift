@@ -46,6 +46,7 @@ struct PauseMenu: View {
                 .overlay(Circle().stroke(DishTheme.outline, lineWidth: DishSize.padStroke))
         }
         .accessibilityLabel(state.title)
+        .hint(state.hint)
     }
 }
 

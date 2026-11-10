@@ -24,9 +24,10 @@ enum ShellUI {
 
     /// The app with the welcome seen or not, set through the launch
     /// arguments, which `UserDefaults` reads first.
-    static func launch(welcomeCompleted: Bool) -> XCUIApplication {
+    /// TipKit's hints stay hidden, so no popover covers what a test taps.
+    static func launch(welcomeCompleted: Bool, extraArguments: [String] = []) -> XCUIApplication {
         let app = XCUIApplication()
-        app.launchArguments = ["-onboarding_welcome_completed", welcomeCompleted ? "YES" : "NO"]
+        app.launchArguments = ["-onboarding_welcome_completed", welcomeCompleted ? "YES" : "NO", "-tips_hidden", "YES"] + extraArguments
         app.launch()
         return app
     }
