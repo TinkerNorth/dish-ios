@@ -58,10 +58,14 @@ final class MoonlightHttpTransportTests: XCTestCase {
         let gone = await transport.get(
             MoonlightHttpRequest(host: "127.0.0.1", port: port, tls: false, pathAndQuery: "/counted"),
             tls: nil,
-            timeout: 2
+            timeout: 10
         )
         XCTAssertEqual(gone, .unreachable)
-        XCTAssertLessThan(Date().timeIntervalSince(started), 1, "a refused connect fails at once, not at the deadline")
+        XCTAssertLessThan(
+            Date().timeIntervalSince(started),
+            5,
+            "a refused connect fails when the connection parks, well before the deadline (a CI runner takes about a second)"
+        )
     }
 
     func testMutualTlsPresentsTheDishsCertificateAndJudgesTheHostsLeaf() async throws {
