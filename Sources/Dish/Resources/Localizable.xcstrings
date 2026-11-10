@@ -1327,6 +1327,24 @@
             }
           }
         },
+        "en" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld report"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld reports"
+                }
+              }
+            }
+          }
+        },
         "es" : {
           "variations" : {
             "plural" : {
@@ -2684,6 +2702,41 @@
         }
       }
     },
+    "Auto sends %@ for this controller." : {
+      "comment" : "Picker detail; the argument is the type's name.",
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Automatski šalje %@ za ovaj kontroler."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Automatisch sendet %@ für diesen Controller."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Automático envía %@ para este mando."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Automatique envoie %@ pour cette manette."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Automático envia %@ para este controle."
+          }
+        }
+      }
+    },
     "BEST PERFORMANCE" : {
       "localizations" : {
         "bs" : {
@@ -3911,6 +3964,41 @@
         }
       }
     },
+    "Control round trip" : {
+      "comment" : "Diagnostics, a Moonlight host's card line key: the ENet control link's round trip.",
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Povratni put kontrole"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Steuerkanal-Round-Trip"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ida y vuelta de control"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aller-retour de contrôle"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ida e volta de controle"
+          }
+        }
+      }
+    },
     "Controller" : {
       "localizations" : {
         "bs" : {
@@ -4557,6 +4645,41 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "O Dish (iOS, Windows, Android, Linux, Mac) e o Satellite são publicados sob a LGPL-3.0."
+          }
+        }
+      }
+    },
+    "Dish asks %@ to plug in this controller. Some hosts override the choice." : {
+      "comment" : "Under the Emulate picker of a Moonlight pad; the argument is the host's name.",
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dish traži od %@ da priključi ovaj kontroler. Neki hostovi zaobiđu taj izbor."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dish bittet %@, diesen Controller anzuschließen. Manche Hosts überschreiben die Wahl."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dish pide a %@ que conecte este mando. Algunos hosts anulan la elección."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dish demande à %@ de brancher cette manette. Certains hôtes remplacent ce choix."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O Dish pede que %@ conecte este controle. Alguns hosts substituem a escolha."
           }
         }
       }
@@ -5618,6 +5741,41 @@
         }
       }
     },
+    "Ended" : {
+      "comment" : "Diagnostics, a Moonlight host's card: the session ended.",
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Završena"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Beendet"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Terminada"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Terminée"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Encerrada"
+          }
+        }
+      }
+    },
     "Enter an IPv4 address like 192.168.1.50 (optionally :port)" : {
       "localizations" : {
         "bs" : {
@@ -6233,6 +6391,41 @@
         }
       }
     },
+    "GFE version" : {
+      "comment" : "Diagnostics, a Moonlight host's card line key: the GameStream version the host reports.",
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "GFE verzija"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "GFE-Version"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Versión de GFE"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Version GFE"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Versão do GFE"
+          }
+        }
+      }
+    },
     "Gamepad" : {
       "localizations" : {
         "bs" : {
@@ -6542,6 +6735,76 @@
         }
       }
     },
+    "Host app" : {
+      "comment" : "Diagnostics, a Moonlight host's card line key: the host software's version.",
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aplikacija hosta"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Host-App"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "App del host"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Application hôte"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "App do host"
+          }
+        }
+      }
+    },
+    "Host name" : {
+      "comment" : "Diagnostics, a Moonlight host's card line key.",
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ime hosta"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hostname"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nombre del host"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nom de l'hôte"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nome do host"
+          }
+        }
+      }
+    },
     "How Dish works, and what to try when it doesn’t" : {
       "localizations" : {
         "bs" : {
@@ -6640,6 +6903,41 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Como você quer jogar?"
+          }
+        }
+      }
+    },
+    "Idle" : {
+      "comment" : "Diagnostics, a Moonlight host's card: no session.",
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Neaktivna"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Inaktiv"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Inactiva"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Inactive"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Inativa"
           }
         }
       }
@@ -7222,6 +7520,41 @@
         }
       }
     },
+    "Launching" : {
+      "comment" : "Diagnostics, a Moonlight host's card: the session is being brought up.",
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pokretanje"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Startet"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Iniciando"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lancement"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Iniciando"
+          }
+        }
+      }
+    },
     "Leave through the pause menu" : {
       "localizations" : {
         "bs" : {
@@ -7456,6 +7789,41 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Nível do link"
+          }
+        }
+      }
+    },
+    "Live" : {
+      "comment" : "Diagnostics, a Moonlight host's card: the session is streaming.",
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aktivna"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aktiv"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Activa"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Active"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ativa"
           }
         }
       }
@@ -8208,6 +8576,216 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Taxa de movimento"
+          }
+        }
+      }
+    },
+    "Motion: host can’t receive" : {
+      "comment" : "The Motion row's line on the controller page: the satellite has no motion sink for the emulated type.",
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pokret: host ne može primiti"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bewegung: Host kann nicht empfangen"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Movimiento: el host no puede recibir"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mouvement : l’hôte ne peut pas recevoir"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Movimento: o host não consegue receber"
+          }
+        }
+      }
+    },
+    "Motion: no gyroscope" : {
+      "comment" : "The Motion row's line on the controller page.",
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pokret: nema žiroskopa"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bewegung: kein Gyroskop"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Movimiento: sin giroscopio"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mouvement : pas de gyroscope"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Movimento: sem giroscópio"
+          }
+        }
+      }
+    },
+    "Motion: not sent" : {
+      "comment" : "The Motion row's line on the controller page.",
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pokret: nije poslan"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bewegung: nicht gesendet"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Movimiento: no enviado"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mouvement : non transmis"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Movimento: não enviado"
+          }
+        }
+      }
+    },
+    "Motion: server can’t deliver" : {
+      "comment" : "The Motion row's line on the controller page: the satellite's motion backend is unhealthy.",
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pokret: server ne može isporučiti"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bewegung: Server kann nicht zustellen"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Movimiento: el servidor no puede entregar"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mouvement : le serveur ne peut pas transmettre"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Movimento: o servidor não consegue entregar"
+          }
+        }
+      }
+    },
+    "Motion: streaming" : {
+      "comment" : "The Motion row's line on the controller page.",
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pokret: striming"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bewegung: streamt"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Movimiento: transmitiendo"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mouvement : diffusion"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Movimento: transmitindo"
+          }
+        }
+      }
+    },
+    "Motion: turned off" : {
+      "comment" : "The Motion row's line on the controller page.",
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pokret: isključen"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bewegung: ausgeschaltet"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Movimiento: desactivado"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mouvement : désactivé"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Movimento: desligado"
           }
         }
       }
@@ -9988,6 +10566,41 @@
         }
       }
     },
+    "Pad %lld" : {
+      "comment" : "Diagnostics, a Moonlight host's card line key: the pad under this controller number.",
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kontroler %lld"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pad %lld"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mando %lld"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Manette %lld"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Controle %lld"
+          }
+        }
+      }
+    },
     "Pair" : {
       "localizations" : {
         "bs" : {
@@ -10499,6 +11112,41 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Jogar"
+          }
+        }
+      }
+    },
+    "PlayStation" : {
+      "comment" : "The Emulate picker: the PlayStation type a Moonlight host plugs in.",
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "PlayStation"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "PlayStation"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "PlayStation"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "PlayStation"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "PlayStation"
           }
         }
       }
@@ -11352,6 +12000,41 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Execute o Satellite em um PC nesta Wi‑Fi e ele aparece aqui."
+          }
+        }
+      }
+    },
+    "Running app" : {
+      "comment" : "Diagnostics, a Moonlight host's card line key.",
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pokrenuta aplikacija"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Laufende App"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "App en ejecución"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Application en cours"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "App em execução"
           }
         }
       }
@@ -15346,6 +16029,41 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Sem essa permissão, o Dish não consegue encontrar nem alcançar seu PC."
+          }
+        }
+      }
+    },
+    "Xbox" : {
+      "comment" : "The Emulate picker: the Xbox type a Moonlight host plugs in.",
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Xbox"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Xbox"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Xbox"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Xbox"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Xbox"
           }
         }
       }

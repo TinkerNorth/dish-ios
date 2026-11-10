@@ -37,7 +37,9 @@ package extension AppModel {
             batteryPercent: nil,
             destination: destination(slotId: onScreenSlotId),
             emulateAs: onScreenEmulateAs,
-            features: carried.map { ControllerFeatureFact(feature: $0, enabled: switches.isOn($0)) }
+            features: carried.map { ControllerFeatureFact(feature: $0, enabled: switches.isOn($0)) },
+            motion: motionFact(slotId: onScreenSlotId),
+            hostEmulation: network.hub.hostEmulation(slotId: onScreenSlotId)
         )]
     }
 

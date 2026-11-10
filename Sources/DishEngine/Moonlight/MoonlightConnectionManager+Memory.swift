@@ -58,14 +58,20 @@ extension MoonlightConnectionManager {
     /// The standing binding of a pad, kept across restarts; the hub writes and drops it.
     func rememberBinding(slotId: String, hostId: String, controllerType: Int) {
         store.putBinding(RememberedMoonlightBinding(slotId: slotId, hostId: hostId, controllerType: controllerType))
+        publishBindings()
     }
 
     func forgetBinding(slotId: String) {
         store.removeBinding(slotId: slotId)
+        publishBindings()
     }
 
-    var rememberedBindings: [RememberedMoonlightBinding] {
-        store.bindings()
+    /// The records as the facts read them; no routing follows, since the
+    /// binding's own change asks for that.
+    func publishBindings() {
+        let rows = store.bindings()
+        guard rows != rememberedBindings else { return }
+        rememberedBindings = rows
     }
 
     /// Write the host's record. Only a pairing names the machine, with

@@ -96,8 +96,18 @@ package extension AppModel {
             family: slot.family,
             emulateAs: pads.types.typeFor(slot.id) ?? slot.family.emulatedPad,
             features: carried.map { ControllerFeatureFact(feature: $0, enabled: switches.isOn($0)) },
-            supported: slot.readable
+            supported: slot.readable,
+            motion: motionFact(slotId: slot.id),
+            hostEmulation: network.hub.hostEmulation(slotId: slot.id)
         )
+    }
+
+    /// Whether the pad's PC carries motion now, and what its satellite said
+    /// of it the last time it applied the pad.
+    internal func motionFact(slotId: String) -> MotionFact {
+        guard let connectionId = network.hub.bindings[slotId] else { return MotionFact(carries: false, status: nil) }
+        let status = network.wifi.motionStatus.statusFor(SlotKey(connectionId: connectionId, slotId: slotId))
+        return MotionFact(carries: sessionIsUp(network.hub.summary(connectionId)?.live), status: status)
     }
 }
 

@@ -129,6 +129,45 @@ func moonlightStatusLine(_ summary: ConnectionSummary, phase: MoonlightSessionPh
     }
 }
 
+// MARK: - The Emulate picker of a pad on a host
+
+/// The protocol's type names; anything else a host plugs in as an Xbox pad.
+func moonlightTypeName(_ type: UInt8, words: L10n = .app) -> String {
+    switch type {
+    case MoonlightControllerType.playStation: words.playStation
+    case MoonlightControllerType.nintendo: words.nintendo
+    default: words.xbox
+    }
+}
+
+/// Auto, then the three types the host protocol names, in its numbering.
+func moonlightEmulateOptions(words: L10n = .app) -> [MoonlightEmulateOption] {
+    [
+        MoonlightEmulateOption(id: nil, label: words.moonlightAuto),
+        MoonlightEmulateOption(id: Int(MoonlightControllerType.xbox), label: words.xbox),
+        MoonlightEmulateOption(id: Int(MoonlightControllerType.playStation), label: words.playStation),
+        MoonlightEmulateOption(id: Int(MoonlightControllerType.nintendo), label: words.nintendo)
+    ]
+}
+
+/// Under the picker: what Auto sends for this pad, or what a pick asks of the host.
+func moonlightEmulateDetail(_ emulation: HostEmulationFact, hasMotion: Bool, host: String, words: L10n = .app) -> String {
+    if emulation.isOverride { return words.dishAsksHostToPlugIn(host) }
+    let resolved = MoonlightPadRules.resolveType(picked: UInt8(truncatingIfNeeded: emulation.type), sourceHasMotion: hasMotion)
+    return words.autoSends(moonlightTypeName(resolved, words: words))
+}
+
+/// The pick the picker shows: nil is Auto.
+func moonlightEmulateSelection(_ emulation: HostEmulationFact) -> Int? {
+    emulation.isOverride ? emulation.type : nil
+}
+
+/// One choice of the protocol's picker; `id` is the protocol's type, nil for Auto.
+struct MoonlightEmulateOption: Equatable, Identifiable {
+    let id: Int?
+    let label: String
+}
+
 // MARK: - What a host's events say
 
 /// How loud a host's word is drawn.

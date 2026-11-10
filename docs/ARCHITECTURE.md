@@ -132,7 +132,8 @@ The network engine has these, under dish-mac's names:
 |---|---|---|
 | `WifiConnectionManager` (`Network/WifiConnectionManager*.swift`) | coordinator | The pool of satellite sessions: connect, pair (path A in `+Pairing`, path B in `+Approval`), the session PUT and the re-key (`+Session`), the per-slot converge (`+Slots`), the scan (`+Discovery`), death, close-notify, reconcile and the backoff (`+Lifecycle`). `@Observable`; every decision it takes is a `DishCore` reducer's. |
 | `WifiConnection` (`+Slots`, `+ReturnPaths`) | the per-satellite state the manager drives | The session's state machine, the alive tick, the slot table, the live client and the return-path routes. |
-| `ConnectionHub` | coordinator | The rows the pages read, derived on each read from the manager's observable state, and the slot → satellite binding table. |
+| `ConnectionHub` | coordinator | The rows the pages read, derived on each read from the manager's observable state, and the slot → connection binding table with its memory across restarts: one record per pad of one kind (`BindingMemoryStore`'s `wifi_binding_list` for a satellite, the Moonlight store's `moonlight_binding_list` for a host), written on bind, kept on release, dropped on unbind and Forget, and handed back by `takeDueStandingBindings` once per attachment of the pad. |
+| `BindingMemoryStore`, `MotionBackendStatusStore` | stores | The satellite bindings kept across restarts, over the same `UserDefaults`; and each bound pad's motion word from its satellite's last apply, keyed by `SlotKey` (PC and pad), cleared with the binding. |
 | `PairingAttempts` | store | Each satellite's pairing card, over a held `StateSource`. |
 | `ConnectionStore`, `KeyStore`, `CertPins` | stores | The remembered satellites and the device id in `UserDefaults`, the pairing keys in the Keychain, the TOFU pins in a file of their own (the TLS delegate reads them off the main actor). |
 | `HTTPClient`, `PairingClient`, `TofuPinningDelegate` | gateways | The REST control plane over `URLSession`, TOFU-pinned. |
@@ -482,9 +483,13 @@ list, with where each lands, is [`../Tests/PARITY.md`](../Tests/PARITY.md).
 - **A Moonlight host carries input only.** The session asks the host for no
   video or audio: the control stream carries the pads, and the media pings
   only keep the host's ports open, as dish-mac's do.
-- **A Moonlight binding is remembered, not restored.** The bindings are
-  written under the fleet's `moonlight_binding_list`, so Forget names them,
-  but a pad that returns after a restart is not put back on its host.
+- **A binding is remembered and restored.** `AppModel+BindingMemory` watches
+  the pads, the pool, the satellites and hosts on record and the on-screen
+  gamepad's listing with Observation and binds each remembered binding whose
+  pad is present and whose destination is known, once while the pad stays
+  attached. The pad's pick is the pad's own (`emulated_type_preferences`)
+  for a satellite and the record's type for a host, which the desire reads
+  (`MoonlightDesire.desiredPads(bindingTypes:)`).
 - **The Local Network status is the last scan's word.** iOS has no call that
   asks; the simulator does not enforce the permission, so the denied path is
   proved through the browser's documented policy error, not observed

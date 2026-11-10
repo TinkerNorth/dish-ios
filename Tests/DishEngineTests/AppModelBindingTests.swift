@@ -177,4 +177,19 @@ final class AppModelBindingTests: XCTestCase {
         model.bind(slotId: onScreenSlotId, to: fixture.serverId)
         XCTAssertEqual(model.bindingProgress, .failed(.padGone))
     }
+
+    /// The satellite's word on motion comes back with the apply, reaches the
+    /// pad's fact while the PC carries it, and goes with the binding.
+    func testTheSatellitesMotionWordReachesTheControllersFactAndLeavesWithTheBinding() async {
+        let live = await fixture.connectPaired()
+        XCTAssertTrue(live)
+        XCTAssertEqual(model.shellFacts.controllers.first?.motion, MotionFact(carries: false, status: nil), "unbound")
+        model.bind(slotId: "pad", to: fixture.serverId)
+        let done = await fixture.waitUntil { self.model.bindingProgress == .done }
+        XCTAssertTrue(done, "\(model.bindingProgress)")
+        let good = MotionBackendStatus(sinkSupportedForType: true, backendOk: true)
+        XCTAssertEqual(model.shellFacts.controllers.first?.motion, MotionFact(carries: true, status: good))
+        model.unbind(slotId: "pad")
+        XCTAssertEqual(model.shellFacts.controllers.first?.motion, MotionFact(carries: false, status: nil))
+    }
 }

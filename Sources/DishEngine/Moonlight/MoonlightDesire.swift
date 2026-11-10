@@ -43,13 +43,14 @@ enum MoonlightDesire {
     }
 
     /// Every Moonlight host's pads from the bindings: a slot bound to a host
-    /// the manager knows, whose pad is present. The pick per pad beats the
-    /// host's own; the switches are the slot's under the global ones.
+    /// the manager knows, whose pad is present. The type the pad's binding
+    /// holds (a pick it was bound with, or the one made on its page) beats
+    /// the host's own; the switches are the slot's under the global ones.
     static func desiredPads(
         bindings: [String: String],
         hostIds: Set<String>,
         slots: [ControllerSlot],
-        picks: [String: EmulatedPad],
+        bindingTypes: [String: Int],
         hostTypes: (String) -> Int,
         preferences: [String: SlotPreferences],
         global: ForwardingFlags
@@ -58,7 +59,7 @@ enum MoonlightDesire {
         for (slotId, hostId) in bindings.sorted(by: { $0.key < $1.key }) where hostIds.contains(hostId) {
             guard let slot = slots.first(where: { $0.id == slotId }) else { continue }
             let flags = effectiveFlags(global: global, slot: preferences[slotId] ?? SlotPreferences())
-            let type = picks[slotId].map { Int(controllerType($0)) } ?? hostTypes(hostId)
+            let type = bindingTypes[slotId] ?? hostTypes(hostId)
             out[hostId, default: []].append(request(slotId: slotId, capabilities: slot.capabilities, storedType: type, flags: flags))
         }
         return out

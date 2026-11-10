@@ -109,6 +109,48 @@ extension L10n {
         catalog.text("No session right now")
     }
 
+    // MARK: - A Moonlight host's card
+
+    var sessionIdle: String {
+        catalog.text("Idle")
+    }
+
+    var sessionLaunching: String {
+        catalog.text("Launching")
+    }
+
+    var sessionLive: String {
+        catalog.text("Live")
+    }
+
+    var sessionEnded: String {
+        catalog.text("Ended")
+    }
+
+    var hostName: String {
+        catalog.text("Host name")
+    }
+
+    var hostApp: String {
+        catalog.text("Host app")
+    }
+
+    var gfeVersion: String {
+        catalog.text("GFE version")
+    }
+
+    var runningApp: String {
+        catalog.text("Running app")
+    }
+
+    var controlRoundTrip: String {
+        catalog.text("Control round trip")
+    }
+
+    func padNumber(_ number: Int) -> String {
+        catalog.format("Pad %lld", number)
+    }
+
     var epoch: String {
         catalog.text("Epoch")
     }

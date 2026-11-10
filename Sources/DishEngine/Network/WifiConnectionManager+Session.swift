@@ -253,10 +253,19 @@ extension WifiConnectionManager {
         guard let slotId = conn.slotId(at: index) else { return }
         if let applied, applied.slotIsLive {
             conn.markSlotApplied(slotId)
+            recordMotionStatus(applied, connectionId: conn.id, slotId: slotId)
             onSlotApplied?(conn.id, slotId)
         } else {
             reportSlotNotApplied(slotId)
         }
+    }
+
+    /// The satellite's word on motion for the binding it just applied.
+    private func recordMotionStatus(_ applied: ControllerApplyDto, connectionId: String, slotId: String) {
+        motionStatus.setStatus(
+            MotionBackendStatus(sinkSupportedForType: applied.motionSinkSupportedForType, backendOk: applied.motionBackendOk),
+            for: SlotKey(connectionId: connectionId, slotId: slotId)
+        )
     }
 
     /// Each descriptor's type is resolved as a PUT is built, against the

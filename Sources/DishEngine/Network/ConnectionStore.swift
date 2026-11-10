@@ -28,6 +28,12 @@ package final class ConnectionStore {
         self.pins = pins
     }
 
+    /// The satellite bindings kept across restarts, over the same defaults.
+    @MainActor
+    var bindingMemory: BindingMemoryStore {
+        BindingMemoryStore(defaults: defaults)
+    }
+
     // MARK: - Device id
 
     /// Stable per-install id, made once. Not a secret: it rides every REST

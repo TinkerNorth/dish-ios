@@ -76,7 +76,7 @@ final class MoonlightDesireTests: XCTestCase {
             bindings: ["ds": hostId, "xb": "mid:sat", "gone": hostId, "nin": "moonlight:10.0.0.9"],
             hostIds: [hostId],
             slots: [slot("ds", dualSense), slot("xb", ControllerCapabilities()), slot("nin", ControllerCapabilities())],
-            picks: ["ds": .switchPro],
+            bindingTypes: ["ds": Int(MoonlightControllerType.nintendo)],
             hostTypes: { _ in Int(MoonlightControllerType.playStation) },
             preferences: ["ds": SlotPreferences(rumble: false)],
             global: ForwardingFlags()
@@ -86,14 +86,14 @@ final class MoonlightDesireTests: XCTestCase {
         XCTAssertEqual(
             desired[hostId]?.first?.announced.type,
             MoonlightControllerType.nintendo,
-            "the pick per pad beats the host's own"
+            "the type the pad's binding holds beats the host's own"
         )
         XCTAssertEqual(desired[hostId]?.first?.announced.capabilities, 0x47, "Nintendo sits on the Xbox ceiling; rumble is a hardware fact")
         let hostPick = MoonlightDesire.desiredPads(
             bindings: ["ds": hostId],
             hostIds: [hostId],
             slots: [slot("ds", dualSense)],
-            picks: [:],
+            bindingTypes: [:],
             hostTypes: { _ in Int(MoonlightControllerType.playStation) },
             preferences: [:],
             global: ForwardingFlags()
@@ -103,7 +103,7 @@ final class MoonlightDesireTests: XCTestCase {
             bindings: ["ds": hostId],
             hostIds: [hostId],
             slots: [slot("ds", dualSense)],
-            picks: [:],
+            bindingTypes: [:],
             hostTypes: { _ in Int(MoonlightControllerType.auto) },
             preferences: ["ds": SlotPreferences(motion: false)],
             global: ForwardingFlags()

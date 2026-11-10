@@ -40,6 +40,32 @@ package struct ControllerFeatureFact: Equatable {
     }
 }
 
+/// What the Motion row needs of the PC: whether the pad's PC carries motion
+/// now (its session is up), and the satellite's word from the last apply,
+/// nil until it has given one.
+package struct MotionFact: Equatable {
+    package let carries: Bool
+    package let status: MotionBackendStatus?
+
+    package init(carries: Bool, status: MotionBackendStatus?) {
+        self.carries = carries
+        self.status = status
+    }
+}
+
+/// What a pad on a Moonlight host is emulated as, in the protocol's own
+/// numbering (0 Auto, 1 Xbox, 2 PlayStation, 3 Nintendo): the type its
+/// binding holds, and whether the person picked it over the host's own.
+package struct HostEmulationFact: Equatable {
+    package let type: Int
+    package let isOverride: Bool
+
+    package init(type: Int, isOverride: Bool) {
+        self.type = type
+        self.isOverride = isOverride
+    }
+}
+
 /// A controller Dish knows: a pad on a link, or the on-screen gamepad.
 package struct ControllerFact: Equatable, Identifiable {
     package let id: String
@@ -57,6 +83,10 @@ package struct ControllerFact: Equatable, Identifiable {
     /// False for a pad iOS lists without the extended profile, which Dish
     /// cannot read.
     package let supported: Bool
+    /// The PC's side of the Motion row.
+    package let motion: MotionFact
+    /// Nil unless the controller is bound to a Moonlight host.
+    package let hostEmulation: HostEmulationFact?
 
     package init(
         id: String,
@@ -67,7 +97,9 @@ package struct ControllerFact: Equatable, Identifiable {
         family: PadFamily = .other,
         emulateAs: EmulatedPad = .xboxWireless,
         features: [ControllerFeatureFact] = [],
-        supported: Bool = true
+        supported: Bool = true,
+        motion: MotionFact = MotionFact(carries: false, status: nil),
+        hostEmulation: HostEmulationFact? = nil
     ) {
         self.id = id
         self.name = name
@@ -78,6 +110,8 @@ package struct ControllerFact: Equatable, Identifiable {
         self.emulateAs = emulateAs
         self.features = features
         self.supported = supported
+        self.motion = motion
+        self.hostEmulation = hostEmulation
     }
 }
 

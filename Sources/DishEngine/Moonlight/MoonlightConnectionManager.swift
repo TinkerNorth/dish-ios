@@ -125,6 +125,9 @@ package final class MoonlightConnectionManager {
     package internal(set) var sessionHostIds: Set<String> = []
     package internal(set) var pairingInFlight: Set<String> = []
     package internal(set) var rememberedHosts: [RememberedMoonlightHost] = []
+    /// The pad bindings kept across restarts, mirrored so a pick drawn from
+    /// one re-renders.
+    var rememberedBindings: [RememberedMoonlightBinding] = []
     /// What each host last said about itself, for the diagnostics.
     var hostFacts: [String: MoonlightServerInfo] = [:]
     /// The apps each host listed the last time a probe read them: what the
@@ -170,6 +173,7 @@ package final class MoonlightConnectionManager {
         self.random = random
         self.nonce = nonce
         rememberedHosts = store.hosts()
+        rememberedBindings = store.bindings()
     }
 
     func get(_ id: String) -> MoonlightConnection? {
