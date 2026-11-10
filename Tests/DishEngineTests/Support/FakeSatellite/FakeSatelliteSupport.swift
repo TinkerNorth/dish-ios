@@ -7,6 +7,7 @@
 import CryptoKit
 import Foundation
 import Network
+import Security
 
 /// Close-notify reasons (contract §UDP messages, opcode 0x000F).
 enum FakeSatelliteCloseReason: UInt8 {
@@ -263,7 +264,40 @@ enum FakeSatelliteNet {
         case notReady(String)
     }
 
-    static func startAndAwaitReady(_ listener: NWListener, queue: DispatchQueue, timeout: TimeInterval = 5) throws -> UInt16 {
+    /// One connection to the REST port before any test uses it, so the
+    /// process pays the network stack's and the identity's cold cost here:
+    /// a fresh runner spends seconds on its first TLS handshake, which would
+    /// otherwise land inside a test's wait. Best effort; the tests' own
+    /// waits report what it could not absorb.
+    static func warmTransport(port rawPort: UInt16, tls: Bool, timeout: TimeInterval = 30) {
+        guard let port = NWEndpoint.Port(rawValue: rawPort) else { return }
+        let parameters: NWParameters
+        if tls {
+            let options = NWProtocolTLS.Options()
+            sec_protocol_options_set_verify_block(
+                options.securityProtocolOptions,
+                { _, _, complete in complete(true) },
+                DispatchQueue(label: "dish.fake.warm.verify")
+            )
+            parameters = NWParameters(tls: options)
+        } else {
+            parameters = NWParameters.tcp
+        }
+        let connection = NWConnection(host: .ipv4(.loopback), port: port, using: parameters)
+        let settled = DispatchSemaphore(value: 0)
+        connection.stateUpdateHandler = { state in
+            switch state {
+            case .ready, .failed, .cancelled: settled.signal()
+            case .setup, .waiting, .preparing: break
+            @unknown default: break
+            }
+        }
+        connection.start(queue: DispatchQueue(label: "dish.fake.warm"))
+        _ = settled.wait(timeout: .now() + timeout)
+        connection.cancel()
+    }
+
+    static func startAndAwaitReady(_ listener: NWListener, queue: DispatchQueue, timeout: TimeInterval = 20) throws -> UInt16 {
         let semaphore = DispatchSemaphore(value: 0)
         let failure = Locked<String?>(nil)
         listener.stateUpdateHandler = { state in

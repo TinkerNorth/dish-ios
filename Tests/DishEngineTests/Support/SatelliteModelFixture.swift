@@ -102,7 +102,9 @@ final class SatelliteModelFixture {
         return await waitUntil { !self.network.wifi.isScanning && self.network.wifi.localNetworkDenied != nil }
     }
 
-    func waitUntil(timeout: TimeInterval = 5, _ predicate: () -> Bool) async -> Bool {
+    /// Polls every 20 ms; the default is generous because a fresh CI runner
+    /// spends seconds on its first session, and a pass costs no waiting.
+    func waitUntil(timeout: TimeInterval = 20, _ predicate: () -> Bool) async -> Bool {
         let deadline = Date().addingTimeInterval(timeout)
         while Date() < deadline {
             if predicate() { return true }

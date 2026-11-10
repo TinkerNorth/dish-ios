@@ -66,6 +66,7 @@ final class FakeSatellite: @unchecked Sendable {
     func start() throws -> Ports {
         let udpPort = try udp.start()
         let restPort = try rest.start()
+        FakeSatelliteNet.warmTransport(port: restPort, tls: transport == .https)
         let ports = Ports(rest: restPort, udp: udpPort)
         self.ports = ports
         return ports
