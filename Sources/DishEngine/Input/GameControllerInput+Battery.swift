@@ -35,8 +35,7 @@ func batteryPoll(secondsSinceAttach seconds: Int) -> BatteryPoll? {
 /// A controller's own `GCDeviceBattery` as a reading: `level` 0...1 to a
 /// percentage, a negative level (unknown) to none.
 func batteryReading(level: Float, state: GCDeviceBattery.State) -> BatteryReading {
-    let percent = level < 0 ? nil : Int(min(level, 1) * 100.0 + 0.5)
-    return BatteryReading(level: percent, state: batteryChargeState(state))
+    BatteryReading(level: batteryPercent(level), state: batteryChargeState(state))
 }
 
 func batteryChargeState(_ state: GCDeviceBattery.State) -> BatteryChargeState {
@@ -50,8 +49,9 @@ func batteryChargeState(_ state: GCDeviceBattery.State) -> BatteryChargeState {
 }
 
 /// The battery cadence of `GameControllerInput`: one main-actor tick a
-/// second while any pad is attached. iOS gives the engine no host battery to
-/// stand in for a pad without one, so such a pad reports none.
+/// second while any pad is attached. Each sample weighs the pad's own
+/// battery against the device's (`routeBattery`): the card keeps the pad's,
+/// and the host is sent the lower, or the device's for a pad without one.
 extension GameControllerInput {
 
     func startBatteryClock(deviceId: String) {
@@ -77,23 +77,29 @@ extension GameControllerInput {
         }
     }
 
-    /// Reads the pad's battery and forwards it as the poll says: the steady
-    /// sample always, the watch only on a changed charge state.
+    /// Reads the pad's own battery, none for a pad without one, and forwards
+    /// it as the poll says.
     func emitBattery(deviceId: String, poll: BatteryPoll) {
-        guard let battery = controllersById[deviceId]?.battery else { return }
-        forwardBattery(deviceId: deviceId, reading: batteryReading(level: battery.batteryLevel, state: battery.batteryState), poll: poll)
+        guard let controller = controllersById[deviceId] else { return }
+        let pad = controller.battery.map { batteryReading(level: $0.batteryLevel, state: $0.batteryState) }
+        forwardBattery(deviceId: deviceId, pad: pad, poll: poll)
     }
 
-    func forwardBattery(deviceId: String, reading: BatteryReading, poll: BatteryPoll) {
-        let changed = lastBatteryState[deviceId] != reading.state
+    /// The card takes the pad's own reading and the host the routed one: the
+    /// steady sample always, the watch only when the charge state the host
+    /// is sent changed.
+    func forwardBattery(deviceId: String, pad: BatteryReading?, poll: BatteryPoll) {
+        let routed = routeBattery(pad: pad, device: deviceBattery.reading)
+        guard let sent = routed.wire else { return }
+        let changed = lastBatteryState[deviceId] != sent.state
         switch poll {
         case .steady: break
         case .watch: guard changed else { return }
         }
-        lastBatteryState[deviceId] = reading.state
-        if let index = slots.firstIndex(where: { $0.id == deviceId }) {
-            updateBattery(reading, at: index)
+        lastBatteryState[deviceId] = sent.state
+        if let display = routed.display, let index = slots.firstIndex(where: { $0.id == deviceId }) {
+            updateBattery(display, at: index)
         }
-        processor.publishBattery(deviceId: deviceId, reading: reading)
+        processor.publishBattery(deviceId: deviceId, reading: sent)
     }
 }

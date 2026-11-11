@@ -27,6 +27,8 @@ package final class GameControllerInput: ControllerSource {
     let padActuators: PadActuators
     /// Drives the battery cadence once a second while a pad is attached.
     @ObservationIgnored let batteryTicker: any Ticker
+    /// The iPhone's or iPad's own battery, which competes with each pad's.
+    @ObservationIgnored let deviceBattery: any DeviceBattery
     /// Each pad's seconds since it attached and its last forwarded charge
     /// state, for the battery cadence.
     @ObservationIgnored var batteryClocks: [String: Int] = [:]
@@ -42,11 +44,13 @@ package final class GameControllerInput: ControllerSource {
     @ObservationIgnored private let center: NotificationCenter
 
     /// `connected` is the launch sweep, the framework's list unless a test
-    /// hands in its own; `center` carries the connect and disconnect messages.
+    /// hands in its own; `center` carries the connect and disconnect messages;
+    /// `deviceBattery` is the scene's.
     package init(
         connected: [GCController] = GCController.controllers(),
         center: NotificationCenter = .default,
-        batteryTicker: any Ticker = TimerTicker()
+        batteryTicker: any Ticker = TimerTicker(),
+        deviceBattery: any DeviceBattery = InertDeviceBattery()
     ) {
         let actuators = PadActuators(queue: ThreadRole.feedback.queue(label: "dish.feedback", qos: .userInteractive))
         padActuators = actuators
@@ -54,6 +58,7 @@ package final class GameControllerInput: ControllerSource {
         processor = GamepadInputProcessor()
         self.center = center
         self.batteryTicker = batteryTicker
+        self.deviceBattery = deviceBattery
         observers.append(center.addObserver(of: GCController.self, for: .didConnect) { [weak self] message in
             self?.attach(message.controller)
         })

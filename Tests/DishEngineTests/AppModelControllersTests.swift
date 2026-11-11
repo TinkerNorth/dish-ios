@@ -163,4 +163,13 @@ final class AppModelControllersTests: XCTestCase {
         XCTAssertEqual(defaults.object(forKey: "feature_rumble_enabled") as? Bool, false)
         XCTAssertEqual(defaults.string(forKey: "feature_lightbar_mode"), "off")
     }
+
+    /// The scene fills the seam with the device's own battery; the bridge
+    /// the model builds is the one that weighs it against each pad's.
+    func testTheModelHandsTheDevicesBatteryToTheBridgeItBuilds() throws {
+        let battery = FakeDeviceBattery(BatteryReading(level: 30, state: .discharging))
+        let model = try AppModel(defaults: TestDefaults.fresh(self), deviceBattery: battery)
+        let bridge = try XCTUnwrap(model.pads.source as? GameControllerInput)
+        XCTAssertTrue(bridge.deviceBattery === battery)
+    }
 }

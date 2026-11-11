@@ -18,8 +18,12 @@ final class GameControllerInputTests: XCTestCase {
         return try (controller, XCTUnwrap(controller.extendedGamepad))
     }
 
-    private func input(connected: [GCController] = [], center: NotificationCenter = NotificationCenter()) -> GameControllerInput {
-        GameControllerInput(connected: connected, center: center, batteryTicker: ManualTicker())
+    private func input(
+        connected: [GCController] = [],
+        center: NotificationCenter = NotificationCenter(),
+        deviceBattery: any DeviceBattery = InertDeviceBattery()
+    ) -> GameControllerInput {
+        GameControllerInput(connected: connected, center: center, batteryTicker: ManualTicker(), deviceBattery: deviceBattery)
     }
 
     private func spinUntil(_ predicate: () -> Bool, message: String) {
@@ -189,10 +193,10 @@ final class GameControllerInputTests: XCTestCase {
         let recorder = InputRecorder()
         input.processor.route(recorder.route)
         let discharging = BatteryReading(level: 50, state: .discharging)
-        input.forwardBattery(deviceId: id, reading: discharging, poll: .steady)
-        input.forwardBattery(deviceId: id, reading: discharging, poll: .watch)
-        input.forwardBattery(deviceId: id, reading: BatteryReading(level: 50, state: .charging), poll: .watch)
-        input.forwardBattery(deviceId: id, reading: BatteryReading(level: 51, state: .charging), poll: .steady)
+        input.forwardBattery(deviceId: id, pad: discharging, poll: .steady)
+        input.forwardBattery(deviceId: id, pad: discharging, poll: .watch)
+        input.forwardBattery(deviceId: id, pad: BatteryReading(level: 50, state: .charging), poll: .watch)
+        input.forwardBattery(deviceId: id, pad: BatteryReading(level: 51, state: .charging), poll: .steady)
         XCTAssertEqual(recorder.batteries.map(\.reading.level), [50, 50, 51])
         XCTAssertEqual(input.slots.first?.battery, BatteryReading(level: 51, state: .charging), "the slot shows the last reading")
     }
@@ -204,5 +208,71 @@ final class GameControllerInputTests: XCTestCase {
         XCTAssertEqual(ticker.starts, [1])
         input.detach(controller)
         XCTAssertFalse(ticker.running)
+    }
+
+    // MARK: - The battery rule
+
+    /// The snapshot pad reports no battery, as a pad without one does: the
+    /// first steady sample sends its host the device's, and its card stays
+    /// empty.
+    func testAPadWithNoBatterySendsTheDevicesOnTheClockAndItsCardStaysEmpty() throws {
+        let ticker = ManualTicker()
+        let (controller, _) = try snapshotPad()
+        XCTAssertNil(controller.battery, "the snapshot pad has no battery of its own")
+        let device = BatteryReading(level: 55, state: .full)
+        let input = GameControllerInput(
+            connected: [controller],
+            center: NotificationCenter(),
+            batteryTicker: ticker,
+            deviceBattery: FakeDeviceBattery(device)
+        )
+        let recorder = InputRecorder()
+        input.processor.route(recorder.route)
+        ticker.fire()
+        XCTAssertEqual(recorder.batteries.map(\.reading), [device], "a second after the attach, the steady sample")
+        XCTAssertNil(input.slots.first?.battery, "the card shows the pad's own battery, and it has none")
+    }
+
+    func testThePadsHostIsSentTheLowerBatteryAndItsCardKeepsThePadsOwn() throws {
+        let (controller, _) = try snapshotPad()
+        let device = BatteryReading(level: 60, state: .charging)
+        let input = input(connected: [controller], deviceBattery: FakeDeviceBattery(device))
+        let id = input.slotId(for: controller)
+        let recorder = InputRecorder()
+        input.processor.route(recorder.route)
+        let low = BatteryReading(level: 20, state: .discharging)
+        let high = BatteryReading(level: 90, state: .discharging)
+        input.forwardBattery(deviceId: id, pad: low, poll: .steady)
+        input.forwardBattery(deviceId: id, pad: high, poll: .steady)
+        XCTAssertEqual(recorder.batteries.map(\.reading), [low, device], "the lower each time, with its own charge state")
+        XCTAssertEqual(input.slots.first?.battery, high, "the card keeps the pad's own reading")
+    }
+
+    /// The watch forwards a change of what the host is sent: the pad's own
+    /// charging is not it while the device's battery wins, the device's is.
+    func testTheWatchFollowsTheChargeStateTheHostIsSent() throws {
+        let (controller, _) = try snapshotPad()
+        let device = FakeDeviceBattery(BatteryReading(level: 40, state: .discharging))
+        let input = input(connected: [controller], deviceBattery: device)
+        let id = input.slotId(for: controller)
+        let recorder = InputRecorder()
+        input.processor.route(recorder.route)
+        input.forwardBattery(deviceId: id, pad: BatteryReading(level: 90, state: .discharging), poll: .steady)
+        input.forwardBattery(deviceId: id, pad: BatteryReading(level: 90, state: .charging), poll: .watch)
+        device.reading = BatteryReading(level: 40, state: .charging)
+        input.forwardBattery(deviceId: id, pad: BatteryReading(level: 90, state: .charging), poll: .watch)
+        XCTAssertEqual(
+            recorder.batteries.map(\.reading),
+            [BatteryReading(level: 40, state: .discharging), BatteryReading(level: 40, state: .charging)]
+        )
+    }
+
+    func testNoBatteryOnEitherSideSendsNothing() throws {
+        let (controller, _) = try snapshotPad()
+        let input = input(connected: [controller])
+        let recorder = InputRecorder()
+        input.processor.route(recorder.route)
+        input.emitBattery(deviceId: input.slotId(for: controller), poll: .steady)
+        XCTAssertTrue(recorder.batteries.isEmpty)
     }
 }

@@ -41,23 +41,6 @@ package struct ControllerCapabilities: Hashable {
     package static let none = ControllerCapabilities()
 }
 
-/// Charging state for a battery reading, from `GCDeviceBattery.State`.
-package enum BatteryChargeState: Hashable {
-    case unknown, discharging, charging, full
-}
-
-/// A battery reading. `level` is 0...100, or nil when the controller
-/// reports a state but not a percentage.
-package struct BatteryReading: Hashable {
-    package var level: Int?
-    package var state: BatteryChargeState = .unknown
-
-    package init(level: Int? = nil, state: BatteryChargeState = .unknown) {
-        self.level = level
-        self.state = state
-    }
-}
-
 /// The physical pad's family, decided once at attach from the framework's
 /// product category. It picks the type the pad is emulated as. The
 /// framework exports constants for the first three; Nintendo's pads are
