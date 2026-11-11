@@ -122,4 +122,45 @@ final class AppModelControllersTests: XCTestCase {
         source.processor.feed(for: "pad").publish(GamepadReport(lx: 15000))
         XCTAssertEqual(recorder.reports.map(\.report.lx), [0])
     }
+
+    func testEachTunedPadsDeadZonesAreFactsAndAResetForgetsThem() throws {
+        let (model, _) = try model([dualSense])
+        XCTAssertEqual(model.shellFacts.deadzones, [:], "a pad never tuned has no entry, so it reads the defaults")
+        model.setStickDeadzone(percent: 20, slotId: dualSense.id)
+        model.setTriggerDeadzone(percent: 12, slotId: dualSense.id)
+        XCTAssertEqual(model.shellFacts.deadzones[dualSense.id]?.stickPercent, 20)
+        XCTAssertEqual(model.shellFacts.deadzones[dualSense.id]?.triggerPercent, 12)
+        model.resetDeadzones(slotId: dualSense.id)
+        XCTAssertEqual(model.shellFacts.deadzones, [:])
+    }
+
+    func testTheGlobalSwitchesAreFactsAndOverrideEveryPadsOwn() throws {
+        let (model, _) = try model([dualSense])
+        XCTAssertEqual(model.shellFacts.forwarding, ForwardingFlags(), "a fresh install has everything on")
+        model.setRumbleForwarded(false)
+        model.setTouchpadForwarded(false)
+        model.setMotionForwarded(false)
+        model.setLightbarMode(.off)
+        XCTAssertEqual(
+            model.shellFacts.forwarding,
+            ForwardingFlags(motion: false, touchpad: false, rumble: false, lightbar: false, triggerEffects: true, playerLeds: true)
+        )
+        let flags = model.forwardingFlags(slotId: dualSense.id)
+        XCTAssertFalse(flags.rumble)
+        XCTAssertFalse(flags.touchpad)
+        XCTAssertFalse(flags.motion)
+        XCTAssertFalse(flags.lightbar)
+        XCTAssertTrue(flags.triggerEffects, "the pad's own switch still decides what has no global one")
+        model.setRumbleForwarded(true)
+        XCTAssertTrue(model.forwardingFlags(slotId: dualSense.id).rumble)
+    }
+
+    func testTheGlobalSwitchesAreKeptUnderTheDesktopsKeys() throws {
+        let defaults = try TestDefaults.fresh(self)
+        let model = AppModel(defaults: defaults, controllerSource: FakeControllerSource())
+        model.setRumbleForwarded(false)
+        model.setLightbarMode(.off)
+        XCTAssertEqual(defaults.object(forKey: "feature_rumble_enabled") as? Bool, false)
+        XCTAssertEqual(defaults.string(forKey: "feature_lightbar_mode"), "off")
+    }
 }

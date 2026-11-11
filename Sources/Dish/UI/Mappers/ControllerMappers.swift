@@ -113,6 +113,20 @@ struct ControllerFunctionsState: Equatable {
     let rows: [ControllerFunctionRowState]
 }
 
+/// One rate of TELEMETRY: the stream and its rate.
+struct TelemetryRowState: Equatable, Identifiable {
+    let id: String
+    let label: String
+    let value: String
+}
+
+/// TELEMETRY: the rates of the streams the pad has, read off the same
+/// trackers Diagnostics shows.
+struct ControllerTelemetryState: Equatable {
+    let title: String
+    let rows: [TelemetryRowState]
+}
+
 /// The page for a pad that is attached.
 struct ControllerPadState: Equatable {
     let id: String
@@ -125,6 +139,10 @@ struct ControllerPadState: Equatable {
     /// The on-screen controller's Open, which raises its gamepad; nil for a pad.
     let open: String?
     let footnote: String
+    /// The row that pushes the Dead zones page; nil for the on-screen gamepad.
+    let deadZones: String?
+    /// Nil until the pad has sent a report.
+    let telemetry: ControllerTelemetryState?
 }
 
 enum ControllerContent: Equatable {
@@ -147,6 +165,7 @@ func controllerPageState(
     controllers: [ControllerFact],
     paired: [ConnectionFact] = [],
     apply: ApplyFact? = nil,
+    pads: [PadDiagnostics] = [],
     id: String,
     words: L10n = .app
 ) -> ControllerPageState {
@@ -160,7 +179,7 @@ func controllerPageState(
     return ControllerPageState(
         title: controllerName(controller, words: words),
         subtitle: controllerSubtitle(controller, words: words),
-        content: .pad(controllerPadState(controller, paired: paired, apply: apply, words: words))
+        content: .pad(controllerPadState(controller, paired: paired, apply: apply, pads: pads, words: words))
     )
 }
 
@@ -173,6 +192,7 @@ private func controllerPadState(
     _ controller: ControllerFact,
     paired: [ConnectionFact],
     apply: ApplyFact?,
+    pads: [PadDiagnostics],
     words: L10n
 ) -> ControllerPadState {
     let rows = controller.features.map { functionRow($0, of: controller, words: words) }
@@ -196,8 +216,30 @@ private func controllerPadState(
         apply: applyRowState(apply, slotId: controller.id, words: words),
         functions: rows.isEmpty ? nil : ControllerFunctionsState(title: words.functions, rows: rows),
         open: opensPlay(controller.link) ? words.open : nil,
-        footnote: words.noPadAudio
+        footnote: words.noPadAudio,
+        deadZones: hasDeadZones(controller.link) ? words.deadZones : nil,
+        telemetry: telemetryState(controller, readings: pads, words: words)
     )
+}
+
+/// The on-screen gamepad has no stick drift to tune out.
+private func hasDeadZones(_ link: ControllerLink) -> Bool {
+    switch link {
+    case .usbC, .bluetooth: true
+    case .onScreen: false
+    }
+}
+
+/// TELEMETRY once the pad has sent a report: the report rate always, and the
+/// motion and touch rates when the pad has the hardware for them.
+private func telemetryState(_ controller: ControllerFact, readings: [PadDiagnostics], words: L10n) -> ControllerTelemetryState? {
+    guard let reading = readings.first(where: { $0.controller.id == controller.id }), reading.reports > 0 else { return nil }
+    let has = Set(controller.features.map(\.feature))
+    let gamepad = TelemetryRowState(id: "gamepad", label: words.gamepad, value: words.hertz(reading.rates.reportHz))
+    let motion = TelemetryRowState(id: "motion", label: words.setupMotion, value: words.hertz(reading.rates.motionHz))
+    let touch = TelemetryRowState(id: "touch", label: words.touch, value: words.hertz(reading.rates.touchHz))
+    let rows = [gamepad] + (has.contains(.motion) ? [motion] : []) + (has.contains(.touchpad) ? [touch] : [])
+    return ControllerTelemetryState(title: words.telemetry, rows: rows)
 }
 
 /// The protocol's picker for a pad bound to a Moonlight host; nil for any

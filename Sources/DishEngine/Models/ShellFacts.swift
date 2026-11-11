@@ -36,6 +36,10 @@ package struct ShellFacts: Equatable {
     package let apply: ApplyFact?
     /// The PC added by its address this run, by id; nil until one is.
     package let addedByAddress: String?
+    /// The dead zones of each pad tuned; a pad with no entry reads the defaults.
+    package let deadzones: [String: DeadzoneSetting]
+    /// The global switches above every pad's own.
+    package let forwarding: ForwardingFlags
 
     package init(
         controllers: [ControllerFact],
@@ -53,7 +57,9 @@ package struct ShellFacts: Equatable {
         diagnostics: DiagnosticsSnapshot = DiagnosticsSnapshot(),
         diagnosticsEvents: [DiagnosticsEvent] = [],
         apply: ApplyFact? = nil,
-        addedByAddress: String? = nil
+        addedByAddress: String? = nil,
+        deadzones: [String: DeadzoneSetting] = [:],
+        forwarding: ForwardingFlags = ForwardingFlags()
     ) {
         self.controllers = controllers
         self.attachedPads = attachedPads
@@ -71,5 +77,7 @@ package struct ShellFacts: Equatable {
         self.diagnosticsEvents = diagnosticsEvents
         self.apply = apply
         self.addedByAddress = addedByAddress
+        self.deadzones = deadzones
+        self.forwarding = forwarding
     }
 }

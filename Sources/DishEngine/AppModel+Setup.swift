@@ -69,7 +69,7 @@ package extension AppModel {
     private func run(_ effect: SetupEffect) {
         switch effect {
         case .askLocalNetwork: askLocalNetwork()
-        case .scan: localNetwork.scan()
+        case .scan: scanAfterThePrimer()
         case let .bind(draft):
             adoptOnScreen(draft)
             bindDraft(draft)
@@ -80,8 +80,15 @@ package extension AppModel {
     /// The first browse makes iOS put its question; the walk moves on when
     /// the status leaves unknown.
     private func askLocalNetwork() {
+        onboarding.markLocalNetworkPrimed()
         localNetwork.ask()
         awaitLocalNetworkAnswer()
+    }
+
+    /// The walk's own scan comes after the question was asked or answered.
+    private func scanAfterThePrimer() {
+        onboarding.markLocalNetworkPrimed()
+        localNetwork.scan()
     }
 
     private func awaitLocalNetworkAnswer() {

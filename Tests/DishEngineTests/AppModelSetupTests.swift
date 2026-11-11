@@ -134,6 +134,27 @@ final class AppModelSetupTests: XCTestCase {
         XCTAssertEqual(access.scans, 1)
     }
 
+    func testThePrimerBeingAnsweredMarksItSeenSoTheConnectionsTabMayScan() throws {
+        let model = try model(AnsweredLocalNetworkAccess(status: .unknown))
+        XCTAssertFalse(model.onboarding.state.localNetworkPrimed)
+        model.startSetup(.input)
+        model.pickSetupInput(pad)
+        XCTAssertFalse(model.onboarding.state.localNetworkPrimed, "reading the primer is not asking")
+        model.setupNext()
+        XCTAssertTrue(model.onboarding.state.localNetworkPrimed)
+    }
+
+    /// Settings › Setup guide, with iOS asked already, walks past the
+    /// primer straight to Pick your PC, whose scan is the question's answer.
+    func testAGuideWalkedAfterIOSWasAskedMarksTheQuestionExplainedToo() throws {
+        let model = try model(AnsweredLocalNetworkAccess(status: .allowed))
+        model.startSetup(.welcome)
+        model.setupNext()
+        model.pickSetupInput(pad)
+        XCTAssertEqual(model.setup?.step, .pickPC)
+        XCTAssertTrue(model.onboarding.state.localNetworkPrimed)
+    }
+
     func testPickingAPCAndEditingTheDraftReachReview() throws {
         let model = try model(AnsweredLocalNetworkAccess(status: .allowed))
         model.startSetup(.input)

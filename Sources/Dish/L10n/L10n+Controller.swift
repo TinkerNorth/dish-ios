@@ -44,6 +44,46 @@ extension L10n {
         catalog.text("Player LEDs")
     }
 
+    // MARK: - Dead zones
+
+    var deadZones: String {
+        catalog.text("Dead zones")
+    }
+
+    var stickDeadZone: String {
+        catalog.text("Stick dead zone")
+    }
+
+    var triggerDeadZone: String {
+        catalog.text("Trigger dead zone")
+    }
+
+    var resetToDefaults: String {
+        catalog.text("Reset to defaults")
+    }
+
+    func resetDeadZonesFor(_ pad: String) -> String {
+        catalog.format("Reset dead zones for %@", pad)
+    }
+
+    func percent(_ value: Int) -> String {
+        catalog.format("%lld%%", value)
+    }
+
+    var overridesArePerDevice: String {
+        catalog.text("Overrides are stored per device and take effect immediately.")
+    }
+
+    // MARK: - Telemetry
+
+    var telemetry: String {
+        catalog.text("Telemetry")
+    }
+
+    var touch: String {
+        catalog.text("Touch")
+    }
+
     // MARK: - The Motion row
 
     var motionNoGyroscope: String {

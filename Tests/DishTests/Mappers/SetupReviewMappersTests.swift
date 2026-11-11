@@ -109,6 +109,17 @@ final class SetupReviewMappersTests: XCTestCase {
         XCTAssertEqual(unheard.pc?.name, "A PC by address", "an address not yet paired is still the generic PC")
     }
 
+    /// Added by its address and listed as found, a PC with no name yet is
+    /// named by its address on Review until pairing names it.
+    func testAPCAddedByAddressIsNamedByItsAddressUntilPairingNamesIt() {
+        let inputs = SetupFixture.inputs(found: [SetupFixture.typed], byAddress: SetupFixture.typed.id)
+        let state = review(.wired, .byAddress, inputs: inputs)
+        XCTAssertEqual(
+            state.pc,
+            ReviewEndState(symbol: "desktopcomputer", name: "192.168.1.50", detail: "Needs pairing", dot: DishTheme.warning)
+        )
+    }
+
     // MARK: - What carries, per emulated pad
 
     func testADualSenseCarriesMotionTouchpadTriggersAndTheLightBar() {

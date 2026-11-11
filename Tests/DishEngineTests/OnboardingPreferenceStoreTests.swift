@@ -35,4 +35,27 @@ final class OnboardingPreferenceStoreTests: XCTestCase {
         store.markWelcomeComplete()
         XCTAssertFalse(defaults.bool(forKey: OnboardingPreferenceStore.welcomeCompletedKey), "a repeat set is a no-op")
     }
+
+    func testAFreshInstallHasNotSeenTheLocalNetworkPrimer() throws {
+        let store = try OnboardingPreferenceStore(defaults: TestDefaults.fresh(self))
+        XCTAssertFalse(store.state.localNetworkPrimed)
+    }
+
+    func testThePrimedFlagIsReadUnderDishMacsKey() throws {
+        let defaults = try TestDefaults.fresh(self)
+        defaults.set(true, forKey: "local_network_primed")
+        XCTAssertTrue(OnboardingPreferenceStore(defaults: defaults).state.localNetworkPrimed)
+        XCTAssertFalse(OnboardingPreferenceStore(defaults: defaults).state.welcomeCompleted, "the two flags are separate")
+    }
+
+    func testMarkingThePrimerSeenPersistsPublishesAndWritesOnce() throws {
+        let defaults = try TestDefaults.fresh(self)
+        let store = OnboardingPreferenceStore(defaults: defaults)
+        store.markLocalNetworkPrimed()
+        XCTAssertTrue(store.state.localNetworkPrimed)
+        XCTAssertTrue(OnboardingPreferenceStore(defaults: defaults).state.localNetworkPrimed, "a relaunch reads it back")
+        defaults.removeObject(forKey: OnboardingPreferenceStore.localNetworkPrimedKey)
+        store.markLocalNetworkPrimed()
+        XCTAssertFalse(defaults.bool(forKey: OnboardingPreferenceStore.localNetworkPrimedKey), "a repeat set is a no-op")
+    }
 }

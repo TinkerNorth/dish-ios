@@ -83,4 +83,32 @@ final class SettingsMappersTests: XCTestCase {
             licenses: "Open source licenses"
         ))
     }
+
+    func testForwardedFeaturesOfferTheThreeSwitchesAndTheLightBarWithTheirDetails() {
+        let features = page().features
+        XCTAssertEqual(features.title, "Forwarded features")
+        XCTAssertEqual(features.rows.map(\.feature), [.motion, .rumble, .touchpad])
+        XCTAssertEqual(features.rows.map(\.title), ["Motion", "Rumble", "Touchpad"])
+        XCTAssertEqual(features.rows.map(\.detail), [
+            "Forward gyroscope and accelerometer to the host, used for motion aiming in games that support it.",
+            "Play vibration the host game sends back on your controller.",
+            "Forward the DualSense / DualShock 4 touchpad. Controllers without a touchpad ignore this."
+        ])
+        XCTAssertEqual(features.rows.map(\.isOn), [true, true, true], "a fresh install has everything on")
+        XCTAssertEqual(features.lightBarTitle, "Light bar")
+        XCTAssertEqual(features.lightBarDetail, "Follow game: the controller LED matches the host game. Off: leave the LED untouched.")
+        XCTAssertEqual(features.lightBarOptions.map(\.mode), [.followGame, .off])
+        XCTAssertEqual(features.lightBarOptions.map(\.title), ["Follow game", "Off"])
+        XCTAssertEqual(
+            features.footer,
+            "Features only apply when your controller's hardware supports them. The controller list shows what was detected."
+        )
+    }
+
+    func testTheForwardedFeaturesShowTheGlobalSwitchesAsTheyStand() {
+        let flags = ForwardingFlags(motion: false, touchpad: true, rumble: false, lightbar: false)
+        let features = settingsPageState(preferences: FactsFixture.preferences, forwarding: flags, appVersion: "0.1.0").features
+        XCTAssertEqual(features.rows.map(\.isOn), [false, false, true])
+        XCTAssertEqual(features.lightBar, .off)
+    }
 }

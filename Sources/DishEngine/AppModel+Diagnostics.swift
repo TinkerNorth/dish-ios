@@ -32,6 +32,7 @@ extension AppModel {
                 controller: controller,
                 reports: tally.reports[controller.id] ?? 0,
                 motion: tally.motion[controller.id] ?? 0,
+                touch: tally.touch[controller.id] ?? 0,
                 wire: wireFacts(slotId: controller.id)
             )
         }

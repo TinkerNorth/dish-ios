@@ -32,6 +32,24 @@ final class AppModelPreferencesTests: XCTestCase {
         XCTAssertEqual(model.shellFacts.preferences.deviceName, "Den iPhone")
     }
 
+    /// iOS tells an app only the model's own name, so an unnamed device is
+    /// the iPhone or the iPad the scene says it runs on.
+    func testAnUnnamedDeviceIntroducesItselfAsTheDeviceTheSceneSaysItIs() {
+        XCTAssertEqual(wireDeviceName("", on: .phone), "iPhone")
+        XCTAssertEqual(wireDeviceName("", on: .pad), "iPad")
+        XCTAssertEqual(wireDeviceName("Den iPad", on: .pad), "Den iPad", "the person's own name wins")
+    }
+
+    func testTheModelNamesTheSatelliteTheDeviceItWasBuiltFor() throws {
+        let defaults = try TestDefaults.fresh(self)
+        let pad = AppModel(defaults: defaults, deviceKind: .pad)
+        XCTAssertEqual(pad.network.wifi.deviceName(), "iPad")
+        pad.setDeviceName("Den iPad")
+        XCTAssertEqual(pad.network.wifi.deviceName(), "Den iPad")
+        let phone = try AppModel(defaults: TestDefaults.fresh(self))
+        XCTAssertEqual(phone.network.wifi.deviceName(), "iPhone", "an iPhone is the default")
+    }
+
     func testTurningKeepScreenOnOffChangesTheFacts() throws {
         let model = try model()
         model.setKeepScreenOn(false)

@@ -39,12 +39,24 @@ package struct NetworkStack {
     }
 }
 
-/// The name the satellite shows for this iPhone: the one the person gave
+/// The device Dish runs on, as the scene read it once: the engine imports no
+/// UIKit, so the scene hands this over.
+package enum DeviceKind: Equatable {
+    case phone
+    case pad
+}
+
+/// The name the satellite shows for this device: the one the person gave
 /// it, else the model's own name, which iOS reports to every app.
-func wireDeviceName(_ stored: String) -> String {
-    stored.isEmpty ? unnamedDeviceWireName : stored
+func wireDeviceName(_ stored: String, on kind: DeviceKind = .phone) -> String {
+    stored.isEmpty ? unnamedDeviceWireName(kind) : stored
 }
 
 /// What the device's name reads to an app without the user-assigned name
 /// entitlement; the satellite's operator sees it, never Dish's UI.
-let unnamedDeviceWireName = "iPhone"
+func unnamedDeviceWireName(_ kind: DeviceKind) -> String {
+    switch kind {
+    case .phone: "iPhone"
+    case .pad: "iPad"
+    }
+}

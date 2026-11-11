@@ -61,13 +61,34 @@ final class AppModelPagesTests: XCTestCase {
         XCTAssertEqual(clocked.ticker.starts, [])
     }
 
-    /// The Connections tab looks for PCs as it opens, through the seam.
-    func testConnectionsAppearingLooksForPCs() throws {
+    /// The Connections tab looks for PCs as it opens, through the seam, once
+    /// the primer has explained the question that scan makes iOS ask.
+    func testConnectionsAppearingLooksForPCsOnceThePrimerWasSeen() throws {
         let clocked = try ClockedModel(self)
+        clocked.model.onboarding.markLocalNetworkPrimed()
         clocked.model.pageAppeared(.connections)
         XCTAssertEqual((clocked.model.localNetwork as? RecordedLocalNetworkAccess)?.scans, 1)
         clocked.model.pageDisappeared(.connections)
         XCTAssertEqual((clocked.model.localNetwork as? RecordedLocalNetworkAccess)?.scans, 1, "one scan per appearance")
+    }
+
+    /// Before the primer iOS has not been asked, and the tab opening is not
+    /// the place to ask it: the tab opens with no scan, and its clock still runs.
+    func testConnectionsAppearingBeforeThePrimerRunsNoScan() throws {
+        let clocked = try ClockedModel(self)
+        clocked.model.pageAppeared(.connections)
+        XCTAssertEqual((clocked.model.localNetwork as? RecordedLocalNetworkAccess)?.scans, 0)
+        XCTAssertTrue(clocked.ticker.running, "the page still words its times")
+    }
+
+    /// The person's own scan needs no more explaining: after it, the tab's
+    /// opening scan runs.
+    func testAPersonsOwnScanCountsAsTheQuestionExplained() throws {
+        let clocked = try ClockedModel(self)
+        clocked.model.startScan()
+        XCTAssertTrue(clocked.model.onboarding.state.localNetworkPrimed)
+        clocked.model.pageAppeared(.connections)
+        XCTAssertEqual((clocked.model.localNetwork as? RecordedLocalNetworkAccess)?.scans, 2)
     }
 
     /// The address sheet words only what happens to its own attempt.

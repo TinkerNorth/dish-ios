@@ -191,7 +191,11 @@ passes down the two values only UIKit can give (`settingsURL`, from
 drives `preferredColorScheme` from the appearance fact and sets the idle timer
 from `idleTimerDisabled(facts:)`. It reads the device's idiom once
 (`deviceIdiom(_:)`), for the orientation lock: an iPhone stands upright but
-for play, an iPad follows the device on every screen. It puts `WindowReader`
+for play, an iPad follows the device on every screen. The same fact tells the
+engine which device it is (`deviceKind(_:)` into `AppModel`'s `deviceKind`), so
+a device with no name of its own introduces itself to the satellite as "iPhone"
+or "iPad" (`wireDeviceName`); the words that name the device (about nineteen
+catalog keys) are device variations in the String Catalog, which the OS picks. It puts `WindowReader`
 (`Scene/WindowReader.swift`) at the window's root, the one reader of the
 window's size classes and shape, which hands them down as `windowFacts`; the
 iPad's layouts (the split tabs, the setup cover's column, the gamepad's
@@ -209,7 +213,10 @@ What `AppModel` publishes today:
   `session` from the live satellite carrying the most pads (its latency off
   the heartbeat window, `.stoppedResponding` while its acks falter),
   `localNetwork` from the last scan, `preferences` (the stores' state), `now`
-  (the clock) and `setup` (the walk, nil while the cover is down). Beside it,
+  (the clock) and `setup` (the walk, nil while the cover is down), `deadzones`
+  (each tuned pad's) and `forwarding` (the global switches, `FeatureSettings`);
+  `found` also lists a PC typed by its address that the pool holds and that is
+  not paired. Beside it,
   for the pages the next wave draws: `openPairing` (the card),
   `bindingProgress` (the apply) and `lastConnectionEvent` (a failure to word).
   For the Moonlight hosts page, `moonlightFacts`: the hub's rows for the
@@ -344,6 +351,11 @@ there (`Tests/DishCoreTests/SetupMachineTests.swift`) with no mocks.
   Continue emits `.askLocalNetwork`; the answer moves to Pick your PC and emits
   `.scan` when allowed. iOS puts the question only once, so an earlier answer
   is the answer.
+- The primer being asked (`.askLocalNetwork`, or the `.scan` that follows an
+  answer) marks it seen under `local_network_primed`, dish-mac's key, and so
+  does the person's own scan (`startScan`). The Connections tab's opening scan
+  (`pageAppeared(.connections)`) runs only once that flag is set, so iOS asks
+  its question after the explanation and not as the tab first opens.
 - A pick of the input moves on and seeds the draft (a seen pad emulates its own
   family, anything else an Xbox Wireless; motion follows what the pad carries).
 - Review's Bind emits `.bind(draft)` then `.ended(.bound)`. Skip anywhere emits
@@ -492,6 +504,15 @@ list, with where each lands, is [`../Tests/PARITY.md`](../Tests/PARITY.md).
   attached. The pad's pick is the pad's own (`emulated_type_preferences`)
   for a satellite and the record's type for a host, which the desire reads
   (`MoonlightDesire.desiredPads(bindingTypes:)`).
+- **The pair sheet's countdown is the poll's clock.** The approval poll adds
+  its interval to the attempt's `elapsedMs` (`PairingAttempts.advance`) before
+  it reads the reply, so the sheet's "Waiting · 1:58" is the time the
+  satellite still keeps the request, never a timer of the sheet's own.
+- **The controller page reads the Diagnostics source.** `pageAppeared(.controller)`
+  starts the same 1 Hz tick the Diagnostics page uses, so the Gamepad, Motion
+  and Touch rates are the `InputRateTracker` readings over the pads' record
+  counts (`PadRecord` counts a pad's reports, admitted motion samples and
+  touchpad samples in words of their own, outside the seqlock).
 - **The Local Network status is the last scan's word.** iOS has no call that
   asks; the simulator does not enforce the permission, so the denied path is
   proved through the browser's documented policy error, not observed

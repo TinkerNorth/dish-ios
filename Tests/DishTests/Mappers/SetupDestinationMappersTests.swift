@@ -92,6 +92,21 @@ final class SetupDestinationMappersTests: XCTestCase {
         ]))
     }
 
+    func testAPCAddedByAddressIsListedByItsAddressBeforeItHasAName() {
+        let state = pickPCStepState(SetupFixture.inputs(found: [SetupFixture.typed]))
+        XCTAssertEqual(state.satellite.list, .rows([
+            SetupPCRow(
+                id: "wifi:192.168.1.50:9876",
+                symbol: "desktopcomputer",
+                name: "192.168.1.50",
+                detail: "Needs pairing · 192.168.1.50",
+                dot: DishTheme.warning,
+                pick: .satellite(id: "wifi:192.168.1.50:9876"),
+                pairServerId: "wifi:192.168.1.50:9876"
+            )
+        ]))
+    }
+
     func testTheOtherWaysToAPCAndTheFootnote() {
         let state = pickPCStepState(SetupFixture.inputs())
         XCTAssertEqual(state.byAddress, "Add a PC by address")

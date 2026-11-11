@@ -16,6 +16,8 @@ struct SettingsActions {
     let setKeepScreenOn: @MainActor (Bool) -> Void
     let setDimAfter: @MainActor (DimDelay) -> Void
     let setAppearance: @MainActor (Appearance) -> Void
+    let setForwarded: @MainActor (ForwardedFeature, Bool) -> Void
+    let setLightBar: @MainActor (LightbarMode) -> Void
 }
 
 /// The Settings tab (D5).
@@ -27,7 +29,11 @@ struct SettingsPage: View {
 
     var body: some View {
         SettingsPageBody(
-            state: settingsPageState(preferences: model.shellFacts.preferences, appVersion: appVersion),
+            state: settingsPageState(
+                preferences: model.shellFacts.preferences,
+                forwarding: model.shellFacts.forwarding,
+                appVersion: appVersion
+            ),
             actions: SettingsActions(
                 editDeviceName: editDeviceName,
                 openGuide: openGuide,
@@ -38,9 +44,19 @@ struct SettingsPage: View {
                 open: open,
                 setKeepScreenOn: model.setKeepScreenOn,
                 setDimAfter: model.setDimAfter,
-                setAppearance: model.setAppearance
+                setAppearance: model.setAppearance,
+                setForwarded: setForwarded,
+                setLightBar: model.setLightbarMode
             )
         )
+    }
+
+    private func setForwarded(_ feature: ForwardedFeature, _ on: Bool) {
+        switch feature {
+        case .motion: model.setMotionForwarded(on)
+        case .rumble: model.setRumbleForwarded(on)
+        case .touchpad: model.setTouchpadForwarded(on)
+        }
     }
 
     private func editDeviceName() {
@@ -70,6 +86,7 @@ struct SettingsPageBody: View {
         List {
             DeviceSection(state: state.device, edit: actions.editDeviceName)
             StreamingSection(state: state.streaming, actions: actions)
+            ForwardedFeaturesSection(state: state.features, actions: actions)
             SetupHelpSection(state: state.help, actions: actions)
             AppearanceSection(state: state.appearance, select: actions.setAppearance)
             AboutSection(state: state.about, actions: actions)
@@ -97,7 +114,9 @@ struct SettingsPageBody: View {
                 open: { _ in },
                 setKeepScreenOn: { _ in },
                 setDimAfter: { _ in },
-                setAppearance: { _ in }
+                setAppearance: { _ in },
+                setForwarded: { _, _ in },
+                setLightBar: { _ in }
             )
         )
     }

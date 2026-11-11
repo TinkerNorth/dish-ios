@@ -17,9 +17,17 @@ private enum PairFixture {
         phase: ReversePairingPhase = .awaiting,
         submitting: Bool = false,
         rejection: PinRejection? = nil,
-        rejections: Int = 0
+        rejections: Int = 0,
+        elapsedMs: Int = 0
     ) -> PairingAttempt {
-        PairingAttempt(clientPin: clientPin, phase: phase, submittingPin: submitting, rejection: rejection, rejections: rejections)
+        PairingAttempt(
+            clientPin: clientPin,
+            phase: phase,
+            submittingPin: submitting,
+            rejection: rejection,
+            rejections: rejections,
+            elapsedMs: elapsedMs
+        )
     }
 
     static func card(
@@ -78,17 +86,27 @@ final class PairingMappersTests: XCTestCase {
             title: "Accept on your PC",
             body: "Satellite shows a request from iPhone. Accept it if the code matches.",
             code: "4821",
-            status: "Waiting",
+            status: "Waiting · 2:00",
             statusColor: DishTheme.muted,
             waiting: true,
-            hint: "The request expires in 2 min.",
             retry: nil
         ))
         XCTAssertEqual(
             PairFixture.card(deviceName: "Den iPhone")?.request?.body,
             "Satellite shows a request from Den iPhone. Accept it if the code matches."
         )
-        XCTAssertEqual(PairFixture.card(timeoutMs: 90000)?.request?.hint, "The request expires in 2 min.", "rounded up")
+    }
+
+    func testTheWaitCountsDownFromWhatTheSatelliteKeepsTheRequestAsTheApprovalPollMovesIt() {
+        let waiting = { (elapsedMs: Int, timeoutMs: Int) in
+            PairFixture.card(PairFixture.attempt(elapsedMs: elapsedMs), timeoutMs: timeoutMs)?.request?.status
+        }
+        XCTAssertEqual(waiting(2000, 120_000), "Waiting · 1:58", "B5's own line after the first poll")
+        XCTAssertEqual(waiting(60000, 120_000), "Waiting · 1:00")
+        XCTAssertEqual(waiting(113_000, 120_000), "Waiting · 0:07")
+        XCTAssertEqual(waiting(500, 90000), "Waiting · 1:30", "a poll's remainder rounds up to the second")
+        XCTAssertEqual(waiting(120_000, 120_000), "Waiting · 0:00")
+        XCTAssertEqual(waiting(130_000, 120_000), "Waiting · 0:00", "never below nothing")
     }
 
     func testADeclineAndAnExpiryOfferTryAgain() throws {
@@ -96,7 +114,6 @@ final class PairingMappersTests: XCTestCase {
         XCTAssertEqual(declined.status, "The operator declined the pairing.")
         XCTAssertEqual(declined.statusColor, DishTheme.error)
         XCTAssertFalse(declined.waiting)
-        XCTAssertNil(declined.hint)
         XCTAssertEqual(declined.retry, "Try again")
         let expired = try XCTUnwrap(PairFixture.card(PairFixture.attempt(phase: .timedOut))?.request)
         XCTAssertEqual(expired.status, "The code expired before your PC answered.")

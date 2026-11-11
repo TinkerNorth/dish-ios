@@ -37,10 +37,12 @@ package struct HostDiagnostics: Equatable, Identifiable {
 package struct PadRates: Equatable {
     package let reportHz: Int
     package let motionHz: Int
+    package let touchHz: Int
 
-    package init(reportHz: Int, motionHz: Int) {
+    package init(reportHz: Int, motionHz: Int, touchHz: Int = 0) {
         self.reportHz = reportHz
         self.motionHz = motionHz
+        self.touchHz = touchHz
     }
 }
 
@@ -108,12 +110,14 @@ package struct PadReading: Equatable {
     package let controller: ControllerFact
     package let reports: UInt64
     package let motion: UInt64
+    package let touch: UInt64
     package let wire: SlotWireFacts?
 
-    package init(controller: ControllerFact, reports: UInt64, motion: UInt64, wire: SlotWireFacts?) {
+    package init(controller: ControllerFact, reports: UInt64, motion: UInt64, touch: UInt64 = 0, wire: SlotWireFacts?) {
         self.controller = controller
         self.reports = reports
         self.motion = motion
+        self.touch = touch
         self.wire = wire
     }
 }
@@ -134,15 +138,18 @@ package struct DiagnosticsReading: Equatable {
 struct TelemetryRates {
     private var reports: [String: InputRateTracker] = [:]
     private var motion: [String: InputRateTracker] = [:]
+    private var touch: [String: InputRateTracker] = [:]
 
     mutating func sample(_ pads: [PadReading], nowUs: UInt64) -> [PadDiagnostics] {
         let ids = Set(pads.map(\.controller.id))
         reports = reports.filter { ids.contains($0.key) }
         motion = motion.filter { ids.contains($0.key) }
+        touch = touch.filter { ids.contains($0.key) }
         return pads.map { pad in
             let reportHz = reports[pad.controller.id, default: InputRateTracker()].sample(count: pad.reports, nowUs: nowUs)
             let motionHz = motion[pad.controller.id, default: InputRateTracker()].sample(count: pad.motion, nowUs: nowUs)
-            let rates = PadRates(reportHz: reportHz, motionHz: motionHz)
+            let touchHz = touch[pad.controller.id, default: InputRateTracker()].sample(count: pad.touch, nowUs: nowUs)
+            let rates = PadRates(reportHz: reportHz, motionHz: motionHz, touchHz: touchHz)
             return PadDiagnostics(controller: pad.controller, rates: rates, reports: pad.reports, wire: pad.wire)
         }
     }

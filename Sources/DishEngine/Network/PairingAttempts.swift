@@ -32,19 +32,23 @@ package struct PairingAttempt: Equatable {
     package var submittingPin: Bool
     package var rejection: PinRejection?
     package var rejections: Int
+    /// How long the operator request has waited, moved by each approval poll.
+    package var elapsedMs: Int
 
     package init(
         clientPin: String = "",
         phase: ReversePairingPhase = .idle,
         submittingPin: Bool = false,
         rejection: PinRejection? = nil,
-        rejections: Int = 0
+        rejections: Int = 0,
+        elapsedMs: Int = 0
     ) {
         self.clientPin = clientPin
         self.phase = phase
         self.submittingPin = submittingPin
         self.rejection = rejection
         self.rejections = rejections
+        self.elapsedMs = elapsedMs
     }
 }
 
@@ -67,6 +71,15 @@ package final class PairingAttempts {
         var attempt = state[id] ?? PairingAttempt()
         attempt.clientPin = clientPin
         attempt.phase = .awaiting
+        attempt.elapsedMs = 0
+        put(attempt, for: id)
+    }
+
+    /// The approval poll's clock: how long the request has waited, for an
+    /// attempt still awaiting the operator.
+    func advance(_ id: String, elapsedMs: Int) {
+        guard var attempt = state[id], attempt.phase == .awaiting else { return }
+        attempt.elapsedMs = elapsedMs
         put(attempt, for: id)
     }
 

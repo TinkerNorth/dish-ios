@@ -124,6 +124,7 @@ extension WifiConnectionManager {
         var elapsedMs = 0
         while await waitOneInterval() {
             elapsedMs += approvalPolling.intervalMs
+            pairingAttempts.advance(conn.id, elapsedMs: elapsedMs)
             let status = await pairing.pairStatus(ip: server.ip, port: server.httpPort, deviceId: deviceId)
             let superseded = Task.isCancelled || conn.state == .live
             if superseded { return }

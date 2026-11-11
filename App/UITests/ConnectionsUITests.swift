@@ -5,7 +5,8 @@ import XCTest
 
 /// The Connections tab through the real app on the simulator: the "+" on its
 /// toolbar opens the Add a PC by address sheet and Cancel lowers it, a swipe
-/// on a paired PC's row reveals Forget This PC, and the empty page takes a
+/// on a paired PC's row reveals Forget This PC, the tab scans as it opens
+/// only once the Local Network primer was seen, and the empty page takes a
 /// pull to refresh. The hints are off, so no popover covers what a test taps.
 @MainActor
 final class ConnectionsUITests: XCTestCase {
@@ -38,6 +39,23 @@ final class ConnectionsUITests: XCTestCase {
     /// Any element labelled with `label` or starting with it.
     private func element(startingWith label: String, in app: XCUIApplication) -> XCUIElement {
         app.descendants(matching: .any).matching(NSPredicate(format: "label BEGINSWITH %@", label)).firstMatch
+    }
+
+    /// iOS asks about the Local Network when Dish first browses, so the
+    /// tab's own scan waits for the setup primer that explains why: opened
+    /// first, the tab shows its empty page and looks for nothing.
+    func testTheTabOpensWithNoScanBeforeThePrimerWasSeen() {
+        let app = launchOnConnections()
+        XCTAssertTrue(app.staticTexts["No PCs yet"].firstMatch.waitForExistence(timeout: 10))
+        XCTAssertFalse(app.staticTexts["Searching"].firstMatch.exists, "no scan ran as the tab opened")
+    }
+
+    /// With the primer seen (its flag is dish-mac's `local_network_primed`)
+    /// the tab looks for PCs as it opens.
+    func testTheTabScansAsItOpensOnceThePrimerWasSeen() {
+        let app = launchOnConnections(["-local_network_primed", "YES"])
+        XCTAssertTrue(app.staticTexts["Searching"].firstMatch.waitForExistence(timeout: 5), "the opening scan ran")
+        XCTAssertTrue(app.staticTexts["No PCs yet"].firstMatch.waitForExistence(timeout: 20), "and ended with no PC answering")
     }
 
     func testThePlusOnConnectionsOpensAddAPCByAddressAndCancelLowersIt() {
@@ -76,7 +94,7 @@ final class ConnectionsUITests: XCTestCase {
         )
         let app = launchOnConnections()
         let empty = app.staticTexts["No PCs yet"].firstMatch
-        XCTAssertTrue(empty.waitForExistence(timeout: 20), "the opening scan ends on the empty page when no PC answers")
+        XCTAssertTrue(empty.waitForExistence(timeout: 20), "the page is empty when no PC answers")
         // From the empty state itself: on an iPad the list is a column beside
         // the PC's page, and the window's middle is that page.
         let start = empty.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5))
@@ -94,7 +112,7 @@ final class ConnectionsUITests: XCTestCase {
         try XCTSkipUnless(UIDevice.current.userInterfaceIdiom == .pad, "the phone's list takes a pull instead")
         let app = launchOnConnections()
         let empty = app.staticTexts["No PCs yet"].firstMatch
-        XCTAssertTrue(empty.waitForExistence(timeout: 20), "the opening scan ends on the empty page when no PC answers")
+        XCTAssertTrue(empty.waitForExistence(timeout: 20), "the page is empty when no PC answers")
         let scan = app.buttons["Scan"].firstMatch
         XCTAssertTrue(scan.waitForExistence(timeout: 5))
         scan.tap()

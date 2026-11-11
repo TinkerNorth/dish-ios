@@ -1677,33 +1677,111 @@
     "A controller last paired with another device, such as a console, has to be paired with this iPhone again." : {
       "localizations" : {
         "bs" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Kontroler koji je posljednji put uparen s drugim uređajem, poput konzole, mora se ponovo upariti s ovim iPhoneom."
+          "variations" : {
+            "device" : {
+              "ipad" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Kontroler koji je posljednji put uparen s drugim uređajem, poput konzole, mora se ponovo upariti s ovim iPadom."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Kontroler koji je posljednji put uparen s drugim uređajem, poput konzole, mora se ponovo upariti s ovim iPhoneom."
+                }
+              }
+            }
           }
         },
         "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ein Controller, der zuletzt mit einem anderen Gerät wie einer Konsole gekoppelt war, muss erneut mit diesem iPhone gekoppelt werden."
+          "variations" : {
+            "device" : {
+              "ipad" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Ein Controller, der zuletzt mit einem anderen Gerät wie einer Konsole gekoppelt war, muss erneut mit diesem iPad gekoppelt werden."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Ein Controller, der zuletzt mit einem anderen Gerät wie einer Konsole gekoppelt war, muss erneut mit diesem iPhone gekoppelt werden."
+                }
+              }
+            }
+          }
+        },
+        "en" : {
+          "variations" : {
+            "device" : {
+              "ipad" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "A controller last paired with another device, such as a console, has to be paired with this iPad again."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "A controller last paired with another device, such as a console, has to be paired with this iPhone again."
+                }
+              }
+            }
           }
         },
         "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Un mando emparejado por última vez con otro dispositivo, como una consola, tiene que emparejarse de nuevo con este iPhone."
+          "variations" : {
+            "device" : {
+              "ipad" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Un mando emparejado por última vez con otro dispositivo, como una consola, tiene que emparejarse de nuevo con este iPad."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Un mando emparejado por última vez con otro dispositivo, como una consola, tiene que emparejarse de nuevo con este iPhone."
+                }
+              }
+            }
           }
         },
         "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Une manette appairée en dernier à un autre appareil, comme une console, doit être appairée de nouveau à cet iPhone."
+          "variations" : {
+            "device" : {
+              "ipad" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Une manette appairée en dernier à un autre appareil, comme une console, doit être appairée de nouveau à cet iPad."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Une manette appairée en dernier à un autre appareil, comme une console, doit être appairée de nouveau à cet iPhone."
+                }
+              }
+            }
           }
         },
         "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Um controle pareado por último com outro dispositivo, como um console, precisa ser pareado de novo com este iPhone."
+          "variations" : {
+            "device" : {
+              "ipad" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Um controle pareado por último com outro dispositivo, como um console, precisa ser pareado de novo com este iPad."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Um controle pareado por último com outro dispositivo, como um console, precisa ser pareado de novo com este iPhone."
+                }
+              }
+            }
           }
         }
       }
@@ -1711,33 +1789,111 @@
     "A pad paired to this iPhone in Settings › Bluetooth." : {
       "localizations" : {
         "bs" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Kontroler uparen s ovim iPhoneom u Postavke › Bluetooth."
+          "variations" : {
+            "device" : {
+              "ipad" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Kontroler uparen s ovim iPadom u Postavke › Bluetooth."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Kontroler uparen s ovim iPhoneom u Postavke › Bluetooth."
+                }
+              }
+            }
           }
         },
         "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ein Controller, der in Einstellungen › Bluetooth mit diesem iPhone gekoppelt ist."
+          "variations" : {
+            "device" : {
+              "ipad" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Ein Controller, der in Einstellungen › Bluetooth mit diesem iPad gekoppelt ist."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Ein Controller, der in Einstellungen › Bluetooth mit diesem iPhone gekoppelt ist."
+                }
+              }
+            }
+          }
+        },
+        "en" : {
+          "variations" : {
+            "device" : {
+              "ipad" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "A pad paired to this iPad in Settings › Bluetooth."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "A pad paired to this iPhone in Settings › Bluetooth."
+                }
+              }
+            }
           }
         },
         "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Un mando emparejado con este iPhone en Ajustes › Bluetooth."
+          "variations" : {
+            "device" : {
+              "ipad" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Un mando emparejado con este iPad en Ajustes › Bluetooth."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Un mando emparejado con este iPhone en Ajustes › Bluetooth."
+                }
+              }
+            }
           }
         },
         "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Une manette appairée à cet iPhone dans Réglages › Bluetooth."
+          "variations" : {
+            "device" : {
+              "ipad" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Une manette appairée à cet iPad dans Réglages › Bluetooth."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Une manette appairée à cet iPhone dans Réglages › Bluetooth."
+                }
+              }
+            }
           }
         },
         "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Um controle pareado com este iPhone em Ajustes › Bluetooth."
+          "variations" : {
+            "device" : {
+              "ipad" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Um controle pareado com este iPad em Ajustes › Bluetooth."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Um controle pareado com este iPhone em Ajustes › Bluetooth."
+                }
+              }
+            }
           }
         }
       }
@@ -3661,33 +3817,111 @@
     "Confirm this iPhone and the PC are on the same Wi-Fi network." : {
       "localizations" : {
         "bs" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Potvrdite da su ovaj iPhone i PC na istoj Wi-Fi mreži."
+          "variations" : {
+            "device" : {
+              "ipad" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Potvrdite da su ovaj iPad i PC na istoj Wi-Fi mreži."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Potvrdite da su ovaj iPhone i PC na istoj Wi-Fi mreži."
+                }
+              }
+            }
           }
         },
         "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Stelle sicher, dass dieses iPhone und der PC im selben WLAN sind."
+          "variations" : {
+            "device" : {
+              "ipad" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Stelle sicher, dass dieses iPad und der PC im selben WLAN sind."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Stelle sicher, dass dieses iPhone und der PC im selben WLAN sind."
+                }
+              }
+            }
+          }
+        },
+        "en" : {
+          "variations" : {
+            "device" : {
+              "ipad" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Confirm this iPad and the PC are on the same Wi-Fi network."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Confirm this iPhone and the PC are on the same Wi-Fi network."
+                }
+              }
+            }
           }
         },
         "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Confirma que este iPhone y el PC estén en la misma red Wi-Fi."
+          "variations" : {
+            "device" : {
+              "ipad" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Confirma que este iPad y el PC estén en la misma red Wi-Fi."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Confirma que este iPhone y el PC estén en la misma red Wi-Fi."
+                }
+              }
+            }
           }
         },
         "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Vérifiez que cet iPhone et le PC sont sur le même réseau Wi-Fi."
+          "variations" : {
+            "device" : {
+              "ipad" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Vérifiez que cet iPad et le PC sont sur le même réseau Wi-Fi."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Vérifiez que cet iPhone et le PC sont sur le même réseau Wi-Fi."
+                }
+              }
+            }
           }
         },
         "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Confirme que este iPhone e o PC estão na mesma rede Wi-Fi."
+          "variations" : {
+            "device" : {
+              "ipad" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Confirme que este iPad e o PC estão na mesma rede Wi-Fi."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Confirme que este iPhone e o PC estão na mesma rede Wi-Fi."
+                }
+              }
+            }
           }
         }
       }
@@ -4303,6 +4537,40 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Escuro"
+          }
+        }
+      }
+    },
+    "Dead zones" : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mrtve zone"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Totzonen"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zonas muertas"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zones mortes"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zonas mortas"
           }
         }
       }
@@ -5234,33 +5502,111 @@
     "Dish turns a controller paired with this iPhone, or the iPhone’s own screen, into a wireless gamepad for your PC." : {
       "localizations" : {
         "bs" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Dish pretvara kontroler uparen s ovim iPhoneom, ili sam ekran iPhonea, u bežični gamepad za vaš PC."
+          "variations" : {
+            "device" : {
+              "ipad" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Dish pretvara kontroler uparen s ovim iPadom, ili sam ekran iPada, u bežični gamepad za vaš PC."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Dish pretvara kontroler uparen s ovim iPhoneom, ili sam ekran iPhonea, u bežični gamepad za vaš PC."
+                }
+              }
+            }
           }
         },
         "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Dish macht aus einem mit diesem iPhone gekoppelten Controller oder dem Bildschirm des iPhone selbst ein kabelloses Gamepad für deinen PC."
+          "variations" : {
+            "device" : {
+              "ipad" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Dish macht aus einem mit diesem iPad gekoppelten Controller oder dem Bildschirm des iPad selbst ein kabelloses Gamepad für deinen PC."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Dish macht aus einem mit diesem iPhone gekoppelten Controller oder dem Bildschirm des iPhone selbst ein kabelloses Gamepad für deinen PC."
+                }
+              }
+            }
+          }
+        },
+        "en" : {
+          "variations" : {
+            "device" : {
+              "ipad" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Dish turns a controller paired with this iPad, or the iPad’s own screen, into a wireless gamepad for your PC."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Dish turns a controller paired with this iPhone, or the iPhone’s own screen, into a wireless gamepad for your PC."
+                }
+              }
+            }
           }
         },
         "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Dish convierte un mando emparejado con este iPhone, o la propia pantalla del iPhone, en un mando inalámbrico para tu PC."
+          "variations" : {
+            "device" : {
+              "ipad" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Dish convierte un mando emparejado con este iPad, o la propia pantalla del iPad, en un mando inalámbrico para tu PC."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Dish convierte un mando emparejado con este iPhone, o la propia pantalla del iPhone, en un mando inalámbrico para tu PC."
+                }
+              }
+            }
           }
         },
         "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Dish transforme une manette appairée à cet iPhone, ou l’écran de l’iPhone lui-même, en manette sans fil pour votre PC."
+          "variations" : {
+            "device" : {
+              "ipad" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Dish transforme une manette appairée à cet iPad, ou l’écran de l’iPad lui-même, en manette sans fil pour votre PC."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Dish transforme une manette appairée à cet iPhone, ou l’écran de l’iPhone lui-même, en manette sans fil pour votre PC."
+                }
+              }
+            }
           }
         },
         "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "O Dish transforma um controle pareado com este iPhone, ou a própria tela do iPhone, em um gamepad sem fio para o seu PC."
+          "variations" : {
+            "device" : {
+              "ipad" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "O Dish transforma um controle pareado com este iPad, ou a própria tela do iPad, em um gamepad sem fio para o seu PC."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "O Dish transforma um controle pareado com este iPhone, ou a própria tela do iPhone, em um gamepad sem fio para o seu PC."
+                }
+              }
+            }
           }
         }
       }
@@ -6084,6 +6430,40 @@
         }
       }
     },
+    "Features only apply when your controller's hardware supports them. The controller list shows what was detected." : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Funkcije važe samo ako ih hardver kontrolera podržava. Lista kontrolera pokazuje šta je otkriveno."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Funktionen gelten nur, wenn die Hardware deines Controllers sie unterstützt. Die Controller-Liste zeigt, was erkannt wurde."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Las funciones solo se aplican si el hardware de tu mando las admite. La lista de mandos muestra lo detectado."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Les fonctions ne s'appliquent que si le matériel de votre manette les prend en charge. La liste des manettes indique ce qui a été détecté."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Os recursos só valem quando o hardware do seu controle os suporta. A lista de controles mostra o que foi detectado."
+          }
+        }
+      }
+    },
     "Feedback" : {
       "localizations" : {
         "bs" : {
@@ -6118,36 +6498,182 @@
         }
       }
     },
-    "For the controller-to-iPhone leg, a wired controller has no radio latency." : {
+    "Follow game" : {
       "localizations" : {
         "bs" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Na dionici kontroler–iPhone, žičani kontroler nema radio kašnjenja."
+            "value" : "Prati igru"
           }
         },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Auf der Strecke Controller-zu-iPhone hat ein kabelgebundener Controller keine Funklatenz."
+            "value" : "Spiel folgen"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "En el tramo del mando al iPhone, un mando con cable no tiene latencia de radio."
+            "value" : "Seguir el juego"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Pour le trajet manette-vers-iPhone, une manette filaire n’a aucune latence radio."
+            "value" : "Suivre le jeu"
           }
         },
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "No trecho do controle até o iPhone, um controle com fio não tem latência de rádio."
+            "value" : "Seguir o jogo"
+          }
+        }
+      }
+    },
+    "Follow game: the controller LED matches the host game. Off: leave the LED untouched." : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prati igru: LED kontrolera prati igru na hostu. Isključeno: LED ostaje netaknut."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Spiel folgen: die Controller-LED folgt dem Host-Spiel. Aus: die LED bleibt unverändert."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Seguir el juego: el LED del mando sigue al juego del host. Apagado: el LED no se toca."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Suivre le jeu : la LED de la manette suit le jeu de l'hôte. Désactivé : la LED reste inchangée."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Seguir o jogo: o LED do controle acompanha o jogo do host. Desligado: o LED fica como está."
+          }
+        }
+      }
+    },
+    "For the controller-to-iPhone leg, a wired controller has no radio latency." : {
+      "localizations" : {
+        "bs" : {
+          "variations" : {
+            "device" : {
+              "ipad" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Na dionici kontroler–iPad, žičani kontroler nema radio kašnjenja."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Na dionici kontroler–iPhone, žičani kontroler nema radio kašnjenja."
+                }
+              }
+            }
+          }
+        },
+        "de" : {
+          "variations" : {
+            "device" : {
+              "ipad" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Auf der Strecke Controller-zu-iPad hat ein kabelgebundener Controller keine Funklatenz."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Auf der Strecke Controller-zu-iPhone hat ein kabelgebundener Controller keine Funklatenz."
+                }
+              }
+            }
+          }
+        },
+        "en" : {
+          "variations" : {
+            "device" : {
+              "ipad" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "For the controller-to-iPad leg, a wired controller has no radio latency."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "For the controller-to-iPhone leg, a wired controller has no radio latency."
+                }
+              }
+            }
+          }
+        },
+        "es" : {
+          "variations" : {
+            "device" : {
+              "ipad" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "En el tramo del mando al iPad, un mando con cable no tiene latencia de radio."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "En el tramo del mando al iPhone, un mando con cable no tiene latencia de radio."
+                }
+              }
+            }
+          }
+        },
+        "fr" : {
+          "variations" : {
+            "device" : {
+              "ipad" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Pour le trajet manette-vers-iPad, une manette filaire n’a aucune latence radio."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Pour le trajet manette-vers-iPhone, une manette filaire n’a aucune latence radio."
+                }
+              }
+            }
+          }
+        },
+        "pt-BR" : {
+          "variations" : {
+            "device" : {
+              "ipad" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "No trecho do controle até o iPad, um controle com fio não tem latência de rádio."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "No trecho do controle até o iPhone, um controle com fio não tem latência de rádio."
+                }
+              }
+            }
           }
         }
       }
@@ -6155,33 +6681,111 @@
     "For the iPhone-to-PC leg, Wi-Fi is the only way, so connect the PC to the router with Ethernet if you can." : {
       "localizations" : {
         "bs" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Na dionici iPhone–PC, Wi-Fi je jedini put, pa povežite PC na usmjerivač Ethernetom ako možete."
+          "variations" : {
+            "device" : {
+              "ipad" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Na dionici iPad–PC, Wi-Fi je jedini put, pa povežite PC na usmjerivač Ethernetom ako možete."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Na dionici iPhone–PC, Wi-Fi je jedini put, pa povežite PC na usmjerivač Ethernetom ako možete."
+                }
+              }
+            }
           }
         },
         "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Auf der Strecke iPhone-zu-PC ist WLAN der einzige Weg, verbinde den PC also nach Möglichkeit per Ethernet mit dem Router."
+          "variations" : {
+            "device" : {
+              "ipad" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Auf der Strecke iPad-zu-PC ist WLAN der einzige Weg, verbinde den PC also nach Möglichkeit per Ethernet mit dem Router."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Auf der Strecke iPhone-zu-PC ist WLAN der einzige Weg, verbinde den PC also nach Möglichkeit per Ethernet mit dem Router."
+                }
+              }
+            }
+          }
+        },
+        "en" : {
+          "variations" : {
+            "device" : {
+              "ipad" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "For the iPad-to-PC leg, Wi-Fi is the only way, so connect the PC to the router with Ethernet if you can."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "For the iPhone-to-PC leg, Wi-Fi is the only way, so connect the PC to the router with Ethernet if you can."
+                }
+              }
+            }
           }
         },
         "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "En el tramo del iPhone al PC, el Wi-Fi es la única vía, así que conecta el PC al router con Ethernet si puedes."
+          "variations" : {
+            "device" : {
+              "ipad" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "En el tramo del iPad al PC, el Wi-Fi es la única vía, así que conecta el PC al router con Ethernet si puedes."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "En el tramo del iPhone al PC, el Wi-Fi es la única vía, así que conecta el PC al router con Ethernet si puedes."
+                }
+              }
+            }
           }
         },
         "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Pour le trajet iPhone-vers-PC, le Wi-Fi est le seul chemin, donc reliez le PC au routeur en Ethernet si vous le pouvez."
+          "variations" : {
+            "device" : {
+              "ipad" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Pour le trajet iPad-vers-PC, le Wi-Fi est le seul chemin, donc reliez le PC au routeur en Ethernet si vous le pouvez."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Pour le trajet iPhone-vers-PC, le Wi-Fi est le seul chemin, donc reliez le PC au routeur en Ethernet si vous le pouvez."
+                }
+              }
+            }
           }
         },
         "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "No trecho do iPhone até o PC, o Wi-Fi é o único caminho, então ligue o PC ao roteador com Ethernet se puder."
+          "variations" : {
+            "device" : {
+              "ipad" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "No trecho do iPad até o PC, o Wi-Fi é o único caminho, então ligue o PC ao roteador com Ethernet se puder."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "No trecho do iPhone até o PC, o Wi-Fi é o único caminho, então ligue o PC ao roteador com Ethernet se puder."
+                }
+              }
+            }
           }
         }
       }
@@ -6289,36 +6893,216 @@
         }
       }
     },
-    "Found on this iPhone" : {
+    "Forward gyroscope and accelerometer to the host, used for motion aiming in games that support it." : {
       "localizations" : {
         "bs" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Pronađeno na ovom iPhoneu"
+            "value" : "Proslijedi žiroskop i akcelerometar hostu, za nišanjenje pokretom u igrama koje to podržavaju."
           }
         },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Auf diesem iPhone gefunden"
+            "value" : "Gyroskop und Beschleunigungssensor an den Host weiterleiten, für Bewegungssteuerung in Spielen, die sie unterstützen."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Encontrado en este iPhone"
+            "value" : "Reenviar giroscopio y acelerómetro al host, para apuntar con movimiento en los juegos que lo admiten."
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Trouvé sur cet iPhone"
+            "value" : "Transmettre le gyroscope et l'accéléromètre à l'hôte, pour la visée gyroscopique dans les jeux compatibles."
           }
         },
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Encontrado neste iPhone"
+            "value" : "Encaminhar giroscópio e acelerômetro para o host, para mirar com movimento nos jogos que oferecem suporte."
+          }
+        }
+      }
+    },
+    "Forward the DualSense / DualShock 4 touchpad. Controllers without a touchpad ignore this." : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Proslijedi dodirnu ploču DualSense / DualShock 4 kontrolera. Kontroleri bez dodirne ploče ovo ignorišu."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Das Touchpad von DualSense / DualShock 4 weiterleiten. Controller ohne Touchpad ignorieren dies."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reenviar el panel táctil de DualSense / DualShock 4. Los mandos sin panel táctil lo ignoran."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Transmettre le pavé tactile DualSense / DualShock 4. Les manettes sans pavé tactile l'ignorent."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Encaminhar o touchpad do DualSense / DualShock 4. Controles sem touchpad ignoram isto."
+          }
+        }
+      }
+    },
+    "Forwarded features" : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Proslijeđene funkcije"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Weitergeleitete Funktionen"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Funciones reenviadas"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fonctions transmises"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Recursos encaminhados"
+          }
+        }
+      }
+    },
+    "Found on this iPhone" : {
+      "localizations" : {
+        "bs" : {
+          "variations" : {
+            "device" : {
+              "ipad" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Pronađeno na ovom iPadu"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Pronađeno na ovom iPhoneu"
+                }
+              }
+            }
+          }
+        },
+        "de" : {
+          "variations" : {
+            "device" : {
+              "ipad" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Auf diesem iPad gefunden"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Auf diesem iPhone gefunden"
+                }
+              }
+            }
+          }
+        },
+        "en" : {
+          "variations" : {
+            "device" : {
+              "ipad" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Found on this iPad"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Found on this iPhone"
+                }
+              }
+            }
+          }
+        },
+        "es" : {
+          "variations" : {
+            "device" : {
+              "ipad" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Encontrado en este iPad"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Encontrado en este iPhone"
+                }
+              }
+            }
+          }
+        },
+        "fr" : {
+          "variations" : {
+            "device" : {
+              "ipad" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Trouvé sur cet iPad"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Trouvé sur cet iPhone"
+                }
+              }
+            }
+          }
+        },
+        "pt-BR" : {
+          "variations" : {
+            "device" : {
+              "ipad" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Encontrado neste iPad"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Encontrado neste iPhone"
+                }
+              }
+            }
           }
         }
       }
@@ -7421,33 +8205,111 @@
     "Keep the controller close to this iPhone and the PC on wired Ethernet." : {
       "localizations" : {
         "bs" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Držite kontroler blizu ovog iPhonea, a PC na žičanom Ethernetu."
+          "variations" : {
+            "device" : {
+              "ipad" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Držite kontroler blizu ovog iPada, a PC na žičanom Ethernetu."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Držite kontroler blizu ovog iPhonea, a PC na žičanom Ethernetu."
+                }
+              }
+            }
           }
         },
         "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Halte den Controller nah an diesem iPhone und den PC am kabelgebundenen Ethernet."
+          "variations" : {
+            "device" : {
+              "ipad" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Halte den Controller nah an diesem iPad und den PC am kabelgebundenen Ethernet."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Halte den Controller nah an diesem iPhone und den PC am kabelgebundenen Ethernet."
+                }
+              }
+            }
+          }
+        },
+        "en" : {
+          "variations" : {
+            "device" : {
+              "ipad" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Keep the controller close to this iPad and the PC on wired Ethernet."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Keep the controller close to this iPhone and the PC on wired Ethernet."
+                }
+              }
+            }
           }
         },
         "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Mantén el mando cerca de este iPhone y el PC con Ethernet por cable."
+          "variations" : {
+            "device" : {
+              "ipad" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Mantén el mando cerca de este iPad y el PC con Ethernet por cable."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Mantén el mando cerca de este iPhone y el PC con Ethernet por cable."
+                }
+              }
+            }
           }
         },
         "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Gardez la manette près de cet iPhone et le PC en Ethernet filaire."
+          "variations" : {
+            "device" : {
+              "ipad" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Gardez la manette près de cet iPad et le PC en Ethernet filaire."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Gardez la manette près de cet iPhone et le PC en Ethernet filaire."
+                }
+              }
+            }
           }
         },
         "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Mantenha o controle perto deste iPhone e o PC no Ethernet com fio."
+          "variations" : {
+            "device" : {
+              "ipad" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Mantenha o controle perto deste iPad e o PC no Ethernet com fio."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Mantenha o controle perto deste iPhone e o PC no Ethernet com fio."
+                }
+              }
+            }
           }
         }
       }
@@ -9987,6 +10849,40 @@
         }
       }
     },
+    "Off" : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Isključeno"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aus"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apagado"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Désactivé"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Desligado"
+          }
+        }
+      }
+    },
     "Offline" : {
       "localizations" : {
         "bs" : {
@@ -10498,6 +11394,40 @@
         }
       }
     },
+    "Overrides are stored per device and take effect immediately." : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prilagodbe se čuvaju po uređaju i odmah stupaju na snagu."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Anpassungen werden pro Gerät gespeichert und wirken sofort."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Los valores personalizados se guardan por dispositivo y se aplican de inmediato."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Les valeurs personnalisées sont enregistrées par appareil et prennent effet immédiatement."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "As personalizações são salvas por dispositivo e entram em vigor imediatamente."
+          }
+        }
+      }
+    },
     "PC" : {
       "localizations" : {
         "bs" : {
@@ -10706,33 +11636,111 @@
     "Pair it with this iPhone in Settings › Bluetooth, or plug it in with a cable." : {
       "localizations" : {
         "bs" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Uparite ga s ovim iPhoneom u Postavke › Bluetooth ili ga priključite kablom."
+          "variations" : {
+            "device" : {
+              "ipad" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Uparite ga s ovim iPadom u Postavke › Bluetooth ili ga priključite kablom."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Uparite ga s ovim iPhoneom u Postavke › Bluetooth ili ga priključite kablom."
+                }
+              }
+            }
           }
         },
         "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Kopple ihn unter Einstellungen › Bluetooth mit diesem iPhone oder schließe ihn per Kabel an."
+          "variations" : {
+            "device" : {
+              "ipad" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Kopple ihn unter Einstellungen › Bluetooth mit diesem iPad oder schließe ihn per Kabel an."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Kopple ihn unter Einstellungen › Bluetooth mit diesem iPhone oder schließe ihn per Kabel an."
+                }
+              }
+            }
+          }
+        },
+        "en" : {
+          "variations" : {
+            "device" : {
+              "ipad" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Pair it with this iPad in Settings › Bluetooth, or plug it in with a cable."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Pair it with this iPhone in Settings › Bluetooth, or plug it in with a cable."
+                }
+              }
+            }
           }
         },
         "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Emparéjalo con este iPhone en Ajustes › Bluetooth o conéctalo con un cable."
+          "variations" : {
+            "device" : {
+              "ipad" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Emparéjalo con este iPad en Ajustes › Bluetooth o conéctalo con un cable."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Emparéjalo con este iPhone en Ajustes › Bluetooth o conéctalo con un cable."
+                }
+              }
+            }
           }
         },
         "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Appairez-la à cet iPhone dans Réglages › Bluetooth, ou branchez-la avec un câble."
+          "variations" : {
+            "device" : {
+              "ipad" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Appairez-la à cet iPad dans Réglages › Bluetooth, ou branchez-la avec un câble."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Appairez-la à cet iPhone dans Réglages › Bluetooth, ou branchez-la avec un câble."
+                }
+              }
+            }
           }
         },
         "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Pareie-o com este iPhone em Ajustes › Bluetooth ou conecte-o com um cabo."
+          "variations" : {
+            "device" : {
+              "ipad" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Pareie-o com este iPad em Ajustes › Bluetooth ou conecte-o com um cabo."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Pareie-o com este iPhone em Ajustes › Bluetooth ou conecte-o com um cabo."
+                }
+              }
+            }
           }
         }
       }
@@ -11116,6 +12124,40 @@
         }
       }
     },
+    "Play vibration the host game sends back on your controller." : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reproduciraj na kontroleru vibraciju koju igra na hostu šalje nazad."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vibration, die das Host-Spiel zurücksendet, auf deinem Controller abspielen."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reproducir en tu mando la vibración que devuelve el juego del host."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Jouer sur votre manette la vibration renvoyée par le jeu de l'hôte."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reproduzir no seu controle a vibração que o jogo do host envia de volta."
+          }
+        }
+      }
+    },
     "PlayStation" : {
       "comment" : "The Emulate picker: the PlayStation type a Moonlight host plugs in.",
       "localizations" : {
@@ -11188,33 +12230,111 @@
     "Plug in a wired pad or use one paired to this iPhone." : {
       "localizations" : {
         "bs" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Priključite žičani kontroler ili koristite onaj uparen s ovim iPhoneom."
+          "variations" : {
+            "device" : {
+              "ipad" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Priključite žičani kontroler ili koristite onaj uparen s ovim iPadom."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Priključite žičani kontroler ili koristite onaj uparen s ovim iPhoneom."
+                }
+              }
+            }
           }
         },
         "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Schließe einen Controller per Kabel an oder nutze einen, der mit diesem iPhone gekoppelt ist."
+          "variations" : {
+            "device" : {
+              "ipad" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Schließe einen Controller per Kabel an oder nutze einen, der mit diesem iPad gekoppelt ist."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Schließe einen Controller per Kabel an oder nutze einen, der mit diesem iPhone gekoppelt ist."
+                }
+              }
+            }
+          }
+        },
+        "en" : {
+          "variations" : {
+            "device" : {
+              "ipad" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Plug in a wired pad or use one paired to this iPad."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Plug in a wired pad or use one paired to this iPhone."
+                }
+              }
+            }
           }
         },
         "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Conecta un mando con cable o usa uno emparejado con este iPhone."
+          "variations" : {
+            "device" : {
+              "ipad" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Conecta un mando con cable o usa uno emparejado con este iPad."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Conecta un mando con cable o usa uno emparejado con este iPhone."
+                }
+              }
+            }
           }
         },
         "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Branchez une manette filaire ou utilisez-en une appairée à cet iPhone."
+          "variations" : {
+            "device" : {
+              "ipad" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Branchez une manette filaire ou utilisez-en une appairée à cet iPad."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Branchez une manette filaire ou utilisez-en une appairée à cet iPhone."
+                }
+              }
+            }
           }
         },
         "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Conecte um controle com fio ou use um pareado com este iPhone."
+          "variations" : {
+            "device" : {
+              "ipad" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Conecte um controle com fio ou use um pareado com este iPad."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Conecte um controle com fio ou use um pareado com este iPhone."
+                }
+              }
+            }
           }
         }
       }
@@ -11257,33 +12377,111 @@
     "Plugged into your iPhone’s USB-C port." : {
       "localizations" : {
         "bs" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Priključeno na USB-C priključak vašeg iPhonea."
+          "variations" : {
+            "device" : {
+              "ipad" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Priključeno na USB-C priključak vašeg iPada."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Priključeno na USB-C priključak vašeg iPhonea."
+                }
+              }
+            }
           }
         },
         "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "An den USB-C-Anschluss deines iPhones angeschlossen."
+          "variations" : {
+            "device" : {
+              "ipad" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "An den USB-C-Anschluss deines iPads angeschlossen."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "An den USB-C-Anschluss deines iPhones angeschlossen."
+                }
+              }
+            }
+          }
+        },
+        "en" : {
+          "variations" : {
+            "device" : {
+              "ipad" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Plugged into your iPad’s USB-C port."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Plugged into your iPhone’s USB-C port."
+                }
+              }
+            }
           }
         },
         "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Conectado al puerto USB-C de tu iPhone."
+          "variations" : {
+            "device" : {
+              "ipad" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Conectado al puerto USB-C de tu iPad."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Conectado al puerto USB-C de tu iPhone."
+                }
+              }
+            }
           }
         },
         "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Branchée au port USB-C de votre iPhone."
+          "variations" : {
+            "device" : {
+              "ipad" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Branchée au port USB-C de votre iPad."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Branchée au port USB-C de votre iPhone."
+                }
+              }
+            }
           }
         },
         "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Conectado à porta USB-C do seu iPhone."
+          "variations" : {
+            "device" : {
+              "ipad" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Conectado à porta USB-C do seu iPad."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Conectado à porta USB-C do seu iPhone."
+                }
+              }
+            }
           }
         }
       }
@@ -11427,33 +12625,111 @@
     "Put the PC on wired Ethernet and this iPhone on 5 GHz Wi-Fi, both on the same router." : {
       "localizations" : {
         "bs" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Stavite PC na žičani Ethernet, a ovaj iPhone na 5 GHz Wi-Fi, oba na istom usmjerivaču."
+          "variations" : {
+            "device" : {
+              "ipad" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Stavite PC na žičani Ethernet, a ovaj iPad na 5 GHz Wi-Fi, oba na istom usmjerivaču."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Stavite PC na žičani Ethernet, a ovaj iPhone na 5 GHz Wi-Fi, oba na istom usmjerivaču."
+                }
+              }
+            }
           }
         },
         "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Häng den PC per Kabel ans Ethernet und dieses iPhone ins 5-GHz-WLAN, beide am selben Router."
+          "variations" : {
+            "device" : {
+              "ipad" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Häng den PC per Kabel ans Ethernet und dieses iPad ins 5-GHz-WLAN, beide am selben Router."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Häng den PC per Kabel ans Ethernet und dieses iPhone ins 5-GHz-WLAN, beide am selben Router."
+                }
+              }
+            }
+          }
+        },
+        "en" : {
+          "variations" : {
+            "device" : {
+              "ipad" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Put the PC on wired Ethernet and this iPad on 5 GHz Wi-Fi, both on the same router."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Put the PC on wired Ethernet and this iPhone on 5 GHz Wi-Fi, both on the same router."
+                }
+              }
+            }
           }
         },
         "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Pon el PC en Ethernet por cable y este iPhone en Wi-Fi de 5 GHz, ambos en el mismo router."
+          "variations" : {
+            "device" : {
+              "ipad" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Pon el PC en Ethernet por cable y este iPad en Wi-Fi de 5 GHz, ambos en el mismo router."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Pon el PC en Ethernet por cable y este iPhone en Wi-Fi de 5 GHz, ambos en el mismo router."
+                }
+              }
+            }
           }
         },
         "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Mettez le PC en Ethernet filaire et cet iPhone en Wi-Fi 5 GHz, tous deux sur le même routeur."
+          "variations" : {
+            "device" : {
+              "ipad" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Mettez le PC en Ethernet filaire et cet iPad en Wi-Fi 5 GHz, tous deux sur le même routeur."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Mettez le PC en Ethernet filaire et cet iPhone en Wi-Fi 5 GHz, tous deux sur le même routeur."
+                }
+              }
+            }
           }
         },
         "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Coloque o PC no Ethernet com fio e este iPhone no Wi-Fi de 5 GHz, ambos no mesmo roteador."
+          "variations" : {
+            "device" : {
+              "ipad" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Coloque o PC no Ethernet com fio e este iPad no Wi-Fi de 5 GHz, ambos no mesmo roteador."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Coloque o PC no Ethernet com fio e este iPhone no Wi-Fi de 5 GHz, ambos no mesmo roteador."
+                }
+              }
+            }
           }
         }
       }
@@ -11666,33 +12942,111 @@
     "Rename this iPhone" : {
       "localizations" : {
         "bs" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Preimenuj ovaj iPhone"
+          "variations" : {
+            "device" : {
+              "ipad" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Preimenuj ovaj iPad"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Preimenuj ovaj iPhone"
+                }
+              }
+            }
           }
         },
         "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Dieses iPhone umbenennen"
+          "variations" : {
+            "device" : {
+              "ipad" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Dieses iPad umbenennen"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Dieses iPhone umbenennen"
+                }
+              }
+            }
+          }
+        },
+        "en" : {
+          "variations" : {
+            "device" : {
+              "ipad" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Rename this iPad"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Rename this iPhone"
+                }
+              }
+            }
           }
         },
         "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Renombrar este iPhone"
+          "variations" : {
+            "device" : {
+              "ipad" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Renombrar este iPad"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Renombrar este iPhone"
+                }
+              }
+            }
           }
         },
         "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Renommer cet iPhone"
+          "variations" : {
+            "device" : {
+              "ipad" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Renommer cet iPad"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Renommer cet iPhone"
+                }
+              }
+            }
           }
         },
         "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Renomear este iPhone"
+          "variations" : {
+            "device" : {
+              "ipad" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Renomear este iPad"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Renomear este iPhone"
+                }
+              }
+            }
           }
         }
       }
@@ -11727,6 +13081,74 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Proteção contra repetição"
+          }
+        }
+      }
+    },
+    "Reset dead zones for %@" : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Resetuj mrtve zone za %@"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Totzonen für %@ zurücksetzen"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Restablecer las zonas muertas de %@"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Réinitialiser les zones mortes de %@"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Restaurar zonas mortas de %@"
+          }
+        }
+      }
+    },
+    "Reset to defaults" : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Resetuj na zadano"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Auf Standard zurücksetzen"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Restablecer valores por defecto"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rétablir les valeurs par défaut"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Restaurar padrões"
           }
         }
       }
@@ -13201,6 +14623,40 @@
         }
       }
     },
+    "Stick dead zone" : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mrtva zona palice"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stick-Totzone"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zona muerta del stick"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zone morte des sticks"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zona morta do analógico"
+          }
+        }
+      }
+    },
     "Stop gamepad" : {
       "localizations" : {
         "bs" : {
@@ -13674,6 +15130,40 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Toque para ativar"
+          }
+        }
+      }
+    },
+    "Telemetry" : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Telemetrija"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Telemetrie"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Telemetría"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Télémétrie"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Telemetria"
           }
         }
       }
@@ -14225,40 +15715,6 @@
         }
       }
     },
-    "The request expires in %lld min." : {
-      "localizations" : {
-        "bs" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Zahtjev ističe za %lld min."
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Die Anfrage läuft in %lld min ab."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "La solicitud caduca en %lld min."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "La demande expire dans %lld min."
-          }
-        },
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "A solicitação expira em %lld min."
-          }
-        }
-      }
-    },
     "The satellite accepted, but the controller link would not open. Try again." : {
       "localizations" : {
         "bs" : {
@@ -14466,33 +15922,111 @@
     "This controller isn’t connected to your iPhone." : {
       "localizations" : {
         "bs" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ovaj kontroler nije povezan s vašim iPhoneom."
+          "variations" : {
+            "device" : {
+              "ipad" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Ovaj kontroler nije povezan s vašim iPadom."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Ovaj kontroler nije povezan s vašim iPhoneom."
+                }
+              }
+            }
           }
         },
         "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Dieser Controller ist nicht mit deinem iPhone verbunden."
+          "variations" : {
+            "device" : {
+              "ipad" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Dieser Controller ist nicht mit deinem iPad verbunden."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Dieser Controller ist nicht mit deinem iPhone verbunden."
+                }
+              }
+            }
+          }
+        },
+        "en" : {
+          "variations" : {
+            "device" : {
+              "ipad" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "This controller isn’t connected to your iPad."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "This controller isn’t connected to your iPhone."
+                }
+              }
+            }
           }
         },
         "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Este mando no está conectado a tu iPhone."
+          "variations" : {
+            "device" : {
+              "ipad" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Este mando no está conectado a tu iPad."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Este mando no está conectado a tu iPhone."
+                }
+              }
+            }
           }
         },
         "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Cette manette n’est pas connectée à votre iPhone."
+          "variations" : {
+            "device" : {
+              "ipad" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Cette manette n’est pas connectée à votre iPad."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Cette manette n’est pas connectée à votre iPhone."
+                }
+              }
+            }
           }
         },
         "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Este controle não está conectado ao seu iPhone."
+          "variations" : {
+            "device" : {
+              "ipad" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Este controle não está conectado ao seu iPad."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Este controle não está conectado ao seu iPhone."
+                }
+              }
+            }
           }
         }
       }
@@ -14535,33 +16069,111 @@
     "This iPhone" : {
       "localizations" : {
         "bs" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ovaj iPhone"
+          "variations" : {
+            "device" : {
+              "ipad" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Ovaj iPad"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Ovaj iPhone"
+                }
+              }
+            }
           }
         },
         "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Dieses iPhone"
+          "variations" : {
+            "device" : {
+              "ipad" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Dieses iPad"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Dieses iPhone"
+                }
+              }
+            }
+          }
+        },
+        "en" : {
+          "variations" : {
+            "device" : {
+              "ipad" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "This iPad"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "This iPhone"
+                }
+              }
+            }
           }
         },
         "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Este iPhone"
+          "variations" : {
+            "device" : {
+              "ipad" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Este iPad"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Este iPhone"
+                }
+              }
+            }
           }
         },
         "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Cet iPhone"
+          "variations" : {
+            "device" : {
+              "ipad" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Cet iPad"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Cet iPhone"
+                }
+              }
+            }
           }
         },
         "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Este iPhone"
+          "variations" : {
+            "device" : {
+              "ipad" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Este iPad"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Este iPhone"
+                }
+              }
+            }
           }
         }
       }
@@ -14569,33 +16181,111 @@
     "This iPhone has no motion sensors" : {
       "localizations" : {
         "bs" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ovaj iPhone nema senzore pokreta"
+          "variations" : {
+            "device" : {
+              "ipad" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Ovaj iPad nema senzore pokreta"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Ovaj iPhone nema senzore pokreta"
+                }
+              }
+            }
           }
         },
         "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Dieses iPhone hat keine Bewegungssensoren"
+          "variations" : {
+            "device" : {
+              "ipad" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Dieses iPad hat keine Bewegungssensoren"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Dieses iPhone hat keine Bewegungssensoren"
+                }
+              }
+            }
+          }
+        },
+        "en" : {
+          "variations" : {
+            "device" : {
+              "ipad" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "This iPad has no motion sensors"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "This iPhone has no motion sensors"
+                }
+              }
+            }
           }
         },
         "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Este iPhone no tiene sensores de movimiento"
+          "variations" : {
+            "device" : {
+              "ipad" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Este iPad no tiene sensores de movimiento"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Este iPhone no tiene sensores de movimiento"
+                }
+              }
+            }
           }
         },
         "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Cet iPhone n’a pas de capteurs de mouvement"
+          "variations" : {
+            "device" : {
+              "ipad" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Cet iPad n’a pas de capteurs de mouvement"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Cet iPhone n’a pas de capteurs de mouvement"
+                }
+              }
+            }
           }
         },
         "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Este iPhone não tem sensores de movimento"
+          "variations" : {
+            "device" : {
+              "ipad" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Este iPad não tem sensores de movimento"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Este iPhone não tem sensores de movimento"
+                }
+              }
+            }
           }
         }
       }
@@ -14770,6 +16460,40 @@
         }
       }
     },
+    "Touch" : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dodir"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Touch"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Táctil"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tactile"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Toque"
+          }
+        }
+      }
+    },
     "Touch buttons on the glass." : {
       "localizations" : {
         "bs" : {
@@ -14868,6 +16592,40 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Touchpad para o host"
+          }
+        }
+      }
+    },
+    "Trigger dead zone" : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mrtva zona okidača"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Trigger-Totzone"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zona muerta del gatillo"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zone morte des gâchettes"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zona morta do gatilho"
           }
         }
       }
@@ -14977,33 +16735,111 @@
     "Turn your iPhone into a wireless PC gamepad" : {
       "localizations" : {
         "bs" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Pretvorite svoj iPhone u bežični gamepad za PC"
+          "variations" : {
+            "device" : {
+              "ipad" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Pretvorite svoj iPad u bežični gamepad za PC"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Pretvorite svoj iPhone u bežični gamepad za PC"
+                }
+              }
+            }
           }
         },
         "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Mach aus deinem iPhone ein kabelloses PC-Gamepad"
+          "variations" : {
+            "device" : {
+              "ipad" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Mach aus deinem iPad ein kabelloses PC-Gamepad"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Mach aus deinem iPhone ein kabelloses PC-Gamepad"
+                }
+              }
+            }
+          }
+        },
+        "en" : {
+          "variations" : {
+            "device" : {
+              "ipad" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Turn your iPad into a wireless PC gamepad"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Turn your iPhone into a wireless PC gamepad"
+                }
+              }
+            }
           }
         },
         "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Convierte tu iPhone en un gamepad inalámbrico para PC"
+          "variations" : {
+            "device" : {
+              "ipad" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Convierte tu iPad en un gamepad inalámbrico para PC"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Convierte tu iPhone en un gamepad inalámbrico para PC"
+                }
+              }
+            }
           }
         },
         "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Transformez votre iPhone en manette sans fil pour PC"
+          "variations" : {
+            "device" : {
+              "ipad" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Transformez votre iPad en manette sans fil pour PC"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Transformez votre iPhone en manette sans fil pour PC"
+                }
+              }
+            }
           }
         },
         "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Transforme seu iPhone em um gamepad sem fio para PC"
+          "variations" : {
+            "device" : {
+              "ipad" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Transforme seu iPad em um gamepad sem fio para PC"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Transforme seu iPhone em um gamepad sem fio para PC"
+                }
+              }
+            }
           }
         }
       }
@@ -15385,40 +17221,6 @@
         }
       }
     },
-    "Waiting" : {
-      "localizations" : {
-        "bs" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Čekanje"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Warten"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Esperando"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "En attente"
-          }
-        },
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Aguardando"
-          }
-        }
-      }
-    },
     "Waiting for the host to accept the PIN" : {
       "comment" : "PIN sheet: phase 1 waits on the human.",
       "localizations" : {
@@ -15450,6 +17252,40 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Aguardando o host aceitar o PIN"
+          }
+        }
+      }
+    },
+    "Waiting · %@" : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Čekanje · %@"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Warten · %@"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Esperando · %@"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "En attente · %@"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aguardando · %@"
           }
         }
       }
@@ -16581,33 +18417,111 @@
     "iOS only tells apps “iPhone”." : {
       "localizations" : {
         "bs" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "iOS aplikacijama govori samo “iPhone”."
+          "variations" : {
+            "device" : {
+              "ipad" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "iOS aplikacijama govori samo “iPad”."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "iOS aplikacijama govori samo “iPhone”."
+                }
+              }
+            }
           }
         },
         "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "iOS sagt Apps nur „iPhone“."
+          "variations" : {
+            "device" : {
+              "ipad" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "iOS sagt Apps nur „iPad“."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "iOS sagt Apps nur „iPhone“."
+                }
+              }
+            }
+          }
+        },
+        "en" : {
+          "variations" : {
+            "device" : {
+              "ipad" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "iOS only tells apps “iPad”."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "iOS only tells apps “iPhone”."
+                }
+              }
+            }
           }
         },
         "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "iOS solo dice a las apps “iPhone”."
+          "variations" : {
+            "device" : {
+              "ipad" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "iOS solo dice a las apps “iPad”."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "iOS solo dice a las apps “iPhone”."
+                }
+              }
+            }
           }
         },
         "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "iOS dit seulement « iPhone » aux apps."
+          "variations" : {
+            "device" : {
+              "ipad" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "iOS dit seulement « iPad » aux apps."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "iOS dit seulement « iPhone » aux apps."
+                }
+              }
+            }
           }
         },
         "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "O iOS informa aos apps apenas “iPhone”."
+          "variations" : {
+            "device" : {
+              "ipad" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "O iOS informa aos apps apenas “iPad”."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "O iOS informa aos apps apenas “iPhone”."
+                }
+              }
+            }
           }
         }
       }
@@ -16683,33 +18597,111 @@
     "iPhone" : {
       "localizations" : {
         "bs" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "iPhone"
+          "variations" : {
+            "device" : {
+              "ipad" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "iPad"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "iPhone"
+                }
+              }
+            }
           }
         },
         "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "iPhone"
+          "variations" : {
+            "device" : {
+              "ipad" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "iPad"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "iPhone"
+                }
+              }
+            }
+          }
+        },
+        "en" : {
+          "variations" : {
+            "device" : {
+              "ipad" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "iPad"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "iPhone"
+                }
+              }
+            }
           }
         },
         "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "iPhone"
+          "variations" : {
+            "device" : {
+              "ipad" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "iPad"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "iPhone"
+                }
+              }
+            }
           }
         },
         "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "iPhone"
+          "variations" : {
+            "device" : {
+              "ipad" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "iPad"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "iPhone"
+                }
+              }
+            }
           }
         },
         "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "iPhone"
+          "variations" : {
+            "device" : {
+              "ipad" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "iPad"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "iPhone"
+                }
+              }
+            }
           }
         }
       }

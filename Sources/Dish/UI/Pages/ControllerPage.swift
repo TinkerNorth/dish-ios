@@ -16,6 +16,8 @@ struct ControllerActions {
     /// Bind to the PC, by its connection id; Try again binds to the same one.
     let bind: @MainActor (String) -> Void
     let unbind: @MainActor () -> Void
+    /// The Dead zones row: that page, pushed.
+    let openDeadZones: @MainActor () -> Void
 
     /// Controls that do nothing, for a preview.
     @MainActor static let preview = ControllerActions(
@@ -24,13 +26,14 @@ struct ControllerActions {
         setHostEmulateAs: { _ in },
         open: {},
         bind: { _ in },
-        unbind: {}
+        unbind: {},
+        openDeadZones: {}
     )
 }
 
 /// Controllers › a controller (C1): the status card, BINDING with the PC it
 /// sends to or the paired PCs to bind to, the apply inline, Emulate as, and
-/// the switches the pad has. Telemetry waits until it is measured.
+/// the switches the pad has, and TELEMETRY once it has reported.
 struct ControllerPage: View {
     let id: String
 
@@ -38,11 +41,18 @@ struct ControllerPage: View {
     @Environment(NavigationStore.self) private var navigation
 
     var body: some View {
+        controllerBody
+            .onAppear { model.pageAppeared(.controller) }
+            .onDisappear { model.pageDisappeared(.controller) }
+    }
+
+    private var controllerBody: some View {
         ControllerPageBody(
             state: controllerPageState(
                 controllers: model.shellFacts.controllers,
                 paired: model.shellFacts.paired,
                 apply: model.shellFacts.apply,
+                pads: model.shellFacts.diagnostics.pads,
                 id: id
             ),
             actions: ControllerActions(
@@ -51,7 +61,8 @@ struct ControllerPage: View {
                 setHostEmulateAs: setHostEmulateAs,
                 open: openGamepad,
                 bind: bind,
-                unbind: unbind
+                unbind: unbind,
+                openDeadZones: openDeadZones
             )
         )
     }
@@ -74,6 +85,10 @@ struct ControllerPage: View {
 
     private func bind(_ connectionId: String) {
         model.bind(slotId: id, to: connectionId)
+    }
+
+    private func openDeadZones() {
+        navigation.send(.push(.deadZones(id: id)))
     }
 
     private func unbind() {
@@ -127,6 +142,12 @@ private struct ControllerPadSections: View {
             Section {} footer: {
                 Text(state.footnote).font(DishFont.detail).foregroundStyle(DishTheme.muted)
             }
+        }
+        if let deadZones = state.deadZones {
+            ControllerDeadZonesSection(title: deadZones, open: actions.openDeadZones)
+        }
+        if let telemetry = state.telemetry {
+            ControllerTelemetrySection(state: telemetry)
         }
     }
 }

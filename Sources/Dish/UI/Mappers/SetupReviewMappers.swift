@@ -129,7 +129,7 @@ private func foundPC(id: String, symbol: String, _ inputs: SetupInputs, words: L
     let paired = pc?.paired ?? false
     return ReviewEndState(
         symbol: symbol,
-        name: pc?.name ?? words.setupYourPC,
+        name: pc.map(setupPCTitle) ?? words.setupYourPC,
         detail: setupPairingWord(paired, words: words),
         dot: setupPairingDot(paired)
     )

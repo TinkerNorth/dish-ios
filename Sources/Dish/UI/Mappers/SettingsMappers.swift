@@ -34,6 +34,44 @@ struct StreamingSectionState: Equatable {
     let footer: String
 }
 
+/// The three global switches that are a toggle each.
+enum ForwardedFeature: Equatable {
+    case motion, rumble, touchpad
+}
+
+/// One toggle of FORWARDED FEATURES.
+struct ForwardedFeatureRowState: Equatable, Identifiable {
+    let feature: ForwardedFeature
+    let title: String
+    let detail: String
+    let isOn: Bool
+
+    var id: ForwardedFeature {
+        feature
+    }
+}
+
+/// One light bar choice.
+struct LightBarOptionState: Equatable, Identifiable {
+    let mode: LightbarMode
+    let title: String
+
+    var id: LightbarMode {
+        mode
+    }
+}
+
+/// FORWARDED FEATURES: the global switches above every controller's own.
+struct ForwardedFeaturesSectionState: Equatable {
+    let title: String
+    let rows: [ForwardedFeatureRowState]
+    let lightBarTitle: String
+    let lightBar: LightbarMode
+    let lightBarOptions: [LightBarOptionState]
+    let lightBarDetail: String
+    let footer: String
+}
+
 /// SETUP & HELP: Setup guide, Help & FAQ and Diagnostics.
 struct SetupHelpSectionState: Equatable {
     let title: String
@@ -81,12 +119,18 @@ struct SettingsPageState: Equatable {
     let title: String
     let device: DeviceSectionState
     let streaming: StreamingSectionState
+    let features: ForwardedFeaturesSectionState
     let help: SetupHelpSectionState
     let appearance: AppearanceSectionState
     let about: AboutSectionState
 }
 
-func settingsPageState(preferences: PreferencesFacts, appVersion: String, words: L10n = .app) -> SettingsPageState {
+func settingsPageState(
+    preferences: PreferencesFacts,
+    forwarding: ForwardingFlags = ForwardingFlags(),
+    appVersion: String,
+    words: L10n = .app
+) -> SettingsPageState {
     SettingsPageState(
         title: words.settings,
         device: DeviceSectionState(
@@ -96,6 +140,7 @@ func settingsPageState(preferences: PreferencesFacts, appVersion: String, words:
             footer: words.deviceNameFooter
         ),
         streaming: streamingSection(preferences, words: words),
+        features: forwardedFeatures(forwarding, words: words),
         help: SetupHelpSectionState(
             title: words.setupAndHelp,
             guide: words.setupGuide,
@@ -129,6 +174,30 @@ private func aboutSection(appVersion: String, words: L10n) -> AboutSectionState 
         ],
         licenses: words.openSourceLicenses
     )
+}
+
+private func forwardedFeatures(_ flags: ForwardingFlags, words: L10n) -> ForwardedFeaturesSectionState {
+    ForwardedFeaturesSectionState(
+        title: words.forwardedFeatures,
+        rows: [
+            ForwardedFeatureRowState(feature: .motion, title: words.setupMotion, detail: words.motionDetail, isOn: flags.motion),
+            ForwardedFeatureRowState(feature: .rumble, title: words.carriesRumble, detail: words.rumbleDetail, isOn: flags.rumble),
+            ForwardedFeatureRowState(feature: .touchpad, title: words.carriesTouchpad, detail: words.touchpadDetail, isOn: flags.touchpad)
+        ],
+        lightBarTitle: words.lightBar,
+        lightBar: flags.lightbar ? .followGame : .off,
+        lightBarOptions: LightbarMode.allCases.map { LightBarOptionState(mode: $0, title: lightbarModeText($0, words: words)) },
+        lightBarDetail: words.lightbarDetail,
+        footer: words.featuresFootnote
+    )
+}
+
+/// The light bar picker's option words.
+func lightbarModeText(_ mode: LightbarMode, words: L10n = .app) -> String {
+    switch mode {
+    case .followGame: words.followGame
+    case .off: words.off
+    }
 }
 
 private func streamingSection(_ preferences: PreferencesFacts, words: L10n) -> StreamingSectionState {

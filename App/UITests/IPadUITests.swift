@@ -27,7 +27,8 @@ final class IPadUITests: XCTestCase {
         }
         XCTAssertTrue(ShellUI.sidebarTab("Controllers", in: app).isSelected)
         ShellUI.sidebarTab("Settings", in: app).tap()
-        XCTAssertTrue(ShellUI.element("Setup guide", in: app).waitForExistence(timeout: 5))
+        let guide = ShellUI.scrolled(to: ShellUI.element("Setup guide", in: app), in: app)
+        XCTAssertTrue(guide.waitForExistence(timeout: 5))
     }
 
     func testThePlayCoverOpensOnTheIPadsSideAndStandsAlongTheBottomUpright() {

@@ -109,18 +109,21 @@ package final class GamepadInputProcessor {
         for (deviceId, feed) in feeds {
             let reports = feed.record.reportCount
             let motion = feed.record.motionCount
+            let touch = feed.record.touchCount
             if reports > 0 { tally.reports[deviceId] = reports }
             if motion > 0 { tally.motion[deviceId] = motion }
+            if touch > 0 { tally.touch[deviceId] = touch }
         }
         return tally
     }
 }
 
-/// What each pad has produced so far: its published reports and its
-/// admitted motion samples.
+/// What each pad has produced so far: its published reports, its admitted
+/// motion samples and its touchpad samples.
 package struct PadTally: Equatable {
     package var reports: [String: UInt64] = [:]
     package var motion: [String: UInt64] = [:]
+    package var touch: [String: UInt64] = [:]
 }
 
 /// The stored setting as the processor applies it.

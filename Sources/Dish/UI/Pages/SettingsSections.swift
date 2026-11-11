@@ -45,6 +45,39 @@ struct StreamingSection: View {
     }
 }
 
+/// FORWARDED FEATURES › Motion, Rumble, Touchpad, Light bar: the global
+/// switches above every controller's own.
+struct ForwardedFeaturesSection: View {
+    let state: ForwardedFeaturesSectionState
+    let actions: SettingsActions
+
+    var body: some View {
+        Section {
+            ForEach(state.rows) { row in
+                Toggle(isOn: Binding(get: { row.isOn }, set: { actions.setForwarded(row.feature, $0) })) {
+                    VStack(alignment: .leading, spacing: DishSpace.s1) {
+                        Text(row.title)
+                        Text(row.detail).font(DishFont.detail).foregroundStyle(DishTheme.muted)
+                    }
+                }
+            }
+            VStack(alignment: .leading, spacing: DishSpace.s1) {
+                Picker(state.lightBarTitle, selection: Binding(get: { state.lightBar }, set: { actions.setLightBar($0) })) {
+                    ForEach(state.lightBarOptions) { Text($0.title).tag($0.mode) }
+                }
+                .pickerStyle(.menu)
+                Text(state.lightBarDetail).font(DishFont.detail).foregroundStyle(DishTheme.muted)
+            }
+        } header: {
+            SectionEyebrow(title: state.title, color: DishTheme.muted)
+        } footer: {
+            SettingsFooter(text: state.footer)
+        }
+        .foregroundStyle(DishTheme.onSurface)
+        .listRowBackground(DishTheme.surface)
+    }
+}
+
 /// SETUP & HELP › Setup guide, Help & FAQ, Diagnostics.
 struct SetupHelpSection: View {
     let state: SetupHelpSectionState

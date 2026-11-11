@@ -129,6 +129,45 @@ private struct ApplyRow: View {
     }
 }
 
+/// Dead zones ›: the row that pushes the page.
+struct ControllerDeadZonesSection: View {
+    let title: String
+    let open: @MainActor () -> Void
+
+    var body: some View {
+        Section {
+            Button(action: open) {
+                HStack(spacing: DishSpace.s4) {
+                    Text(title).foregroundStyle(DishTheme.onSurface)
+                    Spacer()
+                    Image(systemName: DishSymbol.disclosure).font(DishFont.detail).foregroundStyle(DishTheme.muted)
+                }
+                .contentShape(Rectangle())
+            }
+        }
+        .listRowBackground(DishTheme.surface)
+    }
+}
+
+/// TELEMETRY: the rates the pad's streams run at.
+struct ControllerTelemetrySection: View {
+    let state: ControllerTelemetryState
+
+    var body: some View {
+        Section {
+            ForEach(state.rows) { row in
+                LabeledContent(row.label) {
+                    Text(row.value).font(DishFont.mono)
+                }
+                .foregroundStyle(DishTheme.onSurface)
+            }
+        } header: {
+            SectionEyebrow(title: state.title, color: DishTheme.muted)
+        }
+        .listRowBackground(DishTheme.surface)
+    }
+}
+
 /// FUNCTIONS: one switch per feature the pad has, and why two are missing.
 struct ControllerFunctionsSection: View {
     let state: ControllerFunctionsState
