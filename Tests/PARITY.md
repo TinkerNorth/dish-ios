@@ -9,7 +9,8 @@
 > Legend: **built** works as the row says · **mapper only** the state is built
 > and tested through its mapper and shown in a `#Preview`, but nothing reaches
 > it at run time yet · **not yet** not built; the row says where it lands ·
-> **n/a** does not apply on iOS. Verified against the code on 2026-11-11.
+> **n/a** does not apply on iOS · **not possible** iOS gives an app no way to
+> do it; the row says why. Verified against the code on 2026-11-11.
 >
 > Wave 1 built the shell; wave A the protocol core; wave B the controller
 > bridge; wave C the network engine; wave E the play screens; wave F the
@@ -199,3 +200,19 @@ so the sanctioned path works alone.
   rumble, light-bar, trigger and player-LED values the receive loop decoded
   rather than dish-mac's `RumbleCommand`-shaped values, so the controller
   bridge needs nothing from the wire codecs.
+
+## 5. Pads and return paths, as iOS allows them
+
+What reaches a pad through GameController, and the pads iOS keeps from an
+app. Checked on 2026-11-11 against the code here, GameController's API and
+SDL's sources (`SDL_hidapi_steam.c`, `SDL_hidapi_steam_triton.c` and the iOS
+backend `src/hidapi/ios/hid.m`, all zlib); none of it has been tried on
+hardware yet.
+
+| Pad or path | Status | How, or why not |
+|---|---|---|
+| **A DualSense's rumble, adaptive triggers, light bar and player LEDs from a satellite** | built | Each command arrives on the receive loop, passes the pad's switch (the light bar the global one too) and lands on the pad's feedback record; the feedback queue plays the newest of each kind through GameController. MSG_RUMBLE drives two `CHHapticEngine`s from `GCController.haptics`, the strong motor at `.leftHandle` and the weak at `.rightHandle`; MSG_TRIGGER_EFFECTS is decoded from the firmware's 11-byte blocks (`DualSenseTriggerEffect`) onto `GCDualSenseAdaptiveTrigger`'s off, feedback, weapon and vibration modes and their ten-zone forms; MSG_LIGHTBAR is `GCDeviceLight.color`; MSG_PLAYER_LEDS is `GCController.playerIndex`. What the API cannot say: the galloping effect plays as off, the machine effect as a ten-zone vibration at its first amplitude with no period, the bow as a weapon; the LEDs show the framework's four player patterns rather than any mask; and an app gets no haptic audio, speaker or microphone on the pad. A black light bar the satellite writes is painted black here: the satellite's DualSense output decoder is where that is fixed. |
+| **An 8BitDo Ultimate 2 Wireless in X-input mode** (USB 2DC8:310B, the Xbox 360 wired protocol) | not possible | X-input mode is a vendor-class USB interface, not HID, and GameController drives no Xbox 360 pad, so iOS vends no controller for it; an app gets no USB or HID access to read it itself (section 3). On an iPad with an M-series chip, a DriverKit driver Apple entitles for the vendor's USB devices could claim the interface; Dish has none. |
+| **A Steam Controller (2015) on USB or its wireless dongle** (28DE:1102, 28DE:1142) | not possible | The pad's interface is vendor HID, and lizard mode is turned off by feature reports (SDL clears the digital mappings and sets both trackpads to none); iOS lets an app do neither, and GameController does not vend the pad, so iOS sees only lizard mode's keyboard and mouse. |
+| **A Steam Controller (2026) on USB or its dongles** (28DE:1302; the Proteus and Nereid dongles, 28DE:1304 and 28DE:1305, one pad per interface 2 to 5) | not possible | The same: vendor HID reports, and a lizard-mode setting the firmware's watchdog restores unless it is sent again every 3 s, neither reachable from an app. |
+| **Either Steam Controller on Bluetooth LE** (the 2015 pad on its BLE firmware, 28DE:1106; the 2026 pad, 28DE:1303) | not yet | GameController does not vend them, but CoreBluetooth reaches them. SDL's iOS backend talks to Valve's GATT service `100F6C32-1735-4313-B402-38567131E5F3`: the 2015 pad's input on `100F6C33-…`, the 2026 pad's reports 0x45 and 0x47 on `100F6C7A-…` and `100F6C7C-…`, the feature reports on `100F6C34-…`, through which its drivers turn lizard mode off and over which they decode `ID_CONTROLLER_BLE_STATE` and `ID_TRITON_CONTROLLER_STATE_BLE`. A port is a source beside GameController in the engine, with `NSBluetoothAlwaysUsageDescription` and the Bluetooth question it brings (SDL keeps the driver off by default on iOS for that reason), and a pad of each kind to verify it on. |
