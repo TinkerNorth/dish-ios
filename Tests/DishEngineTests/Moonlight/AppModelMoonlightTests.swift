@@ -16,6 +16,7 @@ final class AppModelMoonlightTests: XCTestCase {
     private var moonlight: MoonlightConnectionManager!
     private var source: FakeControllerSource!
     private var model: AppModel!
+    private var batteryTicker: ManualTicker!
     private let host = MoonlightHost(name: "PC", address: "10.0.0.5", uniqueId: "abc")
     private let dualSense = ControllerSlot(
         id: "ds",
@@ -46,6 +47,7 @@ final class AppModelMoonlightTests: XCTestCase {
         moonlight.store.put(record)
         moonlight.publishRemembered()
         source = FakeControllerSource(slots: [dualSense])
+        batteryTicker = ManualTicker()
         model = AppModel(
             onboarding: OnboardingPreferenceStore(defaults: defaults),
             appearance: AppearancePreferenceStore(defaults: defaults),
@@ -57,7 +59,9 @@ final class AppModelMoonlightTests: XCTestCase {
             network: TestNetwork.stack(defaults: defaults, moonlight: moonlight),
             tips: RecordedTipStore(shelf: .success([])),
             motionSensor: FakeMotionSensor(),
-            resendTicker: ManualTicker()
+            resendTicker: ManualTicker(),
+            deviceBattery: FakeDeviceBattery(BatteryReading(level: 64, state: .discharging)),
+            batteryTicker: batteryTicker
         )
     }
 
@@ -180,6 +184,18 @@ final class AppModelMoonlightTests: XCTestCase {
             [.state(MoonlightInput.PadFrame(controller: 0, activeMask: 0b0001, buttons: 0x0010))],
             "the on-screen gamepad's feed reaches the host's link"
         )
+    }
+
+    func testTheOnScreenGamepadBoundToAHostIsSentTheDevicesBatteryAndAnnouncesOne() async throws {
+        model.openGamepad()
+        model.bind(slotId: onScreenSlotId, to: host.id)
+        let announced = try XCTUnwrap(moonlight.desired[host.id]?.first?.announced)
+        XCTAssertNotEqual(announced.capabilities & MoonlightCapability.battery, 0, "the host is told this pad has a battery")
+        await moonlight.awaitQuiet()
+        let live = try XCTUnwrap(edges.liveSessions.last)
+        _ = live.take()
+        batteryTicker.fire()
+        XCTAssertEqual(live.take(), [.battery(0, MoonlightBatteryState.discharging, 64)], "the first steady sample")
     }
 
     func testForgettingAHostUnbindsItsSlotsFirst() async {

@@ -13,16 +13,19 @@ private struct PlayModel {
     let source = FakeControllerSource()
     let recorder = InputRecorder()
     let ticker = ManualTicker()
+    let batteryTicker = ManualTicker()
     let sensor: FakeMotionSensor
 
-    init(_ test: XCTestCase, sensor: FakeMotionSensor = FakeMotionSensor()) throws {
+    init(_ test: XCTestCase, sensor: FakeMotionSensor = FakeMotionSensor(), deviceBattery: any DeviceBattery = InertDeviceBattery()) throws {
         self.sensor = sensor
         model = try AppModel(
             defaults: TestDefaults.fresh(test),
             localNetwork: RecordedLocalNetworkAccess(),
             controllerSource: source,
             motionSensor: sensor,
-            resendTicker: ticker
+            resendTicker: ticker,
+            deviceBattery: deviceBattery,
+            batteryTicker: batteryTicker
         )
         source.processor.route(recorder.route)
     }
@@ -234,5 +237,41 @@ final class AppModelPlayTests: XCTestCase {
         live.rumble(controllerIndex: 0, strong: 40000, weak: 0, durationMs: 100)
         feedback.queue.sync {}
         XCTAssertEqual(actuators.actuations, [.rumble(onScreenSlotId, strong: 40000, weak: 0, durationMs: 100)])
+    }
+
+    // MARK: - The device's battery
+
+    private let deviceReading = BatteryReading(level: 64, state: .discharging)
+
+    func testTheOnScreenControllerSendsTheDevicesBatteryOnTheSteadyCadence() throws {
+        let played = try PlayModel(self, deviceBattery: FakeDeviceBattery(deviceReading))
+        played.model.openGamepad()
+        (1 ... 31).forEach { _ in played.batteryTicker.fire() }
+        let sent = played.recorder.batteries
+        XCTAssertEqual(sent.map(\.id), [onScreenSlotId, onScreenSlotId], "the steady samples at seconds 1 and 31")
+        XCTAssertEqual(sent.map(\.reading), [deviceReading, deviceReading])
+        XCTAssertNil(played.onScreenController?.batteryPercent, "its card has no battery of its own")
+    }
+
+    func testTheOnScreenBatteryRunsWhileTheControllerIsListedAndStopsWithIt() throws {
+        let played = try PlayModel(self, deviceBattery: FakeDeviceBattery(deviceReading))
+        XCTAssertFalse(played.batteryTicker.running, "an unlisted controller has no cadence")
+        played.model.openGamepad()
+        played.model.closePlay()
+        XCTAssertTrue(played.batteryTicker.running, "a listed controller stays bound after the screen closes")
+        played.model.stopOnScreenGamepad()
+        XCTAssertFalse(played.batteryTicker.running)
+    }
+
+    func testAnIphoneWithNoBatterySendsTheOnScreenHostNothing() throws {
+        let played = try PlayModel(self)
+        played.model.openGamepad()
+        (1 ... 31).forEach { _ in played.batteryTicker.fire() }
+        XCTAssertTrue(played.recorder.batteries.isEmpty)
+    }
+
+    func testTheOnScreenControllerClaimsABatteryItsHostCanRead() throws {
+        let played = try PlayModel(self)
+        XCTAssertTrue(played.model.onScreenCapabilities.hasBattery)
     }
 }

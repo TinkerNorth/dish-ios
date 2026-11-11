@@ -90,12 +90,7 @@ extension GameControllerInput {
     /// is sent changed.
     func forwardBattery(deviceId: String, pad: BatteryReading?, poll: BatteryPoll) {
         let routed = routeBattery(pad: pad, device: deviceBattery.reading)
-        guard let sent = routed.wire else { return }
-        let changed = lastBatteryState[deviceId] != sent.state
-        switch poll {
-        case .steady: break
-        case .watch: guard changed else { return }
-        }
+        guard let sent = batteryToSend(routed.wire, poll: poll, lastState: lastBatteryState[deviceId]) else { return }
         lastBatteryState[deviceId] = sent.state
         if let display = routed.display, let index = slots.firstIndex(where: { $0.id == deviceId }) {
             updateBattery(display, at: index)

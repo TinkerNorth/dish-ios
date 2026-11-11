@@ -37,6 +37,7 @@ package final class AppModel {
     let supportSource = StateSource<SupportFacts>(initial: .initial)
     /// The on-screen controller's slot: its touches, its resend loop, its motion.
     package let onScreen: OnScreenPad
+    let onScreenBattery: OnScreenBattery
     /// The play screen on display; nil while none is.
     let playSource = StateSource<PlayScreen?>(initial: nil)
     /// Whether the on-screen controller is one of the controllers.
@@ -81,7 +82,9 @@ package final class AppModel {
         motionSensor: any MotionSensor,
         resendTicker: any Ticker,
         diagnostics: DiagnosticsSource = DiagnosticsSource(ticker: TimerTicker()),
-        pasteboard: any Pasteboard = InertPasteboard()
+        pasteboard: any Pasteboard = InertPasteboard(),
+        deviceBattery: any DeviceBattery = InertDeviceBattery(),
+        batteryTicker: any Ticker = TimerTicker()
     ) {
         self.onboarding = onboarding
         self.appearance = appearance
@@ -100,6 +103,7 @@ package final class AppModel {
         returnPaths = ReturnPathRouter(feedback: pads.source.feedback)
         moonlightFeedback = MoonlightFeedbackRouter(feedback: pads.source.feedback)
         onScreen = OnScreenPad(feed: pads.source.processor.feed(for: onScreenSlotId), ticker: resendTicker, sensor: motionSensor)
+        onScreenBattery = OnScreenBattery(ticker: batteryTicker, device: deviceBattery, processor: pads.source.processor)
         applyStoredDeadzones()
         pads.source.processor.setDeadzones(deviceId: onScreenSlotId, GamepadInputProcessor.Deadzones())
         wireNetwork()
@@ -126,6 +130,7 @@ package final class AppModel {
         diagnostics: DiagnosticsSource = DiagnosticsSource(ticker: TimerTicker()),
         pasteboard: any Pasteboard = InertPasteboard(),
         deviceBattery: any DeviceBattery = InertDeviceBattery(),
+        batteryTicker: any Ticker = TimerTicker(),
         deviceKind: DeviceKind = .phone
     ) {
         let device = DevicePreferenceStore(defaults: defaults)
@@ -143,7 +148,9 @@ package final class AppModel {
             motionSensor: motionSensor,
             resendTicker: resendTicker,
             diagnostics: diagnostics,
-            pasteboard: pasteboard
+            pasteboard: pasteboard,
+            deviceBattery: deviceBattery,
+            batteryTicker: batteryTicker
         )
         Self.mintMoonlightIdentity(into: network)
     }
