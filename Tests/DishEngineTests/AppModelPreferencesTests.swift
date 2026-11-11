@@ -8,8 +8,11 @@ import XCTest
 @MainActor
 final class AppModelPreferencesTests: XCTestCase {
 
+    /// No pads: the simulator vends any controller plugged into the Mac it
+    /// runs on, once GameController has looked, which an empty source holds
+    /// out of the facts.
     private func model() throws -> AppModel {
-        try AppModel(defaults: TestDefaults.fresh(self))
+        try AppModel(defaults: TestDefaults.fresh(self), controllerSource: FakeControllerSource())
     }
 
     func testAFreshModelPublishesRealEmptyFactsAndTheDefaults() throws {
