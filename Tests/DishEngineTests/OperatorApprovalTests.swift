@@ -110,6 +110,16 @@ final class OperatorApprovalTests: XCTestCase {
         XCTAssertEqual(pairingFailures, [])
     }
 
+    func testEachPollMovesTheRequestsElapsedTimeAndANewRequestStartsItAgain() async {
+        manager.pairWithClientPin(server, clientPin: "4081")
+        XCTAssertEqual(attempt?.elapsedMs, 0, "nothing has been waited out when the request is filed")
+        let moved = await waitUntil { (self.attempt?.elapsedMs ?? 0) >= 150 }
+        XCTAssertTrue(moved)
+        XCTAssertEqual((attempt?.elapsedMs ?? 1) % Self.fastPolling.intervalMs, 0, "it moves a whole interval at a time")
+        manager.pairWithClientPin(server, clientPin: "5092")
+        XCTAssertEqual(attempt?.elapsedMs, 0, "a new code is a new request with its own time")
+    }
+
     func testADeclineIsPublishedAndKeyedToTheSatellite() async {
         manager.pairWithClientPin(server, clientPin: "9911")
         let filed = await requestFiled("9911")

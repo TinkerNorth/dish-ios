@@ -5,7 +5,8 @@ import Foundation
 import XCTest
 
 /// A String Catalog as the tree holds it: its source language and, for each
-/// key, every language's plain value or plural forms, with their states.
+/// key, every language's plain value, plural forms or device forms, with
+/// their states.
 struct StringCatalogFile {
 
     struct Entry {
@@ -14,10 +15,12 @@ struct StringCatalogFile {
         let plain: [String: String]
         /// language → CLDR plural category → value.
         let plural: [String: [String: String]]
+        /// language → device (`ipad`, `other`) → value.
+        let device: [String: [String: String]]
         let states: [String]
 
         var languages: Set<String> {
-            Set(plain.keys).union(plural.keys)
+            Set(plain.keys).union(plural.keys).union(device.keys)
         }
     }
 
@@ -40,6 +43,7 @@ struct StringCatalogFile {
         let localizations = try XCTUnwrap(entry["localizations"] as? [String: Any], key)
         var plain: [String: String] = [:]
         var plural: [String: [String: String]] = [:]
+        var device: [String: [String: String]] = [:]
         var states: [String] = []
         for (code, rawLocalization) in localizations {
             let localization = try XCTUnwrap(rawLocalization as? [String: Any], "\(key) in \(code)")
@@ -47,16 +51,25 @@ struct StringCatalogFile {
                 plain[code] = unit["value"] as? String ?? ""
                 states.append(unit["state"] as? String ?? "")
             }
-            guard let variations = localization["variations"] as? [String: Any],
-                  let forms = variations["plural"] as? [String: Any] else { continue }
-            var byForm: [String: String] = [:]
-            for (form, rawForm) in forms {
-                let unit = (rawForm as? [String: Any])?["stringUnit"] as? [String: Any]
-                byForm[form] = unit?["value"] as? String ?? ""
-                states.append(unit?["state"] as? String ?? "")
+            guard let variations = localization["variations"] as? [String: Any] else { continue }
+            if let forms = variations["plural"] as? [String: Any] {
+                plural[code] = Self.values(of: forms, states: &states)
             }
-            plural[code] = byForm
+            if let forms = variations["device"] as? [String: Any] {
+                device[code] = Self.values(of: forms, states: &states)
+            }
         }
-        return Entry(key: key, plain: plain, plural: plural, states: states)
+        return Entry(key: key, plain: plain, plural: plural, device: device, states: states)
+    }
+
+    /// The value of each form of a variation, and its state.
+    private static func values(of forms: [String: Any], states: inout [String]) -> [String: String] {
+        var byForm: [String: String] = [:]
+        for (form, rawForm) in forms {
+            let unit = (rawForm as? [String: Any])?["stringUnit"] as? [String: Any]
+            byForm[form] = unit?["value"] as? String ?? ""
+            states.append(unit?["state"] as? String ?? "")
+        }
+        return byForm
     }
 }

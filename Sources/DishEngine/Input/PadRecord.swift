@@ -36,6 +36,7 @@ package final class PadRecord: Sendable {
     private let present = AtomicWord()
     private let reports = AtomicWord()
     private let motions = AtomicWord()
+    private let touches = AtomicWord()
 
     package init() {}
 
@@ -45,6 +46,10 @@ package final class PadRecord: Sendable {
 
     package var motionCount: UInt64 {
         UInt64(bitPattern: motions.loadRelaxed())
+    }
+
+    package var touchCount: UInt64 {
+        UInt64(bitPattern: touches.loadRelaxed())
     }
 
     func write(raw: GamepadReport, filtered: GamepadReport) {
@@ -73,6 +78,7 @@ package final class PadRecord: Sendable {
         touchHigh.storeRelaxed(touch.packedHigh)
         present.storeRelaxed(present.loadRelaxed() | Self.hasTouch)
         endWrite(odd)
+        touches.storeRelaxed(touches.loadRelaxed() &+ 1)
     }
 
     /// The writer's opening bracket: the sequence goes odd before any store.

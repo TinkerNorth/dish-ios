@@ -7,7 +7,7 @@ import Foundation
 /// The controllers' facts and intents: the bridge's slots become the
 /// Controllers tab's rows and setup's attached pads; the controller page
 /// flips a pad's switches and picks what it is emulated as; the dead zones
-/// reach each pad's feed as they change.
+/// reach each pad's feed as they change; Settings flips the global switches.
 package extension AppModel {
 
     /// Every pad iOS lists, readable or not, with its switches, its pick and
@@ -51,6 +51,27 @@ package extension AppModel {
         } else {
             pads.types.setType(pad, for: slotId)
         }
+        refreshRouting()
+    }
+
+    /// A global switch moves every pad's route and, while bound, its descriptor.
+    func setRumbleForwarded(_ on: Bool) {
+        pads.features.setRumble(on)
+        refreshRouting()
+    }
+
+    func setTouchpadForwarded(_ on: Bool) {
+        pads.features.setTouchpad(on)
+        refreshRouting()
+    }
+
+    func setMotionForwarded(_ on: Bool) {
+        pads.features.setMotion(on)
+        refreshRouting()
+    }
+
+    func setLightbarMode(_ mode: LightbarMode) {
+        pads.features.setLightbarMode(mode)
         refreshRouting()
     }
 

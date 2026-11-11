@@ -82,6 +82,23 @@ miss. `Tests/PARITY.md` lists everything not built.
   trip and each pad it carries. A pad bound to a Moonlight host offers the
   protocol's Auto, Xbox, PlayStation and Nintendo under Emulate as, with the
   line saying what Auto sends.
+- **The second parity sweep.** The controller page shows TELEMETRY once the
+  pad has sent a report, the on-screen gamepad included: the Gamepad rate,
+  and the Motion and Touch rates for a pad that has the hardware, off the
+  same readings Diagnostics shows, ticking only while the page is on screen.
+  A Dead zones page, pushed from a controller's page, tunes the stick and
+  trigger dead zones with Reset to defaults, and Settings gains Forwarded
+  features: the global Motion, Rumble, Touchpad and Light bar switches that
+  sit above every controller's own. The pair sheet counts the request down
+  ("Waiting · 1:58") as the approval poll runs, and no longer says how many
+  minutes the satellite keeps it. A PC added by its address is a found row
+  with Pair, titled by the address, from the moment it is added, and Review
+  names it that way until pairing names it. The Connections tab scans as it
+  opens only once the setup primer was seen (`local_network_primed`), so iOS
+  asks its Local Network question after the explanation. On an iPad the
+  words that name the iPhone name the iPad, in all six languages, and a
+  device with no name of its own introduces itself to the satellite as
+  "iPad".
 - **Pairing and connections.** The pair sheet (B5), from Pair on a found or
   revoked row, from Pick your PC, from Re-pair on a PC's page and from a PC
   that asks for a PIN as it is connected to: the satellite's PIN typed into

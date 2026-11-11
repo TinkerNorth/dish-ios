@@ -92,6 +92,10 @@ final class ShellMappersTests: XCTestCase {
         XCTAssertNil(pairingSheetId(nil))
     }
 
+    func testTheDeadZonesPageIsTitled() {
+        XCTAssertEqual(pageTitle(.deadZones(id: "pad")), "Dead zones")
+    }
+
     func testTheMoonlightHostsPageIsTitledAsItsConnectionsRow() {
         XCTAssertEqual(pageTitle(.moonlightHosts), "Moonlight hosts")
     }

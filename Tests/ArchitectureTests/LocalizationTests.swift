@@ -74,6 +74,13 @@ final class LocalizationTests: XCTestCase {
             for (code, value) in entry.plain {
                 XCTAssertFalse(value.isEmpty, "\(entry.key) is blank in \(code)")
             }
+            for (code, forms) in entry.device {
+                XCTAssertNotNil(forms["ipad"], "\(entry.key) in \(code) lacks the iPad form")
+                XCTAssertNotNil(forms["other"], "\(entry.key) in \(code) lacks the form every other device reads")
+                for (form, value) in forms {
+                    XCTAssertFalse(value.isEmpty, "\(entry.key) is blank in \(code)/\(form)")
+                }
+            }
             for (code, forms) in entry.plural {
                 XCTAssertNotNil(forms["one"], "\(entry.key) in \(code) lacks the singular")
                 XCTAssertNotNil(forms["other"], "\(entry.key) in \(code) lacks the plural")
@@ -102,6 +109,39 @@ final class LocalizationTests: XCTestCase {
                     XCTAssertEqual(Self.specifiers(in: value), expected, "\(entry.key) in \(code)/\(form)")
                 }
             }
+            for (code, forms) in entry.device {
+                for (form, value) in forms {
+                    XCTAssertEqual(Self.specifiers(in: value), expected, "\(entry.key) in \(code)/\(form)")
+                }
+            }
+        }
+    }
+
+    // MARK: - An iPad reads its own device
+
+    /// Every key whose English names the iPhone carries a device variation:
+    /// the iPad's form in all five languages (and English), the same sentence
+    /// with the iPad named, and the form every other device reads untouched.
+    func testEveryKeyThatNamesTheIPhoneHasAnIPadForm() {
+        let naming = entries.filter { $0.key.contains("iPhone") }
+        XCTAssertGreaterThanOrEqual(naming.count, 19, "the sweep must see every key that names the iPhone")
+        for entry in naming {
+            XCTAssertEqual(Self.languages.subtracting(entry.device.keys).sorted(), [], "\(entry.key) lacks an iPad form")
+            XCTAssertEqual(entry.device["en"]?["ipad"], entry.key.replacingOccurrences(of: "iPhone", with: "iPad"), entry.key)
+            XCTAssertEqual(entry.device["en"]?["other"], entry.key, "\(entry.key): everything else reads the key as it is")
+            for (code, forms) in entry.device {
+                XCTAssertEqual(forms["ipad"]?.contains("iPhone"), false, "\(entry.key) in \(code): the iPad form names an iPhone")
+                XCTAssertEqual(forms["ipad"]?.contains("iPad"), true, "\(entry.key) in \(code): the iPad form never names the iPad")
+                XCTAssertEqual(forms["other"]?.contains("iPhone"), true, "\(entry.key) in \(code): the other form lost the iPhone")
+            }
+        }
+    }
+
+    /// A device form is a variation of a whole entry: no entry mixes a plain
+    /// value with device forms in one language, which Xcode would not compile.
+    func testNoLanguageHoldsBothAPlainValueAndDeviceForms() {
+        for entry in entries {
+            XCTAssertEqual(Set(entry.plain.keys).intersection(entry.device.keys).sorted(), [], entry.key)
         }
     }
 

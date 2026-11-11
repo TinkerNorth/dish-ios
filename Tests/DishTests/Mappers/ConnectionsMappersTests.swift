@@ -139,6 +139,16 @@ final class ConnectionsMappersTests: XCTestCase {
         XCTAssertEqual(list.found, FoundSectionState(title: "Found on your Wi‑Fi", searching: nil, rows: [row]))
     }
 
+    /// A PC typed by its address has no name until it is paired: its row is
+    /// titled by the address and offers Pair like any found PC.
+    func testAFoundPCWithNoNameIsTitledByItsAddress() throws {
+        let typed = ConnectionFact(id: "wifi:192.168.1.50:9876", name: "", address: "192.168.1.50", kind: .satellite, state: .needsPairing)
+        let list = try ConnectionsFixture.list(FactsFixture.shell(found: [typed]))
+        let row = try XCTUnwrap(list.found?.rows.first)
+        XCTAssertEqual(row.name, "192.168.1.50")
+        XCTAssertEqual(row.button, ConnectionRowButton(title: "Pair", action: .pair(serverId: "wifi:192.168.1.50:9876")))
+    }
+
     /// A paired row opens its PC's page; one that is offline offers Connect
     /// and one whose key the PC revoked offers Pair.
     func testPairedRowsOpenTheirPageAndOfferConnectOrPair() throws {

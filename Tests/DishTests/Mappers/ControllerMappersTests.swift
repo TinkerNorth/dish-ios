@@ -34,9 +34,15 @@ private enum PadFixture {
         )
     }
 
-    static func page(_ controller: ControllerFact) -> ControllerPadState? {
-        guard case let .pad(state) = controllerPageState(controllers: [controller], id: controller.id).content else { return nil }
-        return state
+    static func page(_ controller: ControllerFact, pads: [PadDiagnostics] = []) -> ControllerPadState? {
+        let state = controllerPageState(controllers: [controller], pads: pads, id: controller.id)
+        guard case let .pad(pad) = state.content else { return nil }
+        return pad
+    }
+
+    /// What the Diagnostics source read for the pad: its rates and how many reports it has sent.
+    static func reading(of controller: ControllerFact, rates: PadRates, reports: UInt64 = 100) -> PadDiagnostics {
+        PadDiagnostics(controller: controller, rates: rates, reports: reports, wire: nil)
     }
 }
 
@@ -271,6 +277,58 @@ final class ControllerMappersTests: XCTestCase {
             PadFamily.allFamilies.map { padFamilyName($0) },
             ["DualSense", "DualShock 4", "Xbox Wireless", "Nintendo", "Controller"]
         )
+    }
+
+    // MARK: - Dead zones
+
+    func testAPadOffersItsDeadZonesPage() {
+        XCTAssertEqual(PadFixture.page(PadFixture.dualSense())?.deadZones, "Dead zones")
+    }
+
+    func testTheOnScreenGamepadHasNoDeadZonesToTune() {
+        let onScreen = ControllerFact(id: "on-screen", name: "", link: .onScreen, batteryPercent: nil, destination: nil)
+        XCTAssertNil(PadFixture.page(onScreen)?.deadZones)
+    }
+
+    // MARK: - Telemetry
+
+    func testTelemetryNamesTheReportMotionAndTouchRatesOfAPadThatReports() throws {
+        let pad = PadFixture.dualSense()
+        let reading = PadFixture.reading(of: pad, rates: PadRates(reportHz: 500, motionHz: 250, touchHz: 120))
+        let telemetry = try XCTUnwrap(PadFixture.page(pad, pads: [reading])?.telemetry)
+        XCTAssertEqual(telemetry.title, "Telemetry")
+        XCTAssertEqual(telemetry.rows, [
+            TelemetryRowState(id: "gamepad", label: "Gamepad", value: "500 Hz"),
+            TelemetryRowState(id: "motion", label: "Motion", value: "250 Hz"),
+            TelemetryRowState(id: "touch", label: "Touch", value: "120 Hz")
+        ])
+    }
+
+    func testTelemetryLeavesOutTheStreamsAPadHasNoHardwareFor() throws {
+        let xbox = PadFixture.dualSense(features: [ControllerFeatureFact(feature: .rumble, enabled: true)])
+        let reading = PadFixture.reading(of: xbox, rates: PadRates(reportHz: 125, motionHz: 0, touchHz: 0))
+        let telemetry = try XCTUnwrap(PadFixture.page(xbox, pads: [reading])?.telemetry)
+        XCTAssertEqual(telemetry.rows.map(\.label), ["Gamepad"])
+        XCTAssertEqual(telemetry.rows.map(\.value), ["125 Hz"])
+    }
+
+    func testTelemetryIsDrawnOnlyForAPadThatHasReported() {
+        let pad = PadFixture.dualSense()
+        XCTAssertNil(PadFixture.page(pad)?.telemetry, "nothing read for the pad yet")
+        let silent = PadFixture.reading(of: pad, rates: PadRates(reportHz: 0, motionHz: 0), reports: 0)
+        XCTAssertNil(PadFixture.page(pad, pads: [silent])?.telemetry, "a pad with no report has no rate to show")
+        let other = PadFixture.reading(
+            of: ControllerFact(id: "else", name: "x", link: .usbC, batteryPercent: nil, destination: nil),
+            rates: PadRates(reportHz: 9, motionHz: 0)
+        )
+        XCTAssertNil(PadFixture.page(pad, pads: [other])?.telemetry, "another pad's rates are not this pad's")
+    }
+
+    func testTheOnScreenGamepadShowsItsTelemetryToo() throws {
+        let onScreen = ControllerFact(id: "on-screen", name: "", link: .onScreen, batteryPercent: nil, destination: nil)
+        let reading = PadFixture.reading(of: onScreen, rates: PadRates(reportHz: 60, motionHz: 0))
+        let telemetry = try XCTUnwrap(PadFixture.page(onScreen, pads: [reading])?.telemetry)
+        XCTAssertEqual(telemetry.rows.map(\.value), ["60 Hz"])
     }
 }
 

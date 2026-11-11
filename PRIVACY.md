@@ -58,6 +58,9 @@ Preferences are stored with `UserDefaults` in the app's preferences domain
 | `keep_screen_on` | A switch, on by default | Holding the screen on while a session streams (there is no session yet) |
 | `dim_after_seconds` | 10, 20, 30, 60, 120 or 0 for never; 20 by default | When the low-power dim rises while streaming |
 | `onboarding_welcome_completed` | Whether the welcome was finished or skipped | Showing the setup cover on its own only once |
+| `local_network_primed` | Whether the setup walk has explained the Local Network question (dish-mac's key) | Keeping the Connections tab from looking for PCs as it opens, which is what makes iOS ask, until that explanation was seen; your own scan counts as the question asked |
+| `feature_motion_enabled`, `feature_rumble_enabled`, `feature_touchpad_enabled`, `feature_lightbar_mode` | Settings › Forwarded features: three switches, on by default, and `followGame` or `off` (the desktops' keys) | Whether Dish sends motion and the touchpad to the PC and acts on rumble and the light bar, above each controller's own switches |
+| `deadzone:<controller id>` | A controller's stick and trigger dead zones as `{"s":…,"t":…}`, once you changed them (the desktops' shape) | The controller page's Dead zones; Reset to defaults erases it |
 
 Beside them, for the PCs you pair:
 

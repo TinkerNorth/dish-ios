@@ -29,8 +29,6 @@ struct PairRequestState: Equatable {
     let statusColor: Color
     /// The spinner beside the status.
     let waiting: Bool
-    /// How long the PC keeps the request, while it waits.
-    let hint: String?
     /// Try again, once the request was declined or expired.
     let retry: String?
 }
@@ -105,7 +103,8 @@ func pairRequestState(
     timeoutMs: Int,
     words: L10n = .app
 ) -> PairRequestState? {
-    guard let line = requestStatusLine(attempt.phase, name: name, words: words) else { return nil }
+    let left = remainingText(timeoutMs - attempt.elapsedMs)
+    guard let line = requestStatusLine(attempt.phase, name: name, left: left, words: words) else { return nil }
     let device = deviceName.isEmpty ? words.iPhone : deviceName
     return PairRequestState(
         title: words.acceptOnYourPC,
@@ -114,7 +113,6 @@ func pairRequestState(
         status: line.text,
         statusColor: line.color,
         waiting: line.waiting,
-        hint: line.expires ? words.requestExpiresIn(wholeMinutesUp(timeoutMs)) : nil,
         retry: line.offersNewCode ? words.tryAgain : nil
     )
 }
@@ -124,30 +122,28 @@ private struct RequestStatusLine {
     let text: String
     let color: Color
     let waiting: Bool
-    let expires: Bool
     let offersNewCode: Bool
 }
 
-private func requestStatusLine(_ phase: ReversePairingPhase, name: String, words: L10n) -> RequestStatusLine? {
+private func requestStatusLine(_ phase: ReversePairingPhase, name: String, left: String, words: L10n) -> RequestStatusLine? {
     switch phase {
     case .idle:
         nil
     case .awaiting:
-        RequestStatusLine(text: words.waiting, color: DishTheme.muted, waiting: true, expires: true, offersNewCode: false)
+        RequestStatusLine(text: words.waitingWithTimeLeft(left), color: DishTheme.muted, waiting: true, offersNewCode: false)
     case .approved:
-        RequestStatusLine(text: words.approvedConnecting, color: DishTheme.success, waiting: true, expires: false, offersNewCode: false)
+        RequestStatusLine(text: words.approvedConnecting, color: DishTheme.success, waiting: true, offersNewCode: false)
     case .declined:
-        RequestStatusLine(text: words.operatorDeclined, color: DishTheme.error, waiting: false, expires: false, offersNewCode: true)
+        RequestStatusLine(text: words.operatorDeclined, color: DishTheme.error, waiting: false, offersNewCode: true)
     case .timedOut:
-        RequestStatusLine(text: words.codeExpired, color: DishTheme.muted, waiting: false, expires: false, offersNewCode: true)
+        RequestStatusLine(text: words.codeExpired, color: DishTheme.muted, waiting: false, offersNewCode: true)
     case .identityChanged:
-        RequestStatusLine(text: words.identityChanged, color: DishTheme.error, waiting: false, expires: false, offersNewCode: false)
+        RequestStatusLine(text: words.identityChanged, color: DishTheme.error, waiting: false, offersNewCode: false)
     case .versionMismatch:
         RequestStatusLine(
             text: words.differentSatelliteVersion(name),
             color: DishTheme.error,
             waiting: false,
-            expires: false,
             offersNewCode: false
         )
     }
@@ -192,8 +188,13 @@ private func isASCIIDigit(_ character: Character) -> Bool {
     character.isASCII && character.isNumber
 }
 
-/// Milliseconds as whole minutes, rounded up, so "2 min" never promises
-/// more time than the PC gives.
-private func wholeMinutesUp(_ milliseconds: Int) -> Int {
-    (milliseconds + 59999) / 60000
+/// What is left of the request as the board counts it, "1:58": whole
+/// seconds rounded up, as a countdown reads (it shows 0:00 only once the
+/// time is out), and never below nothing.
+func remainingText(_ milliseconds: Int) -> String {
+    let seconds = (max(milliseconds, 0) + 999) / 1000
+    let digits = String(format: "%02d", seconds % secondsPerMinute)
+    return "\(seconds / secondsPerMinute):\(digits)"
 }
+
+private let secondsPerMinute = 60

@@ -113,7 +113,7 @@ private struct SceneRoot {
 
     init(orientation: OrientationLock, idiom: DeviceIdiom) {
         TipKitTips.configure(hidden: UserDefaults.standard.bool(forKey: TipKitTips.hiddenKey))
-        let model = AppModel(defaults: .standard, pasteboard: SystemPasteboard())
+        let model = AppModel(defaults: .standard, pasteboard: SystemPasteboard(), deviceKind: deviceKind(idiom))
         let navigation = NavigationStore(
             onboarding: model.onboarding,
             startSetup: { model.startSetup(setupStart($0)) },
@@ -129,6 +129,14 @@ private struct SceneRoot {
         self.model = model
         self.navigation = navigation
         router = IntentRouter(send: { navigation.send($0) }, paired: { model.shellFacts.paired })
+    }
+}
+
+/// The device the engine names itself for when the person gave it no name.
+func deviceKind(_ idiom: DeviceIdiom) -> DeviceKind {
+    switch idiom {
+    case .phone: .phone
+    case .pad: .pad
     }
 }
 

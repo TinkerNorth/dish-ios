@@ -123,10 +123,11 @@ package final class AppModel {
         motionSensor: any MotionSensor = DeviceMotionSensor(),
         resendTicker: any Ticker = TimerTicker(),
         diagnostics: DiagnosticsSource = DiagnosticsSource(ticker: TimerTicker()),
-        pasteboard: any Pasteboard = InertPasteboard()
+        pasteboard: any Pasteboard = InertPasteboard(),
+        deviceKind: DeviceKind = .phone
     ) {
         let device = DevicePreferenceStore(defaults: defaults)
-        let network = NetworkStack(defaults: defaults, keyStore: keyStore, pins: pins) { wireDeviceName(device.state) }
+        let network = NetworkStack(defaults: defaults, keyStore: keyStore, pins: pins) { wireDeviceName(device.state, on: deviceKind) }
         self.init(
             onboarding: OnboardingPreferenceStore(defaults: defaults),
             appearance: AppearancePreferenceStore(defaults: defaults),
@@ -182,7 +183,9 @@ package final class AppModel {
             diagnostics: diagnostics.state,
             diagnosticsEvents: diagnosticsLog.state,
             apply: applyFact,
-            addedByAddress: addedByAddress?.id
+            addedByAddress: addedByAddress?.id,
+            deadzones: pads.deadzones.state,
+            forwarding: pads.features.flags
         )
     }
 

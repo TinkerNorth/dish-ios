@@ -35,12 +35,8 @@ extension L10n {
         catalog.text("Accept it if the code matches.")
     }
 
-    var waiting: String {
-        catalog.text("Waiting")
-    }
-
-    func requestExpiresIn(_ minutes: Int) -> String {
-        catalog.format("The request expires in %lld min.", minutes)
+    func waitingWithTimeLeft(_ time: String) -> String {
+        catalog.format("Waiting · %@", time)
     }
 
     var approvedConnecting: String {

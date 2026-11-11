@@ -209,9 +209,6 @@ private struct PairRequestCard: View {
                     }
                     Text(state.status).font(DishFont.detail).foregroundStyle(state.statusColor)
                 }
-                if let hint = state.hint {
-                    Text(hint).font(DishFont.caption).foregroundStyle(DishTheme.muted)
-                }
                 if let retry = state.retry {
                     Button(retry, action: tryAgain)
                         .buttonStyle(.bordered)

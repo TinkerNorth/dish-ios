@@ -12,6 +12,8 @@ enum SetupFixture {
     static let xbox = SetupPadInput(id: "pad-2", name: "Xbox Wireless", link: .bluetooth, batteryPercent: nil, family: .xboxWireless)
     static let livingRoom = SetupPCInput(id: "lr", name: "Living Room PC", address: "192.168.1.24", kind: .satellite, paired: false)
     static let office = SetupPCInput(id: "office", name: "Office PC", address: "192.168.1.31", kind: .satellite, paired: true)
+    /// A PC typed by its address: the pool lists it before it has a name.
+    static let typed = SetupPCInput(id: "wifi:192.168.1.50:9876", name: "", address: "192.168.1.50", kind: .satellite, paired: false)
     static let den = SetupPCInput(id: "den", name: "Den PC", address: "192.168.1.40", kind: .moonlightHost, paired: false)
 
     static func inputs(

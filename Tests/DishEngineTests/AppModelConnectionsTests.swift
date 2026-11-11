@@ -114,6 +114,42 @@ final class AppModelConnectionsTests: XCTestCase {
         XCTAssertNotNil(fixture.network.wifi.get("wifi:127.0.0.1:\(fixture.ports.udp)"))
     }
 
+    /// A PC typed by its address is on the Connections tab as found, with
+    /// Pair, from the moment it is added: an address whose pair sheet was
+    /// cancelled still has its row.
+    func testAPCAddedByAddressIsFoundBeforeItIsPaired() {
+        let id = "wifi:127.0.0.1:\(fixture.ports.udp)"
+        XCTAssertTrue(fixture.model.addByAddress("127.0.0.1:\(fixture.ports.udp)"))
+        XCTAssertEqual(fixture.model.shellFacts.found, [ConnectionFact(
+            id: id,
+            name: "",
+            address: "127.0.0.1",
+            kind: .satellite,
+            state: .needsPairing
+        )])
+        fixture.model.cancelPairing(id)
+        XCTAssertEqual(fixture.model.shellFacts.found.map(\.id), [id], "cancelling the sheet leaves the row")
+        XCTAssertEqual(fixture.model.shellFacts.paired, [])
+    }
+
+    func testAPCAddedByAddressThatIsAlreadyPairedIsPairedNotFound() {
+        let port = Int(fixture.ports.udp)
+        let remembered = DiscoveredServer(name: "Den PC", ip: "127.0.0.1", udpPort: port, source: .manual)
+        fixture.network.wifi.store.remember(remembered)
+        fixture.network.wifi.refreshRemembered()
+        XCTAssertTrue(fixture.model.addByAddress("127.0.0.1:\(port)"))
+        XCTAssertEqual(fixture.model.shellFacts.found, [])
+        XCTAssertEqual(fixture.model.shellFacts.paired.map(\.id), [remembered.id])
+    }
+
+    func testAPCThatScanAndAddressBothNameIsListedOnce() async {
+        let scanned = await fixture.scan()
+        XCTAssertTrue(scanned)
+        XCTAssertTrue(fixture.model.addByAddress("127.0.0.1:\(fixture.ports.udp)"))
+        let ids = fixture.model.shellFacts.found.map(\.id)
+        XCTAssertEqual(Set(ids).count, ids.count, "no PC is listed twice")
+    }
+
     func testStartScanGoesThroughTheLocalNetworkSeam() throws {
         let recorded = try SatelliteModelFixture(self, localNetwork: .recorded)
         defer { recorded.tearDown() }

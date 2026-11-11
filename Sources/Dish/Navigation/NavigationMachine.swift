@@ -30,6 +30,8 @@ enum Page: Hashable {
     case diagnostics
     /// Connections › Moonlight hosts.
     case moonlightHosts
+    /// Controllers › a controller › Dead zones, by its slot id.
+    case deadZones(id: String)
 }
 
 /// Where the setup cover opens.

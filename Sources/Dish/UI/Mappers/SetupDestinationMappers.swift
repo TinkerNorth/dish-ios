@@ -110,12 +110,18 @@ private func setupPCRow(_ pc: SetupPCInput, words: L10n) -> SetupPCRow {
     return SetupPCRow(
         id: pc.id,
         symbol: setupPCSymbol(pc.kind),
-        name: pc.name,
+        name: setupPCTitle(pc),
         detail: [pairing, pc.address].joined(separator: lineSeparator),
         dot: setupPairingDot(pc.paired),
         pick: destinationPick(pc),
         pairServerId: pairServerId(pc)
     )
+}
+
+/// A PC's name, or its address while it has none: a PC typed by its address
+/// is listed before pairing names it.
+func setupPCTitle(_ pc: SetupPCInput) -> String {
+    pc.name.isEmpty ? pc.address : pc.name
 }
 
 private func pairServerId(_ pc: SetupPCInput) -> String? {

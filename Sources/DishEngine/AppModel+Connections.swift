@@ -31,10 +31,16 @@ package extension AppModel {
         return network.hub.connections.filter { remembered.contains($0.id) }.map(pairedFact)
     }
 
-    /// What the last scan heard that is not paired: each wants a PIN.
+    /// What the last scan heard that is not paired, then the PCs typed by
+    /// their address that the pool holds: each wants a PIN.
     internal var foundFacts: [ConnectionFact] {
         let remembered = Set(network.wifi.remembered().map(\.id))
-        return network.wifi.discoveredServers.filter { !remembered.contains($0.id) }.map { server in
+        let heard = network.wifi.discoveredServers
+        let heardIds = Set(heard.map(\.id))
+        let typed = network.wifi.connections.values.map(\.server)
+            .filter { $0.source == .manual && !heardIds.contains($0.id) }
+            .sorted { $0.id < $1.id }
+        return (heard + typed).filter { !remembered.contains($0.id) }.map { server in
             ConnectionFact(id: server.id, name: server.name, address: server.ip, kind: .satellite, state: .needsPairing)
         }
     }
@@ -70,8 +76,17 @@ package extension AppModel {
 
     // MARK: - Intents
 
-    /// The person's own scan: it may raise iOS's Local Network question.
+    /// The person's own scan: it may raise iOS's Local Network question,
+    /// which they asked for, so it needs no more explaining.
     func startScan() {
+        onboarding.markLocalNetworkPrimed()
+        localNetwork.scan()
+    }
+
+    /// The tab's opening scan, held back until the primer has explained the
+    /// question it makes iOS ask.
+    internal func scanIfPrimed() {
+        guard onboarding.state.localNetworkPrimed else { return }
         localNetwork.scan()
     }
 

@@ -107,6 +107,27 @@ final class AppModelDiagnosticsTests: XCTestCase {
         XCTAssertEqual(diagnosed.snapshot.pads.first?.reports, 10)
     }
 
+    func testATickReadsEachPadsTouchRateOffItsRecord() throws {
+        let diagnosed = try DiagnosedModel(self, pads: [Self.dualSense])
+        diagnosed.model.pageAppeared(.diagnostics)
+        let feed = diagnosed.source.processor.feed(for: "pad")
+        for _ in 0 ..< 10 {
+            feed.publishTouchpad(TouchpadSample(finger0: .none, finger1: .none, buttonPressed: false))
+        }
+        diagnosed.uptime.nanoseconds += 1_000_000_000
+        diagnosed.ticker.fire()
+        XCTAssertEqual(diagnosed.snapshot.pads.first?.rates, PadRates(reportHz: 0, motionHz: 0, touchHz: 10))
+    }
+
+    func testTheControllerPageTicksTheSameSourceWhileItShows() throws {
+        let diagnosed = try DiagnosedModel(self, pads: [Self.dualSense])
+        diagnosed.model.pageAppeared(.controller)
+        XCTAssertEqual(diagnosed.ticker.starts, [1])
+        XCTAssertEqual(diagnosed.snapshot.pads.first?.controller.id, "pad")
+        diagnosed.model.pageDisappeared(.controller)
+        XCTAssertFalse(diagnosed.ticker.running)
+    }
+
     func testDiagnosticsDisappearingStopsTheTick() throws {
         let diagnosed = try DiagnosedModel(self)
         diagnosed.model.pageAppeared(.diagnostics)
