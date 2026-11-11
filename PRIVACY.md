@@ -1,6 +1,6 @@
 # Dish for iOS: Privacy Policy
 
-**Effective date:** 2026-11-10.
+**Effective date:** 2026-11-11.
 **Canonical copy:** this file, at
 [`https://github.com/TinkerNorth/dish-ios/blob/main/PRIVACY.md`](https://github.com/TinkerNorth/dish-ios/blob/main/PRIVACY.md).
 
@@ -96,6 +96,11 @@ you set up Connect to a PC in Shortcuts, the app answers with the names of
 the PCs you paired, on the iPhone, so you can pick one; Apple's handling of
 your shortcuts is under Apple's privacy policy.
 
+While a controller is attached, the app reads the iPhone's battery level and
+whether it is charging, every few seconds, through iOS's battery monitoring.
+It stores none of it: the reading only decides which battery a PC is told
+about, the controller's or this iPhone's, whichever is lower (section 2.2).
+
 Settings › Setup & help › Diagnostics shows what the app sees right now
 (each paired PC's session and its packet counters, each controller's rates
 and binding, the Local Network status, the app and protocol versions) and a
@@ -123,7 +128,8 @@ nothing of it leaves that network:
 - **Streaming**: UDP on port 9876 to the PC you chose, encrypted with
   ChaCha20-Poly1305 under a key fresh for each session: each bound
   controller's buttons, sticks and triggers, its motion and touchpad when you
-  left them on, its battery level, and a heartbeat every two seconds; the PC
+  left them on, its battery level (or this iPhone's, when that is lower or
+  the controller reports none), and a heartbeat every two seconds; the PC
   sends back the heartbeat's answer and the rumble, light-bar, trigger and
   player-light commands for the controller.
 - **Forget This PC** sends that PC one request to drop this iPhone from its
@@ -144,7 +150,8 @@ nothing of it leaves that network:
   or audio is asked for); and the control stream, UDP to the host's control
   port encrypted with that session's key: each bound controller's type and
   features, its buttons, sticks and triggers, its motion and touchpad when you
-  left them on, its battery level, and a keepalive every half second. The host
+  left them on, its battery level (or this iPhone's, when that is lower or
+  the controller reports none), and a keepalive every half second. The host
   sends back rumble, light-bar and motion requests for the controller.
 
 ### 2.3 Sent to TinkerNorth or a third party
@@ -187,6 +194,7 @@ Improvements; that is Apple's mechanism and policy, not the app's.
 | Keeping the screen on (the idle timer) | Held off only while a session is up and Keep screen on is set, so that iOS does not lock the screen and suspend Dish mid-game. There is no session in this version, so it is never held. |
 | App Intents (Siri, Spotlight, the Shortcuts app) | Five actions (open the gamepad, the touchpad or the mouse, dim the screen, connect to a paired PC) that open the app; no permission is asked and nothing is donated (section 2.1). |
 | TipKit | Four hints about the app's own controls, remembered on the iPhone (section 2.1). |
+| Battery monitoring (`UIDevice`) | The iPhone's battery level and charging state, read while a controller is attached so a PC is told the lower of it and the controller's; no permission is asked and nothing is stored (section 2.1). |
 
 The app asks for no other permission. It does not use the camera, the
 microphone, location, contacts, photos, notifications or tracking. It reads

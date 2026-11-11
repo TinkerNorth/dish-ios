@@ -158,7 +158,10 @@ The seams are protocols with one production implementation each, so a test
 replaces them: `LocalNetworkAccess` (`BonjourLocalNetworkAccess`, the scan;
 `RecordedLocalNetworkAccess` for tests), `Ticker`, `ControllerSource`,
 `KeyStore` (`KeychainKeyStore`, `InMemoryKeyStore`) and the manager's
-`DiscoveryPaths` (the live browse, or a scripted LAN).
+`DiscoveryPaths` (the live browse, or a scripted LAN). Two have theirs in the
+scene, because only UIKit can fill them: `Pasteboard` (`SystemPasteboard`)
+and `DeviceBattery` (`SystemDeviceBattery`, `UIDevice`'s level and charge
+state), each `Inert` in a model built outside the scene.
 
 ## The composition root
 
@@ -188,6 +191,8 @@ time the kept build reads them. It hands the store the model's
 `onboarding`, `startSetup` and `endSetup`, injects both with `.environment`,
 passes down the two values only UIKit can give (`settingsURL`, from
 `UIApplication.openSettingsURLString`, and `appVersion`, from the bundle),
+hands the model the clipboard and the device's battery (which each pad's
+battery is weighed against, `routeBattery` in `DishCore`),
 drives `preferredColorScheme` from the appearance fact and sets the idle timer
 from `idleTimerDisabled(facts:)`. It reads the device's idiom once
 (`deviceIdiom(_:)`), for the orientation lock: an iPhone stands upright but
@@ -549,7 +554,8 @@ list, with where each lands, is [`../Tests/PARITY.md`](../Tests/PARITY.md).
   covers every page's mapper, one test per flow (empty, content, each
   variant, an iPad's included), `Tests/DishTests/Navigation` covers the
   machine, the store and the orientation per device, and
-  `Tests/DishTests/Scene` the scene's facts: the idiom, the lock's answer
-  and the window's size classes and shape. What a test cannot say, how it
+  `Tests/DishTests/Scene` the scene's facts: the idiom, the lock's answer,
+  the window's size classes and shape, and the device's battery as UIKit
+  reports it. What a test cannot say, how it
   looks, is a `#Preview` per state, the iPad's on its side and upright
   among them; the UI tests run on an iPhone and again on an iPad.

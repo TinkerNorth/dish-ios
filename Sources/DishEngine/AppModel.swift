@@ -110,8 +110,9 @@ package final class AppModel {
     }
 
     /// Every store over the same defaults, the wall clock, the pads iOS
-    /// sees, the satellite pool with its keys in the Keychain, the Bonjour
-    /// scan as the Local Network seam, the App Store and the phone's sensors.
+    /// sees (weighed against the device's battery the scene hands in), the
+    /// satellite pool with its keys in the Keychain, the Bonjour scan as the
+    /// Local Network seam, the App Store and the phone's sensors.
     package convenience init(
         defaults: UserDefaults,
         clock: ClockSource = ClockSource(ticker: TimerTicker(), now: Date.init),
@@ -119,11 +120,12 @@ package final class AppModel {
         keyStore: any KeyStore = KeychainKeyStore(),
         pins: CertPins = CertPins(file: CertPins.defaultFile()),
         tips: any TipStore = StoreKitTipStore(),
-        controllerSource: any ControllerSource = GameControllerInput(),
+        controllerSource: (any ControllerSource)? = nil,
         motionSensor: any MotionSensor = DeviceMotionSensor(),
         resendTicker: any Ticker = TimerTicker(),
         diagnostics: DiagnosticsSource = DiagnosticsSource(ticker: TimerTicker()),
         pasteboard: any Pasteboard = InertPasteboard(),
+        deviceBattery: any DeviceBattery = InertDeviceBattery(),
         deviceKind: DeviceKind = .phone
     ) {
         let device = DevicePreferenceStore(defaults: defaults)
@@ -135,7 +137,7 @@ package final class AppModel {
             streaming: StreamingPreferenceStore(defaults: defaults),
             clock: clock,
             localNetwork: localNetwork ?? BonjourLocalNetworkAccess(wifi: network.wifi),
-            pads: ControllerStack(source: controllerSource, defaults: defaults),
+            pads: ControllerStack(source: controllerSource ?? GameControllerInput(deviceBattery: deviceBattery), defaults: defaults),
             network: network,
             tips: tips,
             motionSensor: motionSensor,

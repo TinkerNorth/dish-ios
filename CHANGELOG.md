@@ -29,6 +29,18 @@ to. The rows answer a long press and a swipe, Siri and Shortcuts can open the
 play screens, dim and connect, and TipKit points at what a new person might
 miss. `Tests/PARITY.md` lists everything not built.
 
+### Changed
+
+- **A controller's battery on the PC is the lower of the controller's and
+  the iPhone's.** The battery Dish sends a Satellite or a Moonlight host for
+  a controller is now the lower of the controller's own charge and the
+  iPhone's or iPad's, with the charging state of whichever is lower; a
+  controller that reports no battery sends the iPhone's, and an unknown
+  level loses to any known one. A wired controller that reports its charge
+  is treated like any other. The controller's row, its page and Diagnostics
+  still show the controller's own battery. The simulator reports no battery
+  for the iPhone, so there every controller sends its own.
+
 ### Fixed
 
 - **The scene builds its objects once.** SwiftUI calls the scene's
