@@ -16,7 +16,11 @@ private struct PlayModel {
     let batteryTicker = ManualTicker()
     let sensor: FakeMotionSensor
 
-    init(_ test: XCTestCase, sensor: FakeMotionSensor = FakeMotionSensor(), deviceBattery: any DeviceBattery = InertDeviceBattery()) throws {
+    init(
+        _ test: XCTestCase,
+        sensor: FakeMotionSensor = FakeMotionSensor(),
+        deviceBattery: any DeviceBattery = InertDeviceBattery()
+    ) throws {
         self.sensor = sensor
         model = try AppModel(
             defaults: TestDefaults.fresh(test),
