@@ -33,9 +33,12 @@ final class SettingsUITests: XCTestCase {
         XCTAssertTrue(ShellUI.settles(rumble, to: "1"))
     }
 
-    /// A tap on the switch itself, at the row's trailing edge.
+    /// A tap on the switch itself: the last 51 points of the row before its
+    /// 16-point inset, whatever the row's width, so 40 points in from the
+    /// trailing edge is its middle on an iPhone and on an iPad either way up.
     private func flip(_ element: XCUIElement) {
-        element.coordinate(withNormalizedOffset: CGVector(dx: 0.93, dy: 0.5)).tap()
+        let trailingEdge = element.coordinate(withNormalizedOffset: CGVector(dx: 1, dy: 0.5))
+        trailingEdge.withOffset(CGVector(dx: -40, dy: 0)).tap()
     }
 
     func testTheLightBarPickerOffersFollowGameAndOff() {
