@@ -23,12 +23,12 @@ final class IPadUITests: XCTestCase {
         let app = ShellUI.launch(welcomeCompleted: true)
         ShellUI.openTheSidebar(in: app)
         for title in ["Controllers", "Connections", "Settings"] {
-            XCTAssertTrue(ShellUI.sidebarTab(title, in: app).waitForExistence(timeout: 5), "\(title) is in the sidebar")
+            XCTAssertTrue(ShellUI.sidebarTab(title, in: app).waitForExistence(timeout: ShellUI.patience), "\(title) is in the sidebar")
         }
         XCTAssertTrue(ShellUI.sidebarTab("Controllers", in: app).isSelected)
         ShellUI.sidebarTab("Settings", in: app).tap()
         let guide = ShellUI.scrolled(to: ShellUI.element("Setup guide", in: app), in: app)
-        XCTAssertTrue(guide.waitForExistence(timeout: 5))
+        XCTAssertTrue(guide.waitForExistence(timeout: ShellUI.patience))
     }
 
     func testThePlayCoverOpensOnTheIPadsSideAndStandsAlongTheBottomUpright() {
@@ -36,10 +36,10 @@ final class IPadUITests: XCTestCase {
         let app = ShellUI.launch(welcomeCompleted: true)
         ShellUI.listTheOnScreenGamepad(in: app)
         let open = app.buttons["Open"].firstMatch
-        XCTAssertTrue(open.waitForExistence(timeout: 5))
+        XCTAssertTrue(open.waitForExistence(timeout: ShellUI.patience))
         open.tap()
         let pause = app.buttons["Pause"].firstMatch
-        XCTAssertTrue(pause.waitForExistence(timeout: 5))
+        XCTAssertTrue(pause.waitForExistence(timeout: ShellUI.patience))
         XCTAssertTrue(ShellUI.window(of: app, turns: .landscape), "the play cover opens on the iPad's side")
         XCUIDevice.shared.orientation = .portrait
         XCTAssertTrue(ShellUI.window(of: app, turns: .portrait), "iPadOS turns the window with the device")
