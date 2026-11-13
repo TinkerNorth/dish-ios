@@ -24,6 +24,7 @@ final class ControllerStoresTests: XCTestCase {
         for pad in EmulatedPad.allCases {
             XCTAssertEqual(emulatedPad(storedWord: storedWord(pad)), pad)
         }
+        XCTAssertEqual(storedWord(.dualSenseEdge), "dualsenseedge", "the catalog's slug, stable across releases")
         let defaults = try TestDefaults.fresh(self)
         defaults.set(["pad": "gamecube", "other": "xbox"], forKey: "emulated_type_preferences")
         XCTAssertEqual(ControllerTypeStore(defaults: defaults).state, ["other": .xboxWireless])

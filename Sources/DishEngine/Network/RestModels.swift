@@ -259,13 +259,13 @@ struct PairStatusResponse: Decodable {
 struct ControllerDescriptor: Encodable, Hashable {
     var ctrlIdx = 0
     var type = ProtocolConstants.controllerTypeXbox
-    /// `ProtocolConstants.cap*` bit word (analogTriggers/rumble/motion/lightbar).
+    /// `ProtocolConstants.cap*` bit word.
     var caps: UInt16 = 0
     var touchpadMode = TouchpadMode.off
 
     private enum CodingKeys: String, CodingKey { case ctrlIdx, type, caps, touchpadMode }
     private enum CapsKeys: String, CodingKey {
-        case rumble, motion, analogTriggers, lightbar, triggerEffects, playerLeds, mic, speaker, hapticAudio
+        case rumble, motion, analogTriggers, lightbar, triggerEffects, playerLeds, mic, speaker, hapticAudio, extendedButtons
     }
 
     /// Every cap bit and the key it is written under, so the body always
@@ -279,7 +279,8 @@ struct ControllerDescriptor: Encodable, Hashable {
         (ProtocolConstants.capPlayerLeds, .playerLeds),
         (ProtocolConstants.capMic, .mic),
         (ProtocolConstants.capSpeaker, .speaker),
-        (ProtocolConstants.capHapticAudio, .hapticAudio)
+        (ProtocolConstants.capHapticAudio, .hapticAudio),
+        (ProtocolConstants.capExtendedButtons, .extendedButtons)
     ]
 
     func encode(to encoder: Encoder) throws {

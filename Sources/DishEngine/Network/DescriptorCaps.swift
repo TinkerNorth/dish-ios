@@ -8,7 +8,8 @@ import Foundation
 /// matching stream or return path lands, so it needs both the hardware and
 /// the user's switch: a feature turned off is not advertised. Analog
 /// triggers ride every extended gamepad. iOS gives apps no pad microphone or
-/// speaker, so the audio caps are never claimed.
+/// speaker, so the audio caps are never claimed. The extended-buttons claim
+/// follows the pad alone: it has no switch.
 func descriptorCaps(_ capabilities: ControllerCapabilities, _ flags: ForwardingFlags) -> UInt16 {
     let claims: [(claimed: Bool, bit: UInt16)] = [
         (true, ProtocolConstants.capAnalogTriggers),
@@ -16,7 +17,8 @@ func descriptorCaps(_ capabilities: ControllerCapabilities, _ flags: ForwardingF
         (capabilities.hasMotion && flags.motion, ProtocolConstants.capMotion),
         (capabilities.hasLightbar && flags.lightbar, ProtocolConstants.capLightbar),
         (capabilities.hasTriggerEffects && flags.triggerEffects, ProtocolConstants.capTriggerEffects),
-        (capabilities.hasPlayerLeds && flags.playerLeds, ProtocolConstants.capPlayerLeds)
+        (capabilities.hasPlayerLeds && flags.playerLeds, ProtocolConstants.capPlayerLeds),
+        (capabilities.hasExtendedButtons, ProtocolConstants.capExtendedButtons)
     ]
     return claims.filter(\.claimed).reduce(UInt16(0)) { $0 | $1.bit }
 }
@@ -41,25 +43,41 @@ func typeOffersDs4Touchpad(in catalog: CatalogDTO?, type: Int) -> Bool {
     return typeOffersDs4Touchpad(supported: row.features.touchpad.supported, modes: row.features.touchpad.modes)
 }
 
-/// The `sdlType` values a pick is emulated as, best first.
-func emulationCandidates(for pad: EmulatedPad) -> [String] {
+/// A catalog type a pick can land on: the type the contract fixes by its
+/// id, or the first type that emulates a physical pad (`emulates.sdlType`).
+enum TypeCandidate: Equatable {
+    case typeId(UInt8)
+    case emulating(String)
+}
+
+/// The types a pick is emulated as, best first.
+func emulationCandidates(for pad: EmulatedPad) -> [TypeCandidate] {
     switch pad {
-    case .dualSense: ["ps5", "ps4"]
-    case .dualShock4: ["ps4", "ps5"]
-    case .xboxWireless: ["xbox360", "xboxone"]
-    case .switchPro: ["switchpro"]
+    case .dualSense: [.emulating("ps5"), .emulating("ps4")]
+    case .dualShock4: [.emulating("ps4"), .emulating("ps5")]
+    case .xboxWireless: [.emulating("xbox360"), .emulating("xboxone")]
+    case .switchPro: [.emulating("switchpro")]
+    case .dualSenseEdge: [.typeId(ProtocolConstants.controllerTypeDualSenseEdge), .emulating("ps5"), .emulating("ps4")]
+    }
+}
+
+/// Whether a catalog type is the one a candidate names.
+func typeMatches(_ type: CatalogControllerType, _ candidate: TypeCandidate) -> Bool {
+    switch candidate {
+    case let .typeId(id): type.id == Int(id)
+    case let .emulating(sdlType): type.emulates?.sdlType == sdlType
     }
 }
 
 /// The catalog type a pad is emulated as: the first candidate the catalog
-/// offers under `emulates.sdlType`, else the first type offered, else the
-/// legacy Xbox target when there is no catalog at all.
+/// offers, else the first type offered, else the legacy Xbox target when
+/// there is no catalog at all.
 func preferredControllerType(in catalog: CatalogDTO?, for pad: EmulatedPad) -> Int {
     guard let types = catalog?.controllerTypes, let first = types.first else {
         return Int(ProtocolConstants.controllerTypeXbox)
     }
     for candidate in emulationCandidates(for: pad) {
-        if let match = types.first(where: { $0.emulates?.sdlType == candidate }) {
+        if let match = types.first(where: { typeMatches($0, candidate) }) {
             return match.id
         }
     }

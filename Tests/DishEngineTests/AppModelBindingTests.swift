@@ -43,7 +43,7 @@ final class AppModelBindingTests: XCTestCase {
 
         feed.publish(GamepadReport(buttons: 0x0010, lt: 3))
         let frame = try XCTUnwrap(fixture.satellite.awaitFrame(opcode: FakeSatelliteOpcode.input))
-        guard case let .input(ctrlIdx, _) = frame.detail else { return XCTFail("an input frame: \(frame.detail)") }
+        guard case let .input(ctrlIdx, _, _) = frame.detail else { return XCTFail("an input frame: \(frame.detail)") }
         XCTAssertEqual(ctrlIdx, 0, "the pad rides the index it holds")
         XCTAssertEqual(model.shellFacts.controllers.first?.destination, DestinationFact(name: "Den PC", health: .online))
     }

@@ -3,7 +3,7 @@
 The protocol contract (REST surface, UDP streams, crypto, liveness,
 identity) lives in ONE place: **`satellite/docs/contract.md`** in the
 [TinkerNorth/satellite](https://github.com/TinkerNorth/satellite) repo. This
-client offers protocol 3 and still speaks 1, as the fleet does, with control
+client offers protocol 4 and still speaks 1, as the fleet does, with control
 on `:9443` (HTTPS REST) and data on `:9876` (encrypted UDP); this file
 records only the iOS-side mapping. When code and contract disagree, the
 contract wins.
@@ -21,10 +21,11 @@ names its files; what is not built is in [`Tests/PARITY.md`](../Tests/PARITY.md)
 
 | Contract concept | dish-ios home |
 |---|---|
-| Ports (9443 control, 9876 data) and the protocol constants (version 3, the opcodes, the caps, the cadences) | `Sources/DishCore/ProtocolConstants.swift`; the defaults a discovery result falls back to in `Sources/DishEngine/Models/SatelliteModels.swift`; `ProtocolConstantsTests` |
+| Ports (9443 control, 9876 data) and the protocol constants (version 4, the opcodes, the caps, the extended-button bits, the cadences) | `Sources/DishCore/ProtocolConstants.swift`; the defaults a discovery result falls back to in `Sources/DishEngine/Models/SatelliteModels.swift`; `ProtocolConstantsTests` |
 | HKDF session key, `hmacProof`, packet AEAD (direction nonce, AAD = token) | `Sources/DishCore/Wire/SessionCrypto.swift` (cross-repo vectors: `SessionCryptoVectorTests`) |
 | Packet framing (`token(4)‖counter(4)` header, `msgType‖msgLen‖payload` inner frame) | `Sources/DishCore/Wire/PacketCodec.swift` |
-| Stream payloads up (input 13, motion 17, battery 3, touchpad 16, the 0x000C POINTER frame from version 2) and down (heartbeat ack, rumble, light bar, trigger effects, player LEDs) | `Sources/DishCore/Wire/Encoders.swift`, `FeedbackCommands.swift`; the shape by the settled version in `SatelliteClient.sendTouchpad` (`Sources/DishEngine/Network/SatelliteClient+Streams.swift`) |
+| Stream payloads up (input 13, or 17 from version 4; motion 17, battery 3, touchpad 16, the 0x000C POINTER frame from version 2) and down (heartbeat ack, rumble, light bar, trigger effects, player LEDs) | `Sources/DishCore/Wire/Encoders.swift`, `FeedbackCommands.swift`; the shape by the settled version in `SatelliteClient.sendTouchpad` and `SatelliteClient.sendReport` (`Sources/DishEngine/Network/SatelliteClient+Streams.swift`) |
+| INPUT 0x0001's extended-buttons word (version 4, 17 bytes; SDL's names, `extButton*`) and the `extendedButtons` cap, a claim that the pad sources the word | `GamepadReport.extButtons` and `Encoders.writeInputPayload` in `Sources/DishCore/Wire/`; an Xbox Elite's paddles into the word in `Sources/DishEngine/Input/GameControllerInput+Paddles.swift`; the claim from `ControllerCapabilities.hasExtendedButtons` in `Sources/DishEngine/Network/DescriptorCaps.swift` |
 | Which battery a MSG_BATTERY carries: the lower of the pad's own and the device's (the fleet's client rule; the contract fixes only the payload) | `Sources/DishCore/Reducers/BatteryRouting.swift` (`routeBattery`), applied by `forwardBattery` in `Sources/DishEngine/Input/GameControllerInput+Battery.swift` over the scene's `DeviceBattery`; the same reading feeds a Moonlight host's CONTROLLER_BATTERY; `BatteryRoutingTests` |
 | Controller audio frames (0x0012 to 0x0015) | `Sources/DishCore/Wire/AudioFrames.swift`; the receive loop recognises and skips them, since iOS gives apps no pad audio |
 | UDP data plane: the socket (`IP_TOS = 0xB8`, `SO_NOSIGPIPE`, 500 ms receive timeout), counters from 1 per direction, the replay guard, the send gate, the heartbeat, the receive thread | `Sources/DishEngine/Network/SatelliteClient.swift`, `SatelliteClient+IO.swift`, `SatelliteClient+Streams.swift`, `SendGate.swift`, `ReceiveHandlers.swift`; `SatelliteClient*Tests` |
@@ -40,7 +41,7 @@ names its files; what is not built is in [`Tests/PARITY.md`](../Tests/PARITY.md)
 | Session lifecycle: declarative PUT, HKDF key handoff, proactive re-key | `Sources/DishEngine/Network/WifiConnectionManager+Session.swift` |
 | `controllers[]` with `ctrlIdx`: up to four pads per session on the lowest free index; the live per-slot converge of exactly the indices an edit changed | `Sources/DishCore/Reducers/SatelliteSlots.swift`; `SatelliteSlotTable.swift`, `WifiConnection+Slots.swift`, `WifiConnectionManager+Slots.swift` in `Sources/DishEngine/Network/` |
 | Descriptor caps as promises (the hardware and the user's switch) and `touchpadMode` | `Sources/DishEngine/Network/DescriptorCaps.swift`; `DescriptorCapsTests` |
-| Catalog version 2 (`emulates`, the feature slugs, `modes`) and the type a pick is emulated as | `Sources/DishEngine/Network/CatalogModels.swift`; `preferredControllerType` in `DescriptorCaps.swift`, read before the first session PUT |
+| Catalog version 2 (`emulates`, the feature slugs, `modes`) and the type a pick is emulated as; type 4 `dualsenseedge`, a `ps5` pad found only by its id, so no family's own pick lands on it | `Sources/DishEngine/Network/CatalogModels.swift`; `preferredControllerType` and `emulationCandidates` in `DescriptorCaps.swift`, read before the first session PUT |
 | `GET /api/server/capabilities` | `Sources/DishEngine/Network/ServerCapabilities.swift`, cached by `fetchCapabilities` in `WifiConnectionManager+Session.swift`; `ServerCapabilitiesTests` |
 | Versioning: the offer, the 409 range, the settled version that keys the frames | `Sources/DishCore/Reducers/ProtocolNegotiation.swift`, applied by `settleOffer` and `adoptGrant` in `WifiConnectionManager+Session.swift` |
 | Connect and pair flows, terminal-401 key drop and the stale marker, forget → self-unpair | `Sources/DishEngine/Network/WifiConnectionManager.swift` and its extensions; `WifiConnectionManagerControlPlaneTests`, `IntegrationSessionLifecycleTests`, `IntegrationReconcilePolicyTests` |
@@ -55,8 +56,10 @@ names its files; what is not built is in [`Tests/PARITY.md`](../Tests/PARITY.md)
 Test double: `Tests/DishEngineTests/Support/FakeSatellite/` is dish-mac's
 in-process satellite, ported: REST over TLS with an identity imported from a
 PKCS#12 fixture (two, so a pin taken from one instance is refused by the
-next), the UDP data plane with its own CryptoKit crypto asserted against the
-same pinned vectors, and every return path injectable. The control-plane,
+next), a protocol range of 1...4 like the real one's, the UDP data plane with
+its own CryptoKit crypto asserted against the same pinned vectors and INPUT
+read by length (the extended-buttons word from 17 bytes, 0 below), and every
+return path injectable. The control-plane,
 data-plane, approval, hub, model and `Integration*` suites drive it.
 
 ## Client behaviours required by the contract

@@ -182,6 +182,14 @@ final class AppModelPlayTests: XCTestCase {
         XCTAssertEqual(played.recorder.reports.last?.report.rt, 255)
     }
 
+    func testADualSenseEdgeKeepsTheRailsAnalog() throws {
+        let played = try PlayModel(self)
+        played.model.openGamepad()
+        played.model.setPlayEmulateAs(.dualSenseEdge)
+        played.model.onScreenPad(.trigger(.right, railY: 0.625))
+        XCTAssertEqual(played.recorder.reports.last?.report.rt, 128)
+    }
+
     func testStopGamepadClosesTheScreenAndTakesTheControllerOffTheList() throws {
         let played = try PlayModel(self)
         played.model.openGamepad()

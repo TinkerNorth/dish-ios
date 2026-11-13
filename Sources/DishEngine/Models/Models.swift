@@ -19,6 +19,9 @@ package struct ControllerCapabilities: Hashable {
     package var hasTriggerEffects = false
     /// The pad has player-indicator LEDs the framework drives by player index.
     package var hasPlayerLeds = false
+    /// The pad sources the protocol 4 extended buttons
+    /// (`ProtocolConstants.extButton*`): the `extendedButtons` claim.
+    package var hasExtendedButtons = false
 
     package init(
         hasMotion: Bool = false,
@@ -27,7 +30,8 @@ package struct ControllerCapabilities: Hashable {
         hasLightbar: Bool = false,
         hasBattery: Bool = false,
         hasTriggerEffects: Bool = false,
-        hasPlayerLeds: Bool = false
+        hasPlayerLeds: Bool = false,
+        hasExtendedButtons: Bool = false
     ) {
         self.hasMotion = hasMotion
         self.hasTouchpad = hasTouchpad
@@ -36,6 +40,7 @@ package struct ControllerCapabilities: Hashable {
         self.hasBattery = hasBattery
         self.hasTriggerEffects = hasTriggerEffects
         self.hasPlayerLeds = hasPlayerLeds
+        self.hasExtendedButtons = hasExtendedButtons
     }
 
     package static let none = ControllerCapabilities()

@@ -142,12 +142,12 @@ package final class GameControllerInput: ControllerSource {
         readable=\(slot.readable) motion=\(slot.capabilities.hasMotion) touchpad=\(slot.capabilities.hasTouchpad) \
         rumble=\(slot.capabilities.hasRumble) lightbar=\(slot.capabilities.hasLightbar) \
         battery=\(slot.capabilities.hasBattery) triggerEffects=\(slot.capabilities.hasTriggerEffects) \
-        playerLeds=\(slot.capabilities.hasPlayerLeds)
+        playerLeds=\(slot.capabilities.hasPlayerLeds) extendedButtons=\(slot.capabilities.hasExtendedButtons)
         """)
     }
 
     /// Only the DualSense takes trigger effects and has player LEDs the
-    /// framework drives by player index.
+    /// framework drives by player index; only an Xbox Elite has paddles.
     private static func detectCapabilities(_ controller: GCController, pad: GCExtendedGamepad) -> ControllerCapabilities {
         let dualSense = pad is GCDualSenseGamepad
         return ControllerCapabilities(
@@ -157,7 +157,8 @@ package final class GameControllerInput: ControllerSource {
             hasLightbar: controller.light != nil,
             hasBattery: controller.battery != nil,
             hasTriggerEffects: dualSense,
-            hasPlayerLeds: dualSense
+            hasPlayerLeds: dualSense,
+            hasExtendedButtons: paddleInputs(pad) != nil
         )
     }
 
@@ -205,22 +206,23 @@ package final class GameControllerInput: ControllerSource {
     // MARK: - Hot path
 
     /// GameController coalesces simultaneous changes into one call, and the
-    /// handler rebuilds the whole report from the pad every time. Nonisolated,
-    /// so the compiler refuses a handler that reaches for main-actor state:
-    /// it runs on the input queue.
+    /// handler rebuilds the whole report from the pad every time, with the
+    /// paddles found once here. Nonisolated, so the compiler refuses a
+    /// handler that reaches for main-actor state: it runs on the input queue.
     private nonisolated static func installReportHandler(pad: GCExtendedGamepad, feed: PadFeed) {
+        let paddles = paddleInputs(pad)
         pad.valueChangedHandler = { pad, _ in
-            pushReport(pad: pad, feed: feed)
+            pushReport(pad: pad, paddles: paddles, feed: feed)
         }
     }
 
-    nonisolated static func pushReport(pad: GCExtendedGamepad, feed: PadFeed) {
-        feed.publishIfChanged(wireReport(padSample(pad)))
+    nonisolated static func pushReport(pad: GCExtendedGamepad, paddles: PaddleInputs?, feed: PadFeed) {
+        feed.publishIfChanged(wireReport(padSample(pad, paddles: paddles)))
     }
 
     /// The pad as GameController reads it, which is already the wire's
     /// orientation: both report a stick pushed up as positive y.
-    nonisolated static func padSample(_ pad: GCExtendedGamepad) -> PadSample {
+    nonisolated static func padSample(_ pad: GCExtendedGamepad, paddles: PaddleInputs? = nil) -> PadSample {
         PadSample(
             leftX: pad.leftThumbstick.xAxis.value,
             leftY: pad.leftThumbstick.yAxis.value,
@@ -228,13 +230,15 @@ package final class GameControllerInput: ControllerSource {
             rightY: pad.rightThumbstick.yAxis.value,
             leftTrigger: pad.leftTrigger.value,
             rightTrigger: pad.rightTrigger.value,
-            pressed: heldButtons(pad)
+            pressed: heldButtons(pad),
+            extButtons: heldPaddles(paddles)
         )
     }
 
     /// The fleet's button table, read off the pad's named inputs one by one:
     /// no table of key paths is walked and nothing is built. XUSB has no
-    /// Share button and no paddles, so those stay unmapped.
+    /// Share button and no paddles: the paddles ride the extended-buttons
+    /// word, and the Share button stays unmapped.
     nonisolated static func heldButtons(_ pad: GCExtendedGamepad) -> WireButtonWord {
         var word = WireButtonWord()
         word.insert(.faceA, held: pad.buttonA.isPressed)

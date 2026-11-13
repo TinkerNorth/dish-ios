@@ -143,6 +143,7 @@ func emulatedPadName(_ pad: EmulatedPad, words: L10n = .app) -> String {
     case .dualShock4: words.dualShock4
     case .xboxWireless: words.xboxWireless
     case .switchPro: words.switchPro
+    case .dualSenseEdge: words.dualSenseEdge
     }
 }
 
@@ -152,6 +153,7 @@ private func padCarriesSentence(_ pad: EmulatedPad, words: L10n) -> String {
     case .dualShock4: words.dualShock4Carries
     case .xboxWireless: words.xboxWirelessCarries
     case .switchPro: words.switchProCarries
+    case .dualSenseEdge: words.dualSenseEdgeCarries
     }
 }
 
@@ -166,7 +168,7 @@ struct PadCarries: Equatable {
 
 func padCarries(_ pad: EmulatedPad) -> PadCarries {
     switch pad {
-    case .dualSense: PadCarries(touchpad: true, triggerEffects: true, lightBar: true)
+    case .dualSense, .dualSenseEdge: PadCarries(touchpad: true, triggerEffects: true, lightBar: true)
     case .dualShock4: PadCarries(touchpad: true, triggerEffects: false, lightBar: true)
     case .xboxWireless, .switchPro: PadCarries(touchpad: false, triggerEffects: false, lightBar: false)
     }

@@ -158,7 +158,7 @@ final class FakeSatellite: @unchecked Sendable {
 
     /// The protocol range the fake accepts on pair and session PUT; an offer
     /// outside it draws 409 with both bounds (contract §Versioning). The real
-    /// satellite's range is 1...3.
+    /// satellite's range is 1...4.
     var protocolRange: ClosedRange<Int> {
         get { store.with { $0.supportedProtocolMin ... $0.supportedProtocol } }
         set {

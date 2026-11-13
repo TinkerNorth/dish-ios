@@ -105,7 +105,7 @@ final class PlayMappersTests: XCTestCase {
         let state = try switches(FactsFixture.play(emulateAs: .switchPro))
         XCTAssertEqual(state.emulateTitle, "Emulate as")
         XCTAssertEqual(state.emulateAs, .switchPro)
-        XCTAssertEqual(state.emulateOptions.map(\.name), ["DualSense", "DualShock 4", "Xbox Wireless", "Switch Pro"])
+        XCTAssertEqual(state.emulateOptions.map(\.name), ["DualSense", "DualShock 4", "Xbox Wireless", "Switch Pro", "DualSense Edge"])
     }
 
     // MARK: - The gamepad
@@ -121,7 +121,7 @@ final class PlayMappersTests: XCTestCase {
     }
 
     func testAPlayStationPadDrawsItsGlyphs() {
-        for emulated in [EmulatedPad.dualSense, .dualShock4] {
+        for emulated in [EmulatedPad.dualSense, .dualShock4, .dualSenseEdge] {
             let pad = cover(FactsFixture.play(emulateAs: emulated)).gamepad
             XCTAssertEqual([pad.leftShoulder, pad.leftTrigger], ["L1", "L2"])
             XCTAssertEqual(pad.bottom.glyph, .symbol("xmark"))

@@ -313,6 +313,10 @@ extension L10n {
         catalog.text("Switch Pro")
     }
 
+    var dualSenseEdge: String {
+        catalog.text("DualSense Edge")
+    }
+
     var dualSenseCarries: String {
         catalog.text("DualSense carries motion, touchpad and adaptive triggers.")
     }
@@ -327,6 +331,10 @@ extension L10n {
 
     var switchProCarries: String {
         catalog.text("Switch Pro carries motion and rumble.")
+    }
+
+    var dualSenseEdgeCarries: String {
+        catalog.text("DualSense Edge carries motion, touchpad, adaptive triggers and four extra buttons.")
     }
 
     var theOtherPadsAreInTheMenu: String {

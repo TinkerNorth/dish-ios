@@ -168,7 +168,7 @@ final class AppModelConnectionsTests: XCTestCase {
         let row = fixture.model.shellFacts.paired.first
         XCTAssertEqual(row?.boundControllerIds, ["pad"])
         XCTAssertEqual(row?.satelliteVersion, "1.6.0")
-        XCTAssertEqual(row?.protocolVersion, 3)
+        XCTAssertEqual(row?.protocolVersion, 4)
         XCTAssertEqual(row?.features, SatelliteFeaturesFact(motion: true, rumble: true))
     }
 

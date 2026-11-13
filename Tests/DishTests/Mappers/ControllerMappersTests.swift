@@ -172,7 +172,7 @@ final class ControllerMappersTests: XCTestCase {
         XCTAssertEqual(binding.emulateTitle, "Emulate as")
         XCTAssertEqual(binding.emulateAs, .xboxWireless)
         XCTAssertEqual(binding.emulateOptions.map(\.pad), EmulatedPad.allCases)
-        XCTAssertEqual(binding.emulateOptions.map(\.name), ["DualSense", "DualShock 4", "Xbox Wireless", "Switch Pro"])
+        XCTAssertEqual(binding.emulateOptions.map(\.name), ["DualSense", "DualShock 4", "Xbox Wireless", "Switch Pro", "DualSense Edge"])
     }
 
     func testAPadBoundToAHostOffersTheProtocolsFourInPlaceOfDishsPads() throws {

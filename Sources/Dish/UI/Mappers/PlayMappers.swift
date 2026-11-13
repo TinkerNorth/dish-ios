@@ -294,7 +294,7 @@ func motionReason(_ availability: PlayMotion, words: L10n = .app) -> String? {
 func gamepadCoverState(_ pad: EmulatedPad) -> GamepadCoverState {
     switch pad {
     case .xboxWireless: xboxLabels
-    case .dualSense, .dualShock4: playStationLabels
+    case .dualSense, .dualShock4, .dualSenseEdge: playStationLabels
     case .switchPro: switchLabels
     }
 }

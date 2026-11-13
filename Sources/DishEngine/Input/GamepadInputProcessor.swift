@@ -207,7 +207,8 @@ func applyDeadzones(_ report: GamepadReport, _ zones: GamepadInputProcessor.Dead
         lx: flattenedAxis(report.lx, stickFlat),
         ly: flattenedAxis(report.ly, stickFlat),
         rx: flattenedAxis(report.rx, stickFlat),
-        ry: flattenedAxis(report.ry, stickFlat)
+        ry: flattenedAxis(report.ry, stickFlat),
+        extButtons: report.extButtons
     )
 }
 

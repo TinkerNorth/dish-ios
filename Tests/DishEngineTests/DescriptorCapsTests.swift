@@ -57,6 +57,15 @@ final class DescriptorCapsTests: XCTestCase {
         XCTAssertEqual(descriptorCaps(padWithoutImu, ForwardingFlags()) & ProtocolConstants.capPlayerLeds, 0)
     }
 
+    func testTheExtendedButtonsClaimFollowsThePadAloneWithNoSwitch() {
+        let everySwitchOff = ForwardingFlags(
+            motion: false, touchpad: false, rumble: false, lightbar: false, triggerEffects: false, playerLeds: false
+        )
+        let elite = ControllerCapabilities(hasExtendedButtons: true)
+        XCTAssertNotEqual(descriptorCaps(elite, everySwitchOff) & ProtocolConstants.capExtendedButtons, 0)
+        XCTAssertEqual(descriptorCaps(everything, ForwardingFlags()) & ProtocolConstants.capExtendedButtons, 0, "no paddles, no claim")
+    }
+
     /// The adaptive triggers and the player LEDs have switches of their own
     /// here, so a cap is the hardware and its switch, as for the others.
     func testTheFeedbackCapsFollowTheHardwareAndTheirOwnSwitches() {
@@ -125,6 +134,26 @@ final class DescriptorCapsTests: XCTestCase {
             types.controllerTypes[index].emulates = nil
         }
         XCTAssertEqual(preferredControllerType(in: types, for: .dualSense), 0)
+    }
+
+    func testTheDualSenseEdgeIsItsOwnTypeWhereOfferedAndTheDualSensesWhereNot() throws {
+        var types = try catalog()
+        XCTAssertEqual(preferredControllerType(in: types, for: .dualSenseEdge), Int(ProtocolConstants.controllerTypeDualSenseEdge))
+        types.controllerTypes.removeAll { $0.id == Int(ProtocolConstants.controllerTypeDualSenseEdge) }
+        XCTAssertEqual(preferredControllerType(in: types, for: .dualSenseEdge), 2, "a satellite before protocol 4 has the DualSense")
+        types.controllerTypes.removeAll { $0.emulates?.sdlType == "ps5" }
+        XCTAssertEqual(preferredControllerType(in: types, for: .dualSenseEdge), 1, "then the DualShock 4")
+    }
+
+    /// The Edge is a `ps5` pad too, listed after the DualSense, so a
+    /// DualSense lands on the DualSense and no family lands on the Edge.
+    func testNoFamilyIsEmulatedAsTheDualSenseEdge() throws {
+        let types = try catalog()
+        XCTAssertEqual(preferredControllerType(in: types, for: .dualSense), 2)
+        for family in [PadFamily.dualSense, .dualShock4, .xbox, .nintendo, .other] {
+            let type = preferredControllerType(in: types, for: family.emulatedPad)
+            XCTAssertNotEqual(type, Int(ProtocolConstants.controllerTypeDualSenseEdge), "\(family) is never the Edge unasked")
+        }
     }
 
     func testNoCatalogMeansTheLegacyXboxTarget() {

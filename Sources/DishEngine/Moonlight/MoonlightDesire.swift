@@ -31,12 +31,12 @@ enum MoonlightDesire {
         return MoonlightPadRequest(slotId: slotId, announced: MoonlightPadRules.arrival(storedType: storedType, source: source))
     }
 
-    /// The host protocol's type for the pad a slot is emulated as: the two
+    /// The host protocol's type for the pad a slot is emulated as: the
     /// PlayStation pads are its PlayStation, the Xbox Wireless its Xbox, the
     /// Switch Pro its Nintendo.
     static func controllerType(_ pad: EmulatedPad) -> UInt8 {
         switch pad {
-        case .dualSense, .dualShock4: MoonlightControllerType.playStation
+        case .dualSense, .dualShock4, .dualSenseEdge: MoonlightControllerType.playStation
         case .xboxWireless: MoonlightControllerType.xbox
         case .switchPro: MoonlightControllerType.nintendo
         }
