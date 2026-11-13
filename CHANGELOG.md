@@ -61,6 +61,12 @@ miss. `Tests/PARITY.md` lists everything not built.
   met: a scan is read on Diagnostics, where it leaves the Local Network
   allowed (and not asked yet while no scan ran), a sheet's lowering is
   waited for, and the two polls that slept are expectations too.
+- **The on-screen gamepad sends its PC the iPhone's battery.** The
+  on-screen gamepad bound to a Satellite or a Moonlight host sent no battery
+  at all, where dish-android's sends the phone's. It now sends the iPhone's
+  or iPad's charge and charging state every 30 seconds while it is among the
+  controllers, like a controller with no battery of its own, and a Moonlight
+  host is told at arrival that it has one.
 - **The scene builds its objects once.** SwiftUI calls the scene's
   initializer again on its own (at launch and on a scene phase change) and
   keeps only the first build's state; each extra call used to build a whole

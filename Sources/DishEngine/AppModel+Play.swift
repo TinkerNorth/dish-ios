@@ -44,10 +44,10 @@ package extension AppModel {
     }
 
     /// What the on-screen gamepad claims on a satellite: the phone's motion
-    /// when it has the sensors, the touchpad screen, and the Taptic Engine
-    /// as its rumble.
+    /// when it has the sensors, the touchpad screen, the Taptic Engine as
+    /// its rumble, and the phone's battery.
     internal var onScreenCapabilities: ControllerCapabilities {
-        ControllerCapabilities(hasMotion: onScreen.hasMotionSensor, hasTouchpad: true, hasRumble: true)
+        ControllerCapabilities(hasMotion: onScreen.hasMotionSensor, hasTouchpad: true, hasRumble: true, hasBattery: true)
     }
 
     func openPlay(_ screen: PlayScreen) {
@@ -97,7 +97,7 @@ package extension AppModel {
     /// PC go and leaves the controllers, so nothing routes it any more.
     func stopOnScreenGamepad() {
         closePlay()
-        onScreenListed.setState(false)
+        list(onScreen: false)
         unbind(slotId: onScreenSlotId)
     }
 
@@ -113,9 +113,19 @@ package extension AppModel {
     /// the emulation and the Motion switch the walk picked.
     internal func adoptOnScreen(_ draft: SetupDraft) {
         guard draft.input == .onScreen else { return }
-        onScreenListed.setState(true)
+        list(onScreen: true)
         pads.types.setType(draft.emulateAs, for: onScreenSlotId)
         setControllerFeature(slotId: onScreenSlotId, .motion, enabled: draft.motion)
+    }
+
+    /// The on-screen controller joins or leaves the controllers; its battery
+    /// cadence runs while it is listed.
+    private func list(onScreen listed: Bool) {
+        onScreenListed.setState(listed)
+        switch listed {
+        case true: onScreenBattery.start()
+        case false: onScreenBattery.stop()
+        }
     }
 
     private var onScreenEmulateAs: EmulatedPad {
@@ -134,7 +144,7 @@ package extension AppModel {
         let previous = playSource.state
         guard previous != screen else { return }
         if previous != nil { onScreen.stop() }
-        onScreenListed.setState(true)
+        list(onScreen: true)
         onScreen.useAnalogTriggers(hasAnalogTriggers(onScreenEmulateAs))
         playSource.setState(screen)
         onScreen.start()
