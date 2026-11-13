@@ -99,6 +99,7 @@
 
 | Feature | Where it lands |
 |---|---|
+| **The iPhone lanes' simulators are not read back.** Only the iPad lane creates its device through `scripts/ci-simulator.sh`, which requires `simctl list` to show it booted before xcodebuild and recreates it when it is not; the two iPhone steps of `ios-ci.yml` and `e2e.yml`'s still create theirs inline and trust `bootstatus`. | the three steps calling `scripts/ci-simulator.sh create` and `run`, once the iPad lane has shown the script holds on the runners |
 | **The controller page's Touchpad and Mouse buttons, and its rename.** A physical pad's status card has no Touchpad and Mouse buttons (the on-screen controller's page has Open), and a pad cannot be renamed. | the play screens on a physical pad's card, and a rename through the slot's preferences |
 | **A primer card on the Connections tab.** Before the setup primer was seen the tab opens with its empty page and no scan (dish-mac shows a priming card with "Show me the prompt"); Scan, a pull to refresh and the setup walk are the ways to the question. The Moonlight hosts page still browses as it opens. | a card on the empty page over `local_network_primed`, and the hosts page behind the same flag |
 | **A typed PC that never pairs stays listed.** A PC added by address stays a found row for the run, pairing or not; nothing forgets a typed address that answers nowhere. | a long-press Remove on a found row that is not heard, if the design asks |

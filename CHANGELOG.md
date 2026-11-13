@@ -43,6 +43,15 @@ miss. `Tests/PARITY.md` lists everything not built.
 
 ### Fixed
 
+- **CI reads its iPad back before the UI tests run on it.** The iPad lane
+  created its simulator and trusted `simctl bootstatus`; on one runner the
+  device was gone a minute later and xcodebuild listed no simulator at all,
+  on another the UI test runner timed out before any test ran, and each cost
+  the whole run. `scripts/ci-simulator.sh` now creates the iPad on the newest
+  runtime that supports it, requires `simctl list` to show it booted after
+  the boot and again right before xcodebuild (recreating it when it is not),
+  and runs xcodebuild once more only on those two runner errors, never on a
+  failing test.
 - **The scene builds its objects once.** SwiftUI calls the scene's
   initializer again on its own (at launch and on a scene phase change) and
   keeps only the first build's state; each extra call used to build a whole
