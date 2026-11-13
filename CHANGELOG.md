@@ -52,6 +52,15 @@ miss. `Tests/PARITY.md` lists everything not built.
   the boot and again right before xcodebuild (recreating it when it is not),
   and runs xcodebuild once more only on those two runner errors, never on a
   failing test.
+- **The UI tests wait for what the app ends in, not for a clock.** On a
+  slow CI runner the iPad lane failed when a five-second wait for the
+  Add a PC by address sheet ran out, and when the "Searching" label of
+  a scan had already gone by the time the test looked for it. Every wait
+  in `App/UITests` is now an expectation on a state the app reaches,
+  with a shared patience of thirty seconds that ends the moment it is
+  met: a scan is read on Diagnostics, where it leaves the Local Network
+  allowed (and not asked yet while no scan ran), a sheet's lowering is
+  waited for, and the two polls that slept are expectations too.
 - **The scene builds its objects once.** SwiftUI calls the scene's
   initializer again on its own (at launch and on a scene phase change) and
   keeps only the first build's state; each extra call used to build a whole
