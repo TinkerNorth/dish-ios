@@ -27,11 +27,14 @@ public enum EmulatedPad: CaseIterable, Hashable, Sendable {
     case dualShock4
     case xboxWireless
     case switchPro
+    /// The DualSense with the four paddles the extended-buttons word carries
+    /// (protocol 4).
+    case dualSenseEdge
 
     /// The pad carries motion, so the Motion switch means something.
     public var hasMotion: Bool {
         switch self {
-        case .dualSense, .dualShock4, .switchPro: true
+        case .dualSense, .dualShock4, .switchPro, .dualSenseEdge: true
         case .xboxWireless: false
         }
     }

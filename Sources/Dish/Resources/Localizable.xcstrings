@@ -5849,6 +5849,76 @@
         }
       }
     },
+    "DualSense Edge" : {
+      "comment" : "A controller type a pad is emulated as. DualSense Edge is a product name.",
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "DualSense Edge"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "DualSense Edge"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "DualSense Edge"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "DualSense Edge"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "DualSense Edge"
+          }
+        }
+      }
+    },
+    "DualSense Edge carries motion, touchpad, adaptive triggers and four extra buttons." : {
+      "comment" : "What the DualSense Edge type carries, on Review and bind. DualSense Edge is a product name.",
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "DualSense Edge prenosi pokret, dodirnu ploču, adaptivne okidače i četiri dodatna dugmeta."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "DualSense Edge überträgt Bewegung, Touchpad, adaptive Trigger und vier zusätzliche Tasten."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "DualSense Edge transmite movimiento, panel táctil, gatillos adaptativos y cuatro botones adicionales."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "DualSense Edge transmet le mouvement, le pavé tactile, les gâchettes adaptatives et quatre boutons supplémentaires."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O DualSense Edge transmite movimento, touchpad, gatilhos adaptativos e quatro botões extras."
+          }
+        }
+      }
+    },
     "DualSense carries motion, touchpad and adaptive triggers." : {
       "localizations" : {
         "bs" : {
@@ -6357,6 +6427,41 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Todo recurso continua grátis, com gorjeta ou sem."
+          }
+        }
+      }
+    },
+    "Extra buttons" : {
+      "comment" : "A caps word feature: the protocol 4 extended buttons (an Xbox Elite's paddles).",
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dodatna dugmad"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zusätzliche Tasten"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Botones adicionales"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Boutons supplémentaires"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Botões extras"
           }
         }
       }

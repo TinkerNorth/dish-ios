@@ -85,6 +85,7 @@ final class GameControllerInputTests: XCTestCase {
         XCTAssertTrue(slot.readable)
         XCTAssertEqual(slot.link, .bluetooth, "a snapshot pad is not attached to the device")
         XCTAssertFalse(slot.capabilities.hasTriggerEffects, "only a DualSense takes trigger effects")
+        XCTAssertFalse(slot.capabilities.hasExtendedButtons, "only an Xbox Elite has paddles to send")
     }
 
     func testAConnectHandsThePadItsInputQueueAndADisconnectLetsItGo() throws {
@@ -129,6 +130,73 @@ final class GameControllerInputTests: XCTestCase {
             controller.handlerQueue.sync { pad.valueChangedHandler?(pad, pad.leftThumbstick) }
         }
         XCTAssertEqual(recorder.reports.map(\.report.ly), [32767, 0, 32767], "three changes, three reports")
+    }
+
+    // MARK: - Paddles
+
+    /// The snapshot pad's profile names the four paddle buttons an Elite's
+    /// has, so they stand in for an Elite's own.
+    private func snapshotPaddles(_ pad: GCExtendedGamepad) throws -> GameControllerInput.PaddleInputs {
+        try GameControllerInput.PaddleInputs(
+            one: XCTUnwrap(pad.buttons[GCInputXboxPaddleOne]),
+            two: XCTUnwrap(pad.buttons[GCInputXboxPaddleTwo]),
+            three: XCTUnwrap(pad.buttons[GCInputXboxPaddleThree]),
+            four: XCTUnwrap(pad.buttons[GCInputXboxPaddleFour])
+        )
+    }
+
+    func testAnElitesPaddlesAreSdlsPaddlesTheRightHandsFirst() throws {
+        let (_, pad) = try snapshotPad()
+        let paddles = try snapshotPaddles(pad)
+        let bits: [(GCControllerButtonInput, UInt32)] = [
+            (paddles.one, ProtocolConstants.extButtonRightPaddle1),
+            (paddles.two, ProtocolConstants.extButtonRightPaddle2),
+            (paddles.three, ProtocolConstants.extButtonLeftPaddle1),
+            (paddles.four, ProtocolConstants.extButtonLeftPaddle2)
+        ]
+        XCTAssertEqual(GameControllerInput.padSample(pad, paddles: paddles).extButtons, 0, "no paddle held")
+        for (paddle, bit) in bits {
+            paddle.setValue(1)
+            XCTAssertEqual(GameControllerInput.padSample(pad, paddles: paddles).extButtons, bit, "\(paddle) alone")
+            paddle.setValue(0)
+        }
+        paddles.one.setValue(1)
+        paddles.four.setValue(1)
+        let both = GameControllerInput.padSample(pad, paddles: paddles).extButtons
+        XCTAssertEqual(both, ProtocolConstants.extButtonRightPaddle1 | ProtocolConstants.extButtonLeftPaddle2, "levels, not edges")
+    }
+
+    /// SDL's mapping has GameController's own word behind it: each paddle is
+    /// an alias of the back button it is, P1 and P2 the right hand's, upper
+    /// first, P3 and P4 the left's.
+    func testGameControllersOwnAliasesPlaceEachPaddleAsSdlDoes() throws {
+        let (_, pad) = try snapshotPad()
+        let paddles = try snapshotPaddles(pad)
+        XCTAssertTrue(paddles.one.aliases.contains(GCButtonElementName.backRightButton(position: 0).rawValue))
+        XCTAssertTrue(paddles.two.aliases.contains(GCButtonElementName.backRightButton(position: 1).rawValue))
+        XCTAssertTrue(paddles.three.aliases.contains(GCButtonElementName.backLeftButton(position: 0).rawValue))
+        XCTAssertTrue(paddles.four.aliases.contains(GCButtonElementName.backLeftButton(position: 1).rawValue))
+    }
+
+    func testAHeldPaddleGoesOutWithThePadsReport() throws {
+        let (controller, pad) = try snapshotPad()
+        let input = input(connected: [controller])
+        let recorder = InputRecorder()
+        input.processor.route(recorder.route)
+        let paddles = try snapshotPaddles(pad)
+        let feed = input.processor.feed(for: input.slotId(for: controller))
+        paddles.three.setValue(1)
+        controller.handlerQueue.sync { GameControllerInput.pushReport(pad: pad, paddles: paddles, feed: feed) }
+        XCTAssertEqual(recorder.reports.map(\.report.extButtons), [ProtocolConstants.extButtonLeftPaddle1])
+    }
+
+    /// GameController names paddles only on its Xbox profile, and there only
+    /// for a pad that has them: the Xbox Wireless pad's are nil.
+    func testOnlyAnXboxProfileThatNamesItsPaddlesHasThem() throws {
+        let (_, pad) = try snapshotPad()
+        XCTAssertNil(GameControllerInput.paddleInputs(pad), "not an Xbox profile")
+        XCTAssertNil(GameControllerInput.paddleInputs(GCXboxGamepad()), "an Xbox profile without paddles")
+        XCTAssertEqual(GameControllerInput.padSample(pad).extButtons, 0)
     }
 
     func testEachControllerGetsAQueueOfItsOwnKeptAcrossAReattach() throws {

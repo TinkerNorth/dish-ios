@@ -29,6 +29,27 @@ to. The rows answer a long press and a swipe, Siri and Shortcuts can open the
 play screens, dim and connect, and TipKit points at what a new person might
 miss. `Tests/PARITY.md` lists everything not built.
 
+### Added
+
+- **Room on the wire for a controller's extra buttons.** `[wire-coordinated]`
+  Protocol 4. Dish now speaks Satellite protocol 4: on a session that settled
+  on it, every controller report carries a second word for the buttons an
+  Xbox pad does not have, and a controller that sends them says so in its
+  capabilities, shown as "Extra buttons" on Diagnostics. An older Satellite
+  keeps working at protocol 3 and is sent exactly what it was sent before.
+- **An Xbox Elite controller's back paddles reach the PC.** On a Satellite
+  that speaks protocol 4, the four paddles of an Xbox Elite Wireless
+  Controller Series 2 travel in that word under the names SDL gives them: P1
+  and P2 are the right hand's upper and lower paddles, P3 and P4 the left
+  hand's. iOS addresses the paddles only while the controller is on its
+  default profile; on any other profile they press the buttons they are
+  mapped to. Not yet tried with a real Elite.
+- **The DualSense Edge is a controller type.** Every Emulate as picker lists
+  the DualSense Edge last: the DualSense with two back buttons and two Fn
+  buttons, which is where an Xbox Elite's four paddles land in a game. It is
+  never picked for you, and on a Satellite that does not offer it the pad is
+  emulated as a DualSense. Not yet tried against a host that offers the type.
+
 ### Changed
 
 - **A controller's battery on the PC is the lower of the controller's and

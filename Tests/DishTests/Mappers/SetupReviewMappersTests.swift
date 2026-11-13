@@ -35,7 +35,7 @@ final class SetupReviewMappersTests: XCTestCase {
         XCTAssertEqual(state.sends.title, "Sends to PC")
         XCTAssertEqual(state.getsBack.title, "Gets back")
         XCTAssertEqual(state.primary, "Bind")
-        XCTAssertEqual(state.emulateOptions.map(\.name), ["DualSense", "DualShock 4", "Xbox Wireless", "Switch Pro"])
+        XCTAssertEqual(state.emulateOptions.map(\.name), ["DualSense", "DualShock 4", "Xbox Wireless", "Switch Pro", "DualSense Edge"])
     }
 
     // MARK: - The pad's end
@@ -132,6 +132,17 @@ final class SetupReviewMappersTests: XCTestCase {
         XCTAssertEqual(
             state.footnote,
             "DualSense carries motion, touchpad and adaptive triggers. The other pads are in the menu."
+        )
+    }
+
+    func testADualSenseEdgeCarriesWhatTheDualSenseDoesAndFourExtraButtons() {
+        let state = review(seenDualSense, .byAddress, edits: [.setEmulateAs(.dualSenseEdge)])
+        XCTAssertTrue(state.motionEnabled)
+        XCTAssertEqual(carried(state.sends), ["Buttons, sticks", "Motion", "Touchpad", "Battery"])
+        XCTAssertEqual(carried(state.getsBack), ["Rumble", "Trigger effects", "Light bar"])
+        XCTAssertEqual(
+            state.footnote,
+            "DualSense Edge carries motion, touchpad, adaptive triggers and four extra buttons. The other pads are in the menu."
         )
     }
 
