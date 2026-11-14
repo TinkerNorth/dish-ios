@@ -33,12 +33,18 @@ final class SettingsUITests: XCTestCase {
         XCTAssertTrue(ShellUI.settles(rumble, to: "1"))
     }
 
-    /// A tap on the switch itself: the last 51 points of the row before its
-    /// 16-point inset, whatever the row's width, so 40 points in from the
-    /// trailing edge is its middle on an iPhone and on an iPad either way up.
+    /// How long a flip holds the switch down. A switch takes a touch only once
+    /// its press has begun, about a frame after the touch lands; XCUITest's
+    /// tap lifts after 50 ms, and on a slow runner the press had not begun by
+    /// then. The flip holds ten times as long.
+    private static let pressHold: TimeInterval = 0.5
+
+    /// A press on the switch itself: the last 63 points of the row before its
+    /// 14-point inset on an iPhone and its 18-point inset on an iPad, so 40
+    /// points in from the trailing edge lands on it at either row width.
     private func flip(_ element: XCUIElement) {
         let trailingEdge = element.coordinate(withNormalizedOffset: CGVector(dx: 1, dy: 0.5))
-        trailingEdge.withOffset(CGVector(dx: -40, dy: 0)).tap()
+        trailingEdge.withOffset(CGVector(dx: -40, dy: 0)).press(forDuration: Self.pressHold)
     }
 
     func testTheLightBarPickerOffersFollowGameAndOff() {
