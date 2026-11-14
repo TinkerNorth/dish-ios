@@ -8,8 +8,9 @@ import Observation
 
 /// The composition root: it holds every store and seam and vends the facts
 /// the shell draws. Intents live in extensions by topic and are the only
-/// thing a view calls. The controllers come from the GameController bridge,
-/// the PCs and the session from the satellite pool.
+/// thing a view calls. The controllers come from the GameController bridge
+/// and, once the person opts in, the Steam Controllers over Bluetooth; the
+/// PCs and the session from the satellite pool.
 @MainActor
 @Observable
 package final class AppModel {
@@ -37,7 +38,7 @@ package final class AppModel {
     let supportSource = StateSource<SupportFacts>(initial: .initial)
     /// The on-screen controller's slot: its touches, its resend loop, its motion.
     package let onScreen: OnScreenPad
-    let onScreenBattery: OnScreenBattery
+    let onScreenBattery: DeviceBatteryCadence
     /// The play screen on display; nil while none is.
     let playSource = StateSource<PlayScreen?>(initial: nil)
     /// Whether the on-screen controller is one of the controllers.
@@ -103,7 +104,7 @@ package final class AppModel {
         returnPaths = ReturnPathRouter(feedback: pads.source.feedback)
         moonlightFeedback = MoonlightFeedbackRouter(feedback: pads.source.feedback)
         onScreen = OnScreenPad(feed: pads.source.processor.feed(for: onScreenSlotId), ticker: resendTicker, sensor: motionSensor)
-        onScreenBattery = OnScreenBattery(ticker: batteryTicker, device: deviceBattery, processor: pads.source.processor)
+        onScreenBattery = DeviceBatteryCadence(ticker: batteryTicker, device: deviceBattery, processor: pads.source.processor)
         applyStoredDeadzones()
         pads.source.processor.setDeadzones(deviceId: onScreenSlotId, GamepadInputProcessor.Deadzones())
         wireNetwork()
@@ -111,12 +112,15 @@ package final class AppModel {
         wireMoonlight()
         observeBindingMemory()
         restoreStandingBindings()
+        resumeSteamControllers()
     }
 
     /// Every store over the same defaults, the wall clock, the pads iOS
-    /// sees (weighed against the device's battery the scene hands in), the
-    /// satellite pool with its keys in the Keychain, the Bonjour scan as the
-    /// Local Network seam, the App Store and the phone's sensors.
+    /// sees and the Steam Controllers over Bluetooth (each weighed against
+    /// the device's battery the scene hands in; the Bluetooth radio made only
+    /// once the person opts in), the satellite pool with its keys in the
+    /// Keychain, the Bonjour scan as the Local Network seam, the App Store
+    /// and the phone's sensors.
     package convenience init(
         defaults: UserDefaults,
         clock: ClockSource = ClockSource(ticker: TimerTicker(), now: Date.init),
@@ -131,10 +135,20 @@ package final class AppModel {
         pasteboard: any Pasteboard = InertPasteboard(),
         deviceBattery: any DeviceBattery = InertDeviceBattery(),
         batteryTicker: any Ticker = TimerTicker(),
-        deviceKind: DeviceKind = .phone
+        deviceKind: DeviceKind = .phone,
+        steamRadio: @escaping SteamRadioFactory = { CoreBluetoothRadio(events: $0, queue: $1) },
+        steamClock: (any SteamClock)? = nil
     ) {
         let device = DevicePreferenceStore(defaults: defaults)
         let network = NetworkStack(defaults: defaults, keyStore: keyStore, pins: pins) { wireDeviceName(device.state, on: deviceKind) }
+        let source = controllerSource ?? GameControllerInput(deviceBattery: deviceBattery)
+        let steam = SteamBluetoothPads(
+            processor: source.processor,
+            feedback: source.feedback,
+            makeRadio: steamRadio,
+            clock: steamClock,
+            deviceBattery: deviceBattery
+        )
         self.init(
             onboarding: OnboardingPreferenceStore(defaults: defaults),
             appearance: AppearancePreferenceStore(defaults: defaults),
@@ -142,7 +156,7 @@ package final class AppModel {
             streaming: StreamingPreferenceStore(defaults: defaults),
             clock: clock,
             localNetwork: localNetwork ?? BonjourLocalNetworkAccess(wifi: network.wifi),
-            pads: ControllerStack(source: controllerSource ?? GameControllerInput(deviceBattery: deviceBattery), defaults: defaults),
+            pads: ControllerStack(source: source, defaults: defaults, steam: steam),
             network: network,
             tips: tips,
             motionSensor: motionSensor,
@@ -194,7 +208,8 @@ package final class AppModel {
             apply: applyFact,
             addedByAddress: addedByAddress?.id,
             deadzones: pads.deadzones.state,
-            forwarding: pads.features.flags
+            forwarding: pads.features.flags,
+            steamBluetooth: steamBluetoothStatus(enabled: pads.steamSetting.enabled, radio: pads.steam.radio)
         )
     }
 

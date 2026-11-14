@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 // Copyright (C) 2026 Dish contributors.
 
+import DishCore
 import DishEngine
 import XCTest
 @testable import Dish
@@ -103,6 +104,45 @@ final class SettingsMappersTests: XCTestCase {
             features.footer,
             "Features only apply when your controller's hardware supports them. The controller list shows what was detected."
         )
+    }
+
+    // MARK: - Steam Controllers
+
+    private func steam(_ status: SteamBluetoothStatus) -> SteamControllersSectionState {
+        settingsPageState(preferences: FactsFixture.preferences, steamBluetooth: status, appVersion: "0.1.0").steamControllers
+    }
+
+    func testSteamControllersOverBluetoothStandOffUntilThePersonOptsIn() {
+        XCTAssertEqual(page().steamControllers, SteamControllersSectionState(
+            title: "Steam Controllers",
+            toggleTitle: "Read over Bluetooth",
+            isOn: false,
+            line: SteamBluetoothLine(text: "Dish doesn’t use Bluetooth until you turn this on.", warns: false),
+            footer: "iOS doesn’t offer Steam Controllers to games, so Dish reads them over Bluetooth itself."
+                + " Turning this on asks for Bluetooth."
+        ))
+    }
+
+    func testEachStateOfBluetoothShowsItsOwnLineOnTheRow() {
+        let lines: [(SteamBluetoothStatus, String, Bool)] = [
+            (.waiting, "Waiting for Bluetooth.", false),
+            (.on, "Reading the Steam Controllers paired in Settings › Bluetooth.", false),
+            (.bluetoothOff, "Bluetooth is turned off.", true),
+            (.refused, "Dish isn’t allowed to use Bluetooth. Allow it in Settings › Privacy & Security › Bluetooth.", true),
+            (.restricted, "Bluetooth is restricted on this device.", true),
+            (.unsupported, "This device has no Bluetooth LE.", true)
+        ]
+        for (status, text, warns) in lines {
+            let section = steam(status)
+            XCTAssertTrue(section.isOn, "\(status): the switch is on")
+            XCTAssertEqual(section.line, SteamBluetoothLine(text: text, warns: warns), "\(status)")
+        }
+        XCTAssertEqual(Set(lines.map(\.1)).count, lines.count, "no two states share a line")
+    }
+
+    func testOnlyWhatThePersonCanChangeWarns() {
+        XCTAssertEqual(steam(.refused).line.color, DishTheme.warning)
+        XCTAssertEqual(steam(.on).line.color, DishTheme.muted)
     }
 
     func testTheForwardedFeaturesShowTheGlobalSwitchesAsTheyStand() {

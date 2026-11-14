@@ -65,9 +65,9 @@ own directory.
 
 | Module | Role | Depends on | May import |
 |---|---|---|---|
-| `DishCore` | The pure core: the setup machine (`Setup/`), the protocol constants (`ProtocolConstants.swift`), the wire codecs and the session crypto (`Wire/`), the policy reducers (`Reducers/`), and under `Moonlight/` the Moonlight host protocol's pure half (the wire formats and the control seal, the PIN pairing, the host's XML replies and the RTSP text, the controller numbers, what a pad's arrival declares, the pad table the hot path reads, the session reducer and the telemetry conversions) with the ENet client the control stream rides on (`Moonlight/Enet/`, a pure state machine with an injected clock), ported from dish-mac under its names and pinned by the fleet's vectors and Wolf's. | nothing | Foundation, CryptoKit, CommonCrypto (the pairing's AES-ECB, which CryptoKit does not offer) |
+| `DishCore` | The pure core: the setup machine (`Setup/`), the protocol constants (`ProtocolConstants.swift`), the wire codecs and the session crypto (`Wire/`), the policy reducers (`Reducers/`), and under `Moonlight/` the Moonlight host protocol's pure half (the wire formats and the control seal, the PIN pairing, the host's XML replies and the RTSP text, the controller numbers, what a pad's arrival declares, the pad table the hot path reads, the session reducer and the telemetry conversions) with the ENet client the control stream rides on (`Moonlight/Enet/`, a pure state machine with an injected clock), ported from dish-mac under its names and pinned by the fleet's vectors and Wolf's, and under `DirectInput/` the Steam Controllers over Bluetooth: dish-mac's decoders, trackpad router, plan and model rows, SDL's iOS GATT facts (`SteamBleGatt.swift`) and a link's lifecycle (`SteamLinkMachine.swift`). | nothing | Foundation, CryptoKit, CommonCrypto (the pairing's AES-ECB, which CryptoKit does not offer) |
 | `DishKernel` | The dataflow primitive `StateSource` (below) | nothing | Foundation, Observation |
-| `DishEngine` | Everything that owns state or touches the platform: the preference stores (`Preferences/`), the minute clock (`Clock/`), the Local Network seam and its Bonjour implementation (`LocalNetwork/`), the GameController bridge and the hot path's pad side (`Input/`), the satellite pool, the REST control plane and the UDP data plane (`Network/`), the Moonlight hosts' edges (`Moonlight/`: the keychain identity, one-connection HTTP with mutual TLS, the pinning gateway, the host store, the RTSP handshake, the UDP control socket and media pinger, the control session that seals input onto the ENet link, the connection that holds a host's pads and live session, the feedback router and the manager that probes, pairs, converges the bindings onto one session per host and forgets), the diagnostics source and its flight recorder (`Diagnostics/`), the App Store's tips (`Support/`), the facts the UI draws (`Models/`) and `AppModel`, the one composition root, with its intents by topic. | `DishCore`, `DishKernel` | Foundation, Observation, os, Synchronization, GameController, CoreHaptics, CoreMotion, StoreKit, Network, Security, CryptoKit, Darwin, DishCore, DishKernel; never SwiftUI or UIKit |
+| `DishEngine` | Everything that owns state or touches the platform: the preference stores (`Preferences/`), the minute clock (`Clock/`), the Local Network seam and its Bonjour implementation (`LocalNetwork/`), the GameController bridge and the hot path's pad side (`Input/`), the satellite pool, the REST control plane and the UDP data plane (`Network/`), the Moonlight hosts' edges (`Moonlight/`: the keychain identity, one-connection HTTP with mutual TLS, the pinning gateway, the host store, the RTSP handshake, the UDP control socket and media pinger, the control session that seals input onto the ENet link, the connection that holds a host's pads and live session, the feedback router and the manager that probes, pairs, converges the bindings onto one session per host and forgets), the diagnostics source and its flight recorder (`Diagnostics/`), the App Store's tips (`Support/`), the facts the UI draws (`Models/`) and `AppModel`, the one composition root, with its intents by topic. The Steam Controllers over Bluetooth are `Input/`'s too: `SteamBluetoothPads`, their links (`SteamLinks`, `SteamPadReader`) and the CoreBluetooth radio. | `DishCore`, `DishKernel` | Foundation, Observation, os, Synchronization, GameController, CoreBluetooth, CoreHaptics, CoreMotion, StoreKit, Network, Security, CryptoKit, Darwin, DishCore, DishKernel; never SwiftUI or UIKit |
 | `Dish` | The SwiftUI library: `DishScene` and `OrientationLock` (the two `public` types), the navigation machine and its store, the shell, the pages, the setup cover and the dim, the kit, the mappers, the theme, the localized words and their catalog | `DishEngine`, `DishCore`, `DishKernel` | Foundation, Observation, SwiftUI, UIKit (only `UI/Theme.swift` and `DishScene.swift`), the three modules |
 | `Dish` | The SwiftUI library: `DishScene` and `OrientationLock` (the two `public` types), the scene's seams under `Scene/` (the orientation lock, the window's reader), the navigation machine and its store, the shell, the pages, the setup cover and the dim, the kit, the mappers, the theme, the localized words and their catalog | `DishEngine`, `DishCore`, `DishKernel` | Foundation, Observation, SwiftUI, UIKit (only `UI/Theme.swift`, `DishScene.swift` and `Scene/Orientation.swift`), the three modules |
 | `Dish` | The SwiftUI library: `DishScene` and `OrientationLock` (the two `public` types), the navigation machine and its store, the shell, the pages, the setup cover and the dim, the kit, the mappers, the theme, the localized words and their catalog | `DishEngine`, `DishCore`, `DishKernel` | Foundation, Observation, SwiftUI, UIKit (only `UI/Theme.swift` and `DishScene.swift`), AppIntents (only `Intents/` and `DishScene.swift`), TipKit (only the kit's `HintTip.swift` and `Scene/TipKitTips.swift`), the three modules |
@@ -157,8 +157,11 @@ sockets, or `FakeMoonlightEdges`) and the discovery closure.
 The seams are protocols with one production implementation each, so a test
 replaces them: `LocalNetworkAccess` (`BonjourLocalNetworkAccess`, the scan;
 `RecordedLocalNetworkAccess` for tests), `Ticker`, `ControllerSource`,
-`KeyStore` (`KeychainKeyStore`, `InMemoryKeyStore`) and the manager's
-`DiscoveryPaths` (the live browse, or a scripted LAN). Two have theirs in the
+`KeyStore` (`KeychainKeyStore`, `InMemoryKeyStore`), the manager's
+`DiscoveryPaths` (the live browse, or a scripted LAN), and the Steam
+Controllers' `SteamRadio` (`CoreBluetoothRadio`, made by a factory only once
+the person opts in; `FakeSteamRadio` in the tests) with its `SteamClock`
+(`QueueClock`, or `ManualSteamClock`). Two have theirs in the
 scene, because only UIKit can fill them: `Pasteboard` (`SystemPasteboard`)
 and `DeviceBattery` (`SystemDeviceBattery`, `UIDevice`'s level and charge
 state), each `Inert` in a model built outside the scene.
@@ -170,7 +173,10 @@ final class and the only place the engine's objects are made. The designated
 initializer takes every collaborator, so a test builds one over fakes; the
 convenience initializer takes a `UserDefaults` and builds the real set: the four
 preference stores over those defaults, a `ClockSource` over a `TimerTicker`,
-the pads (`ControllerStack` over `GameControllerInput`), the satellite pool
+the pads (`ControllerStack` over `GameControllerInput`, and
+`SteamBluetoothPads` beside it over the same processor and feedback, whose
+radio exists only once the person opts in; `ControllerStack.slots` lists both),
+the satellite pool
 (`NetworkStack`: the manager over a `ConnectionStore` with its keys in the
 Keychain and its pins in Application Support, the Moonlight manager over its
 host store and the pinning gateway, and the hub over both) and the Bonjour
@@ -422,6 +428,25 @@ Receive and Feedback threads to no tracked lock and the Heartbeat to the
 latency window's alone, over a pad routed to a live client and a loopback
 satellite answering it. Everything else in the engine is `@MainActor`.
 
+A Steam Controller over Bluetooth takes the same path from its feed on. Its
+links run on one serial queue (`com.tinkernorth.dish.input.steam`, marked
+`ThreadRole.input`), which is both the queue every CoreBluetooth callback is
+delivered on and the executor of `SteamLinks`, an actor, as `PadActuators` is
+the feedback queue's: a value goes from the radio's callback into the actor
+with `assumeIsolated`, gets its report id back in front in a buffer the
+reader made once, is decoded against the carry it made once, has its
+trackpads landed by the pick, and leaves through the pad's `PadFeed` with no
+lock, no hop and no allocation of Dish's own (CoreBluetooth's `Data` is the
+framework's, as GameController's are). The main actor hands the actor a
+claimed pad's feed and pick with `queue.async`; the actor tells the main actor
+of a claim, its end and Bluetooth's word through the main queue, in order. A
+Steam slot's rumble drains on that same queue: `PadFeedback.drive(slotsPrefixed:on:with:)`
+gives the `ble:` slots the links' queue and the actor as their actuators, so
+a satellite's rumble reaches the pad in one hop. The 3 s lizard refresh, the
+40 ms rumble re-send and the 5 s look for connected pads are `asyncAfter` on
+the queue (`QueueClock`). `LockLawTests` holds that queue to no tracked lock,
+over a claimed pad routed to a live client and rumbled by a satellite.
+
 A pad bound to a Moonlight host routes to a `MoonlightPadSink`: the host's
 `MoonlightPadLink` builds the frame under its lock (the pad table, the click's
 replay, the touches, motion and battery) and hands it to the
@@ -469,8 +494,10 @@ These are the rules the bridge and the wire keep, taken from dish-mac:
 - Some of the siblings' capabilities sit behind entitlements Apple grants on
   request: the multicast entitlement for the legacy discovery beacon, raw HID
   access for the Direct path. The hot path reaches every pad through
-  GameController and every satellite through Bonjour until they are granted;
-  `Tests/PARITY.md` lists them.
+  GameController, but the Steam Controllers over Bluetooth, which iOS never
+  vends and CoreBluetooth reaches with the person's leave, and every
+  satellite through Bonjour until they are granted; `Tests/PARITY.md` lists
+  them.
 
 ## How to add a feature
 

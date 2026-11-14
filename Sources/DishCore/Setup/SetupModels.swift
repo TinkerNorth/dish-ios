@@ -38,6 +38,14 @@ public enum EmulatedPad: CaseIterable, Hashable, Sendable {
         case .xboxWireless: false
         }
     }
+
+    /// The pad has a touchpad a Steam Controller's trackpads can be.
+    public var hasTouchpad: Bool {
+        switch self {
+        case .dualSense, .dualShock4, .dualSenseEdge: true
+        case .xboxWireless, .switchPro: false
+        }
+    }
 }
 
 /// What the person plays with: a pad iOS already sees (with the family it

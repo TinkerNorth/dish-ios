@@ -168,11 +168,13 @@ struct ControllerTelemetrySection: View {
     }
 }
 
-/// FUNCTIONS: one switch per feature the pad has, and why two are missing.
+/// FUNCTIONS: one switch per feature the pad has, a Steam Controller's
+/// trackpads, and why two are missing.
 struct ControllerFunctionsSection: View {
     let state: ControllerFunctionsState
     let footnote: String
     let setFeature: @MainActor (SlotSwitch, Bool) -> Void
+    let setTrackpads: @MainActor (TouchpadPick) -> Void
 
     var body: some View {
         Section {
@@ -192,6 +194,18 @@ struct ControllerFunctionsSection: View {
                     }
                 }
                 .tint(DishTheme.success)
+            }
+            if let trackpads = state.trackpads {
+                Picker(selection: Binding(get: { trackpads.selection }, set: { setTrackpads($0) })) {
+                    ForEach(trackpads.options) { Text($0.title).tag($0.pick) }
+                } label: {
+                    Label {
+                        Text(trackpads.title).foregroundStyle(DishTheme.onSurface)
+                    } icon: {
+                        Image(systemName: trackpads.symbol).foregroundStyle(DishTheme.primary)
+                    }
+                }
+                .pickerStyle(.menu)
             }
         } header: {
             SectionEyebrow(title: state.title, color: DishTheme.muted)

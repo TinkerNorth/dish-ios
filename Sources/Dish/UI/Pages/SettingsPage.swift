@@ -18,6 +18,7 @@ struct SettingsActions {
     let setAppearance: @MainActor (Appearance) -> Void
     let setForwarded: @MainActor (ForwardedFeature, Bool) -> Void
     let setLightBar: @MainActor (LightbarMode) -> Void
+    let setSteamControllers: @MainActor (Bool) -> Void
 }
 
 /// The Settings tab (D5).
@@ -32,6 +33,7 @@ struct SettingsPage: View {
             state: settingsPageState(
                 preferences: model.shellFacts.preferences,
                 forwarding: model.shellFacts.forwarding,
+                steamBluetooth: model.shellFacts.steamBluetooth,
                 appVersion: appVersion
             ),
             actions: SettingsActions(
@@ -46,7 +48,8 @@ struct SettingsPage: View {
                 setDimAfter: model.setDimAfter,
                 setAppearance: model.setAppearance,
                 setForwarded: setForwarded,
-                setLightBar: model.setLightbarMode
+                setLightBar: model.setLightbarMode,
+                setSteamControllers: model.setSteamControllersOverBluetooth
             )
         )
     }
@@ -87,6 +90,7 @@ struct SettingsPageBody: View {
             DeviceSection(state: state.device, edit: actions.editDeviceName)
             StreamingSection(state: state.streaming, actions: actions)
             ForwardedFeaturesSection(state: state.features, actions: actions)
+            SteamControllersSection(state: state.steamControllers, set: actions.setSteamControllers)
             SetupHelpSection(state: state.help, actions: actions)
             AppearanceSection(state: state.appearance, select: actions.setAppearance)
             AboutSection(state: state.about, actions: actions)
@@ -116,7 +120,8 @@ struct SettingsPageBody: View {
                 setDimAfter: { _ in },
                 setAppearance: { _ in },
                 setForwarded: { _, _ in },
-                setLightBar: { _ in }
+                setLightBar: { _ in },
+                setSteamControllers: { _ in }
             )
         )
     }

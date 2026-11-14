@@ -83,9 +83,10 @@ func namedPadFamily(productCategory: String, vendorName: String?) -> PadFamily {
     return namesNintendo ? .nintendo : .other
 }
 
-/// One controller GameController vends, as the bridge publishes it. A pad
-/// without the extended profile is listed but not read: iOS has no HID
-/// access, so dish-mac's profile and Direct paths have no counterpart.
+/// One controller Dish lists: a pad GameController vends, as the bridge
+/// publishes it, or a Steam Controller read over Bluetooth. A pad without
+/// the extended profile is listed but not read: iOS has no HID access, so
+/// dish-mac's profile and USB Direct paths have no counterpart.
 package struct ControllerSlot: Identifiable, Hashable {
     package let id: String
     package let name: String
@@ -96,6 +97,9 @@ package struct ControllerSlot: Identifiable, Hashable {
     package var family: PadFamily
     /// The pad has the extended profile, so Dish reads it.
     package var readable: Bool
+    /// A Steam Controller's trackpads, which its pick lands; none for every
+    /// other pad.
+    package var trackpads: SteamTrackpads
 
     package init(
         id: String,
@@ -104,7 +108,8 @@ package struct ControllerSlot: Identifiable, Hashable {
         capabilities: ControllerCapabilities = .none,
         battery: BatteryReading? = nil,
         family: PadFamily = .other,
-        readable: Bool = true
+        readable: Bool = true,
+        trackpads: SteamTrackpads = .none
     ) {
         self.id = id
         self.name = name
@@ -113,5 +118,6 @@ package struct ControllerSlot: Identifiable, Hashable {
         self.battery = battery
         self.family = family
         self.readable = readable
+        self.trackpads = trackpads
     }
 }

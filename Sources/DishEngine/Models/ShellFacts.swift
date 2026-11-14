@@ -40,6 +40,8 @@ package struct ShellFacts: Equatable {
     package let deadzones: [String: DeadzoneSetting]
     /// The global switches above every pad's own.
     package let forwarding: ForwardingFlags
+    /// Where Steam Controllers over Bluetooth stand.
+    package let steamBluetooth: SteamBluetoothStatus
 
     package init(
         controllers: [ControllerFact],
@@ -59,7 +61,8 @@ package struct ShellFacts: Equatable {
         apply: ApplyFact? = nil,
         addedByAddress: String? = nil,
         deadzones: [String: DeadzoneSetting] = [:],
-        forwarding: ForwardingFlags = ForwardingFlags()
+        forwarding: ForwardingFlags = ForwardingFlags(),
+        steamBluetooth: SteamBluetoothStatus = .off
     ) {
         self.controllers = controllers
         self.attachedPads = attachedPads
@@ -79,5 +82,6 @@ package struct ShellFacts: Equatable {
         self.addedByAddress = addedByAddress
         self.deadzones = deadzones
         self.forwarding = forwarding
+        self.steamBluetooth = steamBluetooth
     }
 }

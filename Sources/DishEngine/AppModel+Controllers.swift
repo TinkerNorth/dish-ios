@@ -4,21 +4,22 @@
 import DishCore
 import Foundation
 
-/// The controllers' facts and intents: the bridge's slots become the
+/// The controllers' facts and intents: the pads' slots become the
 /// Controllers tab's rows and setup's attached pads; the controller page
-/// flips a pad's switches and picks what it is emulated as; the dead zones
-/// reach each pad's feed as they change; Settings flips the global switches.
+/// flips a pad's switches, picks what it is emulated as and what a Steam
+/// Controller's trackpads are; the dead zones reach each pad's feed as they
+/// change; Settings flips the global switches and the Steam Controllers.
 package extension AppModel {
 
     /// Every pad iOS lists, readable or not, with its switches, its pick and
     /// the PC it is bound to, then the on-screen controller once it is listed.
     internal var controllerFacts: [ControllerFact] {
-        pads.source.slots.map(controllerFact) + onScreenFact
+        pads.slots.map(controllerFact) + onScreenFact
     }
 
     /// The pads setup can offer: the ones Dish can read.
     internal var attachedPadFacts: [AttachedPadFact] {
-        pads.source.slots.filter(\.readable).map { slot in
+        pads.slots.filter(\.readable).map { slot in
             AttachedPadFact(
                 id: slot.id,
                 name: slot.name,
@@ -31,7 +32,59 @@ package extension AppModel {
 
     /// The switches in force for a pad: the global ones and its own.
     func forwardingFlags(slotId: String) -> ForwardingFlags {
-        effectiveFlags(global: pads.features.flags, slot: pads.switches.preferences(for: slotId))
+        effectiveFlags(global: pads.features.flags, slot: slotPreferencesInForce(slotId))
+    }
+
+    /// A pad's own switches; a Steam Controller's touchpad is on while its
+    /// trackpad pick puts anything on the surface.
+    private func slotPreferencesInForce(_ slotId: String) -> SlotPreferences {
+        let stored = pads.switches.preferences(for: slotId)
+        guard let pick = trackpadPick(slotId: slotId) else { return stored }
+        return stored.with(.touchpad, pick.carriesSurface)
+    }
+
+    /// A Steam Controller's pick in force: the one chosen where its model
+    /// offers it, else its model's default, held to the touchpad of the pad
+    /// it is emulated as. Nil for every other pad.
+    internal func trackpadPick(slotId: String) -> TouchpadPick? {
+        guard let slot = pads.slots.first(where: { $0.id == slotId }), slot.trackpads != .none else { return nil }
+        let emulated = pads.types.typeFor(slotId) ?? slot.family.emulatedPad
+        return effectiveTrackpadPick(
+            stored: pads.trackpads.pick(for: slotId),
+            trackpads: slot.trackpads,
+            typeOffersDs4: emulated.hasTouchpad
+        )
+    }
+
+    /// A Steam Controller's trackpads from now on: its route, its
+    /// descriptor and its link's router follow.
+    func setTrackpadPick(slotId: String, _ pick: TouchpadPick) {
+        pads.trackpads.setPick(pick, for: slotId)
+        refreshRouting()
+    }
+
+    /// On makes the radio, which asks iOS for Bluetooth the first time; off
+    /// gives every Steam Controller back.
+    func setSteamControllersOverBluetooth(_ on: Bool) {
+        pads.steamSetting.setEnabled(on)
+        switch on {
+        case true: pads.steam.start()
+        case false: pads.steam.stop()
+        }
+    }
+
+    /// The person opted in before this launch.
+    internal func resumeSteamControllers() {
+        guard pads.steamSetting.enabled else { return }
+        pads.steam.start()
+    }
+
+    /// Each Steam Controller's link routes its trackpads by the pick in force.
+    internal func pushTrackpadPicks() {
+        for slot in pads.steam.slots {
+            guard let pick = trackpadPick(slotId: slot.id) else { continue }
+            pads.steam.useTrackpadPick(pick, slotId: slot.id)
+        }
     }
 
     /// A switch moves the pad's route and, while bound, its descriptor.
@@ -45,7 +98,7 @@ package extension AppModel {
     /// by the converge the routing refresh asks for.
     func setEmulatedType(slotId: String, _ pad: EmulatedPad) {
         network.hub.setEmulatedType(slotId: slotId, pad)
-        let family = pads.source.slots.first { $0.id == slotId }?.family.emulatedPad
+        let family = pads.slots.first { $0.id == slotId }?.family.emulatedPad
         if pad == family {
             pads.types.clear(slotId)
         } else {
@@ -106,8 +159,8 @@ package extension AppModel {
     }
 
     private func controllerFact(_ slot: ControllerSlot) -> ControllerFact {
-        let switches = pads.switches.preferences(for: slot.id)
-        let carried = SlotSwitch.allCases.filter { $0.isCarried(by: slot.capabilities) }
+        let switches = slotPreferencesInForce(slot.id)
+        let carried = offeredSwitches(slot)
         return ControllerFact(
             id: slot.id,
             name: slot.name,
@@ -119,8 +172,22 @@ package extension AppModel {
             features: carried.map { ControllerFeatureFact(feature: $0, enabled: switches.isOn($0)) },
             supported: slot.readable,
             motion: motionFact(slotId: slot.id),
-            hostEmulation: network.hub.hostEmulation(slotId: slot.id)
+            hostEmulation: network.hub.hostEmulation(slotId: slot.id),
+            trackpads: trackpadsFact(slot)
         )
+    }
+
+    /// The switches the pad has the hardware for; a Steam Controller's
+    /// trackpads are its pick instead of the Touchpad switch.
+    private func offeredSwitches(_ slot: ControllerSlot) -> [SlotSwitch] {
+        let carried = SlotSwitch.allCases.filter { $0.isCarried(by: slot.capabilities) }
+        guard slot.trackpads != .none else { return carried }
+        return carried.filter { $0 != .touchpad }
+    }
+
+    private func trackpadsFact(_ slot: ControllerSlot) -> TrackpadsFact? {
+        guard let pick = trackpadPick(slotId: slot.id) else { return nil }
+        return TrackpadsFact(choices: trackpadPickChoices(slot.trackpads), pick: pick)
     }
 
     /// Whether the pad's PC carries motion now, and what its satellite said

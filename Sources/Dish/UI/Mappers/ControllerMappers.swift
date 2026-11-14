@@ -107,10 +107,31 @@ struct ControllerFunctionRowState: Equatable, Identifiable {
     }
 }
 
-/// FUNCTIONS: the switches the pad has the hardware for.
+/// One choice of Trackpads.
+struct TrackpadOptionState: Equatable, Identifiable {
+    let pick: TouchpadPick
+    let title: String
+
+    var id: TouchpadPick {
+        pick
+    }
+}
+
+/// FUNCTIONS › Trackpads: a Steam Controller's pick, in place of the
+/// Touchpad switch.
+struct TrackpadsRowState: Equatable {
+    let title: String
+    let symbol: String
+    let selection: TouchpadPick
+    let options: [TrackpadOptionState]
+}
+
+/// FUNCTIONS: the switches the pad has the hardware for, and a Steam
+/// Controller's trackpads.
 struct ControllerFunctionsState: Equatable {
     let title: String
     let rows: [ControllerFunctionRowState]
+    let trackpads: TrackpadsRowState?
 }
 
 /// One rate of TELEMETRY: the stream and its rate.
@@ -196,6 +217,8 @@ private func controllerPadState(
     words: L10n
 ) -> ControllerPadState {
     let rows = controller.features.map { functionRow($0, of: controller, words: words) }
+    let trackpads = trackpadsRow(controller.trackpads, words: words)
+    let hasFunctions = !rows.isEmpty || trackpads != nil
     return ControllerPadState(
         id: controller.id,
         status: ControllerStatusState(
@@ -214,7 +237,7 @@ private func controllerPadState(
             hostEmulate: hostEmulateState(controller, words: words)
         ),
         apply: applyRowState(apply, slotId: controller.id, words: words),
-        functions: rows.isEmpty ? nil : ControllerFunctionsState(title: words.functions, rows: rows),
+        functions: hasFunctions ? ControllerFunctionsState(title: words.functions, rows: rows, trackpads: trackpads) : nil,
         open: opensPlay(controller.link) ? words.open : nil,
         footnote: words.noPadAudio,
         deadZones: hasDeadZones(controller.link) ? words.deadZones : nil,
@@ -324,6 +347,26 @@ private func functionRow(_ fact: ControllerFeatureFact, of controller: Controlle
         isOn: fact.enabled,
         status: motionStatus(fact, of: controller, words: words)
     )
+}
+
+private func trackpadsRow(_ fact: TrackpadsFact?, words: L10n) -> TrackpadsRowState? {
+    guard let fact else { return nil }
+    return TrackpadsRowState(
+        title: words.trackpads,
+        symbol: functionSymbol(.touchpad),
+        selection: fact.pick,
+        options: fact.choices.map { TrackpadOptionState(pick: $0, title: trackpadPickText($0, words: words)) }
+    )
+}
+
+/// The words for each pick; iOS never offers the mouse, which keeps its word.
+func trackpadPickText(_ pick: TouchpadPick, words: L10n = .app) -> String {
+    switch pick {
+    case .stick: words.rightStick
+    case .pad: words.carriesTouchpad
+    case .mouse: words.mouse
+    case .off: words.off
+    }
 }
 
 /// Only the Motion row has a line under it.

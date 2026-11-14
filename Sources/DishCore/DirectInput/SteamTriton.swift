@@ -1,0 +1,324 @@
+// SPDX-License-Identifier: LGPL-3.0-or-later
+// Copyright (C) 2026 Dish contributors.
+//
+// The 2026 Steam Controller ("Triton", 28de:1303 on Bluetooth LE), read from
+// SDL's `SDL_hidapi_steam_triton.c` and `controller_structs.h` and ported
+// from dish-mac's `SteamTriton.swift`: its state reports, the feature report
+// that turns lizard mode off and the IMU on, and the haptic rumble output
+// report. The firmware's watchdog turns lizard mode back on, so the link
+// re-sends the setting every few seconds while it reads the pad. SDL's iOS
+// backend subscribes to the state characteristic alone, so the battery
+// report and the receiver's wireless events never arrive and are not read
+// here. The state layout agrees with the Linux `hid-steam` tables. Decoding
+// reads the caller's buffer in place and builds no collection.
+
+import Foundation
+
+package enum TritonReportId {
+    package static let state: UInt8 = 0x42
+    package static let stateBle: UInt8 = 0x45
+    package static let stateTimestamp: UInt8 = 0x47
+    package static let controllerFeature: UInt8 = 0x01
+    package static let hapticRumble: UInt8 = 0x80
+}
+
+/// Offsets past the report id. Every state report shares SDL's
+/// `TritonMTUNoQuat_t` through the gyro: the full report appends a
+/// quaternion and the timestamped one moves only the pads and timestamps.
+enum TritonLayout {
+    static let stateLength = 46
+    static let buttons = 2
+    static let leftTrigger = 6
+    static let rightTrigger = 8
+    static let leftStick = 10
+    static let rightStick = 14
+    /// Left x, y, pressure, then right x, y, pressure: from 18 on the plain
+    /// reports, from 20 on the timestamped one, whose u16 pad timestamp
+    /// comes first.
+    static let pads = 18
+    static let padsTimestamped = 20
+    static let rightPadWithinPads = 6
+    static let imuTick = 30
+    static let imuTick16 = 32
+    static let accel = 34
+    static let gyro = 40
+    static let triggerMax: Int32 = 32767
+}
+
+enum TritonButtonMask {
+    static let buttonA: UInt32 = 0x0000_0001
+    static let buttonB: UInt32 = 0x0000_0002
+    static let buttonX: UInt32 = 0x0000_0004
+    static let buttonY: UInt32 = 0x0000_0008
+    static let quickAccess: UInt32 = 0x0000_0010
+    static let rightStickClick: UInt32 = 0x0000_0020
+    static let view: UInt32 = 0x0000_0040
+    static let r4: UInt32 = 0x0000_0080
+    static let r5: UInt32 = 0x0000_0100
+    static let rightShoulder: UInt32 = 0x0000_0200
+    static let dpadDown: UInt32 = 0x0000_0400
+    static let dpadRight: UInt32 = 0x0000_0800
+    static let dpadLeft: UInt32 = 0x0000_1000
+    static let dpadUp: UInt32 = 0x0000_2000
+    static let menu: UInt32 = 0x0000_4000
+    static let leftStickClick: UInt32 = 0x0000_8000
+    static let steam: UInt32 = 0x0001_0000
+    static let l4: UInt32 = 0x0002_0000
+    static let l5: UInt32 = 0x0004_0000
+    static let leftShoulder: UInt32 = 0x0008_0000
+    static let rightStickTouch: UInt32 = 0x0010_0000
+    static let rightPadTouch: UInt32 = 0x0020_0000
+    static let rightPadClick: UInt32 = 0x0040_0000
+    static let rightTriggerClick: UInt32 = 0x0080_0000
+    static let leftStickTouch: UInt32 = 0x0100_0000
+    static let leftPadTouch: UInt32 = 0x0200_0000
+    static let leftPadClick: UInt32 = 0x0400_0000
+    static let leftTriggerClick: UInt32 = 0x0800_0000
+    static let rightGripTouch: UInt32 = 0x1000_0000
+    static let leftGripTouch: UInt32 = 0x2000_0000
+}
+
+/// SDL's mapping: View is Start and Menu is Back (hid-steam calls the bits
+/// Start and Select).
+let tritonButtonBits = [
+    SteamButtonBit(mask: TritonButtonMask.buttonA, button: .faceA),
+    SteamButtonBit(mask: TritonButtonMask.buttonB, button: .faceB),
+    SteamButtonBit(mask: TritonButtonMask.buttonX, button: .faceX),
+    SteamButtonBit(mask: TritonButtonMask.buttonY, button: .faceY),
+    SteamButtonBit(mask: TritonButtonMask.leftShoulder, button: .leftShoulder),
+    SteamButtonBit(mask: TritonButtonMask.rightShoulder, button: .rightShoulder),
+    SteamButtonBit(mask: TritonButtonMask.view, button: .start),
+    SteamButtonBit(mask: TritonButtonMask.menu, button: .back),
+    SteamButtonBit(mask: TritonButtonMask.steam, button: .guide),
+    SteamButtonBit(mask: TritonButtonMask.leftStickClick, button: .leftThumb),
+    SteamButtonBit(mask: TritonButtonMask.rightStickClick, button: .rightThumb),
+    SteamButtonBit(mask: TritonButtonMask.dpadUp, button: .dpadUp),
+    SteamButtonBit(mask: TritonButtonMask.dpadDown, button: .dpadDown),
+    SteamButtonBit(mask: TritonButtonMask.dpadLeft, button: .dpadLeft),
+    SteamButtonBit(mask: TritonButtonMask.dpadRight, button: .dpadRight)
+]
+
+/// SDL's names for the rest: QAM is misc1, R4/L4/R5/L5 are paddle 1 to 4,
+/// the trigger clicks misc3 and misc4, and the stick and grip touches its
+/// capsense inputs. The pad clicks are the trackpad router's, and the pad
+/// touches have no slot in the word.
+let tritonExtendedBits = [
+    SteamExtendedBit(mask: TritonButtonMask.quickAccess, ext: ProtocolConstants.extButtonMisc1),
+    SteamExtendedBit(mask: TritonButtonMask.r4, ext: ProtocolConstants.extButtonRightPaddle1),
+    SteamExtendedBit(mask: TritonButtonMask.l4, ext: ProtocolConstants.extButtonLeftPaddle1),
+    SteamExtendedBit(mask: TritonButtonMask.r5, ext: ProtocolConstants.extButtonRightPaddle2),
+    SteamExtendedBit(mask: TritonButtonMask.l5, ext: ProtocolConstants.extButtonLeftPaddle2),
+    SteamExtendedBit(mask: TritonButtonMask.leftTriggerClick, ext: ProtocolConstants.extButtonLeftTriggerClick),
+    SteamExtendedBit(mask: TritonButtonMask.rightTriggerClick, ext: ProtocolConstants.extButtonRightTriggerClick),
+    SteamExtendedBit(mask: TritonButtonMask.leftStickTouch, ext: ProtocolConstants.extButtonLeftStickTouch),
+    SteamExtendedBit(mask: TritonButtonMask.rightStickTouch, ext: ProtocolConstants.extButtonRightStickTouch),
+    SteamExtendedBit(mask: TritonButtonMask.leftGripTouch, ext: ProtocolConstants.extButtonLeftGripTouch),
+    SteamExtendedBit(mask: TritonButtonMask.rightGripTouch, ext: ProtocolConstants.extButtonRightGripTouch)
+]
+
+/// The pad's decode state that spans reports: the tick of the last IMU
+/// sample published, SDL's `last_sensor_tick32`, which starts at zero.
+package struct TritonCarry: Equatable {
+    var imuTick: UInt32 = 0
+
+    package init() {}
+}
+
+/// Nil for a report this decoder does not read, or one too short to.
+package func decodeTritonReport(_ report: UnsafeBufferPointer<UInt8>, carry: inout TritonCarry) -> SteamReading? {
+    guard let reportId = report.first else { return nil }
+    switch reportId {
+    case TritonReportId.state, TritonReportId.stateBle, TritonReportId.stateTimestamp: return tritonState(report, carry: &carry)
+    default: return nil
+    }
+}
+
+/// Four bytes as one little-endian word, read one by one so a report
+/// builds nothing.
+private func tritonWord32(_ report: UnsafeBufferPointer<UInt8>, _ offset: Int) -> UInt32 {
+    let byte0 = UInt32(report[offset])
+    let byte1 = UInt32(report[offset + 1]) << 8
+    let byte2 = UInt32(report[offset + 2]) << 16
+    let byte3 = UInt32(report[offset + 3]) << 24
+    return byte0 | byte1 | byte2 | byte3
+}
+
+private func tritonWord16(_ report: UnsafeBufferPointer<UInt8>, _ offset: Int) -> UInt16 {
+    UInt16(report[offset]) | UInt16(report[offset + 1]) << 8
+}
+
+/// The sticks are up-positive, as the wire is; the triggers run 0...32767.
+private func tritonState(_ report: UnsafeBufferPointer<UInt8>, carry: inout TritonCarry) -> SteamReading? {
+    guard report.count >= TritonLayout.stateLength else { return nil }
+    let held = tritonWord32(report, TritonLayout.buttons)
+    let state = GamepadReport(
+        buttons: steamButtons(held, tritonButtonBits).rawValue,
+        lt: tritonTrigger(steamLe16(report, TritonLayout.leftTrigger)),
+        rt: tritonTrigger(steamLe16(report, TritonLayout.rightTrigger)),
+        lx: steamLe16(report, TritonLayout.leftStick),
+        ly: steamLe16(report, TritonLayout.leftStick + 2),
+        rx: steamLe16(report, TritonLayout.rightStick),
+        ry: steamLe16(report, TritonLayout.rightStick + 2),
+        extButtons: steamExtendedButtons(held, tritonExtendedBits)
+    )
+    return .state(state, motion: tritonMotion(report, carry: &carry), pads: tritonPads(report, held: held))
+}
+
+/// Both pads as the router takes them: a pad is active on its touch bit and
+/// reads nothing otherwise, and the timestamped report moves them by two.
+private func tritonPads(_ report: UnsafeBufferPointer<UInt8>, held: UInt32) -> SteamPads {
+    let timestamped = report[0] == TritonReportId.stateTimestamp
+    let offset = timestamped ? TritonLayout.padsTimestamped : TritonLayout.pads
+    return SteamPads(
+        left: tritonPad(
+            report,
+            at: offset,
+            touched: held & TritonButtonMask.leftPadTouch != 0,
+            clicked: held & TritonButtonMask.leftPadClick != 0
+        ),
+        right: tritonPad(
+            report,
+            at: offset + TritonLayout.rightPadWithinPads,
+            touched: held & TritonButtonMask.rightPadTouch != 0,
+            clicked: held & TritonButtonMask.rightPadClick != 0
+        )
+    )
+}
+
+private func tritonPad(_ report: UnsafeBufferPointer<UInt8>, at offset: Int, touched: Bool, clicked: Bool) -> SteamPadSample {
+    guard touched else { return SteamPadSample(clicked: clicked) }
+    return SteamPadSample(active: true, x: steamLe16(report, offset), y: steamLe16(report, offset + 2), clicked: clicked)
+}
+
+func tritonTrigger(_ raw: Int16) -> UInt8 {
+    let pulled = max(Int32(raw), 0)
+    return UInt8(clamping: pulled * 255 / TritonLayout.triggerMax)
+}
+
+/// The sample once, on the tick that brought it, as SDL publishes it.
+private func tritonMotion(_ report: UnsafeBufferPointer<UInt8>, carry: inout TritonCarry) -> MotionSample? {
+    let tick = tritonImuTick(report)
+    guard tick != carry.imuTick else { return nil }
+    carry.imuTick = tick
+    return tritonSample(report)
+}
+
+/// `TritonMTUIMUNoQuat_t` leads with a 32-bit tick; the timestamped
+/// report's `TritonMTUIMUNoQuat32usTS_t` with a 16-bit one, two bytes on.
+private func tritonImuTick(_ report: UnsafeBufferPointer<UInt8>) -> UInt32 {
+    let timestamped = report[0] == TritonReportId.stateTimestamp
+    guard !timestamped else { return UInt32(tritonWord16(report, TritonLayout.imuTick16)) }
+    return tritonWord32(report, TritonLayout.imuTick)
+}
+
+/// SDL's axes onto the wire: pitch on gyro X, yaw on gyro Z, roll on minus
+/// gyro Y; accel X, Z and minus Y.
+private func tritonSample(_ report: UnsafeBufferPointer<UInt8>) -> MotionSample {
+    let ax = Int32(steamLe16(report, TritonLayout.accel))
+    let ay = Int32(steamLe16(report, TritonLayout.accel + 2))
+    let az = Int32(steamLe16(report, TritonLayout.accel + 4))
+    let gx = Int32(steamLe16(report, TritonLayout.gyro))
+    let gy = Int32(steamLe16(report, TritonLayout.gyro + 2))
+    let gz = Int32(steamLe16(report, TritonLayout.gyro + 4))
+    return MotionSample(
+        gyroX: steamGyroToWire(gx),
+        gyroY: steamGyroToWire(gz),
+        gyroZ: steamGyroToWire(-gy),
+        accelX: steamAccelToWire(ax),
+        accelY: steamAccelToWire(az),
+        accelZ: steamAccelToWire(-ay)
+    )
+}
+
+// MARK: - What Dish sends
+
+/// `HID_FEATURE_REPORT_BYTES`, the report id included.
+package let tritonFeatureReportBytes = 64
+
+/// SDL's `ID_SET_SETTINGS_VALUES` with one `ControllerSetting` (number,
+/// value LE): `SETTING_LIZARD_MODE` (9) = `LIZARD_MODE_OFF`.
+private let lizardOffSetting: [UInt8] = [0x87, 0x03, 0x09, 0x00, 0x00]
+/// `SETTING_IMU_MODE` (48) = raw accel | raw gyro.
+private let sensorsOnSetting: [UInt8] = [0x87, 0x03, 0x30, 0x18, 0x00]
+
+/// Lizard mode off, on the controller's feature report.
+package func tritonLizardOffReport() -> [UInt8] {
+    tritonFeatureReport(lizardOffSetting)
+}
+
+/// The IMU on, raw: what SDL sends when sensors are enabled.
+package func tritonSensorsOnReport() -> [UInt8] {
+    tritonFeatureReport(sensorsOnSetting)
+}
+
+private func tritonFeatureReport(_ message: [UInt8]) -> [UInt8] {
+    let framed = [TritonReportId.controllerFeature] + message
+    return framed + [UInt8](repeating: 0, count: tritonFeatureReportBytes - framed.count)
+}
+
+/// `ID_OUT_REPORT_HAPTIC_RUMBLE`: type 0 and intensity 0, then each side's
+/// speed and gain, as SDL sends it: the strong motor on the left.
+package func tritonRumbleReport(left: UInt16, right: UInt16) -> [UInt8] {
+    [
+        TritonReportId.hapticRumble, 0x00, 0x00, 0x00,
+        UInt8(truncatingIfNeeded: left), UInt8(truncatingIfNeeded: left >> 8), 0x00,
+        UInt8(truncatingIfNeeded: right), UInt8(truncatingIfNeeded: right >> 8), 0x00
+    ]
+}
+
+// MARK: - Rumble between host commands
+
+package enum TritonRumbleRule {
+    /// SDL's `TRITON_RUMBLE_RESEND_INTERVAL_MS`: inside the firmware's
+    /// ~50 ms safety stop.
+    package static let resendMs: Int64 = 40
+    /// The longest one command runs the motors, the GameController path's
+    /// `RumbleActuator.maxHoldMs`: the satellite re-sends a held level and
+    /// sends the stop itself, so this only outlives a dead host.
+    package static let maxHoldMs: Int64 = 1500
+    /// SDL's lizard-mode refresh: the firmware's watchdog turns it back on.
+    package static let lizardRefreshMs: Int64 = 3000
+}
+
+/// The pad's rumble between host commands: the level, re-sent until its
+/// hold ends or a zero command stops it.
+package struct TritonRumble: Equatable {
+    package private(set) var left: UInt16 = 0
+    package private(set) var right: UInt16 = 0
+    /// When the level ends; nil while the motors are still.
+    package private(set) var endsAtMs: Int64?
+    private var lastSentMs: Int64 = 0
+
+    package init() {}
+
+    package var running: Bool {
+        endsAtMs != nil
+    }
+
+    /// The report a host command sends at once; a zero level stops now.
+    package mutating func command(strong: UInt16, weak: UInt16, durationMs: UInt16, nowMs: Int64) -> [UInt8] {
+        let still = strong == 0 && weak == 0
+        left = strong
+        right = weak
+        endsAtMs = still ? nil : nowMs + directRumbleHoldMs(durationMs)
+        lastSentMs = nowMs
+        return tritonRumbleReport(left: left, right: right)
+    }
+
+    /// The report due at this tick: the level again every `resendMs`, and
+    /// the stop once when the hold ends.
+    package mutating func tick(nowMs: Int64) -> [UInt8]? {
+        guard let endsAtMs else { return nil }
+        if nowMs >= endsAtMs { return command(strong: 0, weak: 0, durationMs: 0, nowMs: nowMs) }
+        guard nowMs - lastSentMs >= TritonRumbleRule.resendMs else { return nil }
+        lastSentMs = nowMs
+        return tritonRumbleReport(left: left, right: right)
+    }
+}
+
+/// How long one host command runs the pad's motors: a continuous command
+/// (0) holds for the safety net, as does a longer one.
+func directRumbleHoldMs(_ durationMs: UInt16) -> Int64 {
+    let asked = Int64(durationMs)
+    return asked == 0 ? TritonRumbleRule.maxHoldMs : min(asked, TritonRumbleRule.maxHoldMs)
+}

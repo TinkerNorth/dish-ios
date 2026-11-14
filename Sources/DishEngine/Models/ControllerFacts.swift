@@ -66,6 +66,18 @@ package struct HostEmulationFact: Equatable {
     }
 }
 
+/// A Steam Controller's trackpad pick: the picks its model offers, in the
+/// picker's order, and the one in force.
+package struct TrackpadsFact: Equatable {
+    package let choices: [TouchpadPick]
+    package let pick: TouchpadPick
+
+    package init(choices: [TouchpadPick], pick: TouchpadPick) {
+        self.choices = choices
+        self.pick = pick
+    }
+}
+
 /// A controller Dish knows: a pad on a link, or the on-screen gamepad.
 package struct ControllerFact: Equatable, Identifiable {
     package let id: String
@@ -87,6 +99,9 @@ package struct ControllerFact: Equatable, Identifiable {
     package let motion: MotionFact
     /// Nil unless the controller is bound to a Moonlight host.
     package let hostEmulation: HostEmulationFact?
+    /// A Steam Controller's trackpads, in place of the Touchpad switch; nil
+    /// for every other controller.
+    package let trackpads: TrackpadsFact?
 
     package init(
         id: String,
@@ -99,7 +114,8 @@ package struct ControllerFact: Equatable, Identifiable {
         features: [ControllerFeatureFact] = [],
         supported: Bool = true,
         motion: MotionFact = MotionFact(carries: false, status: nil),
-        hostEmulation: HostEmulationFact? = nil
+        hostEmulation: HostEmulationFact? = nil,
+        trackpads: TrackpadsFact? = nil
     ) {
         self.id = id
         self.name = name
@@ -112,6 +128,7 @@ package struct ControllerFact: Equatable, Identifiable {
         self.supported = supported
         self.motion = motion
         self.hostEmulation = hostEmulation
+        self.trackpads = trackpads
     }
 }
 

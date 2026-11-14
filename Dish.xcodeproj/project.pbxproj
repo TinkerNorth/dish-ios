@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		0DCB5DEA6411F3AC3ACBA358 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = ADAF4525ED27761494F19178 /* Assets.xcassets */; };
 		1B4DAB36CCAE75CFD88E16FF /* Dish in Frameworks */ = {isa = PBXBuildFile; productRef = A8F8E0CB192277B0567C6467 /* Dish */; };
+		44935549DD0382C53C156043 /* InfoPlist.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = ECD966BE18741CDA34BE0E52 /* InfoPlist.xcstrings */; };
 		7A7D6A4F8000EB3ECBE17BEF /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 647EFCB1A6D036C44E3449F9 /* Localizable.xcstrings */; };
 		8031E12A935A8787B3071B97 /* ShellUI.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2BBB5E16C969D53A9B7BBA5 /* ShellUI.swift */; };
 		875370A16B646CCE31A39B5A /* SettingsUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E4EE053BF47940EE62195E7 /* SettingsUITests.swift */; };
@@ -43,6 +44,7 @@
 		A2BBB5E16C969D53A9B7BBA5 /* ShellUI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShellUI.swift; sourceTree = "<group>"; };
 		AB984DAE071C22BF828A6112 /* Dish.storekit */ = {isa = PBXFileReference; path = Dish.storekit; sourceTree = "<group>"; };
 		ADAF4525ED27761494F19178 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		ECD966BE18741CDA34BE0E52 /* InfoPlist.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = InfoPlist.xcstrings; sourceTree = "<group>"; };
 		ED58ABFDF5C0E2AE25948649 /* DishUITests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = DishUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		F89EF8DC884C7879E2C4407F /* AppShortcuts.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = AppShortcuts.xcstrings; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -93,6 +95,7 @@
 			children = (
 				F89EF8DC884C7879E2C4407F /* AppShortcuts.xcstrings */,
 				ADAF4525ED27761494F19178 /* Assets.xcassets */,
+				ECD966BE18741CDA34BE0E52 /* InfoPlist.xcstrings */,
 				647EFCB1A6D036C44E3449F9 /* Localizable.xcstrings */,
 			);
 			path = Resources;
@@ -220,6 +223,7 @@
 			files = (
 				DC738C39541EB10597967D71 /* AppShortcuts.xcstrings in Resources */,
 				0DCB5DEA6411F3AC3ACBA358 /* Assets.xcassets in Resources */,
+				44935549DD0382C53C156043 /* InfoPlist.xcstrings in Resources */,
 				7A7D6A4F8000EB3ECBE17BEF /* Localizable.xcstrings in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

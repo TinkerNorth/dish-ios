@@ -15,7 +15,8 @@ import XCTest
 /// its heartbeat, and its receive loop opening a loopback satellite's
 /// return commands; and the Moonlight path's own run, a pad routed to a
 /// host's link, the control socket's queue opening the host's events, and
-/// the session's clock. The lists are a ratchet: a lock that appears fails,
+/// the session's clock; and the Steam Controllers' own, a pad over
+/// Bluetooth read and rumbled on the links' queue. The lists are a ratchet: a lock that appears fails,
 /// and so does a listed one no longer observed until it is deleted. No
 /// satellite hot thread takes a lock; the heartbeat takes the latency
 /// window's. The Moonlight path's threads hold the session's lock for the
@@ -95,6 +96,22 @@ final class LockLawTests: XCTestCase {
         expectExactly("Feedback may acquire on the Moonlight path", observed: snapshot.acquired(by: .feedback), listed: [])
         expectExactly("held across a blocking call on the Moonlight path", observed: Set(snapshot.blocking.keys.map(label)), listed: [])
         expectExactly("taken inside another on the Moonlight path", observed: Set(snapshot.edges.keys.map(label)), listed: [])
+    }
+
+    /// The Steam Controllers' queue, the links' and CoreBluetooth's: a
+    /// claimed pad's values go from the radio's callback through the decoder
+    /// and the feed to a live client, and a satellite's rumble drains there
+    /// into the pad's writes, with no tracked lock taken on the way.
+    func testTheSteamControllersQueueTakesNoLock() throws {
+        let run = try LockLawSteamRun.run()
+        XCTAssertGreaterThan(run.uplinks, 0, "the pad's reports left through the client")
+        XCTAssertGreaterThan(run.rumbles, 0, "the rumble reached the pad")
+        let snapshot = run.snapshot
+        expectExactly("Input may acquire on the Steam Controllers' queue", observed: snapshot.acquired(by: .input), listed: [])
+        let blocking = Set(snapshot.blocking.keys.map(label))
+        let nested = Set(snapshot.edges.keys.map(label))
+        expectExactly("held across a blocking call on the Steam Controllers' queue", observed: blocking, listed: [])
+        expectExactly("taken inside another on the Steam Controllers' queue", observed: nested, listed: [])
     }
 
     private struct HotRun {

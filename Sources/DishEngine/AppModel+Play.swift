@@ -123,8 +123,8 @@ package extension AppModel {
     private func list(onScreen listed: Bool) {
         onScreenListed.setState(listed)
         switch listed {
-        case true: onScreenBattery.start()
-        case false: onScreenBattery.stop()
+        case true: onScreenBattery.start(onScreenSlotId)
+        case false: onScreenBattery.stop(onScreenSlotId)
         }
     }
 

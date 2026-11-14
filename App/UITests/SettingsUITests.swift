@@ -3,9 +3,10 @@
 
 import XCTest
 
-/// The Settings tab's global switches through the real app: Forwarded
-/// features lists Motion, Rumble and Touchpad as switches that stand on
-/// until the person turns them off, and the light bar as a picker.
+/// The Settings tab's switches through the real app: Forwarded features lists
+/// Motion, Rumble and Touchpad as switches that stand on until the person
+/// turns them off, and the light bar as a picker; Steam Controllers over
+/// Bluetooth stand off until the person opts in.
 @MainActor
 final class SettingsUITests: XCTestCase {
 
@@ -45,6 +46,14 @@ final class SettingsUITests: XCTestCase {
     private func flip(_ element: XCUIElement) {
         let trailingEdge = element.coordinate(withNormalizedOffset: CGVector(dx: 1, dy: 0.5))
         trailingEdge.withOffset(CGVector(dx: -40, dy: 0)).press(forDuration: Self.pressHold)
+    }
+
+    /// Off on a fresh install, so the app never asks for Bluetooth unasked.
+    func testSteamControllersOverBluetoothStandOffOnAFreshInstall() {
+        let app = launchOnSettings()
+        let steam = ShellUI.scrolled(to: forwardedSwitch("Read over Bluetooth", in: app), in: app)
+        XCTAssertTrue(steam.waitForExistence(timeout: ShellUI.patience))
+        XCTAssertEqual(steam.value as? String, "0")
     }
 
     func testTheLightBarPickerOffersFollowGameAndOff() {

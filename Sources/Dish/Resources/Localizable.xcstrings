@@ -2446,6 +2446,41 @@
         }
       }
     },
+    "Allow it in Settings › Privacy & Security › Bluetooth." : {
+      "comment" : "Settings › Steam Controllers: the line under Read over Bluetooth.",
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dozvolite ga u Postavke › Privatnost i sigurnost › Bluetooth."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Erlaube es unter Einstellungen › Datenschutz & Sicherheit › Bluetooth."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Permítelo en Ajustes › Privacidad y seguridad › Bluetooth."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Autorisez-le dans Réglages › Confidentialité et sécurité › Bluetooth."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Permita em Ajustes › Privacidade e Segurança › Bluetooth."
+          }
+        }
+      }
+    },
     "Allowed" : {
       "localizations" : {
         "bs" : {
@@ -3366,6 +3401,76 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Controle Bluetooth"
+          }
+        }
+      }
+    },
+    "Bluetooth is restricted on this device." : {
+      "comment" : "Settings › Steam Controllers: the line under Read over Bluetooth.",
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bluetooth je ograničen na ovom uređaju."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bluetooth ist auf diesem Gerät eingeschränkt."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bluetooth está restringido en este dispositivo."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Le Bluetooth est restreint sur cet appareil."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O Bluetooth está restrito neste dispositivo."
+          }
+        }
+      }
+    },
+    "Bluetooth is turned off." : {
+      "comment" : "Settings › Steam Controllers: the line under Read over Bluetooth.",
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bluetooth je isključen."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bluetooth ist ausgeschaltet."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bluetooth está desactivado."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Le Bluetooth est désactivé."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O Bluetooth está desligado."
           }
         }
       }
@@ -5157,6 +5262,41 @@
         }
       }
     },
+    "Dish doesn’t use Bluetooth until you turn this on." : {
+      "comment" : "Settings › Steam Controllers: the line under Read over Bluetooth.",
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dish ne koristi Bluetooth dok ovo ne uključite."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dish nutzt Bluetooth erst, wenn du das einschaltest."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dish no usa Bluetooth hasta que actives esto."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dish n’utilise pas le Bluetooth tant que vous n’activez pas ceci."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O Dish não usa o Bluetooth até você ativar isto."
+          }
+        }
+      }
+    },
     "Dish has no pairing identity yet. Try again in a moment." : {
       "comment" : "Banner body: the keychain has not minted the Moonlight identity yet.",
       "localizations" : {
@@ -5256,6 +5396,41 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "O Dish é software livre, licenciado sob a GNU Lesser General Public License, versão 3 ou posterior."
+          }
+        }
+      }
+    },
+    "Dish isn’t allowed to use Bluetooth." : {
+      "comment" : "Settings › Steam Controllers: the line under Read over Bluetooth.",
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dish nema dozvolu za Bluetooth."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dish darf Bluetooth nicht verwenden."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dish no tiene permiso para usar Bluetooth."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dish n’est pas autorisé à utiliser le Bluetooth."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O Dish não tem permissão para usar o Bluetooth."
           }
         }
       }
@@ -12873,6 +13048,76 @@
         }
       }
     },
+    "Read over Bluetooth" : {
+      "comment" : "Settings › Steam Controllers: the switch that opts in.",
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Čitaj preko Bluetootha"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Über Bluetooth lesen"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Leer por Bluetooth"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lire par Bluetooth"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ler via Bluetooth"
+          }
+        }
+      }
+    },
+    "Reading the Steam Controllers paired in Settings › Bluetooth." : {
+      "comment" : "Settings › Steam Controllers: the line under Read over Bluetooth.",
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Čitaju se Steam kontroleri upareni u Postavke › Bluetooth."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Liest die Steam Controller, die unter Einstellungen › Bluetooth gekoppelt sind."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Leyendo los mandos Steam emparejados en Ajustes › Bluetooth."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lecture des manettes Steam appairées dans Réglages › Bluetooth."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lendo os controles Steam pareados em Ajustes › Bluetooth."
+          }
+        }
+      }
+    },
     "Ready" : {
       "localizations" : {
         "bs" : {
@@ -13425,6 +13670,41 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Direito"
+          }
+        }
+      }
+    },
+    "Right stick" : {
+      "comment" : "Trackpads: the 2015 Steam Controller's right trackpad as the right stick.",
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Desna palica"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rechter Stick"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stick derecho"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stick droit"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Analógico direito"
           }
         }
       }
@@ -14724,6 +15004,41 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Fica na sua rede"
+          }
+        }
+      }
+    },
+    "Steam Controllers" : {
+      "comment" : "Settings: the section for Steam Controllers read over Bluetooth.",
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Steam kontroleri"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Steam Controller"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mandos Steam"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Manettes Steam"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Controles Steam"
           }
         }
       }
@@ -16136,6 +16451,41 @@
         }
       }
     },
+    "This device has no Bluetooth LE." : {
+      "comment" : "Settings › Steam Controllers: the line under Read over Bluetooth.",
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ovaj uređaj nema Bluetooth LE."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dieses Gerät hat kein Bluetooth LE."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Este dispositivo no tiene Bluetooth LE."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cet appareil n’a pas de Bluetooth LE."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Este dispositivo não tem Bluetooth LE."
+          }
+        }
+      }
+    },
     "This host has a new identity, so the old pairing no longer works. Pair again to start a session." : {
       "comment" : "Banner body under was reset.",
       "localizations" : {
@@ -16701,6 +17051,41 @@
         }
       }
     },
+    "Trackpads" : {
+      "comment" : "A Steam Controller's page: the pick of what its trackpads are, in place of the Touchpad switch.",
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Trackpadi"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Trackpads"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Trackpads"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pavés tactiles"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Trackpads"
+          }
+        }
+      }
+    },
     "Trigger dead zone" : {
       "localizations" : {
         "bs" : {
@@ -16945,6 +17330,41 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "Turning this on asks for Bluetooth." : {
+      "comment" : "Settings › Steam Controllers: the footer.",
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uključivanje ovoga traži pristup Bluetoothu."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Beim Einschalten wird nach Bluetooth gefragt."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Al activarlo se pide acceso a Bluetooth."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "L’activer demande l’accès au Bluetooth."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ativar isto pede acesso ao Bluetooth."
           }
         }
       }
@@ -17322,6 +17742,41 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Controles virtuais"
+          }
+        }
+      }
+    },
+    "Waiting for Bluetooth." : {
+      "comment" : "Settings › Steam Controllers: the line under Read over Bluetooth.",
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Čeka se Bluetooth."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Warte auf Bluetooth."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Esperando a Bluetooth."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "En attente du Bluetooth."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aguardando o Bluetooth."
           }
         }
       }
@@ -18515,6 +18970,41 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "O iOS pergunta uma vez se o Dish pode usar a rede local, na primeira vez que o Dish procura seu PC."
+          }
+        }
+      }
+    },
+    "iOS doesn’t offer Steam Controllers to games, so Dish reads them over Bluetooth itself." : {
+      "comment" : "Settings › Steam Controllers: the footer.",
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "iOS ne nudi Steam kontrolere igrama, pa ih Dish sam čita preko Bluetootha."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "iOS bietet Spielen keine Steam Controller an, deshalb liest Dish sie selbst über Bluetooth."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "iOS no ofrece los mandos Steam a los juegos, así que Dish los lee por Bluetooth él mismo."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "iOS ne propose pas les manettes Steam aux jeux, alors Dish les lit lui-même par Bluetooth."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O iOS não oferece controles Steam aos jogos, então o Dish os lê via Bluetooth por conta própria."
           }
         }
       }
