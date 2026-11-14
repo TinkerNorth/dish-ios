@@ -125,4 +125,11 @@ final class SteamBleGattTests: XCTestCase {
         XCTAssertEqual(steamBluetoothStatus(enabled: true, radio: .denied), .refused)
         XCTAssertEqual(steamBluetoothStatus(enabled: true, radio: .restricted), .restricted)
     }
+
+    func testOnlyPoweredOnKeepsTheCentralsPeripherals() {
+        XCTAssertTrue(steamRadioKeepsPeripherals(.poweredOn))
+        for radio in [SteamRadioState.waiting, .poweredOff, .unsupported, .denied, .restricted] {
+            XCTAssertFalse(steamRadioKeepsPeripherals(radio), "\(radio): retrieved afresh once Bluetooth is back")
+        }
+    }
 }

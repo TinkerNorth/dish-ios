@@ -145,6 +145,17 @@ package enum SteamRadioState: Equatable {
     case restricted
 }
 
+/// Whether the central's peripherals outlive Bluetooth's word: below powered
+/// on CoreBluetooth has disconnected them all, and below powered off the
+/// objects themselves are spent (`CBCentralManager.h`), so a pad is retrieved
+/// afresh once Bluetooth is back.
+package func steamRadioKeepsPeripherals(_ radio: SteamRadioState) -> Bool {
+    switch radio {
+    case .poweredOn: true
+    case .waiting, .poweredOff, .unsupported, .denied, .restricted: false
+    }
+}
+
 /// Where Steam Controllers over Bluetooth stand, as the Settings row says.
 package enum SteamBluetoothStatus: Equatable {
     case off

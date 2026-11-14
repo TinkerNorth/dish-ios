@@ -89,6 +89,12 @@ final class CoreBluetoothRadio: NSObject, SteamRadio {
         return peripherals.removeValue(forKey: pad)
     }
 
+    private func forgetAll() {
+        peripherals.removeAll()
+        characteristics.removeAll()
+        inputs.removeAll()
+    }
+
     /// A pad the system connects again is found and kept afresh.
     private func lose(_ pad: UUID) {
         _ = forget(pad) // Its connection is gone already; only the objects go.
@@ -98,7 +104,9 @@ final class CoreBluetoothRadio: NSObject, SteamRadio {
 
 extension CoreBluetoothRadio: CBCentralManagerDelegate {
     func centralManagerDidUpdateState(_ central: CBCentralManager) {
-        events.radioChanged(steamRadioState(central.state, authorization: CBManager.authorization))
+        let state = steamRadioState(central.state, authorization: CBManager.authorization)
+        if !steamRadioKeepsPeripherals(state) { forgetAll() }
+        events.radioChanged(state)
     }
 
     func centralManager(_ central: CBCentralManager, didConnect peripheral: CBPeripheral) {
