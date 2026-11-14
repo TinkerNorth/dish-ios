@@ -79,6 +79,10 @@ miss. `Tests/PARITY.md` lists everything not built.
 
 ### Fixed
 
+- **iOS asks for the local network in your language.** The question iOS
+  puts before Dish first looks for Satellite on your Wi‑Fi was in English
+  whatever the iPhone's language. It is now in Bosnian, German, Spanish,
+  French and Brazilian Portuguese too, as the Bluetooth question is.
 - **CI reads its iPad back before the UI tests run on it.** The iPad lane
   created its simulator and trusted `simctl bootstatus`; on one runner the
   device was gone a minute later and xcodebuild listed no simulator at all,
