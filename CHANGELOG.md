@@ -82,6 +82,14 @@ miss. `Tests/PARITY.md` lists everything not built.
   met: a scan is read on Diagnostics, where it leaves the Local Network
   allowed (and not asked yet while no scan ran), a sheet's lowering is
   waited for, and the two polls that slept are expectations too.
+- **The Settings test holds the Rumble switch until the switch takes the
+  press.** On GitHub's iPhone the test sometimes lost a flip of Rumble: the
+  tap landed on the switch itself and reached the app, but lifted before
+  the switch's press had begun, so the switch ignored it and the test
+  failed thirty seconds later. A switch takes a touch only once its press
+  has begun, about a frame after the touch lands, and XCUITest's tap lifts
+  after 50 ms, which a slow runner's simulator sometimes needs more than.
+  Each flip now holds the switch for half a second.
 - **The on-screen gamepad sends its PC the iPhone's battery.** The
   on-screen gamepad bound to a Satellite or a Moonlight host sent no battery
   at all, where dish-android's sends the phone's. It now sends the iPhone's
