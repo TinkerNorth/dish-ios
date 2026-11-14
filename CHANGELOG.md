@@ -79,6 +79,14 @@ miss. `Tests/PARITY.md` lists everything not built.
 
 ### Fixed
 
+- **A failed Settings test no longer fails the next run.** The UI tests
+  read Rumble as on and Steam Controllers over Bluetooth as off, a fresh
+  install's switches, but the simulator kept whatever a run left: one that
+  failed between two flips of Rumble left it off, and every later run on
+  that simulator failed at its first check. CI starts each run on a new
+  simulator, so only a reused one showed it. Every launch now starts the
+  two switches at a fresh install's values, as it already does the Local
+  Network primer.
 - **iOS asks for the local network in your language.** The question iOS
   puts before Dish first looks for Satellite on your Wi‑Fi was in English
   whatever the iPhone's language. It is now in Bosnian, German, Spanish,
