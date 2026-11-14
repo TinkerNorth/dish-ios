@@ -33,6 +33,12 @@ enum ShellUI {
     /// have left its mark well within this.
     static let longerThanAScan: TimeInterval = 15
 
+    /// The switches the Settings tests start from, at a fresh install's
+    /// values on every launch: a run that fails between two flips leaves its
+    /// switch in the simulator's defaults for the runs after it. The app
+    /// reads each switch once, so a flip still holds for the rest of a launch.
+    static let freshSwitches = ["-feature_rumble_enabled", "YES", "-steam_bluetooth_enabled", "NO"]
+
     /// The app with the welcome seen or not and the Local Network primer
     /// seen or not, set through the launch arguments, which `UserDefaults`
     /// reads first; both are pinned on every launch, since a test that scans
@@ -42,7 +48,7 @@ enum ShellUI {
         let app = XCUIApplication()
         let onboarding = ["-onboarding_welcome_completed", welcomeCompleted ? "YES" : "NO"]
         let primer = ["-local_network_primed", localNetworkPrimed ? "YES" : "NO"]
-        app.launchArguments = onboarding + primer + ["-tips_hidden", "YES"] + extraArguments
+        app.launchArguments = onboarding + primer + freshSwitches + ["-tips_hidden", "YES"] + extraArguments
         app.launch()
         return app
     }
