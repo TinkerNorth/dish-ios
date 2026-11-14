@@ -1,6 +1,6 @@
 # Dish for iOS: Privacy Policy
 
-**Effective date:** 2026-11-11.
+**Effective date:** 2026-11-14.
 **Canonical copy:** this file, at
 [`https://github.com/TinkerNorth/dish-ios/blob/main/PRIVACY.md`](https://github.com/TinkerNorth/dish-ios/blob/main/PRIVACY.md).
 
@@ -39,6 +39,10 @@ same commit as the code that makes it untrue.
   synced to a cloud account by the app.
 - iOS asks for the Local Network permission the first time Dish looks for
   your PC, after the setup flow has explained why (section 4).
+- Bluetooth is off for Dish until you turn on Settings › Steam Controllers ›
+  Read over Bluetooth, which is when iOS asks. Dish then uses Bluetooth only
+  to read the Steam Controllers you paired in Settings › Bluetooth, and only
+  their input goes to your own PC (sections 2.2 and 4).
 - We do not sell, share, or rent your data. We do not show ads. We do not
   profile you.
 
@@ -61,6 +65,8 @@ Preferences are stored with `UserDefaults` in the app's preferences domain
 | `local_network_primed` | Whether the setup walk has explained the Local Network question (dish-mac's key) | Keeping the Connections tab from looking for PCs as it opens, which is what makes iOS ask, until that explanation was seen; your own scan counts as the question asked |
 | `feature_motion_enabled`, `feature_rumble_enabled`, `feature_touchpad_enabled`, `feature_lightbar_mode` | Settings › Forwarded features: three switches, on by default, and `followGame` or `off` (the desktops' keys) | Whether Dish sends motion and the touchpad to the PC and acts on rumble and the light bar, above each controller's own switches |
 | `deadzone:<controller id>` | A controller's stick and trigger dead zones as `{"s":…,"t":…}`, once you changed them (the desktops' shape) | The controller page's Dead zones; Reset to defaults erases it |
+| `steam_bluetooth_enabled` | Settings › Steam Controllers › Read over Bluetooth: a switch, off by default | Whether Dish uses Bluetooth at all; while it is off the app makes no Bluetooth request and iOS never asks |
+| `touchpad_mode_preferences` | Each Steam Controller's trackpad pick (`stick`, `ds4` or `off`), once you chose one (dish-mac's key and words) | What a Steam Controller's trackpads are on the controller page; a Steam Controller is known by the identifier iOS gives this app for it |
 
 Beside them, for the PCs you pair:
 
@@ -134,6 +140,13 @@ nothing of it leaves that network:
   player-light commands for the controller.
 - **Forget This PC** sends that PC one request to drop this iPhone from its
   paired list.
+- **A Steam Controller over Bluetooth** is a controller like any other: once
+  bound, its buttons, sticks, triggers, extra buttons, motion and trackpads
+  go to the PC it is bound to, as above, with this iPhone's battery level,
+  since it reports none. Its Bluetooth traffic itself stays between the pad
+  and this iPhone: Dish reads its input and writes it the settings that turn
+  its keyboard-and-mouse mode off and on again, and the 2026 controller's
+  rumble. Dish talks to no other Bluetooth device.
 - **Moonlight discovery**: a Bonjour browse for `_nvstream._tcp` when the
   Moonlight hosts page opens and when you tap Scan there, which sends nothing
   of yours and reads the hosts' announcements.
@@ -195,11 +208,13 @@ Improvements; that is Apple's mechanism and policy, not the app's.
 | App Intents (Siri, Spotlight, the Shortcuts app) | Five actions (open the gamepad, the touchpad or the mouse, dim the screen, connect to a paired PC) that open the app; no permission is asked and nothing is donated (section 2.1). |
 | TipKit | Four hints about the app's own controls, remembered on the iPhone (section 2.1). |
 | Battery monitoring (`UIDevice`) | The iPhone's battery level and charging state, read while a controller is attached so a PC is told the lower of it and the controller's; no permission is asked and nothing is stored (section 2.1). |
+| Bluetooth (Core Bluetooth), declared in `App/Info.plist` with the usage text "Dish reads the Steam Controllers you pair and sends their input straight to your PC." | Reading the Steam Controllers you paired in Settings › Bluetooth, which iOS keeps from games. Off until you turn on Settings › Steam Controllers › Read over Bluetooth, which is when iOS asks; the app neither scans for nor pairs with anything, and looks only among the devices iOS has already connected. If you refuse, the row says so and points to Settings. |
 
 The app asks for no other permission. It does not use the camera, the
 microphone, location, contacts, photos, notifications or tracking. It reads
 your controllers through the GameController framework, which needs no
-permission, and writes rumble and light commands back to them.
+permission, and writes rumble and light commands back to them; a Steam
+Controller it reads over Bluetooth once you opt in.
 
 ---
 
@@ -210,6 +225,10 @@ permission, and writes rumble and light commands back to them.
 - **Turn the Local Network permission off** in Settings › Privacy & Security ›
   Local Network (or from Dish's page in Settings); the Connections page then
   says it cannot see your network.
+- **Stop using Bluetooth** by turning Read over Bluetooth off in Settings ›
+  Steam Controllers, which hands each Steam Controller its keyboard-and-mouse
+  mode back, or by turning the Bluetooth permission off in Settings › Privacy
+  & Security › Bluetooth.
 - **Forget a PC** to remove its row, its pairing key and its pin, after the
   app tells the PC to drop this iPhone; a Moonlight host's record, bindings
   and pin go the same way.

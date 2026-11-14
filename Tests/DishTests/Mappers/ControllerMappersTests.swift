@@ -324,6 +324,55 @@ final class ControllerMappersTests: XCTestCase {
         XCTAssertNil(PadFixture.page(pad, pads: [other])?.telemetry, "another pad's rates are not this pad's")
     }
 
+    // MARK: - A Steam Controller's trackpads
+
+    private func steamController(_ trackpads: TrackpadsFact) -> ControllerFact {
+        ControllerFact(
+            id: "ble:pad",
+            name: "Valve Steam Controller (Bluetooth)",
+            link: .bluetooth,
+            batteryPercent: nil,
+            destination: nil,
+            features: [ControllerFeatureFact(feature: .motion, enabled: true)],
+            trackpads: trackpads
+        )
+    }
+
+    func testASteamControllersTrackpadsAreAPickBesideItsSwitches() throws {
+        let pad = steamController(TrackpadsFact(choices: [.stick, .pad, .off], pick: .stick))
+        let functions = try XCTUnwrap(PadFixture.page(pad)?.functions)
+        XCTAssertEqual(functions.rows.map(\.feature), [.motion])
+        let trackpads = try XCTUnwrap(functions.trackpads)
+        XCTAssertEqual(trackpads.title, "Trackpads")
+        XCTAssertEqual(trackpads.options.map(\.pick), [.stick, .pad, .off])
+        XCTAssertEqual(trackpads.options.map(\.title), ["Right stick", "Touchpad", "Off"])
+        XCTAssertEqual(trackpads.selection, .stick, "the pick in force")
+        XCTAssertEqual(trackpads.symbol, functionSymbol(.touchpad))
+    }
+
+    func testThe2026PadOffersNoStickAndShowsThePickInForce() throws {
+        let pad = steamController(TrackpadsFact(choices: [.pad, .off], pick: .off))
+        let trackpads = try XCTUnwrap(PadFixture.page(pad)?.functions?.trackpads)
+        XCTAssertEqual(trackpads.options.map(\.title), ["Touchpad", "Off"])
+        XCTAssertEqual(trackpads.selection, .off)
+    }
+
+    func testEveryPickHasItsWordsTheMouseItsOwnThoughIOSNeverOffersIt() {
+        XCTAssertEqual([TouchpadPick.stick, .pad, .mouse, .off].map { trackpadPickText($0) }, ["Right stick", "Touchpad", "Mouse", "Off"])
+    }
+
+    func testAPadWithoutTrackpadsHasNoPick() throws {
+        XCTAssertNil(try XCTUnwrap(PadFixture.page(PadFixture.dualSense())?.functions).trackpads)
+    }
+
+    func testASteamControllerWithTrackpadsAloneStillHasItsFunctionsSection() throws {
+        let trackpads = TrackpadsFact(choices: [.pad, .off], pick: .pad)
+        let pad = ControllerFact(id: "ble:pad", name: "Pad", link: .bluetooth, batteryPercent: nil, destination: nil, trackpads: trackpads)
+        let functions = try XCTUnwrap(PadFixture.page(pad)?.functions)
+        XCTAssertEqual(functions.rows, [])
+        XCTAssertNotNil(functions.trackpads)
+    }
+
     func testTheOnScreenGamepadShowsItsTelemetryToo() throws {
         let onScreen = ControllerFact(id: "on-screen", name: "", link: .onScreen, batteryPercent: nil, destination: nil)
         let reading = PadFixture.reading(of: onScreen, rates: PadRates(reportHz: 60, motionHz: 0))

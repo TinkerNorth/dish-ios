@@ -47,6 +47,8 @@
     </array>
     <key>NSLocalNetworkUsageDescription</key>
     <string>Dish finds Satellite on your Wi‑Fi and sends controller input straight to your PC.</string>
+    <key>NSBluetoothAlwaysUsageDescription</key>
+    <string>Dish reads the Steam Controllers you pair and sends their input straight to your PC.</string>
     <key>NSBonjourServices</key>
     <array>
         <string>_satellite._udp</string>

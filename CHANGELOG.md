@@ -49,6 +49,21 @@ miss. `Tests/PARITY.md` lists everything not built.
   buttons, which is where an Xbox Elite's four paddles land in a game. It is
   never picked for you, and on a Satellite that does not offer it the pad is
   emulated as a DualSense. Not yet tried against a host that offers the type.
+- **A Steam Controller paired over Bluetooth is a controller.** Turn on
+  Settings › Steam Controllers › Read over Bluetooth and a Steam Controller
+  paired in Settings › Bluetooth, the 2015 model or the 2026 one, shows up in
+  Controllers out of its keyboard-and-mouse mode, the way it does on Android
+  and the Mac: its buttons, sticks, triggers, gyro, back buttons and grips
+  reach the PC, its trackpads are the right stick, the touchpad or off on its
+  page (the 2015 model's right trackpad is the right stick until you pick
+  otherwise, the 2026 model's are the touchpad when the type it is emulated
+  as has one), and the 2026 model rumbles. iOS never offers these
+  controllers to apps, so Dish reads them over Bluetooth itself; the switch
+  is off on a fresh install, turning it on is what asks for Bluetooth, and
+  the row says when Bluetooth is off, refused or missing. The controller
+  reports no battery over Bluetooth, so the PC is sent the iPhone's. Turning
+  the switch off gives each controller its keyboard and mouse back. Not yet
+  tried with either controller.
 
 ### Changed
 
@@ -64,6 +79,10 @@ miss. `Tests/PARITY.md` lists everything not built.
 
 ### Fixed
 
+- **iOS asks for the local network in your language.** The question iOS
+  puts before Dish first looks for Satellite on your Wi‑Fi was in English
+  whatever the iPhone's language. It is now in Bosnian, German, Spanish,
+  French and Brazilian Portuguese too, as the Bluetooth question is.
 - **CI reads its iPad back before the UI tests run on it.** The iPad lane
   created its simulator and trusted `simctl bootstatus`; on one runner the
   device was gone a minute later and xcodebuild listed no simulator at all,

@@ -162,6 +162,20 @@ final class PadFeedbackTests: XCTestCase {
         XCTAssertTrue(target.installs.last?.route(0)?.pad === feedback.pad(for: "a0"))
         XCTAssertNil(target.installs.last?.route(3), "no pad holds index 3")
     }
+
+    func testASlotAnotherSourceDrivesDrainsOnThatSourcesQueueIntoItsActuators() {
+        let own = RecordingActuators()
+        let other = RecordingActuators()
+        let otherQueue = DispatchSerialQueue(label: "test.other")
+        let feedback = PadFeedback(actuators: own, queue: DispatchSerialQueue(label: "test.feedback"))
+        feedback.drive(slotsPrefixed: "ble:", on: otherQueue, with: other)
+        feedback.pad(for: "ble:pad").post(rumbleStrong: 1, weak: 2, durationMs: 3)
+        feedback.pad(for: "gc:pad").post(rumbleStrong: 4, weak: 5, durationMs: 6)
+        otherQueue.sync {}
+        feedback.queue.sync {}
+        XCTAssertEqual(other.actuations, [.rumble("ble:pad", strong: 1, weak: 2, durationMs: 3)], "one hop, to the queue that owns it")
+        XCTAssertEqual(own.actuations, [.rumble("gc:pad", strong: 4, weak: 5, durationMs: 6)])
+    }
 }
 
 /// Actuators that signal when a rumble arrives and note the thread it ran on.

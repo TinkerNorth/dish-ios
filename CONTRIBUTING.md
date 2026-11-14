@@ -81,7 +81,7 @@ module may import.
 |---|---|---|
 | a `(state, event) -> result` decision with no IO, a wire codec or a crypto primitive | `DishCore` (`Sources/DishCore`) | Foundation, CryptoKit |
 | a dataflow primitive | `DishKernel` (`Sources/DishKernel`) | Foundation, Observation |
-| a store, a seam to the platform, a clock, an intent, a socket or a request, or the composition root | `DishEngine` (`Sources/DishEngine`) | Foundation, Observation, os, Synchronization, GameController, CoreHaptics, Network, Security, CryptoKit, Darwin, DishCore, DishKernel; never SwiftUI or UIKit |
+| a store, a seam to the platform, a clock, an intent, a socket or a request, or the composition root | `DishEngine` (`Sources/DishEngine`) | Foundation, Observation, os, Synchronization, GameController, CoreBluetooth, CoreHaptics, Network, Security, CryptoKit, Darwin, DishCore, DishKernel; never SwiftUI or UIKit |
 | a view, a theme token, a localized word, a mapper, or the navigation | `Dish` (`Sources/Dish`) | SwiftUI, Observation, Foundation, the three modules; UIKit only in `UI/Theme.swift`, `DishScene.swift` and `Scene/Orientation.swift`; never Network, GameController, Security, CryptoKit |
 | the `@main` | `App/Sources/DishApp.swift` | SwiftUI, Dish |
 | a view, a theme token, a localized word, a mapper, or the navigation | `Dish` (`Sources/Dish`) | SwiftUI, Observation, Foundation, the three modules; UIKit only in `UI/Theme.swift` and `DishScene.swift`; TipKit only in the kit's `HintTip.swift` and `Scene/TipKitTips.swift`; never Network, GameController, Security, CryptoKit |
@@ -342,6 +342,7 @@ Dish clients follow, so a fact ported between clients keeps its shape.
 | `ThemeTokenTests` | no raw colour, font size or kit size; `DESIGN.md` lists every token; every token outside the shared palette is drawn |
 | `ViewPurityTests` | rules V1 to V13 of [`docs/UI_CONTRACT.md`](docs/UI_CONTRACT.md) |
 | `DeviceFamilyTests` | the app targets the iPhone and the iPad; the Info.plist turns an iPad all four ways and an iPhone upright or on its side; CI and `ci-local.sh` run the UI tests on the same iPad |
+| `PrivacyUsageTests` | a framework the engine imports that asks the person (CoreBluetooth) has its question in the Info.plist, without which iOS terminates the app; every question is worded in the six languages in `App/Resources/InfoPlist.xcstrings` |
 | `NavigationCoverageTests` | every tab, page and cover is worded, built, tested and drawn |
 
 ### Test-driven, every flow

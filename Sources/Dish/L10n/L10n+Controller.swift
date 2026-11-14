@@ -44,6 +44,15 @@ extension L10n {
         catalog.text("Player LEDs")
     }
 
+    /// A Steam Controller's pick, in place of the Touchpad switch.
+    var trackpads: String {
+        catalog.text("Trackpads")
+    }
+
+    var rightStick: String {
+        catalog.text("Right stick")
+    }
+
     // MARK: - Dead zones
 
     var deadZones: String {

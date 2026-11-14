@@ -27,6 +27,7 @@ final class ImportBoundariesTests: XCTestCase {
                 "os",
                 "Synchronization",
                 "GameController",
+                "CoreBluetooth",
                 "CoreHaptics",
                 "StoreKit",
                 "CoreMotion",
@@ -85,7 +86,8 @@ final class ImportBoundariesTests: XCTestCase {
 
     func testTheUILayerDoesNoIO() throws {
         let ioModules: Set = [
-            "Network", "GameController", "CoreHaptics", "StoreKit", "CoreMotion", "Security", "CryptoKit", "Darwin", "IOKit"
+            "Network", "GameController", "CoreBluetooth", "CoreHaptics", "StoreKit", "CoreMotion", "Security", "CryptoKit", "Darwin",
+            "IOKit"
         ]
         for file in RepoFiles.swiftFiles(under: "Sources/Dish") {
             let imports = try Set(RepoFiles.imports(of: RepoFiles.read(file)))

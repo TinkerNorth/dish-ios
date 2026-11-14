@@ -107,8 +107,8 @@ package extension AppModel {
     /// on-screen gamepad while it is one of the controllers. The desire
     /// reads a slot's id and capabilities alone.
     private var moonlightCarriableSlots: [ControllerSlot] {
-        guard onScreenListed.state else { return pads.source.slots }
-        return pads.source.slots + [ControllerSlot(id: onScreenSlotId, name: "", capabilities: onScreenCapabilities)]
+        guard onScreenListed.state else { return pads.slots }
+        return pads.slots + [ControllerSlot(id: onScreenSlotId, name: "", capabilities: onScreenCapabilities)]
     }
 
     internal func refreshMoonlightDesire() {
