@@ -33,12 +33,12 @@
 
 /* Begin PBXFileReference section */
 		1C7D8EAF12CE98C14C694464 /* ConnectionsUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectionsUITests.swift; sourceTree = "<group>"; };
+		2785A047BC47F0C88A67176A /* dish-ios */ = {isa = PBXFileReference; lastKnownFileType = folder; name = "dish-ios"; path = .; sourceTree = SOURCE_ROOT; };
 		2852772D9CB3C8CF766600CC /* DishApp.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = DishApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		2F46376963D77A9C96D41437 /* IPadUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IPadUITests.swift; sourceTree = "<group>"; };
 		3D89D88147D0B5DAEE26521B /* SetupFlowUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetupFlowUITests.swift; sourceTree = "<group>"; };
 		647EFCB1A6D036C44E3449F9 /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
 		6C8916C2FE2E8337B08D0229 /* DishApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DishApp.swift; sourceTree = "<group>"; };
-		2785A047BC47F0C88A67176A /* dish-ios */ = {isa = PBXFileReference; lastKnownFileType = folder; name = "dish-ios"; path = .; sourceTree = SOURCE_ROOT; };
 		9DEE456CC6EFCD104DFB6505 /* DishShortcuts.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DishShortcuts.swift; sourceTree = "<group>"; };
 		9E4EE053BF47940EE62195E7 /* SettingsUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsUITests.swift; sourceTree = "<group>"; };
 		A2BBB5E16C969D53A9B7BBA5 /* ShellUI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShellUI.swift; sourceTree = "<group>"; };
