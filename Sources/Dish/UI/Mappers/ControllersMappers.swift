@@ -203,18 +203,19 @@ private func boundActions(
     )
 }
 
-/// Bind to is a submenu of the paired PCs; with none paired, Find a PC.
+/// Bind to is a submenu of the active PCs; with none to bind to, Find a PC.
 private func unboundActions(
     _ slotId: String,
     open: [RowActionItem<ControllerAction>],
     paired: [ConnectionFact],
     words: L10n
 ) -> RowActionsState<ControllerAction> {
-    guard !paired.isEmpty else {
+    let active = bindableConnections(paired)
+    guard !active.isEmpty else {
         let find = RowActionItem(action: ControllerAction.findPC, title: words.findAPC, symbol: RowActionSymbol.pair, destructive: false)
         return RowActionsState(menu: (open + [find]).map(RowMenuEntry.item), leading: open, trailing: [find])
     }
-    let choices = paired.map { pc in
+    let choices = active.map { pc in
         RowActionItem(
             action: ControllerAction.bind(slotId: slotId, connectionId: pc.id),
             title: connectionTitle(pc),
@@ -224,6 +225,20 @@ private func unboundActions(
     }
     let bindTo = [RowMenuEntry.submenu(title: words.bindTo, symbol: RowActionSymbol.bind, items: choices)]
     return RowActionsState(menu: open.map(RowMenuEntry.item) + bindTo, leading: open, trailing: [])
+}
+
+/// The PCs a controller can be bound to right now: the ones whose link is
+/// up, as Android offers them; a resting PC is reached for from its own row
+/// first.
+func bindableConnections(_ paired: [ConnectionFact]) -> [ConnectionFact] {
+    paired.filter { isBindable($0.state) }
+}
+
+func isBindable(_ state: ConnectionState) -> Bool {
+    switch state {
+    case .online, .unsteady: true
+    case .connecting, .offline, .needsPairing: false
+    }
 }
 
 /// A row's second line and its mark.

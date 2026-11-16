@@ -194,7 +194,9 @@ time the kept build reads them. It hands the store the model's
 passes down the two values only UIKit can give (`settingsURL`, from
 `UIApplication.openSettingsURLString`, and `appVersion`, from the bundle),
 drives `preferredColorScheme` from the appearance fact and sets the idle timer
-from `idleTimerDisabled(facts:)`. It reads the device's idiom once
+from `idleTimerDisabled(session:preferences:)`, held only while a session is
+up with a pad bound and Keep screen on is set, so a bare connection lets the
+phone lock like any other app. It reads the device's idiom once
 (`deviceIdiom(_:)`), for the orientation lock: an iPhone stands upright but
 for play, an iPad follows the device on every screen. The same fact tells the
 engine which device it is (`deviceKind(_:)` into `AppModel`'s `deviceKind`), so

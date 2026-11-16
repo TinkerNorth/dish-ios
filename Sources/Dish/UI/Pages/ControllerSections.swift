@@ -27,24 +27,24 @@ struct ControllerStatusCard: View {
 }
 
 /// BINDING › Destination: the PC the pad sends to beside its mark, or Not
-/// bound; the apply inline while one runs or just ended; Updating while
-/// the PC applies the pad's settings; with no PC paired, the footer that
-/// says where to pair one.
+/// bound, which opens the menu of the active PCs to bind to, or Find a PC
+/// when none is up; the apply inline while one runs or just ended;
+/// Updating while the PC applies the pad's settings; the footer that says
+/// what to do on the Connections tab when nothing can be picked.
 struct ControllerBindingSection: View {
     let state: ControllerBindingState
     let apply: ApplyRowState?
     let updating: String?
-    /// Try again, with the PC the bind is to reach again.
-    let retry: @MainActor (String) -> Void
+    /// Bind to the PC, by its connection id; Try again binds to the same one.
+    let bind: @MainActor (String) -> Void
+    /// Nothing to bind to: the Connections tab.
+    let findPC: @MainActor () -> Void
 
     var body: some View {
         Section {
-            LabeledContent(state.destinationTitle) {
-                destination
-            }
-            .foregroundStyle(DishTheme.onSurface)
+            picker
             if let apply {
-                ApplyRow(state: apply, retry: retry)
+                ApplyRow(state: apply, retry: bind)
             }
             if let updating {
                 BusyRow(text: updating)
@@ -59,6 +59,35 @@ struct ControllerBindingSection: View {
         .listRowBackground(DishTheme.surface)
     }
 
+    /// The destination row opens the active PCs as a menu, the current one
+    /// checked; with none up, the row stands alone over Find a PC.
+    @ViewBuilder private var picker: some View {
+        switch state.picker {
+        case let .choices(choices):
+            Menu {
+                ForEach(choices) { choice in
+                    BindChoiceButton(choice: choice, bind: bind)
+                }
+            } label: {
+                LabeledContent(state.destinationTitle) {
+                    HStack(spacing: DishSpace.s3) {
+                        destination
+                        Image(systemName: PlaySymbol.emulate).font(DishFont.detail).foregroundStyle(DishTheme.muted)
+                    }
+                }
+                .foregroundStyle(DishTheme.onSurface)
+                .contentShape(Rectangle())
+            }
+        case let .findPC(title):
+            LabeledContent(state.destinationTitle) {
+                destination
+            }
+            .foregroundStyle(DishTheme.onSurface)
+            Button(title, systemImage: RowActionSymbol.pair, action: findPC)
+                .foregroundStyle(DishTheme.primary)
+        }
+    }
+
     @ViewBuilder private var destination: some View {
         switch state.destination {
         case let .bound(pcName, mark):
@@ -68,6 +97,24 @@ struct ControllerBindingSection: View {
             }
         case let .unbound(note):
             Text(note).foregroundStyle(DishTheme.muted)
+        }
+    }
+}
+
+/// One PC of the menu; the one the pad sends to wears the check.
+private struct BindChoiceButton: View {
+    let choice: BindChoice
+    let bind: @MainActor (String) -> Void
+
+    var body: some View {
+        Button {
+            bind(choice.id)
+        } label: {
+            if choice.current {
+                Label(choice.name, systemImage: "checkmark")
+            } else {
+                Text(choice.name)
+            }
         }
     }
 }

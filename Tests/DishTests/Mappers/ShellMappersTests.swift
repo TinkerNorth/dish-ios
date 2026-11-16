@@ -156,6 +156,10 @@ final class ShellMappersTests: XCTestCase {
         XCTAssertTrue(idleTimerDisabled(facts: FactsFixture.shell(session: FactsFixture.streaming())))
         XCTAssertTrue(idleTimerDisabled(facts: FactsFixture.shell(session: FactsFixture.stopped)), "Reconnect is still on screen")
         XCTAssertFalse(idleTimerDisabled(facts: FactsFixture.shell(session: FactsFixture.reconnecting)), "nothing streams yet")
+        XCTAssertFalse(
+            idleTimerDisabled(facts: FactsFixture.shell(session: FactsFixture.streaming(pads: 0))),
+            "a bare connection holds nothing; the phone locks like any other app"
+        )
         let failed = SessionFact(pcName: "Living Room PC", pads: 1, latencyMs: nil, phase: .failed(.dataPathBlocked))
         XCTAssertFalse(idleTimerDisabled(facts: FactsFixture.shell(session: failed)), "nothing streams")
         XCTAssertFalse(idleTimerDisabled(facts: FactsFixture.shell(session: FactsFixture.streaming(), preferences: off)))

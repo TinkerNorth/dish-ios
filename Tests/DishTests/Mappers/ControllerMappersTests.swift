@@ -49,6 +49,10 @@ private enum PadFixture {
         PadDiagnostics(controller: controller, rates: rates, reports: reports, wire: nil)
     }
 
+    static func pc(_ id: String, _ name: String, state: ConnectionState) -> ConnectionFact {
+        ConnectionFact(id: id, name: name, address: "192.168.1.31", kind: .satellite, state: state)
+    }
+
     static func unbind(_ slotId: String) -> RowActionItem<ControllerAction> {
         RowActionItem(action: .unbind(slotId: slotId), title: "Unbind", symbol: RowActionSymbol.unbind, destructive: true)
     }
@@ -133,22 +137,46 @@ final class ControllerMappersTests: XCTestCase {
         XCTAssertEqual(page.binding.destination, .bound(pcName: "Living Room PC", mark: .busy))
     }
 
-    /// Unbound, the page says so and offers no Unbind; with nothing paired,
-    /// the footer says where to pair a PC.
-    func testAnUnboundPadSaysSoAndTheFooterSaysWhereToPairWhenNothingIs() throws {
-        let living = ConnectionFact(
-            id: "lr",
-            name: "Living Room PC",
-            address: "192.168.1.24",
-            kind: .satellite,
-            state: .offline(lastSeen: nil)
+    /// Unbound, the page says so and offers no Unbind; the destination row
+    /// opens the PCs whose link is up; with none up, Find a PC and the footer
+    /// says what to do on the Connections tab: connect one, or pair one when
+    /// none is paired.
+    func testAnUnboundPadPicksAmongTheActivePCsOrFindsOne() throws {
+        let living = PadFixture.pc("lr", "Living Room PC", state: .online(latencyMs: 4, controllers: 0))
+        let office = PadFixture.pc("office", "", state: .offline(lastSeen: nil))
+        let page = try XCTUnwrap(PadFixture.page(PadFixture.dualSense(), paired: [living, office]))
+        XCTAssertEqual(page.binding.destination, .unbound(note: "Not bound"))
+        XCTAssertEqual(
+            page.binding.picker,
+            .choices([BindChoice(id: "lr", name: "Living Room PC", current: false)]),
+            "a resting PC is not offered"
         )
-        let paired = try XCTUnwrap(PadFixture.page(PadFixture.dualSense(), paired: [living]))
-        XCTAssertEqual(paired.binding.destination, .unbound(note: "Not bound"))
-        XCTAssertNil(paired.binding.hint, "there is a PC to bind to")
-        XCTAssertNil(paired.unbind)
+        XCTAssertNil(page.binding.hint)
+        XCTAssertNil(page.unbind)
+        let resting = try XCTUnwrap(PadFixture.page(PadFixture.dualSense(), paired: [office]))
+        XCTAssertEqual(resting.binding.picker, .findPC("Find a PC"))
+        XCTAssertEqual(resting.binding.hint, "Connect a PC on the Connections tab to bind this controller.")
         let alone = try XCTUnwrap(PadFixture.page(PadFixture.dualSense()))
+        XCTAssertEqual(alone.binding.picker, .findPC("Find a PC"))
         XCTAssertEqual(alone.binding.hint, "Pair a PC on the Connections tab to bind this controller.")
+    }
+
+    /// Bound, the destination row still opens the active PCs, the current
+    /// one checked, so the pad can be sent elsewhere from here.
+    func testABoundPadCanBeSentToAnotherActivePCFromItsPage() throws {
+        let living = PadFixture.pc("lr", "Living Room PC", state: .online(latencyMs: 4, controllers: 1))
+        let den = PadFixture.pc("den", "Den PC", state: .unsteady(latencyMs: 40, controllers: 0))
+        let bound = DestinationFact(id: "lr", name: "Living Room PC", health: .online)
+        let page = try XCTUnwrap(PadFixture.page(PadFixture.dualSense(destination: bound), paired: [living, den]))
+        XCTAssertEqual(page.binding.picker, .choices([
+            BindChoice(id: "lr", name: "Living Room PC", current: true),
+            BindChoice(id: "den", name: "Den PC", current: false)
+        ]))
+        XCTAssertNil(page.binding.hint)
+        let lost = DestinationFact(id: "lr", name: "Living Room PC", health: .lost)
+        let alone = try XCTUnwrap(PadFixture.page(PadFixture.dualSense(destination: lost)))
+        XCTAssertEqual(alone.binding.picker, .findPC("Find a PC"), "nothing up to send the pad to")
+        XCTAssertNil(alone.binding.hint, "the pad is bound; the footer speaks to an unbound one")
     }
 
     func testTheOnScreenControllerOffersUnbindOnceBound() throws {

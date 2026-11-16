@@ -133,6 +133,10 @@ extension L10n {
         catalog.text("Pair a PC on the Connections tab to bind this controller.")
     }
 
+    var connectAPCToBind: String {
+        catalog.text("Connect a PC on the Connections tab to bind this controller.")
+    }
+
     var applyingBinding: String {
         catalog.text("Applying binding…")
     }

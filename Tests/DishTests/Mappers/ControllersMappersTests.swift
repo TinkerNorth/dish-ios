@@ -231,16 +231,37 @@ final class ControllersMappersTests: XCTestCase {
         )
     }
 
-    /// Bind to is a submenu of the paired PCs, each by its name, or its
-    /// address when it never advertised one; there is nothing to swipe.
-    func testAnUnboundControllerOffersBindToEachPairedPC() {
-        let actions = controllerRowActions(ControllerFixture.pad(destination: nil), paired: [RowItems.living, RowItems.nameless])
+    /// Bind to is a submenu of the PCs whose link is up, each by its name,
+    /// or its address when it never advertised one; a resting PC is not
+    /// offered, as Android offers none; there is nothing to swipe.
+    func testAnUnboundControllerOffersBindToEachActivePC() {
+        let faltering = ConnectionFact(
+            id: "office",
+            name: "",
+            address: "192.168.1.31",
+            kind: .satellite,
+            state: .unsteady(latencyMs: 40, controllers: 0)
+        )
+        let actions = controllerRowActions(ControllerFixture.pad(destination: nil), paired: [RowItems.living, faltering, RowItems.nameless])
         let bindTo = RowMenuEntry.submenu(
             title: "Bind to",
             symbol: RowActionSymbol.bind,
             items: [RowItems.bind("lr", "Living Room PC"), RowItems.bind("office", "192.168.1.31")]
         )
         XCTAssertEqual(actions, RowActionsState(menu: [bindTo], leading: [], trailing: []))
+    }
+
+    /// With PCs paired but none up there is nothing to bind to: the row
+    /// finds a PC, as with none paired.
+    func testWithOnlyRestingPCsTheRowFindsAPC() {
+        let resting = controllerRowActions(ControllerFixture.pad(destination: nil), paired: [RowItems.nameless])
+        XCTAssertEqual(resting, RowActionsState(menu: [.item(RowItems.find)], leading: [], trailing: [RowItems.find]))
+        XCTAssertEqual(bindableConnections([RowItems.living, RowItems.nameless]).map(\.id), ["lr"])
+        XCTAssertTrue(isBindable(.online(latencyMs: 4, controllers: 1)))
+        XCTAssertTrue(isBindable(.unsteady(latencyMs: 40, controllers: 1)))
+        XCTAssertFalse(isBindable(.connecting))
+        XCTAssertFalse(isBindable(.offline(lastSeen: nil)))
+        XCTAssertFalse(isBindable(.needsPairing))
     }
 
     /// With no PC paired, Find a PC leads to the Connections tab, as

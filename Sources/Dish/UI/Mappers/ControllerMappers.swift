@@ -20,12 +20,27 @@ enum BindingDestinationState: Equatable {
     case unbound(note: String)
 }
 
-/// BINDING: where the pad sends, and, with no PC paired, the footer that
-/// says where to pair one.
+/// A PC the pad can be bound to, and whether it is the one it sends to.
+struct BindChoice: Equatable, Identifiable {
+    let id: String
+    let name: String
+    let current: Bool
+}
+
+/// How the destination is changed: a menu of the active PCs, or Find a PC
+/// when none is up.
+enum BindingPickerState: Equatable {
+    case choices([BindChoice])
+    case findPC(String)
+}
+
+/// BINDING: where the pad sends, the picker that changes it, and the footer
+/// that says what to do on the Connections tab when nothing can be picked.
 struct ControllerBindingState: Equatable {
     let title: String
     let destinationTitle: String
     let destination: BindingDestinationState
+    let picker: BindingPickerState
     let hint: String?
 }
 
@@ -226,6 +241,7 @@ private func controllerPadState(
             title: words.binding,
             destinationTitle: words.destination,
             destination: bindingDestination(controller, words: words),
+            picker: bindingPicker(controller, paired: paired, words: words),
             hint: bindingHint(controller, paired: paired, words: words)
         ),
         apply: applyRowState(apply, slotId: controller.id, words: words),
@@ -274,10 +290,19 @@ private func bindingDestination(_ controller: ControllerFact, words: L10n) -> Bi
     return .bound(pcName: destination.name, mark: destinationMark(destination.health))
 }
 
-/// Unbound with nothing paired, the footer says where to pair a PC.
+/// The active PCs, the one the pad sends to marked; with none up, Find a PC.
+private func bindingPicker(_ controller: ControllerFact, paired: [ConnectionFact], words: L10n) -> BindingPickerState {
+    let choices = bindableConnections(paired).map { pc in
+        BindChoice(id: pc.id, name: connectionTitle(pc), current: pc.id == controller.destination?.id)
+    }
+    return choices.isEmpty ? .findPC(words.findAPC) : .choices(choices)
+}
+
+/// Unbound with nothing to pick, the footer says what to do on the
+/// Connections tab: pair a PC when none is, connect one when none is up.
 private func bindingHint(_ controller: ControllerFact, paired: [ConnectionFact], words: L10n) -> String? {
-    guard controller.destination == nil, paired.isEmpty else { return nil }
-    return words.pairAPCToBind
+    guard controller.destination == nil, bindableConnections(paired).isEmpty else { return nil }
+    return paired.isEmpty ? words.pairAPCToBind : words.connectAPCToBind
 }
 
 /// "Updating…" while the PC the pad is bound to applies its settings.

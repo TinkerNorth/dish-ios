@@ -4276,6 +4276,40 @@
         }
       }
     },
+    "Connect a PC on the Connections tab to bind this controller." : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Spojite se na PC na kartici Veze da biste povezali ovaj kontroler."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Verbinde einen PC im Tab „Verbindungen“, um diesen Controller zuzuordnen."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Conéctate a un PC en la pestaña Conexiones para vincular este mando."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Connectez un PC dans l’onglet Connexions pour lier cette manette."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Conecte um PC na aba Conexões para vincular este controle."
+          }
+        }
+      }
+    },
     "Connected" : {
       "localizations" : {
         "bs" : {

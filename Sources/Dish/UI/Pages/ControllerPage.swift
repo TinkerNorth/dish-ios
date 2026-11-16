@@ -115,7 +115,7 @@ private struct ControllerPadSections: View {
             ControllerStatusCard(state: state.status)
         }
         .listRowBackground(DishTheme.surface)
-        ControllerBindingSection(state: state.binding, apply: state.apply, updating: state.updating, retry: retry)
+        ControllerBindingSection(state: state.binding, apply: state.apply, updating: state.updating, bind: bind, findPC: findPC)
         ControllerEmulateSection(state: state.emulate, setEmulateAs: actions.setEmulateAs, setHostEmulateAs: actions.setHostEmulateAs)
         if let functions = state.functions {
             ControllerFunctionsSection(state: functions, footnote: state.footnote, setFeature: actions.setFeature)
@@ -135,9 +135,13 @@ private struct ControllerPadSections: View {
         }
     }
 
-    /// Try again binds the pad to the same PC.
-    private func retry(_ connectionId: String) {
+    /// A PC picked, or Try again on the same one.
+    private func bind(_ connectionId: String) {
         actions.act(.bind(slotId: state.id, connectionId: connectionId))
+    }
+
+    private func findPC() {
+        actions.act(.findPC)
     }
 }
 

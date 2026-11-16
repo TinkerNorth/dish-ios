@@ -98,6 +98,13 @@ miss. `Tests/PARITY.md` lists everything not built.
   over. A silent retry that fails because the PC is off still says nothing.
 - **A bind fails as soon as its reach does**, instead of waiting out its
   budget.
+- **A pad can be sent to another PC from its page.** The destination row
+  opens the PCs whose link is up, the current one checked. Bind to, on the
+  page, the row and the long press alike, offers only those; with none up it
+  is Find a PC, and the footer says what to do on the Connections tab.
+- **The screen stays awake only for a pad.** Keep screen on holds the
+  phone awake only while a session streams with a pad bound; a bare
+  connection lets it lock like any other app.
 - **Low power waits for a pad.** The countdown arms only while a session
   streams with a pad bound, never for a bare connection, one being brought
   back, or one that stopped responding.
