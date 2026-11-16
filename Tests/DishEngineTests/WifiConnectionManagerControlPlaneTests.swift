@@ -83,8 +83,8 @@ final class WifiConnectionManagerControlPlaneTests: XCTestCase {
     private var failures: [ConnectionFailure] {
         events.compactMap {
             switch $0 {
-            case let .failure(_, failure), let .pairingFailed(_, failure), let .scanFailed(failure): failure
-            case .pairingRequired: nil
+            case let .failure(_, failure, .own), let .pairingFailed(_, failure), let .scanFailed(failure): failure
+            case .failure, .pairingRequired: nil
             }
         }
     }

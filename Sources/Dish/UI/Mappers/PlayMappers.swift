@@ -238,6 +238,13 @@ func playPill(_ session: SessionFact?, destination: DestinationFact? = nil, word
         )
     case .reconnecting:
         return PlayPillState(pcName: session.pcName, detail: words.connecting, mark: .busy, detailColor: DishTheme.muted)
+    case .failed:
+        return PlayPillState(
+            pcName: session.pcName,
+            detail: words.connectionLost,
+            mark: .dot(DishTheme.error),
+            detailColor: DishTheme.error
+        )
     }
 }
 

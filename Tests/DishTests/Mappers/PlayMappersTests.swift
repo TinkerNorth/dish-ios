@@ -74,6 +74,13 @@ final class PlayMappersTests: XCTestCase {
             PlayPillState(pcName: "Living Room PC", detail: "Connecting…", mark: .busy, detailColor: DishTheme.muted)
         )
         XCTAssertEqual(cover(session: FactsFixture.reconnecting).pill?.mark, .busy)
+        let failed = SessionFact(pcName: "Living Room PC", pads: 1, latencyMs: nil, phase: .failed(.dataPathBlocked))
+        XCTAssertEqual(
+            cover(session: failed).pill?.detail,
+            "Connection lost",
+            "the pill has no room for the reason; the accessory words it"
+        )
+        XCTAssertEqual(cover(session: failed).pill?.mark, .dot(DishTheme.error))
         let online = DestinationFact(id: "lr", name: "Living Room PC", health: .online)
         XCTAssertEqual(cover(FactsFixture.play(destination: online)).pill?.detail, "Online", "a PC up with no session word yet")
     }

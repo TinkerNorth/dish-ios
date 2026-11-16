@@ -19,7 +19,7 @@ enum WindowWay {
 /// What the UI tests share on an iPhone and an iPad: the launch, a
 /// remembered PC to launch with, an element by its label, a tab wherever the
 /// device draws it, an iPad's sidebar, the walk that binds the on-screen
-/// gamepad, its page, and the window's turn.
+/// gamepad, and the window's turn.
 @MainActor
 enum ShellUI {
 
@@ -105,13 +105,6 @@ enum ShellUI {
         let bind = app.buttons["Bind"].firstMatch
         XCTAssertTrue(bind.waitForExistence(timeout: 5))
         bind.tap()
-    }
-
-    /// The on-screen gamepad's page, opened from its row on Controllers.
-    static func openTheOnScreenGamepadsPage(in app: XCUIApplication) {
-        let row = element(startingWith: "On-screen gamepad", in: app)
-        XCTAssertTrue(row.waitForExistence(timeout: 10), "the on-screen gamepad is listed")
-        row.tap()
     }
 
     /// `element` once a few swipes have brought it on screen: a list draws

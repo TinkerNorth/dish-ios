@@ -90,6 +90,26 @@ final class AppModelSessionTests: XCTestCase {
         XCTAssertTrue(back)
     }
 
+    /// With no session up, the accessory carries a bound PC's failure to
+    /// every tab with Reconnect, which reaches again and says so.
+    func testTheAccessoryCarriesABoundPCsFailure() async throws {
+        let live = await fixture.connectPaired()
+        XCTAssertTrue(live)
+        fixture.model.bind(slotId: "pad", to: fixture.serverId)
+        let applied = await fixture.waitUntil { self.fixture.model.bindingProgress == .done }
+        XCTAssertTrue(applied)
+        let conn = try XCTUnwrap(fixture.network.wifi.get(fixture.serverId))
+        try XCTUnwrap(conn.client).sessionCloseReason.set(Int(CloseReason.replaced.rawValue))
+        conn.aliveTick()
+        XCTAssertEqual(fixture.model.sessionFacts.session?.phase, .failed(.sessionReplaced))
+        XCTAssertEqual(fixture.model.sessionFacts.session?.pcName, "Den PC")
+        XCTAssertEqual(fixture.model.sessionFacts.session?.id, fixture.serverId)
+        fixture.model.reconnect()
+        XCTAssertEqual(fixture.model.sessionFacts.session?.phase, .reconnecting, "Reconnect reaches for it and says so")
+        let back = await fixture.waitUntil { self.fixture.model.sessionFacts.session?.phase == .streaming }
+        XCTAssertTrue(back)
+    }
+
     func testTheBackgroundClosesEverySessionAndTheForegroundReachesForThem() async {
         let live = await fixture.connectPaired()
         XCTAssertTrue(live)
@@ -103,6 +123,16 @@ final class AppModelSessionTests: XCTestCase {
     func testEachLinkStateHasItsPhaseAndHealth() {
         XCTAssertEqual(sessionPhase(.connected), .streaming)
         XCTAssertEqual(sessionPhase(.unstable), .stoppedResponding)
+        XCTAssertEqual(
+            sessionPhase(.unstable, notice: .dataPathBlocked),
+            .failed(.dataPathBlocked),
+            "a faltering session words what explains it"
+        )
+        XCTAssertEqual(
+            sessionPhase(.connected, notice: .dataPathBlocked),
+            .streaming,
+            "an answering session is streaming whatever it left before"
+        )
         XCTAssertEqual(linkHealth(.connected), .online)
         XCTAssertEqual(linkHealth(.unstable), .lost, "a PC that stopped responding reads lost on its rows (D4)")
         XCTAssertEqual(linkHealth(.connecting), .connecting)

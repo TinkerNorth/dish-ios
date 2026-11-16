@@ -11,25 +11,40 @@ import Foundation
 /// accessory shows it coming back.
 package extension AppModel {
 
-    /// Nil while no PC has a session up and none is being brought back.
+    /// Nil while no PC has a session up, none is being brought back, and
+    /// none with pads bound carries a failure.
     internal var sessionFact: SessionFact? {
         if let row = sessionConnection {
             return SessionFact(
+                id: row.id,
                 pcName: row.name,
                 pads: row.boundSlotIds.count,
                 latencyMs: row.latencyMs.map(wholeMilliseconds),
-                phase: sessionPhase(row.live)
+                phase: sessionPhase(row.live, notice: noticeOf(row))
             )
         }
-        guard let row = reconnectingConnection else { return nil }
-        return SessionFact(pcName: row.name, pads: row.boundSlotIds.count, latencyMs: nil, phase: .reconnecting)
+        if let row = reconnectingConnection {
+            return SessionFact(id: row.id, pcName: row.name, pads: row.boundSlotIds.count, latencyMs: nil, phase: .reconnecting)
+        }
+        guard let failed = failedLink else { return nil }
+        return SessionFact(
+            id: failed.row.id,
+            pcName: failed.row.name,
+            pads: failed.row.boundSlotIds.count,
+            latencyMs: nil,
+            phase: .failed(failed.failure)
+        )
+    }
+
+    private func noticeOf(_ row: ConnectionSummary) -> ConnectionFailure? {
+        attemptNotice(attemptNotices.state[row.id], live: row.live)
     }
 
     /// The accessory's Reconnect: a session that stopped answering closes
     /// and opens again; one that is down is reached for. A Moonlight host's
     /// session is reopened by its manager, which resumes the app it left.
     func reconnect() {
-        guard let row = sessionConnection else { return }
+        guard let row = sessionConnection ?? failedLink?.row else { return }
         guard !ConnectionHub.isMoonlight(row.id) else { return network.moonlight.retrySessions() }
         reconnect(row.id)
     }
@@ -61,12 +76,27 @@ package extension AppModel {
         let reached = network.hub.connections.filter { reachedFor.contains($0.id) && $0.live == .connecting && !$0.boundSlotIds.isEmpty }
         return reached.max { $0.boundSlotIds.count < $1.boundSlotIds.count }
     }
+
+    /// A PC with pads bound whose rows carry a failure.
+    private struct FailedLink {
+        let row: ConnectionSummary
+        let failure: ConnectionFailure
+    }
+
+    /// The PC with the most pads bound whose last attempt failed: the
+    /// accessory carries the failure to every tab, with Reconnect.
+    private var failedLink: FailedLink? {
+        let failed = network.hub.connections.compactMap { row in noticeOf(row).map { FailedLink(row: row, failure: $0) } }
+        let carrying = failed.filter { !$0.row.boundSlotIds.isEmpty }
+        return carrying.max { $0.row.boundSlotIds.count < $1.row.boundSlotIds.count }
+    }
 }
 
-/// A live link streams; one whose acks falter has stopped responding.
-func sessionPhase(_ live: LinkState) -> SessionPhase {
+/// A live link streams; one whose acks falter has stopped responding, or
+/// failed for the reason its rows carry.
+func sessionPhase(_ live: LinkState, notice: ConnectionFailure? = nil) -> SessionPhase {
     switch live {
-    case .unstable: .stoppedResponding
+    case .unstable: notice.map(SessionPhase.failed) ?? .stoppedResponding
     case .connected, .stale, .saved, .ready, .connecting: .streaming
     }
 }

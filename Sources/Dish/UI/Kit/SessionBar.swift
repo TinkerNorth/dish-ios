@@ -45,6 +45,7 @@ struct SessionBar: View {
                     }
                     .buttonStyle(.borderedProminent)
                     .buttonBorderShape(.capsule)
+                    .fixedSize()
                 }
             }
             .padding(.horizontal, DishSpace.s4)

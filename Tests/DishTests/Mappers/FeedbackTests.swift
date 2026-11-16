@@ -37,7 +37,7 @@ final class FeedbackTests: XCTestCase {
 
     /// A failure speaks over the state, in the error colour, whatever the state.
     func testAFailureSpeaksOverEveryRestingState() {
-        for state in [ConnectionState.offline(lastSeen: nil), .needsPairing] {
+        for state in [ConnectionState.offline(lastSeen: nil), .needsPairing, .unsteady(latencyMs: 40, controllers: 1)] {
             let failed = pc(state, notice: .repairNeeded)
             XCTAssertEqual(connectionLine(failed, now: Self.now), "This satellite no longer recognizes this device. Re-pair needed.")
             XCTAssertEqual(connectionLineColor(failed), DishTheme.error)
@@ -56,24 +56,25 @@ final class FeedbackTests: XCTestCase {
     }
 
     func testEveryPhaseOfTheSessionHasItsOwnBar() {
-        let phases: [SessionPhase] = [.streaming, .stoppedResponding, .reconnecting]
+        let phases: [SessionPhase] = [.streaming, .stoppedResponding, .reconnecting, .failed(.dataPathBlocked)]
         let bars = phases.map { sessionBarState(SessionFact(pcName: "Living Room PC", pads: 1, latencyMs: nil, phase: $0)) }
         XCTAssertEqual(bars.compactMap(\.self).count, phases.count)
         XCTAssertEqual(Set(bars.map(String.init(describing:))).count, phases.count)
     }
 
     func testEveryPhaseOfTheSessionHasItsOwnPill() {
-        let phases: [SessionPhase] = [.streaming, .stoppedResponding, .reconnecting]
+        let phases: [SessionPhase] = [.streaming, .stoppedResponding, .reconnecting, .failed(.sessionReplaced)]
         let pills = phases.map { playPill(SessionFact(pcName: "Living Room PC", pads: 1, latencyMs: nil, phase: $0)) }
         XCTAssertEqual(Set(pills.map { $0?.detail }).count, phases.count)
-        XCTAssertEqual(pills.map { $0?.mark }, [.dot(DishTheme.success), .dot(DishTheme.error), .busy])
+        XCTAssertEqual(pills.map { $0?.mark }, [.dot(DishTheme.success), .dot(DishTheme.error), .busy, .dot(DishTheme.error)])
     }
 
     func testEveryFailureHasItsOwnWords() {
         let failures: [ConnectionFailure] = [
             .identityChanged, .protocolMismatch, .dishUpdateRequired, .satelliteUpdateRequired, .approvalDeclined,
             .approvalTimedOut, .repairNeeded, .unreachable(detail: ""), .noSharedKey, .sessionRefused(detail: nil),
-            .controllerNotApplied, .noServersFound, .localNetworkDenied, .pairingRejected(detail: nil)
+            .controllerNotApplied, .noServersFound, .localNetworkDenied, .pairingRejected(detail: nil), .dataPathBlocked,
+            .sessionReplaced
         ]
         let words = failures.map { connectionFailureText($0, name: "Den PC") }
         XCTAssertEqual(Set(words).count, failures.count, "\(words)")

@@ -282,17 +282,86 @@ final class AppModelConnectionsTests: XCTestCase {
         guard case .offline = fixture.model.connectionsFacts.paired.first?.state else { return XCTFail("the PC rests") }
     }
 
+    /// The person's own attempt says why it failed; a silent one only when
+    /// the failure needs them, never that the PC was merely off.
     func testOnlyAFailureOfTheConnectionIsTheRowsToWord() {
-        XCTAssertFalse(isRowNotice(.controllerNotApplied), "the apply's word on the pad's row")
-        XCTAssertFalse(isRowNotice(.noServersFound), "the page's empty state")
-        XCTAssertFalse(isRowNotice(.localNetworkDenied), "the page's denied state")
-        XCTAssertTrue(isRowNotice(.unreachable(detail: "")))
-        XCTAssertTrue(isRowNotice(.repairNeeded))
-        XCTAssertTrue(isRowNotice(.satelliteUpdateRequired))
+        XCTAssertFalse(isRowNotice(.controllerNotApplied, attempt: .own), "the apply's word on the pad's row")
+        XCTAssertFalse(isRowNotice(.noServersFound, attempt: .own), "the page's empty state")
+        XCTAssertFalse(isRowNotice(.localNetworkDenied, attempt: .own), "the page's denied state")
+        XCTAssertTrue(isRowNotice(.unreachable(detail: ""), attempt: .own))
+        XCTAssertFalse(isRowNotice(.unreachable(detail: ""), attempt: .silent), "a PC that is off is not news")
+        XCTAssertFalse(isRowNotice(.noSharedKey, attempt: .silent))
+        XCTAssertTrue(isRowNotice(.repairNeeded, attempt: .silent))
+        XCTAssertTrue(isRowNotice(.satelliteUpdateRequired, attempt: .silent))
+        XCTAssertTrue(isRowNotice(.dataPathBlocked, attempt: .silent))
+        XCTAssertTrue(isRowNotice(.sessionReplaced, attempt: .silent))
+        XCTAssertTrue(isRowNotice(.identityChanged, attempt: .silent))
+        XCTAssertTrue(endsAReach(.unreachable(detail: "")))
+        XCTAssertFalse(endsAReach(.controllerNotApplied), "the slot's business, not the link's")
     }
 
-    /// A failure is worded while the PC rests or wants a PIN, and not while
-    /// it is up or being reached for, when the state says more.
+    /// A PUT that did not grant: an identity that changed, no HTTPS answer
+    /// at all, or an answer that refused.
+    func testAPutThatDidNotGrantIsReadForWhatItWas() {
+        XCTAssertEqual(refusedOpenFailure(identityChanged: true, reachable: false, detail: nil), .identityChanged)
+        XCTAssertEqual(refusedOpenFailure(identityChanged: false, reachable: false, detail: "timed out"), .unreachable(detail: "timed out"))
+        XCTAssertEqual(refusedOpenFailure(identityChanged: false, reachable: true, detail: "busy"), .sessionRefused(detail: "busy"))
+    }
+
+    /// A session that opens over HTTPS but never hears an ack over UDP dies,
+    /// and the row names the data path the network blocks, with Reconnect;
+    /// the retry curve keeps trying behind it and the word stays.
+    func testASessionWithNoAcksIsNamedABlockedDataPath() async throws {
+        fixture.prePair()
+        fixture.satellite.silenceUdp()
+        fixture.model.bind(slotId: "pad", to: fixture.serverId)
+        let live = await fixture.waitUntil { self.fixture.network.wifi.get(self.fixture.serverId)?.state == .live }
+        XCTAssertTrue(live, "the session opens over REST")
+        let conn = try XCTUnwrap(fixture.network.wifi.get(fixture.serverId))
+        XCTAssertEqual(conn.latencySamples, 0, "no ack came back")
+        try XCTUnwrap(conn.client).connectionAlive.set(false)
+        conn.aliveTick()
+        XCTAssertEqual(fixture.model.connectionsFacts.paired.first?.notice, .dataPathBlocked)
+        guard case .unsteady = fixture.model.connectionsFacts.paired.first?.state else {
+            return XCTFail("parked on the retry window: \(String(describing: fixture.model.connectionsFacts.paired.first?.state))")
+        }
+        XCTAssertEqual(fixture.model.sessionFacts.session?.phase, .failed(.dataPathBlocked), "the accessory names it on every tab")
+    }
+
+    /// Another device's PUT took the session: the row rests and says so, no
+    /// silent retry fights it, and Reconnect takes it back.
+    func testASessionAnotherDeviceTookIsNamedAndWaitsForThePerson() async throws {
+        let live = await fixture.connectPaired()
+        XCTAssertTrue(live)
+        let conn = try XCTUnwrap(fixture.network.wifi.get(fixture.serverId))
+        try XCTUnwrap(conn.client).sessionCloseReason.set(Int(CloseReason.replaced.rawValue))
+        conn.aliveTick()
+        XCTAssertEqual(fixture.model.connectionsFacts.paired.first?.notice, .sessionReplaced)
+        guard case .offline = fixture.model.connectionsFacts.paired.first?.state else { return XCTFail("the row rests") }
+        XCTAssertEqual(fixture.network.wifi.retry[fixture.serverId]?.suppressed, true, "no silent retry fights the newer owner")
+        fixture.model.reconnect(fixture.serverId)
+        XCTAssertNil(fixture.model.connectionsFacts.paired.first?.notice)
+        let again = await fixture.waitUntil { conn.state == .live }
+        XCTAssertTrue(again)
+    }
+
+    /// A bind to a PC that cannot be reached fails as soon as the reach
+    /// does, with the PC's own failure on its row.
+    func testABindFailsAsSoonAsItsReachDoes() async {
+        fixture.prePair()
+        fixture.satellite.stop()
+        let started = Date()
+        fixture.model.bind(slotId: "pad", to: fixture.serverId)
+        let failed = await fixture.waitUntil(timeout: 10) { self.fixture.model.bindingProgress == .failed(.hostUnreachable) }
+        XCTAssertTrue(failed, "\(fixture.model.bindingProgress)")
+        XCTAssertLessThan(Date().timeIntervalSince(started), 10, "well before the fifteen-second budget")
+        guard case .unreachable = fixture.model.connectionsFacts.paired.first?.notice else {
+            return XCTFail("the PC's own failure: \(String(describing: fixture.model.connectionsFacts.paired.first?.notice))")
+        }
+    }
+
+    /// A failure is worded while the PC rests, falters or wants a PIN, and
+    /// not while it is up or being reached for, when the state says more.
     func testANoticeShowsOnlyWhileThePCRestsOrWantsAPin() {
         let failure = ConnectionFailure.unreachable(detail: "")
         XCTAssertEqual(attemptNotice(failure, live: .saved), failure)
@@ -300,7 +369,7 @@ final class AppModelConnectionsTests: XCTestCase {
         XCTAssertEqual(attemptNotice(failure, live: .stale), failure)
         XCTAssertNil(attemptNotice(failure, live: .connecting))
         XCTAssertNil(attemptNotice(failure, live: .connected))
-        XCTAssertNil(attemptNotice(failure, live: .unstable))
+        XCTAssertEqual(attemptNotice(failure, live: .unstable), failure, "a faltering session shows what explains it")
         XCTAssertNil(attemptNotice(nil, live: .saved))
     }
 }

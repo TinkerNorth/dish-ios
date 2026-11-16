@@ -13,7 +13,7 @@ struct ControllerStatusState: Equatable {
     let mark: StatusMark
 }
 
-/// BINDING › Destination: the PC the pad sends to beside its dot, or that
+/// BINDING › Destination: the PC the pad sends to beside its mark, or that
 /// nothing is bound.
 enum BindingDestinationState: Equatable {
     case bound(pcName: String, mark: StatusMark)
@@ -29,13 +29,13 @@ struct ControllerBindingState: Equatable {
     let hint: String?
 }
 
-/// What the page offers besides its facts: the strip under the card, and
-/// Unbind alone at the foot.
-struct ControllerPageActions: Equatable {
+/// What a controller offers besides its facts: the strip under its row, and
+/// Unbind alone at the foot of its page.
+struct ControllerOffers: Equatable {
     /// Open gamepad or the lent screens, Reconnect while the PC is lost,
     /// Bind to or Find a PC while unbound; nil with nothing to offer.
     let strip: [RowMenuEntry<ControllerAction>]?
-    /// The red row at the foot; nil while nothing is bound.
+    /// The red row at the foot of the page; nil while nothing is bound.
     let unbind: RowActionItem<ControllerAction>?
 }
 
@@ -47,6 +47,80 @@ struct ApplyRowState: Equatable {
     let spinner: Bool
     let retry: String?
     let connectionId: String
+}
+
+/// Emulate as: Dish's four pads, or the protocol's four while the pad is
+/// bound to a Moonlight host.
+struct ControllerEmulateState: Equatable {
+    let title: String
+    let emulateAs: EmulatedPad
+    let options: [EmulateOption]
+    /// The protocol's picker, which takes the place of Dish's four pads
+    /// while the pad is bound to a Moonlight host.
+    let host: MoonlightHostEmulateState?
+}
+
+/// Emulate as for a pad on a Moonlight host: Auto and the protocol's three
+/// types, the one picked (nil for Auto) and the line under the picker.
+struct MoonlightHostEmulateState: Equatable {
+    let options: [MoonlightEmulateOption]
+    let selection: Int?
+    let detail: String
+}
+
+/// The line under the Motion row: why motion does or does not reach the PC.
+struct MotionRowStatus: Equatable {
+    let text: String
+    let warns: Bool
+
+    var color: Color {
+        warns ? DishTheme.warning : DishTheme.muted
+    }
+}
+
+/// The gyro chip's state worded for the row; only the two states the
+/// satellite is to blame for warn, the rest read as the row's ordinary on
+/// and off.
+func motionRowStatus(_ state: MotionIndicatorState, words: L10n = .app) -> MotionRowStatus {
+    switch state {
+    case .unavailable: MotionRowStatus(text: words.motionNoGyroscope, warns: false)
+    case .userDisabled: MotionRowStatus(text: words.motionTurnedOff, warns: false)
+    case .notForwarded: MotionRowStatus(text: words.motionNotSent, warns: false)
+    case .noHostSink: MotionRowStatus(text: words.motionHostCannotReceive, warns: true)
+    case .backendBroken: MotionRowStatus(text: words.motionServerCannotDeliver, warns: true)
+    case .forwarding: MotionRowStatus(text: words.motionStreaming, warns: false)
+    }
+}
+
+/// The pad, the switch, the binding and the satellite's word, most blocking
+/// first; a satellite that has not answered yet reads as fine.
+func motionIndicator(_ controller: ControllerFact, switchOn: Bool) -> MotionIndicatorState {
+    motionIndicatorFor(MotionIndicatorInputs(
+        hasGyro: true,
+        userEnabled: switchOn,
+        carriesOnConnection: controller.motion.carries,
+        hostHasSinkForType: controller.motion.status?.sinkSupportedForType ?? true,
+        backendOk: controller.motion.status?.backendOk ?? true
+    ))
+}
+
+/// One switch of FUNCTIONS.
+struct ControllerFunctionRowState: Equatable, Identifiable {
+    let feature: SlotSwitch
+    let symbol: String
+    let title: String
+    let isOn: Bool
+    let status: MotionRowStatus?
+
+    var id: SlotSwitch {
+        feature
+    }
+}
+
+/// FUNCTIONS: the switches the pad has the hardware for.
+struct ControllerFunctionsState: Equatable {
+    let title: String
+    let rows: [ControllerFunctionRowState]
 }
 
 /// One rate of TELEMETRY: the stream and its rate.
@@ -63,18 +137,26 @@ struct ControllerTelemetryState: Equatable {
     let rows: [TelemetryRowState]
 }
 
-/// The page for a pad that is attached.
+/// The page for a pad that is attached: what it is set to, over where it
+/// sends; its actions are its row's.
 struct ControllerPadState: Equatable {
     let id: String
     let status: ControllerStatusState
-    let actions: ControllerPageActions
     let binding: ControllerBindingState
     /// The bind in flight or just ended for this pad; nil otherwise.
     let apply: ApplyRowState?
     /// "Updating…" while the PC applies the pad's settings; nil otherwise.
     let updating: String?
+    let emulate: ControllerEmulateState
+    /// Nil for a pad with no switch to offer: the section is left out.
+    let functions: ControllerFunctionsState?
+    let footnote: String
+    /// The row that pushes the Dead zones page; nil for the on-screen gamepad.
+    let deadZones: String?
     /// Nil until the pad has sent a report.
     let telemetry: ControllerTelemetryState?
+    /// Unbind, the red row at the foot; nil while nothing is bound.
+    let unbind: RowActionItem<ControllerAction>?
 }
 
 enum ControllerContent: Equatable {
@@ -83,15 +165,12 @@ enum ControllerContent: Equatable {
     case gone(message: String)
 }
 
-/// A controller's page (C1): what the pad is and does, with Edit on the
-/// toolbar for what it is set to.
+/// A controller's page (C1): what the pad is set to, over where it sends.
 struct ControllerPageState: Equatable {
     let title: String
     /// "84% battery · USB-C"; empty while the pad is away.
     let subtitle: String
     let content: ControllerContent
-    /// Edit, which pushes the pad's edit page; nil while the pad is away.
-    let edit: String?
 }
 
 /// `paired` are the PCs the pad can be bound to; `apply` the bind in flight
@@ -110,15 +189,13 @@ func controllerPageState(
         return ControllerPageState(
             title: pageTitle(.controller(id: id), words: words),
             subtitle: "",
-            content: .gone(message: words.controllerGone),
-            edit: nil
+            content: .gone(message: words.controllerGone)
         )
     }
     return ControllerPageState(
         title: controllerName(controller, words: words),
         subtitle: controllerSubtitle(controller, port: port, words: words),
-        content: .pad(controllerPadState(controller, paired: paired, apply: apply, pads: pads, port: port, words: words)),
-        edit: words.edit
+        content: .pad(controllerPadState(controller, paired: paired, apply: apply, pads: pads, port: port, words: words))
     )
 }
 
@@ -135,7 +212,9 @@ private func controllerPadState(
     port: DevicePort,
     words: L10n
 ) -> ControllerPadState {
-    ControllerPadState(
+    let rows = controller.features.map { functionRow($0, of: controller, words: words) }
+    let offers = controllerOffers(controllerRowActions(controller, paired: paired, words: words))
+    return ControllerPadState(
         id: controller.id,
         status: ControllerStatusState(
             symbol: controllerSymbol(controller.link),
@@ -143,7 +222,6 @@ private func controllerPadState(
             line: statusLine(controller, port: port, words: words),
             mark: destinationMark(controller.destination?.health)
         ),
-        actions: controllerPageActions(controllerRowActions(controller, paired: paired, words: words)),
         binding: ControllerBindingState(
             title: words.binding,
             destinationTitle: words.destination,
@@ -152,22 +230,25 @@ private func controllerPadState(
         ),
         apply: applyRowState(apply, slotId: controller.id, words: words),
         updating: updatingLine(controller, words: words),
-        telemetry: telemetryState(controller, readings: pads, words: words)
+        emulate: ControllerEmulateState(
+            title: words.setupEmulateAs,
+            emulateAs: controller.emulateAs,
+            options: EmulatedPad.allCases.map { EmulateOption(pad: $0, name: emulatedPadName($0, words: words)) },
+            host: hostEmulateState(controller, words: words)
+        ),
+        functions: rows.isEmpty ? nil : ControllerFunctionsState(title: words.functions, rows: rows),
+        footnote: words.noPadAudio,
+        deadZones: hasDeadZones(controller.link) ? words.deadZones : nil,
+        telemetry: telemetryState(controller, readings: pads, words: words),
+        unbind: offers.unbind
     )
 }
 
-/// "Updating…" while the PC the pad is bound to applies its settings.
-func updatingLine(_ controller: ControllerFact, words: L10n = .app) -> String? {
-    guard controller.destination?.updating == true else { return nil }
-    return words.updating
-}
-
-/// The page offers what the row's menu does: all of it but Unbind in the
-/// strip under the card, and Unbind, which takes the binding away, alone
-/// at the foot.
-func controllerPageActions(_ actions: RowActionsState<ControllerAction>) -> ControllerPageActions {
+/// The row's strip offers what its menu does, all but Unbind, which takes
+/// the binding away and stands alone at the foot of the page.
+func controllerOffers(_ actions: RowActionsState<ControllerAction>) -> ControllerOffers {
     let strip = actions.menu.filter { !takesAway($0) }
-    return ControllerPageActions(
+    return ControllerOffers(
         strip: strip.isEmpty ? nil : strip,
         unbind: actions.menu.compactMap(menuItem).first(where: \.destructive)
     )
@@ -187,7 +268,7 @@ private func menuItem(_ entry: RowMenuEntry<ControllerAction>) -> RowActionItem<
     }
 }
 
-/// The PC the pad sends to beside its dot, or Not bound.
+/// The PC the pad sends to beside its mark, or Not bound.
 private func bindingDestination(_ controller: ControllerFact, words: L10n) -> BindingDestinationState {
     guard let destination = controller.destination else { return .unbound(note: words.notBound) }
     return .bound(pcName: destination.name, mark: destinationMark(destination.health))
@@ -197,6 +278,32 @@ private func bindingDestination(_ controller: ControllerFact, words: L10n) -> Bi
 private func bindingHint(_ controller: ControllerFact, paired: [ConnectionFact], words: L10n) -> String? {
     guard controller.destination == nil, paired.isEmpty else { return nil }
     return words.pairAPCToBind
+}
+
+/// "Updating…" while the PC the pad is bound to applies its settings.
+func updatingLine(_ controller: ControllerFact, words: L10n = .app) -> String? {
+    guard controller.destination?.updating == true else { return nil }
+    return words.updating
+}
+
+/// The on-screen gamepad has no stick drift to tune out.
+private func hasDeadZones(_ link: ControllerLink) -> Bool {
+    switch link {
+    case .usbC, .bluetooth: true
+    case .onScreen: false
+    }
+}
+
+/// The protocol's picker for a pad bound to a Moonlight host; nil for any
+/// other pad, which keeps Dish's four.
+private func hostEmulateState(_ controller: ControllerFact, words: L10n) -> MoonlightHostEmulateState? {
+    guard let emulation = controller.hostEmulation, let host = controller.destination?.name else { return nil }
+    let hasMotion = controller.features.contains { $0.feature == .motion }
+    return MoonlightHostEmulateState(
+        options: moonlightEmulateOptions(words: words),
+        selection: moonlightEmulateSelection(emulation),
+        detail: moonlightEmulateDetail(emulation, hasMotion: hasMotion, host: host, words: words)
+    )
 }
 
 /// The Gamepad rate, and the motion and touch rates when the pad has the
@@ -261,6 +368,46 @@ private func statusLine(_ controller: ControllerFact, port: DevicePort, words: L
     let battery = [controller.batteryPercent.map(words.batteryPercent)].compactMap(\.self)
     let parts = [linkWord(controller.link, port: port, words: words), padFamilyName(controller.family, words: words)] + battery
     return parts.joined(separator: lineSeparator)
+}
+
+private func functionRow(_ fact: ControllerFeatureFact, of controller: ControllerFact, words: L10n) -> ControllerFunctionRowState {
+    ControllerFunctionRowState(
+        feature: fact.feature,
+        symbol: functionSymbol(fact.feature),
+        title: functionTitle(fact.feature, words: words),
+        isOn: fact.enabled,
+        status: motionStatus(fact, of: controller, words: words)
+    )
+}
+
+/// Only the Motion row has a line under it.
+private func motionStatus(_ fact: ControllerFeatureFact, of controller: ControllerFact, words: L10n) -> MotionRowStatus? {
+    switch fact.feature {
+    case .motion: motionRowStatus(motionIndicator(controller, switchOn: fact.enabled), words: words)
+    case .rumble, .triggerEffects, .lightbar, .playerLeds, .touchpad: nil
+    }
+}
+
+func functionTitle(_ feature: SlotSwitch, words: L10n = .app) -> String {
+    switch feature {
+    case .motion: words.setupMotion
+    case .rumble: words.carriesRumble
+    case .triggerEffects: words.adaptiveTriggers
+    case .lightbar: words.lightBar
+    case .playerLeds: words.playerLeds
+    case .touchpad: words.carriesTouchpad
+    }
+}
+
+func functionSymbol(_ feature: SlotSwitch) -> String {
+    switch feature {
+    case .motion: "gyroscope"
+    case .rumble: "iphone.radiowaves.left.and.right"
+    case .triggerEffects: "l2.button.roundedtop.horizontal"
+    case .lightbar: "lightbulb"
+    case .playerLeds: "person.crop.circle"
+    case .touchpad: "hand.point.up.left"
+    }
 }
 
 /// The word for the pad's family; a family the catalog has no pad for is a

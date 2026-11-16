@@ -99,18 +99,24 @@ package enum SessionPhase: Equatable {
     /// No session is up; the PC the person reached for, with pads bound to
     /// it, is being connected to.
     case reconnecting
+    /// The PC with pads bound to it cannot be used, and the rows say why;
+    /// Reconnect tries again.
+    case failed(ConnectionFailure)
 }
 
 /// The live link the session accessory shows on every tab, or the one
 /// being brought back.
 package struct SessionFact: Equatable {
+    /// The PC's connection id; empty in a fixture that names none.
+    package let id: String
     package let pcName: String
     package let pads: Int
     /// Nil until the first round trip is measured, and while reconnecting.
     package let latencyMs: Int?
     package let phase: SessionPhase
 
-    package init(pcName: String, pads: Int, latencyMs: Int?, phase: SessionPhase) {
+    package init(id: String = "", pcName: String, pads: Int, latencyMs: Int?, phase: SessionPhase) {
+        self.id = id
         self.pcName = pcName
         self.pads = pads
         self.latencyMs = latencyMs
@@ -132,11 +138,12 @@ package struct AddedByAddressFact: Equatable {
     }
 }
 
-/// A failure the person's last attempt left, shown while the PC is neither
-/// up nor being reached for again; nil otherwise.
+/// A failure the last attempt left, shown while the PC is neither up with
+/// its acks flowing nor being reached for again; a session that falters
+/// shows the failure that explains it.
 package func attemptNotice(_ failure: ConnectionFailure?, live: LinkState) -> ConnectionFailure? {
     switch live {
-    case .connected, .connecting, .unstable: nil
-    case .stale, .saved, .ready: failure
+    case .connected, .connecting: nil
+    case .unstable, .stale, .saved, .ready: failure
     }
 }

@@ -103,9 +103,34 @@ final class ControllersMappersTests: XCTestCase {
             battery: "84%",
             batteryColor: DishTheme.muted,
             page: .controller(id: "pad"),
+            strip: nil,
             actions: RowActionsState(menu: [.item(RowItems.unbind)], leading: [], trailing: [RowItems.unbind])
         )
         XCTAssertEqual(state.rows, [row])
+    }
+
+    /// The row's strip offers what its menu does but Unbind, which stands
+    /// alone at the foot of the page: Open gamepad once the on-screen
+    /// controller is bound, the screens the phone lends a pad, Find a PC
+    /// with nothing paired; a bound pad with nothing to open has none.
+    func testTheRowsStripOffersWhatItsMenuDoesButUnbind() {
+        let onScreen = controllerRow(ControllerFixture.pad(name: "", link: .onScreen, battery: nil))
+        XCTAssertEqual(onScreen.strip, [.item(RowItems.openGamepad)])
+        let lent = ControllerFact(
+            id: "pad",
+            name: "Xbox Wireless Controller",
+            link: .bluetooth,
+            batteryPercent: 41,
+            destination: DestinationFact(id: "lr", name: "Living Room PC", health: .online),
+            surfaces: [.touchpad, .mouse]
+        )
+        XCTAssertEqual(controllerRow(lent).strip, [.item(RowItems.touchpad), .item(RowItems.mouse)])
+        XCTAssertEqual(controllerRow(ControllerFixture.pad(destination: nil)).strip, [.item(RowItems.find)])
+        XCTAssertNil(controllerRow(ControllerFixture.pad()).strip, "a bound DualSense streams its own trackpad")
+        XCTAssertNil(
+            controllerRow(ControllerFixture.pad(destination: nil, supported: false)).strip,
+            "nothing to offer a pad Dish cannot read"
+        )
     }
 
     func testAPadDishCannotReadSaysSoAndOpensNothing() {

@@ -8,6 +8,8 @@ import SwiftUI
 /// choices opens them as a menu. Each tile calls `perform` with its action.
 struct ActionStrip<Action: Hashable & Sendable>: View {
     let entries: [RowMenuEntry<Action>]
+    /// The tiles' surface: the page's by default, the dim one inside a row.
+    var fill: Color = DishTheme.surface
     let perform: @MainActor (Action) -> Void
 
     var body: some View {
@@ -18,7 +20,7 @@ struct ActionStrip<Action: Hashable & Sendable>: View {
                     Button {
                         perform(item.action)
                     } label: {
-                        ActionTile(title: item.title, symbol: item.symbol)
+                        ActionTile(title: item.title, symbol: item.symbol, fill: fill)
                     }
                     .buttonStyle(.plain)
                 case let .submenu(title, symbol, items):
@@ -31,7 +33,7 @@ struct ActionStrip<Action: Hashable & Sendable>: View {
                             }
                         }
                     } label: {
-                        ActionTile(title: title, symbol: symbol)
+                        ActionTile(title: title, symbol: symbol, fill: fill)
                     }
                     .buttonStyle(.plain)
                 }
@@ -40,10 +42,11 @@ struct ActionStrip<Action: Hashable & Sendable>: View {
     }
 }
 
-/// One tile: the glyph over the word, on the surface.
+/// One tile: the glyph over the word, on its surface.
 private struct ActionTile: View {
     let title: String
     let symbol: String
+    let fill: Color
 
     var body: some View {
         VStack(spacing: DishSpace.s2) {
@@ -54,7 +57,7 @@ private struct ActionTile: View {
         .frame(maxWidth: .infinity)
         .padding(.vertical, DishSpace.s6)
         .padding(.horizontal, DishSpace.s2)
-        .background(RoundedRectangle(cornerRadius: DishSize.actionTileCorner).fill(DishTheme.surface))
+        .background(RoundedRectangle(cornerRadius: DishSize.actionTileCorner).fill(fill))
         .contentShape(RoundedRectangle(cornerRadius: DishSize.actionTileCorner))
     }
 }

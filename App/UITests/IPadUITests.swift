@@ -35,9 +35,8 @@ final class IPadUITests: XCTestCase {
         XCUIDevice.shared.orientation = .landscapeLeft
         let app = ShellUI.launch(welcomeCompleted: true, extraArguments: ShellUI.withARememberedPC)
         ShellUI.bindTheOnScreenGamepad(in: app)
-        ShellUI.openTheOnScreenGamepadsPage(in: app)
         let open = app.buttons["Open gamepad"].firstMatch
-        XCTAssertTrue(open.waitForExistence(timeout: 5), "the gamepad opens from its page once a PC is bound to it")
+        XCTAssertTrue(open.waitForExistence(timeout: 10), "the gamepad opens from its row once a PC is bound to it")
         open.tap()
         let pause = app.buttons["Pause"].firstMatch
         XCTAssertTrue(pause.waitForExistence(timeout: 5))

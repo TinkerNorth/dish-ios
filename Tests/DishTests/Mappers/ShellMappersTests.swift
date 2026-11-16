@@ -99,6 +99,50 @@ final class ShellMappersTests: XCTestCase {
         XCTAssertEqual(sessionBarState(FactsFixture.reconnecting, lowPower: counting), sessionBarState(FactsFixture.reconnecting))
     }
 
+    /// A bound PC's failure takes the accessory's problem shape, worded for
+    /// the PC, with Reconnect.
+    func testABoundPCsFailureIsWordedOnTheAccessoryWithReconnect() {
+        let failed = SessionFact(id: "lr", pcName: "Living Room PC", pads: 2, latencyMs: nil, phase: .failed(.dataPathBlocked))
+        XCTAssertEqual(
+            sessionBarState(failed),
+            .problem(
+                pcName: "Living Room PC",
+                line: "No data gets through to Living Room PC. The network may block traffic between devices, or the PC’s firewall does.",
+                reconnect: "Reconnect"
+            )
+        )
+        let taken = SessionFact(id: "lr", pcName: "Living Room PC", pads: 1, latencyMs: nil, phase: .failed(.sessionReplaced))
+        XCTAssertEqual(
+            sessionBarState(taken),
+            .problem(
+                pcName: "Living Room PC",
+                line: "Another device took over Living Room PC. Connect to take it back.",
+                reconnect: "Reconnect"
+            )
+        )
+    }
+
+    /// A PC counts once on the badge, whether it is the session's or a
+    /// paired row's; a session with no row of its own counts apart.
+    func testTheBadgeCountsAPCOnce() {
+        let faltering = ConnectionFact(
+            id: "lr",
+            name: "Living Room PC",
+            address: "192.168.1.24",
+            kind: .satellite,
+            state: .unsteady(latencyMs: 40, controllers: 2)
+        )
+        let stopped = SessionFact(id: "lr", pcName: "Living Room PC", pads: 2, latencyMs: 40, phase: .stoppedResponding)
+        XCTAssertEqual(connectionsBadge(session: stopped, paired: [faltering]), 1)
+        XCTAssertEqual(
+            connectionsBadge(session: FactsFixture.stopped, paired: [faltering]),
+            2,
+            "a session with no row of its own counts apart"
+        )
+        let failed = SessionFact(id: "lr", pcName: "Living Room PC", pads: 2, latencyMs: nil, phase: .failed(.sessionReplaced))
+        XCTAssertEqual(connectionsBadge(session: failed, paired: []), 1)
+    }
+
     func testAPCThatStoppedRespondingOffersReconnect() {
         XCTAssertEqual(
             sessionBarState(FactsFixture.stopped),
@@ -111,6 +155,9 @@ final class ShellMappersTests: XCTestCase {
         XCTAssertFalse(idleTimerDisabled(facts: FactsFixture.shell()), "nothing streams")
         XCTAssertTrue(idleTimerDisabled(facts: FactsFixture.shell(session: FactsFixture.streaming())))
         XCTAssertTrue(idleTimerDisabled(facts: FactsFixture.shell(session: FactsFixture.stopped)), "Reconnect is still on screen")
+        XCTAssertFalse(idleTimerDisabled(facts: FactsFixture.shell(session: FactsFixture.reconnecting)), "nothing streams yet")
+        let failed = SessionFact(pcName: "Living Room PC", pads: 1, latencyMs: nil, phase: .failed(.dataPathBlocked))
+        XCTAssertFalse(idleTimerDisabled(facts: FactsFixture.shell(session: failed)), "nothing streams")
         XCTAssertFalse(idleTimerDisabled(facts: FactsFixture.shell(session: FactsFixture.streaming(), preferences: off)))
     }
 
@@ -122,7 +169,6 @@ final class ShellMappersTests: XCTestCase {
 
     func testAPushedControllerPageFallsBackToTheGenericTitle() {
         XCTAssertEqual(pageTitle(.controller(id: "pad")), "Controller")
-        XCTAssertEqual(pageTitle(.editController(id: "pad")), "Edit controller")
         XCTAssertEqual(pageTitle(.deviceName), "Name on your PC")
     }
 

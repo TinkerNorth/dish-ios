@@ -64,5 +64,7 @@ func connectionFailureText(_ failure: ConnectionFailure, name: String, words: L1
     case .noServersFound: words.noPCsFoundYet
     case .localNetworkDenied: words.cantSeeYourNetwork
     case .pairingRejected: words.pinNotAccepted(name)
+    case .dataPathBlocked: words.noDataGetsThrough(name)
+    case .sessionReplaced: words.anotherDeviceTookOver(name)
     }
 }

@@ -86,7 +86,7 @@ extension WifiConnectionManager {
                 await openSession(conn: conn, server: server, intent: intent)
             }
         case .refused:
-            failRefusedOpen(conn, server: server, id: id, intent: intent, detail: resp.error)
+            failRefusedOpen(conn, server: server, id: id, intent: intent, response: resp)
         case let .granted(grant):
             let opened = OpenedSession(grant: grant, response: resp, sent: descriptors)
             await adoptGrant(opened, conn: conn, server: server, pairingKey: pairingKey, intent: intent)
@@ -145,7 +145,7 @@ extension WifiConnectionManager {
         case .retryLower:
             return true
         case let .failed(failure):
-            emitFailureIfUserInitiated(conn.id, intent, failure)
+            emitFailure(conn.id, intent, failure)
             return false
         }
     }
@@ -166,20 +166,24 @@ extension WifiConnectionManager {
         if intent != .userInitiated {
             markStale(id)
         }
-        emitFailureIfUserInitiated(id, intent, .noSharedKey)
+        emitFailure(id, intent, .noSharedKey)
     }
 
-    /// Down, moved or malformed. A TOFU mismatch aborted the handshake before
-    /// any bytes flowed and is an identity problem no retry can outrun; a
-    /// plain failure on a silent attempt re-enters the backoff curve.
-    private func failRefusedOpen(_ conn: WifiConnection, server: DiscoveredServer, id: String, intent: ConnectIntent, detail: String?) {
+    /// Down, moved, refused or malformed. A TOFU mismatch aborted the
+    /// handshake before any bytes flowed and is an identity problem no retry
+    /// can outrun; any other failure on a silent attempt re-enters the
+    /// backoff curve.
+    private func failRefusedOpen(
+        _ conn: WifiConnection,
+        server: DiscoveredServer,
+        id: String,
+        intent: ConnectIntent,
+        response: SessionResponse
+    ) {
         conn.markDisconnected()
         let identityChanged = pinMismatches.consume(server.ip)
-        if identityChanged {
-            emitFailureIfUserInitiated(id, intent, .identityChanged)
-        } else if intent == .userInitiated {
-            emit(.failure(serverId: id, .sessionRefused(detail: detail)))
-        } else {
+        emitFailure(id, intent, refusedOpenFailure(identityChanged: identityChanged, reachable: response.reachable, detail: response.error))
+        if intent != .userInitiated, !identityChanged {
             scheduleRetry(id)
         }
     }
@@ -206,7 +210,7 @@ extension WifiConnectionManager {
               let udpPort = UInt16(exactly: server.udpPort) else
         {
             conn.markDisconnected()
-            emitFailureIfUserInitiated(id, intent, .badSessionMaterial)
+            emitFailure(id, intent, .badSessionMaterial)
             return
         }
         // The SETTLED version, never the offer: a pre-versioning satellite
@@ -222,9 +226,8 @@ extension WifiConnectionManager {
         )
         guard aimed else {
             conn.markDisconnected()
-            if intent == .userInitiated {
-                emit(.failure(serverId: id, .sessionLinkFailed))
-            } else {
+            emitFailure(id, intent, .sessionLinkFailed)
+            if intent != .userInitiated {
                 scheduleRetry(id)
             }
             return
@@ -305,7 +308,7 @@ extension WifiConnectionManager {
     }
 
     func reportSlotNotApplied(_ slotId: String, on id: String) {
-        emit(.failure(serverId: id, .controllerNotApplied))
+        emit(.failure(serverId: id, .controllerNotApplied, attempt: .own))
         onSlotRegistrationFailed?(slotId)
     }
 
@@ -394,4 +397,12 @@ extension WifiConnectionManager {
         conn.adoptProtocol(negotiated)
         conn.setLastAppliedEpoch(resp.epoch)
     }
+}
+
+/// What a PUT that did not grant means: an identity that changed, a PC
+/// that gave no HTTPS answer at all, or one that answered and refused.
+func refusedOpenFailure(identityChanged: Bool, reachable: Bool, detail: String?) -> ConnectionFailure {
+    if identityChanged { return .identityChanged }
+    guard reachable else { return .unreachable(detail: detail ?? "") }
+    return .sessionRefused(detail: detail)
 }

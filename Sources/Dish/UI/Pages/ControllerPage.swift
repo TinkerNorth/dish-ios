@@ -5,21 +5,33 @@ import DishCore
 import DishEngine
 import SwiftUI
 
-/// What the controller page does: its actions through the one dispatch its
-/// row shares, and Edit, which pushes the edit page.
+/// What the controller page does: its settings, each an intent, and Unbind
+/// through the one dispatch its row shares.
 struct ControllerActions {
     let act: @MainActor (ControllerAction) -> Void
-    let edit: @MainActor () -> Void
+    let setFeature: @MainActor (SlotSwitch, Bool) -> Void
+    let setEmulateAs: @MainActor (EmulatedPad) -> Void
+    /// A pad on a Moonlight host: the protocol's type, nil for Auto.
+    let setHostEmulateAs: @MainActor (Int?) -> Void
+    /// The Dead zones row: that page, pushed.
+    let openDeadZones: @MainActor () -> Void
 
     /// Controls that do nothing, for a preview.
-    @MainActor static let preview = ControllerActions(act: { _ in }, edit: {})
+    @MainActor static let preview = ControllerActions(
+        act: { _ in },
+        setFeature: { _, _ in },
+        setEmulateAs: { _ in },
+        setHostEmulateAs: { _ in },
+        openDeadZones: {}
+    )
 }
 
-/// Controllers › a controller (C1): what the pad is and does. The status
-/// card, the strip of what it offers (Open gamepad or the lent screens,
-/// Reconnect, Bind to or Find a PC), BINDING with the PC it sends to and
-/// the apply inline, TELEMETRY once it has reported, and Unbind at the
-/// foot; Edit on the toolbar pushes what it is set to.
+/// Controllers › a controller (C1): what the pad is set to, over where it
+/// sends. The status card, BINDING with the PC it sends to and the apply
+/// inline, Emulate as, FUNCTIONS with the switches the pad has, the Dead
+/// zones row, TELEMETRY once it has reported, and Unbind at the foot; each
+/// change lands as it is made, so there is no Done. What the pad offers to
+/// do is its row's.
 struct ControllerPage: View {
     let id: String
 
@@ -42,12 +54,30 @@ struct ControllerPage: View {
                 port: model.controllersFacts.port,
                 id: id
             ),
-            actions: ControllerActions(act: ControllerActionRouter(model: model, navigation: navigation).perform, edit: edit)
+            actions: ControllerActions(
+                act: ControllerActionRouter(model: model, navigation: navigation).perform,
+                setFeature: setFeature,
+                setEmulateAs: setEmulateAs,
+                setHostEmulateAs: setHostEmulateAs,
+                openDeadZones: openDeadZones
+            )
         )
     }
 
-    private func edit() {
-        navigation.send(.push(.editController(id: id)))
+    private func setFeature(_ feature: SlotSwitch, _ enabled: Bool) {
+        model.setControllerFeature(slotId: id, feature, enabled: enabled)
+    }
+
+    private func setEmulateAs(_ pad: EmulatedPad) {
+        model.setEmulatedType(slotId: id, pad)
+    }
+
+    private func setHostEmulateAs(_ type: Int?) {
+        model.setMoonlightEmulatedType(slotId: id, type)
+    }
+
+    private func openDeadZones() {
+        navigation.send(.push(.deadZones(id: id)))
     }
 }
 
@@ -72,18 +102,10 @@ struct ControllerPageBody: View {
         .navigationTitle(state.title)
         .navigationSubtitle(state.subtitle)
         .navigationBarTitleDisplayMode(.inline)
-        .toolbar {
-            if let edit = state.edit {
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button(edit, action: actions.edit)
-                }
-            }
-        }
     }
 }
 
-/// The sections of an attached pad's page: the card, the strip under it,
-/// BINDING, TELEMETRY and Unbind at the foot.
+/// The sections of an attached pad's page, in the board's order.
 private struct ControllerPadSections: View {
     let state: ControllerPadState
     let actions: ControllerActions
@@ -93,18 +115,22 @@ private struct ControllerPadSections: View {
             ControllerStatusCard(state: state.status)
         }
         .listRowBackground(DishTheme.surface)
-        if let strip = state.actions.strip {
-            Section {
-                ActionStrip(entries: strip, perform: actions.act)
-            }
-            .listRowBackground(EmptyView())
-            .listRowInsets(EdgeInsets())
-        }
         ControllerBindingSection(state: state.binding, apply: state.apply, updating: state.updating, retry: retry)
+        ControllerEmulateSection(state: state.emulate, setEmulateAs: actions.setEmulateAs, setHostEmulateAs: actions.setHostEmulateAs)
+        if let functions = state.functions {
+            ControllerFunctionsSection(state: functions, footnote: state.footnote, setFeature: actions.setFeature)
+        } else {
+            Section {} footer: {
+                Text(state.footnote).font(DishFont.detail).foregroundStyle(DishTheme.muted)
+            }
+        }
+        if let deadZones = state.deadZones {
+            ControllerDeadZonesSection(title: deadZones, open: actions.openDeadZones)
+        }
         if let telemetry = state.telemetry {
             ControllerTelemetrySection(state: telemetry)
         }
-        if let unbind = state.actions.unbind {
+        if let unbind = state.unbind {
             ControllerUnbindSection(item: unbind, perform: actions.act)
         }
     }
@@ -133,23 +159,6 @@ private struct ControllerPadSections: View {
     }
 }
 
-#Preview("Xbox, lent the touchpad and the mouse, PC lost") {
-    let pad = ControllerFact(
-        id: "pad",
-        name: "Xbox Wireless Controller",
-        link: .bluetooth,
-        batteryPercent: 41,
-        destination: DestinationFact(id: "lr", name: "Living Room PC", health: .lost),
-        family: .xbox,
-        emulateAs: .xboxWireless,
-        features: [ControllerFeatureFact(feature: .rumble, enabled: true)],
-        surfaces: [.touchpad, .mouse]
-    )
-    NavigationStack {
-        ControllerPageBody(state: controllerPageState(controllers: [pad], id: "pad"), actions: .preview)
-    }
-}
-
 #Preview("Xbox, unbound") {
     let pad = ControllerFact(
         id: "pad",
@@ -164,6 +173,13 @@ private struct ControllerPadSections: View {
     let living = ConnectionFact(id: "lr", name: "Living Room PC", address: "192.168.1.24", kind: .satellite, state: .offline(lastSeen: nil))
     NavigationStack {
         ControllerPageBody(state: controllerPageState(controllers: [pad], paired: [living], id: "pad"), actions: .preview)
+    }
+}
+
+#Preview("On-screen gamepad") {
+    let onScreen = ControllerFact(id: "on-screen", name: "", link: .onScreen, batteryPercent: nil, destination: nil)
+    NavigationStack {
+        ControllerPageBody(state: controllerPageState(controllers: [onScreen], id: "on-screen"), actions: .preview)
     }
 }
 

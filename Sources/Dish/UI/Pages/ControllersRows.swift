@@ -3,10 +3,11 @@
 
 import SwiftUI
 
-/// One controller: its glyph, name, destination line and battery, and no
-/// button, as iOS keeps a row. A row with a page opens it, pushed with a
-/// chevron from a stack, selected beside a split's list; a pad Dish cannot
-/// read has none. A long press and a swipe offer the row's actions.
+/// One controller: its glyph, name, destination line and battery, and under
+/// them the strip of what it offers, as Android's card carries its buttons.
+/// A row with a page opens the controller's settings, pushed with a chevron
+/// from a stack, selected beside a split's list; a pad Dish cannot read has
+/// none. A long press and a swipe offer the same actions.
 struct ControllerRow: View {
     let state: ControllerRowState
     var layout = TabLayout.stack
@@ -16,20 +17,33 @@ struct ControllerRow: View {
     var body: some View {
         switch rowOpening(state.page, layout: layout) {
         case let .push(page):
-            Button {
-                open(page)
-            } label: {
-                ControllerRowContent(state: state, disclosure: true)
+            VStack(alignment: .leading, spacing: DishSpace.s4) {
+                Button {
+                    open(page)
+                } label: {
+                    ControllerRowContent(state: state, disclosure: true)
+                }
+                .buttonStyle(.borderless)
+                strip
             }
-            .buttonStyle(.borderless)
             .modifier(rowActions)
         case let .select(page):
-            ControllerRowContent(state: state, disclosure: false)
-                .modifier(rowActions)
-                .tag(page)
+            VStack(alignment: .leading, spacing: DishSpace.s4) {
+                ControllerRowContent(state: state, disclosure: false)
+                strip
+            }
+            .modifier(rowActions)
+            .tag(page)
         case .inert:
             ControllerRowContent(state: state, disclosure: false)
                 .modifier(rowActions)
+        }
+    }
+
+    /// What the controller offers, as tiles on the row's dim surface.
+    @ViewBuilder private var strip: some View {
+        if let strip = state.strip {
+            ActionStrip(entries: strip, fill: DishTheme.surfaceDim, perform: act)
         }
     }
 
@@ -84,7 +98,6 @@ private struct ControllerDestinationLine: View {
     }
 }
 
-/// The empty state's one line above the Add button.
 /// Add a controller: a full-width capsule on the dim surface, the accent
 /// label with a plus, the hint under it, and TipKit's hint beside it.
 struct AddControllerButton: View {

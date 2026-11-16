@@ -10,11 +10,18 @@ import Synchronization
 
 /// What the manager tells the app: a satellite that wants a PIN, or a failure
 /// the user may need to hear about.
+/// Whose attempt failed: one the person made, which its rows word, or a
+/// silent one of the pool's, which they word only when it says something
+/// the person must act on.
+package enum AttemptKind: Equatable {
+    case own
+    case silent
+}
+
 package enum ConnectionEvent: Equatable {
     case pairingRequired(DiscoveredServer)
-    /// An attempt the person made on the satellite failed; its rows carry
-    /// the reason until the next attempt.
-    case failure(serverId: String, ConnectionFailure)
+    /// An attempt on the satellite failed; the rows word it by whose it was.
+    case failure(serverId: String, ConnectionFailure, attempt: AttemptKind)
     /// A scan the person asked for failed.
     case scanFailed(ConnectionFailure)
     /// A pairing attempt's failure, which the pairing card for that satellite
@@ -40,8 +47,17 @@ final class PinMismatchLog: Sendable {
     }
 }
 
-/// Who asked for a connect. Only a user-initiated attempt may surface a
-/// failure; the automatic ones report through the row's state alone.
+/// Whose attempt an intent is: the person's own, or the pool's.
+func attemptKind(_ intent: ConnectIntent) -> AttemptKind {
+    switch intent {
+    case .userInitiated: .own
+    case .autoReconnect, .retryAfterDeath: .silent
+    }
+}
+
+/// Who asked for a connect. The person's own attempt is worded as a rule;
+/// the automatic ones report through the row's state, and their failure
+/// only when it says what the person must do.
 enum ConnectIntent {
     case userInitiated
     case autoReconnect
@@ -282,12 +298,10 @@ package final class WifiConnectionManager {
         Task { await pairAndConnect(conn: conn, server: server, intent: intent) }
     }
 
-    /// A failure is surfaced only for an attempt the user made; automatic
-    /// attempts report through the row's state.
-    func emitFailureIfUserInitiated(_ id: String, _ intent: ConnectIntent, _ failure: ConnectionFailure) {
-        if intent == .userInitiated {
-            emit(.failure(serverId: id, failure))
-        }
+    /// Every attempt's failure is told, marked by whose it was: the model
+    /// words the person's own, and a silent one when it says what they must do.
+    func emitFailure(_ id: String, _ intent: ConnectIntent, _ failure: ConnectionFailure) {
+        emit(.failure(serverId: id, failure, attempt: attemptKind(intent)))
     }
 
     /// Graceful close: `DELETE /api/connections/{id}`. The row and the key
@@ -368,7 +382,7 @@ package final class WifiConnectionManager {
         clearRetry(id)
         connections[id]?.markDisconnected()
         if loud {
-            emit(.failure(serverId: id, .repairNeeded))
+            emit(.failure(serverId: id, .repairNeeded, attempt: .own))
         }
     }
 

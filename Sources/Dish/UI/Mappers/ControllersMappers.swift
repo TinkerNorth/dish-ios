@@ -40,7 +40,10 @@ struct ControllerRowState: Equatable, Identifiable {
     /// The controller's page; nil for a pad Dish cannot read, which has
     /// nothing to set.
     let page: Page?
-    /// The long-press menu and the swipes.
+    /// The strip under the row: what the controller offers, as Android's
+    /// card carries its buttons; nil with nothing to offer.
+    let strip: [RowMenuEntry<ControllerAction>]?
+    /// The long-press menu and the swipes, which offer the same.
     let actions: RowActionsState<ControllerAction>
 }
 
@@ -115,6 +118,7 @@ func controllerRow(
     words: L10n = .app
 ) -> ControllerRowState {
     let line = rowLine(controller, apply: apply, port: port, words: words)
+    let actions = controllerRowActions(controller, paired: paired, words: words)
     return ControllerRowState(
         id: controller.id,
         symbol: controllerSymbol(controller.link),
@@ -124,7 +128,8 @@ func controllerRow(
         battery: controller.batteryPercent.map(words.batteryPercent),
         batteryColor: batteryColor(controller.batteryPercent),
         page: controller.supported ? .controller(id: controller.id) : nil,
-        actions: controllerRowActions(controller, paired: paired, words: words)
+        strip: controllerOffers(actions).strip,
+        actions: actions
     )
 }
 

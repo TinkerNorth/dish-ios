@@ -65,7 +65,6 @@ func pageTitle(_ page: Page, words: L10n = .app) -> String {
     switch page {
     case .deviceName: words.nameOnYourPC
     case .controller: words.controller
-    case .editController: words.editController
     case .pcDetail: words.pc
     case .help: words.helpAndFaq
     case .licenses: words.openSourceLicenses
@@ -105,24 +104,33 @@ func pairingSheetId(_ open: OpenPairing?) -> String? {
 /// responding, and each paired PC whose key was revoked or whose last
 /// attempt failed; nil while nothing does.
 func connectionsBadge(session: SessionFact?, paired: [ConnectionFact] = []) -> Int? {
-    let stopped = sessionNeedsAttention(session?.phase) ? 1 : 0
-    let pcs = paired.filter(needsAttention).count
-    let count = stopped + pcs
+    let pcs = paired.filter(needsAttention)
+    let counted = Set(pcs.map(\.id))
+    let sessionApart = sessionNeedsAttention(session?.phase) && !counted.contains(session?.id ?? "")
+    let count = pcs.count + (sessionApart ? 1 : 0)
     return count == 0 ? nil : count
 }
 
 private func sessionNeedsAttention(_ phase: SessionPhase?) -> Bool {
     switch phase {
-    case .stoppedResponding: true
+    case .stoppedResponding, .failed: true
     case .streaming, .reconnecting, nil: false
     }
 }
 
-/// A paired PC whose key was revoked, or whose last attempt failed.
+/// A paired PC whose key was revoked, whose acks falter, or whose last
+/// attempt failed.
 func needsAttention(_ pc: ConnectionFact) -> Bool {
     let revoked = pc.state == .needsPairing
     let failed = pc.notice != nil
-    return revoked || failed
+    return revoked || failed || isUnsteady(pc.state)
+}
+
+private func isUnsteady(_ state: ConnectionState) -> Bool {
+    switch state {
+    case .unsteady: true
+    case .online, .connecting, .offline, .needsPairing: false
+    }
 }
 
 /// `lowPower` is the countdown: its last seconds take the streaming line.
@@ -132,6 +140,12 @@ func sessionBarState(_ session: SessionFact?, lowPower: LowPowerFact = .idle, wo
     case .streaming: return streamingBar(session, lowPower: lowPower, words: words)
     case .stoppedResponding: return .problem(pcName: session.pcName, line: words.stoppedResponding, reconnect: words.reconnect)
     case .reconnecting: return .reconnecting(pcName: session.pcName, line: words.connecting)
+    case let .failed(failure):
+        return .problem(
+            pcName: session.pcName,
+            line: connectionFailureText(failure, name: session.pcName, words: words),
+            reconnect: words.reconnect
+        )
     }
 }
 
@@ -237,10 +251,18 @@ func idleTimerDisabled(facts: ShellFacts) -> Bool {
 }
 
 /// iOS suspends Dish when the screen locks, so the idle timer is held off
-/// while a session is up and the person asked to keep the screen on.
+/// while a session is up and the person asked to keep the screen on; a
+/// session being brought back or failed is not up.
 func idleTimerDisabled(session: SessionFact?, preferences: PreferencesFacts) -> Bool {
-    let sessionUp = session != nil
+    let sessionUp = sessionIsUp(session?.phase)
     return sessionUp && preferences.keepScreenOn
+}
+
+private func sessionIsUp(_ phase: SessionPhase?) -> Bool {
+    switch phase {
+    case .streaming, .stoppedResponding: true
+    case .reconnecting, .failed, nil: false
+    }
 }
 
 /// The scheme the Appearance setting forces; nil follows the system.

@@ -85,12 +85,22 @@ miss. `Tests/PARITY.md` lists everything not built.
   page while the PC takes it.
 - **The facts come in slices.** Each page reads the slice it maps, so it
   re-renders for that alone; Diagnostics alone reads the whole.
-- **A controller's page is its info page, with Edit.** A Controllers row
-  carries no button, as iOS keeps a row; its long-press menu and swipes
-  remain. The controller's page draws what it offers in a strip under its
-  card (Open gamepad, Open touchpad, Open mouse, Reconnect, Bind to, Find a
-  PC), BINDING, TELEMETRY and Unbind at the foot, and Edit on its toolbar
-  pushes Edit controller: Emulate as, Functions and Dead zones.
+- **A controller's row carries its actions; its page is its settings.**
+  A Controllers row draws what the controller offers under its line, as
+  Android's card does (Open gamepad, Open touchpad, Open mouse, Reconnect,
+  Bind to, Find a PC); its long-press menu and swipes offer the same. A tap
+  opens the controller's settings: BINDING, Emulate as, Functions, Dead
+  zones, Telemetry and Unbind at the foot.
+- **A blocked data path and a taken session are named.** A session that
+  opens but never hears an ack back, the silence a hotspot that keeps
+  devices apart or a firewall leaves, says so on the PC's row, its page
+  and the accessory, with Reconnect; so does a session another device took
+  over. A silent retry that fails because the PC is off still says nothing.
+- **A bind fails as soon as its reach does**, instead of waiting out its
+  budget.
+- **Low power waits for a pad.** The countdown arms only while a session
+  streams with a pad bound, never for a bare connection, one being brought
+  back, or one that stopped responding.
 - **The session accessory keeps Dim and loses Play.** The on-screen
   controller is a controller with its own Open now, so the accessory no
   longer opens its gamepad.

@@ -202,9 +202,20 @@ package extension AppModel {
         advanceApply(.putSent)
     }
 
+    /// The host carries the pad: the run that waited on it is done, and a
+    /// run that had failed on it is moot, so its word goes.
     internal func slotConfirmed(connectionId: String, slotId: String) {
+        let target = ApplyTarget(slotId: slotId, connectionId: connectionId)
+        if applyTarget == target, applyEndedFailed(bindingProgress) { advanceApply(.dismissed) }
         guard let watch = applyWatch, watch.slotId == slotId, watch.connectionId == connectionId else { return }
         advanceApply(.hostConfirmed)
+    }
+
+    /// The person reached for the PC again: a run that had failed on it is
+    /// moot, so its word goes and the rows read the link instead.
+    internal func dismissFailedApply(on connectionId: String) {
+        guard applyTarget?.connectionId == connectionId, applyEndedFailed(bindingProgress) else { return }
+        advanceApply(.dismissed)
     }
 
     internal func slotRefused(_ slotId: String) {
@@ -238,6 +249,15 @@ package extension AppModel {
         let next = reduceApply(before, event)
         if next != before { bindingProgress = next }
         if applyInFlight(before), !applyInFlight(next) { endApplyWatch() }
+    }
+}
+
+/// Whether a run ended in failure, the one word a later success or reach
+/// makes moot.
+func applyEndedFailed(_ progress: ApplyProgress) -> Bool {
+    switch progress {
+    case .failed: true
+    case .idle, .running, .done: false
     }
 }
 

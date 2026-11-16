@@ -82,7 +82,12 @@ final class AddressMappersTests: XCTestCase {
             (.controllerNotApplied, "The PC refused the controller."),
             (.noServersFound, "No PCs found yet."),
             (.localNetworkDenied, "Dish can’t see your network"),
-            (.pairingRejected(detail: nil), "That PIN wasn’t accepted. Check the code on 192.168.1.50 and try again.")
+            (.pairingRejected(detail: nil), "That PIN wasn’t accepted. Check the code on 192.168.1.50 and try again."),
+            (
+                .dataPathBlocked,
+                "No data gets through to 192.168.1.50. The network may block traffic between devices, or the PC’s firewall does."
+            ),
+            (.sessionReplaced, "Another device took over 192.168.1.50. Connect to take it back.")
         ]
         for (failure, text) in expected {
             XCTAssertEqual(connectionFailureText(failure, name: name), text)

@@ -77,6 +77,12 @@ final class FakeSatellite: @unchecked Sendable {
         udp.stop()
     }
 
+    /// The UDP side goes quiet: a session still opens over REST, and no
+    /// heartbeat ack ever comes back.
+    func silenceUdp() {
+        udp.stop()
+    }
+
     // MARK: - Identity / transport (TOFU material)
 
     var transport: Transport {

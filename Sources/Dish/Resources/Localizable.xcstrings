@@ -2797,6 +2797,40 @@
         }
       }
     },
+    "Another device took over %@. Connect to take it back." : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Drugi uređaj je preuzeo %@. Povežite se da ga vratite."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ein anderes Gerät hat %@ übernommen. Verbinde dich, um es zurückzuholen."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Otro dispositivo tomó el control de %@. Conéctate para recuperarlo."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Un autre appareil a pris %@. Connectez-vous pour le reprendre."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Outro dispositivo assumiu %@. Conecte-se para retomá-lo."
+          }
+        }
+      }
+    },
     "App" : {
       "comment" : "Connections page: the label of a Moonlight host's app picker.",
       "localizations" : {
@@ -6263,74 +6297,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Cada um é configurado de um jeito um pouco diferente."
-          }
-        }
-      }
-    },
-    "Edit" : {
-      "localizations" : {
-        "bs" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Uredi"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Bearbeiten"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Editar"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Modifier"
-          }
-        },
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Editar"
-          }
-        }
-      }
-    },
-    "Edit controller" : {
-      "localizations" : {
-        "bs" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Uredi kontroler"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Controller bearbeiten"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Editar el mando"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Modifier la manette"
-          }
-        },
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Editar o controle"
           }
         }
       }
@@ -10921,6 +10887,40 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Nenhum controle conectado"
+          }
+        }
+      }
+    },
+    "No data gets through to %@. The network may block traffic between devices, or the PC’s firewall does." : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Podaci ne stižu do %@. Mreža možda blokira promet između uređaja, ili ga blokira zaštitni zid računara."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Es kommen keine Daten bei %@ an. Das Netzwerk blockiert womöglich den Verkehr zwischen Geräten, oder die Firewall des PCs tut es."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No llegan datos a %@. Puede que la red bloquee el tráfico entre dispositivos, o que lo haga el cortafuegos del PC."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aucune donnée n’atteint %@. Le réseau bloque peut-être le trafic entre appareils, ou le pare-feu du PC le fait."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nenhum dado chega a %@. A rede pode bloquear o tráfego entre dispositivos, ou o firewall do PC bloqueia."
           }
         }
       }

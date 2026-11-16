@@ -4,7 +4,8 @@
 import Foundation
 import Observation
 
-/// The low-power countdown's intents and what arms it.
+/// The low-power countdown's intents and what arms it: a session that
+/// streams with a pad bound, while the shell could raise the dim.
 package extension AppModel {
 
     /// A touch on the phone, anywhere.
@@ -40,6 +41,18 @@ package extension AppModel {
     }
 
     private func syncLowPower() {
-        lowPower.arm(streaming.state.dimAfter, while: sessionFact != nil && dimAllowed.state)
+        lowPower.arm(streaming.state.dimAfter, while: lowPowerWanted(sessionFact) && dimAllowed.state)
+    }
+}
+
+/// The screen saves power only while there is something to save it for: a
+/// session streaming with a pad bound. One being brought back, one that
+/// stopped responding or failed, and one carrying no pad leave the screen
+/// alone, so the person sees what is happening.
+func lowPowerWanted(_ session: SessionFact?) -> Bool {
+    guard let session else { return false }
+    switch session.phase {
+    case .streaming: return session.pads > 0
+    case .stoppedResponding, .reconnecting, .failed: return false
     }
 }

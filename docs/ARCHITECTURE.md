@@ -240,7 +240,8 @@ What `AppModel` publishes today:
   `.reconnecting` while no session is up and the person's own reach for a PC
   with pads bound is under way, the root's `reaching` source, pruned by
   Observation as links settle so a silent retry never shows; `lowPower`, the
-  countdown), `preferencesFacts`, `forwardingFacts`, `supportFacts`,
+  countdown, armed only while a session streams with a pad bound, never
+  while one is being brought back, stopped responding or failed), `preferencesFacts`, `forwardingFacts`, `supportFacts`,
   `playFacts`, `setup` and `diagnosticsFacts`; and `shellFacts`, the whole,
   which Diagnostics alone reads. Beside them: `openPairing` (the card) and
   `bindingProgress` (the apply).
@@ -330,7 +331,10 @@ What `AppModel` publishes today:
     and why it failed is a fact beside the subject (`ConnectionFact.notice`,
     `ApplyProgress.failed`, `AddedByAddressFact.failure`), keyed by the
     subject and cleared by the next attempt or by the state that supersedes
-    it, never a global last event. A view keeps no loading flag of its own for
+    it, never a global last event. Every attempt's failure is told, the
+    pool's silent ones included, marked by whose it was (`AttemptKind`); the
+    model words the person's own and, of the silent, those that need the
+    person (`needsThePerson`), never that the PC was merely off. A view keeps no loading flag of its own for
     something the engine knows, and the mapper words every case
     ([UI_CONTRACT.md](UI_CONTRACT.md), "Feedback"; `FeedbackTests`).
 

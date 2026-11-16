@@ -93,6 +93,28 @@ final class AppModelBindingTests: XCTestCase {
         XCTAssertNil(model.connectionsFacts.paired.first?.notice, "the refusal is the apply's word on the pad's row, not the PC's")
     }
 
+    /// A run that failed is moot once the person reaches for the PC again,
+    /// or once the host carries the pad after all: its word goes and the
+    /// rows read the link.
+    func testAFailedRunsWordGoesWhenThePCIsReachedForOrCarriesThePad() {
+        model.applyTarget = ApplyTarget(slotId: "pad", connectionId: fixture.serverId)
+        model.bindingProgress = .failed(.hostUnreachable)
+        model.slotConfirmed(connectionId: "other", slotId: "pad")
+        XCTAssertEqual(model.bindingProgress, .failed(.hostUnreachable), "another PC's word is not this run's")
+        model.slotConfirmed(connectionId: fixture.serverId, slotId: "pad")
+        XCTAssertEqual(model.bindingProgress, .idle)
+        model.bindingProgress = .failed(.rejected)
+        model.dismissFailedApply(on: "other")
+        XCTAssertEqual(model.bindingProgress, .failed(.rejected))
+        model.dismissFailedApply(on: fixture.serverId)
+        XCTAssertEqual(model.bindingProgress, .idle)
+        model.bindingProgress = .running(.binding)
+        model.dismissFailedApply(on: fixture.serverId)
+        XCTAssertEqual(model.bindingProgress, .running(.binding), "a run under way keeps its word")
+        XCTAssertTrue(applyEndedFailed(.failed(.padGone)))
+        XCTAssertFalse(applyEndedFailed(.done))
+    }
+
     func testAPadThatLeavesLetsItsBindingGo() async {
         let live = await fixture.connectPaired()
         XCTAssertTrue(live)

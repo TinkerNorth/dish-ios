@@ -20,15 +20,6 @@ extension L10n {
         catalog.text("This controller isn’t connected to your iPhone.")
     }
 
-    /// Edit on the page's toolbar, and the edit page's title.
-    var edit: String {
-        catalog.text("Edit")
-    }
-
-    var editController: String {
-        catalog.text("Edit controller")
-    }
-
     /// The PC is applying the controller's settings.
     var updating: String {
         catalog.text("Updating…")
