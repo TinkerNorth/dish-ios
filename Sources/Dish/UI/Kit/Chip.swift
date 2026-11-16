@@ -3,15 +3,18 @@
 
 import SwiftUI
 
-/// What a chip calls out: the recommended choice, or a fast one.
+/// What a chip calls out: the recommended choice, a fast one, or a caveat
+/// (ADAPTER on a Lightning iPhone's wired row).
 enum ChipTone: Equatable {
     case success
     case primary
+    case warning
 
     var foreground: Color {
         switch self {
         case .success: DishTheme.success
         case .primary: DishTheme.primary
+        case .warning: DishTheme.warning
         }
     }
 
@@ -19,6 +22,7 @@ enum ChipTone: Equatable {
         switch self {
         case .success: DishTheme.successFill
         case .primary: DishTheme.primaryFill
+        case .warning: DishTheme.warningFill
         }
     }
 }
@@ -45,5 +49,6 @@ struct Chip: View {
     HStack {
         Chip(text: L10n.app.setupBest, tone: .success)
         Chip(text: L10n.app.setupFast, tone: .primary)
+        Chip(text: L10n.app.adapter, tone: .warning)
     }
 }

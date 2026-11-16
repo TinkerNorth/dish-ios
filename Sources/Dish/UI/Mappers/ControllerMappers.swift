@@ -22,9 +22,28 @@ struct BindChoice: Equatable, Identifiable {
 /// BINDING › Destination: the PC the pad sends to, with Unbind, or the
 /// paired PCs to bind to.
 enum BindingDestinationState: Equatable {
-    case bound(pcName: String, dot: Color, unbind: String)
-    /// `hint` says to pair a PC first while there is none to choose.
-    case unbound(bindTo: String, choices: [BindChoice], hint: String?)
+    /// `reconnect` reaches for a PC that is lost; nil while it answers.
+    case bound(pcName: String, dot: Color, unbind: String, reconnect: ReconnectState?)
+    case unbound(bindTo: String, choices: [BindChoice])
+    /// Nothing paired: Find a PC leads to the Connections tab, and the hint says why.
+    case nowhereToBind(findPC: String, hint: String)
+}
+
+/// Reconnect, and the PC it reaches for.
+struct ReconnectState: Equatable {
+    let title: String
+    let connectionId: String
+}
+
+/// A screen the phone lends the pad, as a button under the status card.
+struct SurfaceButtonState: Equatable, Identifiable {
+    let screen: PlayScreen
+    let title: String
+    let symbol: String
+
+    var id: PlayScreen {
+        screen
+    }
 }
 
 /// The apply drawn inline under Destination: where the bind stands, and
@@ -136,8 +155,11 @@ struct ControllerPadState: Equatable {
     let apply: ApplyRowState?
     /// Nil for a pad with no switch to offer: the section is left out.
     let functions: ControllerFunctionsState?
-    /// The on-screen controller's Open, which raises its gamepad; nil for a pad.
+    /// The on-screen controller's Open, which raises its gamepad; nil for a
+    /// pad, and while nothing is bound to it.
     let open: String?
+    /// The touchpad and the mouse the phone can lend the pad.
+    let surfaces: [SurfaceButtonState]
     let footnote: String
     /// The row that pushes the Dead zones page; nil for the on-screen gamepad.
     let deadZones: String?
@@ -160,12 +182,14 @@ struct ControllerPageState: Equatable {
 }
 
 /// `paired` are the PCs the pad can be bound to; `apply` the bind in flight
-/// or just ended, drawn when it is this pad's.
+/// or just ended, drawn when it is this pad's; `port` the one an attached
+/// pad is attached to.
 func controllerPageState(
     controllers: [ControllerFact],
     paired: [ConnectionFact] = [],
     apply: ApplyFact? = nil,
     pads: [PadDiagnostics] = [],
+    port: DevicePort = .usbC,
     id: String,
     words: L10n = .app
 ) -> ControllerPageState {
@@ -178,14 +202,14 @@ func controllerPageState(
     }
     return ControllerPageState(
         title: controllerName(controller, words: words),
-        subtitle: controllerSubtitle(controller, words: words),
-        content: .pad(controllerPadState(controller, paired: paired, apply: apply, pads: pads, words: words))
+        subtitle: controllerSubtitle(controller, port: port, words: words),
+        content: .pad(controllerPadState(controller, paired: paired, apply: apply, pads: pads, port: port, words: words))
     )
 }
 
-private func controllerSubtitle(_ controller: ControllerFact, words: L10n) -> String {
+private func controllerSubtitle(_ controller: ControllerFact, port: DevicePort, words: L10n) -> String {
     let battery = [controller.batteryPercent.map(words.batteryLevel)].compactMap(\.self)
-    return (battery + [linkWord(controller.link, words: words)]).joined(separator: lineSeparator)
+    return (battery + [linkWord(controller.link, port: port, words: words)]).joined(separator: lineSeparator)
 }
 
 private func controllerPadState(
@@ -193,6 +217,7 @@ private func controllerPadState(
     paired: [ConnectionFact],
     apply: ApplyFact?,
     pads: [PadDiagnostics],
+    port: DevicePort,
     words: L10n
 ) -> ControllerPadState {
     let rows = controller.features.map { functionRow($0, of: controller, words: words) }
@@ -201,7 +226,7 @@ private func controllerPadState(
         status: ControllerStatusState(
             symbol: controllerSymbol(controller.link),
             title: controllerName(controller, words: words),
-            line: statusLine(controller, words: words),
+            line: statusLine(controller, port: port, words: words),
             dot: destinationDot(controller.destination?.health)
         ),
         binding: ControllerBindingState(
@@ -215,7 +240,10 @@ private func controllerPadState(
         ),
         apply: applyRowState(apply, slotId: controller.id, words: words),
         functions: rows.isEmpty ? nil : ControllerFunctionsState(title: words.functions, rows: rows),
-        open: opensPlay(controller.link) ? words.open : nil,
+        open: opensGamepad(controller) ? words.open : nil,
+        surfaces: controller.surfaces.map {
+            SurfaceButtonState(screen: $0, title: openSurfaceTitle($0, words: words), symbol: playScreenSymbol($0))
+        },
         footnote: words.noPadAudio,
         deadZones: hasDeadZones(controller.link) ? words.deadZones : nil,
         telemetry: telemetryState(controller, readings: pads, words: words)
@@ -259,9 +287,11 @@ private func hostEmulateState(_ controller: ControllerFact, words: L10n) -> Moon
 private func bindingDestination(_ controller: ControllerFact, paired: [ConnectionFact], words: L10n) -> BindingDestinationState {
     guard let destination = controller.destination else {
         let choices = paired.map { BindChoice(id: $0.id, name: connectionTitle($0)) }
-        return .unbound(bindTo: words.bindTo, choices: choices, hint: choices.isEmpty ? words.pairAPCToBind : nil)
+        guard !choices.isEmpty else { return .nowhereToBind(findPC: words.findAPC, hint: words.pairAPCToBind) }
+        return .unbound(bindTo: words.bindTo, choices: choices)
     }
-    return .bound(pcName: destination.name, dot: destinationDot(destination.health), unbind: words.unbind)
+    let reconnect = destination.health == .lost ? ReconnectState(title: words.reconnect, connectionId: destination.id) : nil
+    return .bound(pcName: destination.name, dot: destinationDot(destination.health), unbind: words.unbind, reconnect: reconnect)
 }
 
 /// The apply for this pad: its spinner while it runs, its word once it
@@ -310,9 +340,9 @@ func applyFailureText(_ failure: ApplyFailure, words: L10n = .app) -> String {
 
 /// "USB-C · DualSense · 84%": the link, the family, and the level when the
 /// pad reports one.
-private func statusLine(_ controller: ControllerFact, words: L10n) -> String {
+private func statusLine(_ controller: ControllerFact, port: DevicePort, words: L10n) -> String {
     let battery = [controller.batteryPercent.map(words.batteryPercent)].compactMap(\.self)
-    let parts = [linkWord(controller.link, words: words), padFamilyName(controller.family, words: words)] + battery
+    let parts = [linkWord(controller.link, port: port, words: words), padFamilyName(controller.family, words: words)] + battery
     return parts.joined(separator: lineSeparator)
 }
 

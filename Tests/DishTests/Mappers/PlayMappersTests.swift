@@ -49,6 +49,22 @@ final class PlayMappersTests: XCTestCase {
         XCTAssertNil(cover().pill)
     }
 
+    /// A served slot bound to a PC with no session up reads lost, so the
+    /// screen never goes quiet without a word.
+    func testAServedSlotWhosePCIsDownReadsLost() {
+        let lost = DestinationFact(id: "lr", name: "Living Room PC", health: .lost)
+        let pill = cover(FactsFixture.play(destination: lost)).pill
+        XCTAssertEqual(
+            pill,
+            PlayPillState(pcName: "Living Room PC", detail: "Connection lost", dot: DishTheme.error, detailColor: DishTheme.error)
+        )
+        XCTAssertEqual(
+            cover(FactsFixture.play(destination: lost), session: FactsFixture.streaming()).pill?.detail,
+            "4 ms",
+            "the session's word first"
+        )
+    }
+
     // MARK: - The pause menu
 
     func testThePauseMenuResumesAndStops() {
@@ -63,6 +79,14 @@ final class PlayMappersTests: XCTestCase {
         XCTAssertEqual(cover(screen: .touchpad).pause.screens.map(\.title), ["Gamepad", "Mouse"])
         XCTAssertEqual(cover(screen: .mouse).pause.screens.map(\.screen), [.gamepad, .touchpad])
         XCTAssertEqual(cover(screen: .mouse).pause.screens.map(\.symbol), ["gamecontroller", "rectangle.and.hand.point.up.left"])
+    }
+
+    /// A pad the phone lends its screens to has a gamepad of its own, so
+    /// the pause menu moves only between the touchpad and the mouse.
+    func testAPadsPauseMenuMovesBetweenTheTouchpadAndTheMouseAlone() {
+        let pad = FactsFixture.play(screen: .mouse, target: .pad(id: "pad", name: "Xbox Wireless Controller"))
+        XCTAssertEqual(cover(pad, screen: .mouse).pause.screens.map(\.screen), [.touchpad])
+        XCTAssertEqual(cover(pad, screen: .touchpad).pause.screens.map(\.screen), [.mouse])
     }
 
     func testOnlyTheGamepadHasSwitches() {

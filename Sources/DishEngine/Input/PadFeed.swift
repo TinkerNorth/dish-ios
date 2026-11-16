@@ -89,7 +89,7 @@ package final class PadFeed: Sendable {
     /// per-event timestamp.
     package func publishTouchpad(_ sample: TouchpadSample, nowNs: UInt64 = uptimeNs()) {
         record.write(touch: sample)
-        guard let route = currentRoute(), route.flags.touchpad else { return }
+        guard let route = currentRoute(), route.flags.touchpad || route.flags.phoneSurface != nil else { return }
         route.sink.send(sample, eventTimeMs: UInt32(truncatingIfNeeded: nowNs / 1_000_000), slot: route.slot)
     }
 

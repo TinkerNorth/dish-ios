@@ -17,6 +17,9 @@ enum DishLinks {
     /// Sunshine's project page: the Moonlight host the hosts page offers
     /// when the scan finds none, as dish-mac's does.
     static let sunshine = URL(string: "https://github.com/LizardByte/Sunshine")
+    /// Apple's Lightning to USB 3 Camera Adapter, the one a wired pad needs on
+    /// a Lightning iPhone, offered from the Wired on this iPhone sheet.
+    static let lightningAdapter = URL(string: "https://www.apple.com/shop/product/MK0W2AM/A/lightning-to-usb-3-camera-adapter")
 }
 
 /// A link a page opens through `openURL`.

@@ -100,4 +100,22 @@ extension WifiConnection {
     func setSlotFlags(_ flags: [String: ForwardingFlags]) {
         editSlots { $0.slotFlags = flags }
     }
+
+    /// The satellite's word on mouse control, from its probe.
+    func setHostMouseControl(_ available: Bool) {
+        editSlots { $0.hostMouseControl = available }
+    }
+
+    var hostMouseControl: Bool {
+        slotTable.hostMouseControl
+    }
+
+    /// Whether any slot asks the host for the mouse.
+    var wantsMouseControl: Bool {
+        slotTable.wantsMouseControl
+    }
+
+    func typeOffersDs4(for slotId: String) -> Bool {
+        slotTable.typeOffersDs4(for: slotId)
+    }
 }

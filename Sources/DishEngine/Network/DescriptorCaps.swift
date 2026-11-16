@@ -21,16 +21,24 @@ func descriptorCaps(_ capabilities: ControllerCapabilities, _ flags: ForwardingF
     return claims.filter(\.claimed).reduce(UInt16(0)) { $0 | $1.bit }
 }
 
-/// The touchpad mode a descriptor asks for: the pad render when the pad
-/// has a touchpad, its switch is on and the type offers the render; off
-/// otherwise. The touchpad as the host's mouse waits for the mouse screen
-/// (Tests/PARITY.md), so no descriptor asks for it.
-func descriptorTouchpadMode(_ capabilities: ControllerCapabilities, _ flags: ForwardingFlags, typeOffersDs4: Bool = true) -> TouchpadMode {
-    resolveTouchpadMode(
+/// The touchpad mode a descriptor asks for: the screen the phone lends the
+/// slot, else the pad's own touchpad as the pad render, else off.
+func descriptorTouchpadMode(
+    _ capabilities: ControllerCapabilities,
+    _ flags: ForwardingFlags,
+    typeOffersDs4: Bool = true,
+    hostMouseControl: Bool = false
+) -> TouchpadMode {
+    switch flags.phoneSurface {
+    case .mouse: return hostMouseControl ? .mouse : .off
+    case .touchpad: return typeOffersDs4 ? .ds4 : .off
+    case nil: break
+    }
+    return resolveTouchpadMode(
         pick: flags.touchpad ? .pad : .off,
         padHasTouchpad: capabilities.hasTouchpad,
         typeOffersDs4: typeOffersDs4,
-        hostMouseControl: false
+        hostMouseControl: hostMouseControl
     )
 }
 

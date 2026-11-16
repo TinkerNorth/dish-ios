@@ -66,7 +66,7 @@ struct ControllerBindingSection: View {
 
     @ViewBuilder private var destination: some View {
         switch state.destination {
-        case let .bound(pcName, dot, unbind):
+        case let .bound(pcName, dot, unbind, reconnect):
             LabeledContent(state.destinationTitle) {
                 HStack(spacing: DishSpace.s3) {
                     StatusDot(color: dot)
@@ -74,8 +74,12 @@ struct ControllerBindingSection: View {
                 }
             }
             .foregroundStyle(DishTheme.onSurface)
+            if let reconnect {
+                Button(reconnect.title, systemImage: RowActionSymbol.connect) { actions.reconnect(reconnect.connectionId) }
+                    .foregroundStyle(DishTheme.primary)
+            }
             Button(unbind, role: .destructive, action: actions.unbind)
-        case let .unbound(bindTo, choices, hint):
+        case let .unbound(bindTo, choices):
             Menu {
                 ForEach(choices) { choice in
                     Button(choice.name) { actions.bind(choice.id) }
@@ -83,10 +87,10 @@ struct ControllerBindingSection: View {
             } label: {
                 BindToRow(title: state.destinationTitle, bindTo: bindTo)
             }
-            .disabled(choices.isEmpty)
-            if let hint {
-                Text(hint).font(DishFont.detail).foregroundStyle(DishTheme.muted)
-            }
+        case let .nowhereToBind(findPC, hint):
+            Button(findPC, systemImage: RowActionSymbol.pair, action: actions.findPC)
+                .foregroundStyle(DishTheme.primary)
+            Text(hint).font(DishFont.detail).foregroundStyle(DishTheme.muted)
         }
     }
 }

@@ -151,12 +151,12 @@ package func linkEvents(before: [LinkSnapshot], after: [LinkSnapshot], atMs: Int
 package func padEvents(before: [PadSnapshot], after: [PadSnapshot], atMs: Int64) -> [DiagnosticsEvent] {
     let attachedOrRebound = after.flatMap { pad -> [DiagnosticsEvent] in
         guard let previous = before.first(where: { $0.id == pad.id }) else {
-            return [DiagnosticsEvent(atMs: atMs, kind: .padAttached, subject: pad.name)]
+            return pad.name == .onScreenGamepad ? [] : [DiagnosticsEvent(atMs: atMs, kind: .padAttached, subject: pad.name)]
         }
         return bindingChange(from: previous, to: pad, atMs: atMs)
     }
     let detached = before
-        .filter { pad in !after.contains { $0.id == pad.id } }
+        .filter { pad in pad.name != .onScreenGamepad && !after.contains { $0.id == pad.id } }
         .map { DiagnosticsEvent(atMs: atMs, kind: .padDetached, subject: $0.name, host: $0.boundLabel) }
     return attachedOrRebound + detached
 }

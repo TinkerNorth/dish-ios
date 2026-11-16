@@ -12,6 +12,7 @@ struct ShellSheet: View {
         switch sheet {
         case let .pair(serverId): PairSheet(serverId: serverId)
         case .addByAddress: AddByAddressSheet()
+        case .lightningAdapter: LightningAdapterSheet()
         }
     }
 }

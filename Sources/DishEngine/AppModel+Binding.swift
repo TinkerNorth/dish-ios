@@ -60,13 +60,13 @@ package extension AppModel {
         follow(path, slotId: slotId, connectionId: connectionId)
     }
 
-    /// A pad iOS lists, or the on-screen gamepad while it is one of the
-    /// controllers; nothing else can be bound.
+    /// A pad iOS lists, or the on-screen gamepad, which is always one of
+    /// the controllers; nothing else can be bound.
     private func bindablePad(_ slotId: String) -> BindablePad? {
         if let slot = pads.source.slots.first(where: { $0.id == slotId }) {
             return BindablePad(capabilities: slot.capabilities, family: slot.family.emulatedPad)
         }
-        guard slotId == onScreenSlotId, onScreenListed.state else { return nil }
+        guard slotId == onScreenSlotId else { return nil }
         return BindablePad(capabilities: onScreenCapabilities, family: InputKind.onScreen.defaultEmulation)
     }
 
@@ -111,7 +111,7 @@ package extension AppModel {
     /// unbound.
     internal func destination(slotId: String) -> DestinationFact? {
         guard let row = network.hub.boundConnection(slotId: slotId) else { return nil }
-        return DestinationFact(name: row.name, health: linkHealth(row.live))
+        return DestinationFact(id: row.id, name: row.name, health: linkHealth(row.live))
     }
 
     // MARK: - Routes
@@ -160,7 +160,8 @@ package extension AppModel {
         snapshot.bySatellitePad[pad] = BoundSlotRoute(slotId: slotId, flags: flags)
     }
 
-    private func pushSlotFlags() {
+    /// Each satellite's descriptors take the pads' switches.
+    internal func pushSlotFlags() {
         for conn in network.wifi.connections.values {
             let flags = Dictionary(uniqueKeysWithValues: conn.boundSlotIds.map { ($0, forwardingFlags(slotId: $0)) })
             conn.setSlotFlags(flags)
@@ -186,10 +187,9 @@ package extension AppModel {
     }
 
     /// The slots a binding may hold: the pads iOS lists, and the on-screen
-    /// gamepad while it is one of the controllers.
+    /// gamepad, which is always one of the controllers.
     internal var presentSlotIds: Set<String> {
-        let attached = Set(pads.source.slots.map(\.id))
-        return onScreenListed.state ? attached.union([onScreenSlotId]) : attached
+        Set(pads.source.slots.map(\.id)).union([onScreenSlotId])
     }
 
     // MARK: - Following the satellite

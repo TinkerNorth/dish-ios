@@ -32,6 +32,9 @@ enum DishTheme {
     static let successFill = Color(dark: 0x22C55E, light: 0x1B873F, alpha: 0.16)
     /// A FAST chip's ground under its `primary` word, and a glyph tile's.
     static let primaryFill = Color(dark: 0x4FE3FF, light: 0x0E7C97, alpha: 0.14)
+    /// The tile behind the Lightning note's bolt, and an ADAPTER chip's ground
+    /// under its `warning` word.
+    static let warningFill = Color(dark: 0xF59E0B, light: 0xB7791F, alpha: 0.16)
     /// The low-power dim: true black in either appearance, so an OLED panel is off.
     static let dimBackground = Color(dark: 0x000000, light: 0x000000)
     /// The dim's words, a grey low enough not to light the panel.
@@ -87,6 +90,10 @@ enum DishSymbol {
 enum DishImage {
     /// The app mark, version B: the dish tilted 28 degrees.
     static let mark = Image("DishMark", bundle: .module)
+    /// Apple's Lightning to USB Camera Adapter, drawn as a template in the
+    /// accent: the Lightning plug, the body with its USB port and its power
+    /// port, and the controller's USB plug coming in.
+    static let adapter = Image("LightningAdapter", bundle: .module)
 }
 
 /// The type scale, every name a Dynamic Type style so the words grow with
@@ -150,8 +157,12 @@ enum DishSize {
     static let featureSymbol: CGFloat = 32
     /// The check or dash column of a review carry row.
     static let carryMark: CGFloat = 16
-    /// The phone and PC tiles over the Local Network primer.
+    /// The phone and PC tiles over the Local Network primer, and the phone and
+    /// controller tiles over the adapter sheet.
     static let primerTile: CGFloat = 64
+    /// The adapter drawn between the phone and the controller on the Wired on
+    /// this iPhone sheet.
+    static let adapterArt: CGFloat = 48
     /// The tracking of a section eyebrow.
     static let eyebrowTracking: CGFloat = 1.4
     /// The corner of a licence text's block on the licenses page.

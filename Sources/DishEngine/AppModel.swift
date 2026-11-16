@@ -33,14 +33,22 @@ package final class AppModel {
     @ObservationIgnored let recorder: DiagnosticsRecorder
     /// The clipboard, the scene's to fill.
     let pasteboard: any Pasteboard
+    /// The port this device hosts a wired pad through, as the scene read it.
+    let devicePort: DevicePort
     let setupSource = StateSource<SetupState?>(initial: nil)
     let supportSource = StateSource<SupportFacts>(initial: .initial)
     /// The on-screen controller's slot: its touches, its resend loop, its motion.
     package let onScreen: OnScreenPad
     /// The play screen on display; nil while none is.
     let playSource = StateSource<PlayScreen?>(initial: nil)
-    /// Whether the on-screen controller is one of the controllers.
-    let onScreenListed = StateSource<Bool>(initial: false)
+    /// The slot the phone's touchpad or mouse screen serves: the on-screen
+    /// controller, or a pad the phone was aimed at before the screen opened.
+    var playTarget = onScreenSlotId
+    /// The low-power countdown while a session streams.
+    package let lowPower: LowPowerWatch
+    /// Whether the shell could raise the dim now: the tabs are on screen,
+    /// with no cover or sheet over them.
+    let dimAllowed = StateSource<Bool>(initial: false)
     /// Each pad's route, from the bindings and the live clients.
     @ObservationIgnored let routing = InputRouting()
     /// The satellites' return paths to the pads bound on them.
@@ -81,7 +89,9 @@ package final class AppModel {
         motionSensor: any MotionSensor,
         resendTicker: any Ticker,
         diagnostics: DiagnosticsSource = DiagnosticsSource(ticker: TimerTicker()),
-        pasteboard: any Pasteboard = InertPasteboard()
+        pasteboard: any Pasteboard = InertPasteboard(),
+        devicePort: DevicePort = .usbC,
+        lowPowerTicker: any Ticker = TimerTicker()
     ) {
         self.onboarding = onboarding
         self.appearance = appearance
@@ -94,6 +104,8 @@ package final class AppModel {
         self.tips = tips
         self.diagnostics = diagnostics
         self.pasteboard = pasteboard
+        self.devicePort = devicePort
+        lowPower = LowPowerWatch(ticker: lowPowerTicker)
         let log = DiagnosticsLogStore()
         diagnosticsLog = log
         recorder = DiagnosticsRecorder(store: log)
@@ -107,6 +119,7 @@ package final class AppModel {
         wireMoonlight()
         observeBindingMemory()
         restoreStandingBindings()
+        observeLowPower()
     }
 
     /// Every store over the same defaults, the wall clock, the pads iOS
@@ -124,7 +137,9 @@ package final class AppModel {
         resendTicker: any Ticker = TimerTicker(),
         diagnostics: DiagnosticsSource = DiagnosticsSource(ticker: TimerTicker()),
         pasteboard: any Pasteboard = InertPasteboard(),
-        deviceKind: DeviceKind = .phone
+        deviceKind: DeviceKind = .phone,
+        devicePort: DevicePort = .usbC,
+        lowPowerTicker: any Ticker = TimerTicker()
     ) {
         let device = DevicePreferenceStore(defaults: defaults)
         let network = NetworkStack(defaults: defaults, keyStore: keyStore, pins: pins) { wireDeviceName(device.state, on: deviceKind) }
@@ -141,7 +156,9 @@ package final class AppModel {
             motionSensor: motionSensor,
             resendTicker: resendTicker,
             diagnostics: diagnostics,
-            pasteboard: pasteboard
+            pasteboard: pasteboard,
+            devicePort: devicePort,
+            lowPowerTicker: lowPowerTicker
         )
         Self.mintMoonlightIdentity(into: network)
     }
@@ -185,7 +202,9 @@ package final class AppModel {
             apply: applyFact,
             addedByAddress: addedByAddress?.id,
             deadzones: pads.deadzones.state,
-            forwarding: pads.features.flags
+            forwarding: pads.features.flags,
+            port: devicePort,
+            lowPower: lowPower.state
         )
     }
 

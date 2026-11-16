@@ -81,12 +81,34 @@ final class DescriptorCapsTests: XCTestCase {
         try JSONDecoder().decode(CatalogDTO.self, from: Data(FakeSatelliteRest.catalogJSON.utf8))
     }
 
-    /// The pad render needs a type that offers it; the touchpad as the
-    /// host's mouse waits for the mouse screen, so nothing asks for it.
-    func testTheTouchpadModeNeedsATypeThatOffersThePadRender() {
+    /// The pad render needs a type that offers it; a pad's own touchpad is
+    /// never the host's mouse on its own, whatever the host grants, so no
+    /// session asks for the mouse while no mouse screen is open.
+    func testAPadsOwnTouchpadIsThePadRenderOrOff() {
         let withPad = ControllerCapabilities(hasTouchpad: true)
         XCTAssertEqual(descriptorTouchpadMode(withPad, ForwardingFlags(), typeOffersDs4: true), .ds4)
         XCTAssertEqual(descriptorTouchpadMode(withPad, ForwardingFlags(), typeOffersDs4: false), .off, "no ds4 render")
+        XCTAssertEqual(descriptorTouchpadMode(withPad, ForwardingFlags(), typeOffersDs4: false, hostMouseControl: true), .off)
+        XCTAssertEqual(descriptorTouchpadMode(withPad, ForwardingFlags(), typeOffersDs4: true, hostMouseControl: true), .ds4)
+        XCTAssertEqual(descriptorTouchpadMode(withPad, ForwardingFlags(touchpad: false), hostMouseControl: true), .off, "switched off")
+    }
+
+    /// A screen the phone lends a slot comes first: the mouse needs the
+    /// host's grant, the touchpad a type with one, and a pad with no
+    /// touchpad of its own carries either.
+    func testAScreenThePhoneLendsASlotDeclaresItself() {
+        let mouse = ForwardingFlags(phoneSurface: .mouse)
+        let touchpad = ForwardingFlags(phoneSurface: .touchpad)
+        XCTAssertEqual(descriptorTouchpadMode(.none, mouse, hostMouseControl: true), .mouse)
+        XCTAssertEqual(descriptorTouchpadMode(.none, mouse, hostMouseControl: false), .off, "the host grants no mouse")
+        XCTAssertEqual(descriptorTouchpadMode(.none, touchpad, typeOffersDs4: true), .ds4)
+        XCTAssertEqual(descriptorTouchpadMode(.none, touchpad, typeOffersDs4: false), .off, "the type renders no touchpad")
+        let own = ControllerCapabilities(hasTouchpad: true)
+        XCTAssertEqual(
+            descriptorTouchpadMode(own, ForwardingFlags(touchpad: false, phoneSurface: .mouse), hostMouseControl: true),
+            .mouse,
+            "the lent screen passes the pad's own switch"
+        )
     }
 
     func testTheCatalogsWordOnTheTypesTouchpad() throws {

@@ -1571,6 +1571,40 @@
         }
       }
     },
+    "A Lightning cable alone can’t carry a controller’s input." : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sam Lightning kabl ne može prenositi unos kontrolera."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ein Lightning-Kabel allein kann die Eingaben eines Controllers nicht übertragen."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Un cable Lightning por sí solo no puede transmitir la entrada de un mando."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Un câble Lightning seul ne peut pas transmettre les commandes d’une manette."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Um cabo Lightning sozinho não consegue transmitir a entrada de um controle."
+          }
+        }
+      }
+    },
     "A Moonlight host works without installing anything new, at a little more latency." : {
       "localizations" : {
         "bs" : {
@@ -1670,6 +1704,118 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Um PC por endereço"
+          }
+        }
+      }
+    },
+    "A controller draws more power than the iPhone gives on its own." : {
+      "localizations" : {
+        "bs" : {
+          "variations" : {
+            "device" : {
+              "ipad" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Kontroler vuče više struje nego što iPad sam daje."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Kontroler vuče više struje nego što iPhone sam daje."
+                }
+              }
+            }
+          }
+        },
+        "de" : {
+          "variations" : {
+            "device" : {
+              "ipad" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Ein Controller zieht mehr Strom, als das iPad allein liefert."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Ein Controller zieht mehr Strom, als das iPhone allein liefert."
+                }
+              }
+            }
+          }
+        },
+        "en" : {
+          "variations" : {
+            "device" : {
+              "ipad" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "A controller draws more power than the iPad gives on its own."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "A controller draws more power than the iPhone gives on its own."
+                }
+              }
+            }
+          }
+        },
+        "es" : {
+          "variations" : {
+            "device" : {
+              "ipad" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Un mando consume más energía de la que el iPad da por sí solo."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Un mando consume más energía de la que el iPhone da por sí solo."
+                }
+              }
+            }
+          }
+        },
+        "fr" : {
+          "variations" : {
+            "device" : {
+              "ipad" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Une manette consomme plus de courant que l’iPad n’en fournit seul."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Une manette consomme plus de courant que l’iPhone n’en fournit seul."
+                }
+              }
+            }
+          }
+        },
+        "pt-BR" : {
+          "variations" : {
+            "device" : {
+              "ipad" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Um controle consome mais energia do que o iPad fornece sozinho."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Um controle consome mais energia do que o iPhone fornece sozinho."
+                }
+              }
+            }
           }
         }
       }
@@ -1967,6 +2113,40 @@
         }
       }
     },
+    "A wired controller needs Apple’s Lightning to USB Camera Adapter." : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Žičanom kontroleru treba Appleov Lightning na USB adapter za kameru."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ein kabelgebundener Controller braucht Apples Lightning auf USB Kamera-Adapter."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Un mando con cable necesita el adaptador de Lightning a USB para cámaras de Apple."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Une manette filaire a besoin de l’adaptateur Lightning vers USB pour appareil photo d’Apple."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Um controle com fio precisa do Adaptador de Câmera Lightning para USB da Apple."
+          }
+        }
+      }
+    },
     "ABOUT DISH" : {
       "localizations" : {
         "bs" : {
@@ -2099,6 +2279,40 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Aceite no seu PC"
+          }
+        }
+      }
+    },
+    "Adapter" : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Adapter"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Adapter"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Adaptador"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Adaptateur"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Adaptador"
           }
         }
       }
@@ -2686,6 +2900,40 @@
         }
       }
     },
+    "Apple’s Lightning to USB 3 Camera Adapter" : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Appleov Lightning na USB 3 adapter za kameru"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apples Lightning auf USB 3 Kamera-Adapter"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Adaptador de Lightning a USB 3 para cámaras de Apple"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Adaptateur Lightning vers USB 3 pour appareil photo d’Apple"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Adaptador de Câmera Lightning para USB 3 da Apple"
+          }
+        }
+      }
+    },
     "Applying binding…" : {
       "localizations" : {
         "bs" : {
@@ -3098,40 +3346,6 @@
         }
       }
     },
-    "Bind a pad or the on-screen gamepad to your PC to start playing." : {
-      "localizations" : {
-        "bs" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Poveži kontroler ili gamepad na ekranu s vašim PC-jem da počnete igrati."
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ordne einen Controller oder das Bildschirm-Gamepad deinem PC zu, um loszuspielen."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Vincula un mando o el gamepad en pantalla a tu PC para empezar a jugar."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Liez une manette ou la manette à l’écran à votre PC pour commencer à jouer."
-          }
-        },
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Vincule um controle ou o gamepad na tela ao seu PC para começar a jogar."
-          }
-        }
-      }
-    },
     "Bind to" : {
       "localizations" : {
         "bs" : {
@@ -3366,6 +3580,40 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Controle Bluetooth"
+          }
+        }
+      }
+    },
+    "Bluetooth needs no adapter." : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bluetooth ne treba adapter."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bluetooth braucht keinen Adapter."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bluetooth no necesita adaptador."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Le Bluetooth n’a pas besoin d’adaptateur."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O Bluetooth não precisa de adaptador."
           }
         }
       }
@@ -6498,6 +6746,40 @@
         }
       }
     },
+    "Find a PC" : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pronađi PC"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "PC suchen"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Buscar un PC"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Trouver un PC"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Encontrar um PC"
+          }
+        }
+      }
+    },
     "Follow game" : {
       "localizations" : {
         "bs" : {
@@ -8621,6 +8903,74 @@
         }
       }
     },
+    "Lightning" : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lightning"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lightning"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lightning"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lightning"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lightning"
+          }
+        }
+      }
+    },
+    "Lightning port" : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lightning priključak"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lightning-Anschluss"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Puerto Lightning"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Port Lightning"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Porta Lightning"
+          }
+        }
+      }
+    },
     "Link tier" : {
       "localizations" : {
         "bs" : {
@@ -8892,6 +9242,40 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Economia de energia"
+          }
+        }
+      }
+    },
+    "Low power in %lld s" : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Štednja energije za %lld s"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Energiesparen in %lld s"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bajo consumo en %lld s"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Économie d’énergie dans %lld s"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Economia de energia em %lld s"
           }
         }
       }
@@ -9784,6 +10168,40 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Meu controle fica desconectando no meio do jogo."
+          }
+        }
+      }
+    },
+    "My wired controller doesn’t show up." : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Moj žičani kontroler se ne pojavljuje."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mein kabelgebundener Controller wird nicht angezeigt."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mi mando con cable no aparece."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ma manette filaire n’apparaît pas."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Meu controle com fio não aparece."
           }
         }
       }
@@ -11257,6 +11675,40 @@
         }
       }
     },
+    "Open mouse" : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Otvori miš"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Maus öffnen"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abrir el ratón"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ouvrir la souris"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abrir o mouse"
+          }
+        }
+      }
+    },
     "Open source licenses" : {
       "localizations" : {
         "bs" : {
@@ -11287,6 +11739,40 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Licenças de código aberto"
+          }
+        }
+      }
+    },
+    "Open touchpad" : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Otvori dodirnu ploču"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Touchpad öffnen"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abrir el panel táctil"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ouvrir le pavé tactile"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abrir o touchpad"
           }
         }
       }
@@ -11595,6 +12081,40 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Pareie um PC na aba Conexões para vincular este controle."
+          }
+        }
+      }
+    },
+    "Pair it in Settings › Bluetooth first, or plug it in through Apple’s camera adapter." : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prvo ga uparite u Postavke › Bluetooth ili ga priključite preko Appleovog adaptera za kameru."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kopple ihn zuerst unter Einstellungen › Bluetooth oder schließe ihn über Apples Kamera-Adapter an."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Emparéjalo primero en Ajustes › Bluetooth o conéctalo a través del adaptador para cámaras de Apple."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Appairez-la d’abord dans Réglages › Bluetooth, ou branchez-la via l’adaptateur pour appareil photo d’Apple."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pareie-o primeiro em Ajustes › Bluetooth ou conecte-o pelo adaptador de câmera da Apple."
           }
         }
       }
@@ -12055,6 +12575,40 @@
         }
       }
     },
+    "Pick the USB 3 adapter and plug a charger into its Lightning port." : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Odaberite USB 3 adapter i priključite punjač u njegov Lightning priključak."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nimm den USB 3 Adapter und steck ein Ladegerät in dessen Lightning-Anschluss."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Elige el adaptador USB 3 y conecta un cargador a su puerto Lightning."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Choisissez l’adaptateur USB 3 et branchez un chargeur à son port Lightning."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Escolha o adaptador USB 3 e conecte um carregador à porta Lightning dele."
+          }
+        }
+      }
+    },
     "Pick your PC" : {
       "localizations" : {
         "bs" : {
@@ -12335,6 +12889,186 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "Plug it in through the adapter, or pair it over Bluetooth." : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Priključite ga preko adaptera ili ga uparite preko Bluetootha."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Schließe ihn über den Adapter an oder kopple ihn über Bluetooth."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Conéctalo a través del adaptador o emparéjalo por Bluetooth."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Branchez-la via l’adaptateur, ou appairez-la en Bluetooth."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Conecte-o pelo adaptador ou pareie-o por Bluetooth."
+          }
+        }
+      }
+    },
+    "Plug the adapter into the iPhone’s Lightning port." : {
+      "localizations" : {
+        "bs" : {
+          "variations" : {
+            "device" : {
+              "ipad" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Priključite adapter u Lightning priključak iPada."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Priključite adapter u Lightning priključak iPhonea."
+                }
+              }
+            }
+          }
+        },
+        "de" : {
+          "variations" : {
+            "device" : {
+              "ipad" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Steck den Adapter in den Lightning-Anschluss des iPads."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Steck den Adapter in den Lightning-Anschluss des iPhones."
+                }
+              }
+            }
+          }
+        },
+        "en" : {
+          "variations" : {
+            "device" : {
+              "ipad" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Plug the adapter into the iPad’s Lightning port."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Plug the adapter into the iPhone’s Lightning port."
+                }
+              }
+            }
+          }
+        },
+        "es" : {
+          "variations" : {
+            "device" : {
+              "ipad" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Conecta el adaptador al puerto Lightning del iPad."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Conecta el adaptador al puerto Lightning del iPhone."
+                }
+              }
+            }
+          }
+        },
+        "fr" : {
+          "variations" : {
+            "device" : {
+              "ipad" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Branchez l’adaptateur au port Lightning de l’iPad."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Branchez l’adaptateur au port Lightning de l’iPhone."
+                }
+              }
+            }
+          }
+        },
+        "pt-BR" : {
+          "variations" : {
+            "device" : {
+              "ipad" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Conecte o adaptador à porta Lightning do iPad."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Conecte o adaptador à porta Lightning do iPhone."
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "Plug the controller’s USB cable into the adapter." : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Priključite USB kabl kontrolera u adapter."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Steck das USB-Kabel des Controllers in den Adapter."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Conecta el cable USB del mando al adaptador."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Branchez le câble USB de la manette à l’adaptateur."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Conecte o cabo USB do controle ao adaptador."
           }
         }
       }
@@ -16178,6 +16912,118 @@
         }
       }
     },
+    "This iPhone has a Lightning port." : {
+      "localizations" : {
+        "bs" : {
+          "variations" : {
+            "device" : {
+              "ipad" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Ovaj iPad ima Lightning priključak."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Ovaj iPhone ima Lightning priključak."
+                }
+              }
+            }
+          }
+        },
+        "de" : {
+          "variations" : {
+            "device" : {
+              "ipad" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Dieses iPad hat einen Lightning-Anschluss."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Dieses iPhone hat einen Lightning-Anschluss."
+                }
+              }
+            }
+          }
+        },
+        "en" : {
+          "variations" : {
+            "device" : {
+              "ipad" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "This iPad has a Lightning port."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "This iPhone has a Lightning port."
+                }
+              }
+            }
+          }
+        },
+        "es" : {
+          "variations" : {
+            "device" : {
+              "ipad" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Este iPad tiene un puerto Lightning."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Este iPhone tiene un puerto Lightning."
+                }
+              }
+            }
+          }
+        },
+        "fr" : {
+          "variations" : {
+            "device" : {
+              "ipad" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Cet iPad a un port Lightning."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Cet iPhone a un port Lightning."
+                }
+              }
+            }
+          }
+        },
+        "pt-BR" : {
+          "variations" : {
+            "device" : {
+              "ipad" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Este iPad tem uma porta Lightning."
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Este iPhone tem uma porta Lightning."
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "This iPhone has no motion sensors" : {
       "localizations" : {
         "bs" : {
@@ -16354,6 +17200,40 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "A identidade de segurança deste satélite mudou. Se ele foi reinstalado, esqueça-o aqui e pareie de novo."
+          }
+        }
+      }
+    },
+    "Through Apple’s Lightning to USB Camera Adapter." : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Preko Appleovog Lightning na USB adaptera za kameru."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Über Apples Lightning auf USB Kamera-Adapter."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A través del adaptador de Lightning a USB para cámaras de Apple."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Via l’adaptateur Lightning vers USB pour appareil photo d’Apple."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pelo Adaptador de Câmera Lightning para USB da Apple."
           }
         }
       }
@@ -17528,6 +18408,40 @@
         }
       }
     },
+    "What you need" : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Šta vam treba"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Was du brauchst"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Qué necesitas"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ce qu’il vous faut"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O que você precisa"
+          }
+        }
+      }
+    },
     "What’s motion and what’s the touchpad?" : {
       "localizations" : {
         "bs" : {
@@ -17728,6 +18642,118 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Controle com fio"
+          }
+        }
+      }
+    },
+    "Wired on this iPhone" : {
+      "localizations" : {
+        "bs" : {
+          "variations" : {
+            "device" : {
+              "ipad" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Žičano na ovom iPadu"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Žičano na ovom iPhoneu"
+                }
+              }
+            }
+          }
+        },
+        "de" : {
+          "variations" : {
+            "device" : {
+              "ipad" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Kabelgebunden an diesem iPad"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Kabelgebunden an diesem iPhone"
+                }
+              }
+            }
+          }
+        },
+        "en" : {
+          "variations" : {
+            "device" : {
+              "ipad" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Wired on this iPad"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Wired on this iPhone"
+                }
+              }
+            }
+          }
+        },
+        "es" : {
+          "variations" : {
+            "device" : {
+              "ipad" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Con cable en este iPad"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Con cable en este iPhone"
+                }
+              }
+            }
+          }
+        },
+        "fr" : {
+          "variations" : {
+            "device" : {
+              "ipad" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "En filaire sur cet iPad"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "En filaire sur cet iPhone"
+                }
+              }
+            }
+          }
+        },
+        "pt-BR" : {
+          "variations" : {
+            "device" : {
+              "ipad" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Com fio neste iPad"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Com fio neste iPhone"
+                }
+              }
+            }
           }
         }
       }

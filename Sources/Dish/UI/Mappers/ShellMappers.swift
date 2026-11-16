@@ -94,19 +94,24 @@ func connectionsBadge(session: SessionFact?) -> Int? {
     }
 }
 
-func sessionBarState(_ session: SessionFact?, words: L10n = .app) -> SessionBarState? {
+/// `lowPower` is the countdown: its last seconds take the streaming line.
+func sessionBarState(_ session: SessionFact?, lowPower: LowPowerFact = .idle, words: L10n = .app) -> SessionBarState? {
     guard let session else { return nil }
     switch session.phase {
-    case .streaming: return streamingBar(session, words: words)
+    case .streaming: return streamingBar(session, lowPower: lowPower, words: words)
     case .stoppedResponding: return .problem(pcName: session.pcName, line: words.stoppedResponding, reconnect: words.reconnect)
     }
 }
 
-private func streamingBar(_ session: SessionFact, words: L10n) -> SessionBarState {
+private func streamingBar(_ session: SessionFact, lowPower: LowPowerFact, words: L10n) -> SessionBarState {
     let counts = [words.padCount(session.pads)] + [session.latencyMs.map(words.latency)].compactMap(\.self)
     let shortLine = counts.joined(separator: lineSeparator)
     let line = ([words.streaming] + counts).joined(separator: lineSeparator)
-    return .streaming(pcName: session.pcName, line: line, shortLine: shortLine, dim: words.dim, play: words.play)
+    guard let seconds = lowPower.countdown else {
+        return .streaming(pcName: session.pcName, line: line, shortLine: shortLine, dim: words.dim, play: words.play)
+    }
+    let countdown = words.lowPowerIn(seconds)
+    return .streaming(pcName: session.pcName, line: countdown, shortLine: countdown, dim: words.dim, play: words.play)
 }
 
 // MARK: - A tab's list beside its page, on a regular width

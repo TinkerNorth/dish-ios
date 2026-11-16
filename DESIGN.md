@@ -59,6 +59,7 @@ Fills derived from the palette, named so no view multiplies an alpha itself
 | `DishTheme.errorDim` | error @ 16 % | error @ 16 % | The tile behind a warning glyph: the session accessory's stopped PC |
 | `DishTheme.successFill` | success @ 16 % | success @ 16 % | A BEST or FASTEST chip's ground under its `success` word |
 | `DishTheme.primaryFill` | accent @ 14 % | accent @ 14 % | A FAST chip's ground under its `primary` word |
+| `DishTheme.warningFill` | warning @ 16 % | warning @ 16 % | The tile behind the Lightning note's bolt, and an ADAPTER chip's ground under its `warning` word |
 
 The brand glyphs use the brand book's colour, not the accent:
 
@@ -130,7 +131,8 @@ Points. Every size a kit component sets is one of these names.
 | `DishSize.welcomeMark` | 112 | The brand mark on the welcome |
 | `DishSize.featureSymbol` | 32 | A welcome feature's symbol column |
 | `DishSize.carryMark` | 16 | The check or dash column of a review carry row |
-| `DishSize.primerTile` | 64 | The phone and PC tiles over the Local Network primer |
+| `DishSize.primerTile` | 64 | The phone and PC tiles over the Local Network primer, and the phone and controller tiles over the Wired on this iPhone sheet |
+| `DishSize.adapterArt` | 48 | The adapter drawn between the phone and the controller on the Wired on this iPhone sheet |
 | `DishSize.eyebrowTracking` | 1.4 | The tracking of a section eyebrow |
 | `DishSize.codeCorner` | 10 | The corner of a licence text's block on the licenses page |
 | `DishSize.padStick` | 128 | A stick's base on the on-screen gamepad, on a phone and an upright iPad |
@@ -218,6 +220,7 @@ custom glyph is drawn (`Tests/PARITY.md`).
 | Token | Asset | Role |
 |---|---|---|
 | `DishImage.mark` | `DishMark` in `Sources/Dish/Resources/Media.xcassets` | The app mark, version B: the dish tilted 28 degrees, shown on the welcome. Rendered by `scripts/render-icon.sh` from `Resources/Dish.svg`, the fleet's SVG byte for byte, as 1x, 2x and 3x PNGs, since the asset catalog drops the SVG mask that cuts the gear ring. |
+| `DishImage.adapter` | `LightningAdapter` in `Sources/Dish/Resources/Media.xcassets` | Apple's Lightning to USB Camera Adapter as a template SVG, tinted in the accent on the Wired on this iPhone sheet: the Lightning plug on its cable, the body with its USB port and its power port, and the controller's USB plug coming in. |
 
 ## Components
 
@@ -228,8 +231,12 @@ Also in `Theme.swift`:
 - `StatusDot(color:)`, the 8 pt dot beside a row's second line.
 
 The kit lives in `Sources/Dish/UI/Kit` and follows the kit rules in
-[docs/UI_CONTRACT.md](docs/UI_CONTRACT.md): `Chip` (BEST, FASTEST, FAST),
-`RowGlyph` (the rounded tile at the head of a row), `SessionBar` (the
+[docs/UI_CONTRACT.md](docs/UI_CONTRACT.md): `Chip` (BEST, FASTEST, FAST,
+ADAPTER), `RowGlyph` (the rounded tile at the head of a row),
+`AdapterNoteRow` (the Lightning note: the bolt on its warning tile, the port
+named, why a plain cable will not do, and the way to its sheet),
+`IllustrationTile` (a symbol on its tile with an eyebrow under it, over the
+Local Network primer and the adapter sheet), `SessionBar` (the
 session accessory), `PinCells` (a PIN's digits in a row of cells, the
 caret's cell outlined in the focus colour), `RowActions` (a row's long-press
 menu and swipes; a destructive swipe wears `DishTheme.error`, any other

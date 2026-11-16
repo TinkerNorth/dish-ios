@@ -14,6 +14,8 @@ final class SlotPreferencesTests: XCTestCase {
         let global = ForwardingFlags(motion: false, rumble: true, lightbar: false)
         let slot = SlotPreferences(rumble: false, triggerEffects: false)
         let flags = effectiveFlags(global: global, slot: slot)
+        XCTAssertNil(flags.phoneSurface, "no screen lent unless asked")
+        XCTAssertEqual(effectiveFlags(global: global, slot: slot, phoneSurface: .mouse).phoneSurface, .mouse)
         XCTAssertFalse(flags.motion, "global off")
         XCTAssertFalse(flags.rumble, "the controller's own off")
         XCTAssertFalse(flags.lightbar, "global off")

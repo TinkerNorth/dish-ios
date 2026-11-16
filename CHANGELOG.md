@@ -29,6 +29,41 @@ to. The rows answer a long press and a swipe, Siri and Shortcuts can open the
 play screens, dim and connect, and TipKit points at what a new person might
 miss. `Tests/PARITY.md` lists everything not built.
 
+### Added
+
+- **The on-screen controller is always listed.** As Android's Virtual
+  Controller is: one of the controllers from the first launch, bound and
+  unbound from its row and its page like any pad, its binding kept across
+  restarts; Open raises its gamepad once a PC is bound to it, and Stop
+  gamepad closes the screen and keeps the binding.
+- **The low-power countdown.** Settings › Dim screen after now does what it
+  says: while a session streams and the tabs are on screen, the seconds
+  without a touch on the phone count up to the delay, the last five on the
+  session accessory as "Low power in 5 s", and the dim rises on its own.
+  A touch anywhere restarts the count; controller input never does, as on
+  Android. The dim also drops the screen's brightness to its floor and
+  gives it back on wake. The accessory's Dim still dims at once.
+- **Find a PC and Reconnect.** A controller with no PC paired offers Find a
+  PC, straight to the Connections tab, instead of an empty Bind to; a pad
+  whose PC is lost offers Reconnect ahead of Unbind on its row and page.
+- **The touchpad and the mouse per controller.** A pad with no touchpad of
+  its own, bound to a satellite that grants mouse control, offers Open
+  touchpad and Open mouse on its row and under its status card: the phone's
+  surface is sent through that pad's own slot, which asks the host for the
+  mouse while the screen is open. The on-screen controller's own mouse
+  screen asks the same way, so it moves the PC's pointer.
+- **The Lightning note.** An iPhone or iPad with a Lightning port cannot
+  host a controller over a plain cable, so on one the Controllers tab (while
+  nothing is listed), setup's Input step and Add a controller's hint say that
+  a wired pad needs Apple's Lightning to USB Camera Adapter; the wired row
+  wears an ADAPTER chip in place of BEST, Help & FAQ gains "My wired
+  controller doesn't show up", an attached pad's link reads Lightning rather
+  than USB-C, and the note opens a Wired on this iPhone sheet that draws the
+  adapter between the phone and the controller, lists the three steps and
+  links Apple's page. iOS names no port to an app, so the scene reads the
+  hardware's model identifier once and the engine maps it; a device the
+  table does not know reads as USB-C and sees no note.
+
 ### Fixed
 
 - **The scene builds its objects once.** SwiftUI calls the scene's

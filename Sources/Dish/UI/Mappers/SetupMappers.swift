@@ -10,27 +10,31 @@ import SwiftUI
 
 /// What the setup pages read beside the walk itself: the pads iOS sees, the
 /// PCs discovery heard, whether it is looking, the Local Network answer,
-/// and the PC added by address, by id, once there is one. Plain values, so
-/// the pages do not depend on the engine's fact types.
+/// the PC added by address, by id, once there is one, and the port the
+/// device hosts a wired pad through. Plain values, so the pages do not
+/// depend on the engine's fact types.
 struct SetupInputs: Equatable {
     let detectedPads: [SetupPadInput]
     let found: [SetupPCInput]
     let scanning: Bool
     let localNetwork: LocalNetworkStatus
     let addedByAddress: String?
+    let port: DevicePort
 
     init(
         detectedPads: [SetupPadInput],
         found: [SetupPCInput],
         scanning: Bool,
         localNetwork: LocalNetworkStatus,
-        addedByAddress: String? = nil
+        addedByAddress: String? = nil,
+        port: DevicePort = .usbC
     ) {
         self.detectedPads = detectedPads
         self.found = found
         self.scanning = scanning
         self.localNetwork = localNetwork
         self.addedByAddress = addedByAddress
+        self.port = port
     }
 }
 
@@ -74,7 +78,8 @@ func setupInputs(facts: ShellFacts) -> SetupInputs {
         found: paired + found,
         scanning: facts.scanning,
         localNetwork: facts.localNetwork,
-        addedByAddress: facts.addedByAddress
+        addedByAddress: facts.addedByAddress,
+        port: facts.port
     )
 }
 
@@ -264,23 +269,19 @@ struct InputStepState: Equatable {
     let chooseTitle: String
     let choices: [SetupChoiceRow]
     let footnote: String
+    /// The Lightning note under the choices; nil on a USB-C iPhone.
+    let adapter: AdapterNoteState?
 }
 
 func inputStepState(_ inputs: SetupInputs, words: L10n = .app) -> InputStepState {
-    let pads = inputs.detectedPads.map { setupPadRow($0, words: words) }
+    let pads = inputs.detectedPads.map { setupPadRow($0, port: inputs.port, words: words) }
     return InputStepState(
         title: words.howDoYouWantToPlay,
         body: words.howDoYouWantToPlayBody,
         found: pads.isEmpty ? nil : SetupFoundPads(title: words.foundOnThisIPhone, pads: pads),
         chooseTitle: words.orChoose,
         choices: [
-            SetupChoiceRow(
-                symbol: "cable.connector",
-                title: words.wiredController,
-                body: words.wiredControllerBody,
-                chip: ChipState(text: words.setupBest, tone: .success),
-                pick: .wired
-            ),
+            wiredChoice(inputs.port, words: words),
             SetupChoiceRow(
                 symbol: "antenna.radiowaves.left.and.right",
                 title: words.bluetoothController,
@@ -290,13 +291,35 @@ func inputStepState(_ inputs: SetupInputs, words: L10n = .app) -> InputStepState
             ),
             SetupChoiceRow(symbol: "iphone", title: words.onScreenGamepad, body: words.onScreenGamepadBody, chip: nil, pick: .onScreen)
         ],
-        footnote: words.dishReadsAnyController
+        footnote: words.dishReadsAnyController,
+        adapter: adapterNote(port: inputs.port, words: words)
     )
 }
 
-private func setupPadRow(_ pad: SetupPadInput, words: L10n) -> SetupPadRow {
+/// Wired is the best way in on a USB-C iPhone; on a Lightning one it runs
+/// through the adapter, and the chip says so in place of BEST.
+private func wiredChoice(_ port: DevicePort, words: L10n) -> SetupChoiceRow {
+    switch port {
+    case .usbC: SetupChoiceRow(
+            symbol: "cable.connector",
+            title: words.wiredController,
+            body: words.wiredControllerBody,
+            chip: ChipState(text: words.setupBest, tone: .success),
+            pick: .wired
+        )
+    case .lightning: SetupChoiceRow(
+            symbol: "cable.connector",
+            title: words.wiredController,
+            body: words.wiredThroughTheAdapterBody,
+            chip: ChipState(text: words.adapter, tone: .warning),
+            pick: .wired
+        )
+    }
+}
+
+private func setupPadRow(_ pad: SetupPadInput, port: DevicePort, words: L10n) -> SetupPadRow {
     let state = padState(pad.link, words: words)
-    let parts = [state, setupPadLinkWord(pad.link, words: words)] + setupBatteryWord(pad.batteryPercent, words: words)
+    let parts = [state, setupPadLinkWord(pad.link, port: port, words: words)] + setupBatteryWord(pad.batteryPercent, words: words)
     return SetupPadRow(
         id: pad.id,
         symbol: "gamecontroller",
@@ -314,9 +337,10 @@ private func padState(_ link: SetupPadLink, words: L10n) -> String {
     }
 }
 
-func setupPadLinkWord(_ link: SetupPadLink, words: L10n) -> String {
+/// The link word of a seen pad: the port it is plugged into, or Bluetooth.
+func setupPadLinkWord(_ link: SetupPadLink, port: DevicePort = .usbC, words: L10n) -> String {
     switch link {
-    case .usbC: words.usbC
+    case .usbC: wiredLinkWord(port, words: words)
     case .bluetooth: words.setupBluetooth
     }
 }

@@ -278,10 +278,10 @@ func roundTripText(_ latency: LatencySummary, locale: Locale = .current, words: 
 
 /// The link, the rates, the type and the battery, then the binding and its
 /// side of the wire.
-func padLines(_ pad: PadDiagnostics, words: L10n = .app) -> [FactLine] {
+func padLines(_ pad: PadDiagnostics, port: DevicePort = .usbC, words: L10n = .app) -> [FactLine] {
     let controller = pad.controller
     let opening = [
-        FactLine(key: words.connection, value: linkWord(controller.link, words: words)),
+        FactLine(key: words.connection, value: linkWord(controller.link, port: port, words: words)),
         FactLine(key: words.inputRate, value: rateText(hz: pad.rates.reportHz, reports: pad.reports, words: words))
     ]
     let motion = carriesMotion(controller) ? [FactLine(key: words.motionRate, value: words.hertz(pad.rates.motionHz))] : []
@@ -457,12 +457,12 @@ func hostCard(_ host: HostDiagnostics, locale: Locale = .current, words: L10n = 
 
 /// A controller's card wears its health as the dot and the chip, as its
 /// row on the Controllers tab does.
-func padCard(_ pad: PadDiagnostics, words: L10n = .app) -> DiagnosticsCardState {
+func padCard(_ pad: PadDiagnostics, port: DevicePort = .usbC, words: L10n = .app) -> DiagnosticsCardState {
     DiagnosticsCardState(
         id: pad.id,
         title: controllerName(pad.controller, words: words),
         dot: destinationDot(pad.controller.destination?.health),
         chip: healthText(pad.controller, words: words),
-        lines: padLines(pad, words: words)
+        lines: padLines(pad, port: port, words: words)
     )
 }

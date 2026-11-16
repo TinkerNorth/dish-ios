@@ -40,7 +40,7 @@ environment value and send it events; a view holds no `NavigationPath` or
 | `pairingChanged(serverId:)` | The model's pairing card opened on a satellite (a Pair, or a PC that asked for a PIN as it was connected to): the pair sheet shows it, in place of an address sheet. The card closed, paired or cancelled in the model: the pair sheet lowers with nothing left to cancel. |
 | `openSetup(SetupEntry)` | Raise the setup cover over whatever covered the tabs, the dim included, and start the walk (effect `startSetup(entry)`). |
 | `setupEnded(SetupEnding)` | Lower the setup cover, select Controllers and complete the welcome (effects `endSetup`, `markWelcomeComplete`). Both endings, `bound` and `skipped`, do the same. Ignored while no setup cover is up. |
-| `dim` | Raise the dim cover. Ignored while any cover is up: the accessory that asks for it is not on screen under a cover. |
+| `dim` | Raise the dim cover. Ignored while any cover is up: the accessory that asks for it is not on screen under a cover. The shell also sends it when the low-power countdown ends (`ShellFacts.lowPower.due`); `dimAllowed(_:)` says when the countdown may run at all: no cover and no sheet. |
 | `wake` | Lower the dim cover. Ignored unless the dim is up. |
 | `coverDismissed` | The system lowered the cover (a swipe down, a scene change). Setup ends as a skip, the dim as a wake. |
 | `connectTo(id:)` | Siri, Spotlight or Shortcuts' Connect to a PC (an App Intent, below): the model reaches for the PC (effect `connect(id:)`) and, while the tabs or the dim are on screen, the PC's page shows alone on Connections, the dim waking and a sheet going with its pairing. Under play or the setup walk nothing moves but the effect. |
@@ -53,8 +53,8 @@ the dim risen. An event the machine refused teaches nothing.
 `SetupEntry` is `firstRun` (the welcome, then the three steps), `addController`
 (straight to Input) and `guide` (Settings › Setup guide: the welcome again).
 `Cover` is `setup(SetupEntry)`, `play(PlayScreen)` or `dim`; `Sheet` is
-`pair(serverId:)` or `addByAddress`, and a cover rising or the setup cover
-falling takes the sheet with it. On a first run
+`pair(serverId:)`, `addByAddress` or `lightningAdapter`, and a cover rising
+or the setup cover falling takes the sheet with it. On a first run
 (`onboarding_welcome_completed` unset, read through `OnboardingPreferenceStore`
 when the store is built) the store starts with the setup cover up and the walk
 started, so the tabs never flash; a later launch starts on Controllers with no
@@ -123,7 +123,8 @@ What changes with them:
 ### The session accessory
 
 `SessionBar` (kit) is the `tabViewBottomAccessory`, drawn from one
-`SessionBarState` that `sessionBarState(_:)` builds from `ShellFacts.session`.
+`SessionBarState` that `sessionBarState(_:lowPower:)` builds from
+`ShellFacts.session` and `ShellFacts.lowPower`.
 `ShellView` attaches it only while that state is non-nil, because iOS 26.0 has
 no `isEnabled:` form and an empty accessory still draws its glass. The session
 is the live satellite carrying the most pads (`AppModel+Session.swift`).
@@ -133,8 +134,11 @@ is the live satellite carrying the most pads (`AppModel+Session.swift`).
   on-screen gamepad). A `stoppedResponding` session, one whose heartbeat acks
   falter, draws "Stopped responding" in the error colour with a Reconnect
   button, the Connections tab wears a badge of 1 (`connectionsBadge`), and
-  the controller rows bound to that PC say "Connection lost" (D4; the
-  engine's `linkHealth` reads a faltering link as lost).
+  the controller rows bound to that PC say "Connection lost" and offer
+  Reconnect (D4; the engine's `linkHealth` reads a faltering link as
+  lost). While the low-power countdown runs its last
+  five seconds, the streaming line reads "Low power in 5 s" instead, on
+  the full bar and the inline one.
 - **Inline**, while the tab bar is minimized (`.tabBarMinimizeBehavior(.onScrollDown)`):
   `SessionBar` reads `tabViewBottomAccessoryPlacement` and draws the short line
   alone, "3 pads · 4 ms", or the warning alone.
@@ -166,23 +170,38 @@ the `Cover` case and `NavigationCoverageTests` requires a
   kit component tracking its own finger (`PadButtons`, `PadSticks`,
   `TouchSurfaces`), so several fingers hold several controls; the touchpad's
   two fingers come from `SpatialEventGesture`. The pause menu is a native
-  `Menu`: Resume, the other two screens, on the gamepad Motion (disabled
-  with its reason), Rumble and Emulate as, and the destructive Stop gamepad,
-  which TipKit's urgent hint on the pause button names until it is used.
-  The dim is refused over play: its Dim lives on the accessory.
+  `Menu`: Resume, the other two screens (the touchpad and the mouse alone
+  when the screen serves a pad, whose gamepad is its own), on the gamepad
+  Motion (disabled with its reason), Rumble and Emulate as, and the
+  destructive Stop gamepad, which TipKit's urgent hint on the pause button
+  names until it is used; Stop gamepad closes the screen and keeps the
+  on-screen controller's binding. A screen serves the slot the phone was
+  aimed at before it opened (`aimPlay(at:)`, from a pad's Open touchpad or
+  Open mouse): its touches go through that pad's slot, whose descriptor
+  asks for the screen while it is open, and the pill reads "Connection
+  lost" when that pad's PC is down (`PlayFacts.target`, `.destination`).
+  The dim is refused over play: its Dim lives on the accessory, and the
+  low-power countdown rests under any cover.
 - **Dim** (`DimCover.swift`): `DishTheme.dimBackground` (true black in either
   appearance), `.statusBarHidden()`, `.persistentSystemOverlays(.hidden)`, the
   words "low power" and "tap to wake" in the eyebrow style, and a tap anywhere
   sends `.wake`. It is also an accessibility button with the same action. It
   draws the clock from `ShellFacts.now` (the dim runs the clock while it is
   up) and, while a session is up, the session card: the accessory's own
-  line and each bound pad's level (`dimCoverState`). It is raised only by
-  the accessory's Dim.
+  line and each bound pad's level (`dimCoverState`). It is raised by the
+  accessory's Dim, and by the shell when the low-power countdown ends:
+  while a session streams and the tabs are on screen, the engine's
+  `LowPowerWatch` counts the seconds without a touch on the phone up to
+  Settings › Dim screen after (the scene's `TouchWatcher` on every window
+  reports each touch; controller input never counts), and the shell sends
+  `dim` when it is due and tells the model so. While the dim is up the
+  scene's `ScreenDimmer` holds the screen's brightness at 0.01 and gives
+  back what it found on wake and on the way to the background.
 
 ### The sheets
 
-A sheet is `Sheet.pair(serverId:)` or `Sheet.addByAddress`, held by the
-navigation state and drawn by `ShellSheet` (`Sources/Dish/UI/Sheets/`). Two
+A sheet is `Sheet.pair(serverId:)`, `Sheet.addByAddress` or
+`Sheet.lightningAdapter`, held by the navigation state and drawn by `ShellSheet` (`Sources/Dish/UI/Sheets/`). Two
 hosts present it: the tabs, through `navigation.tabsSheet`, while no cover is
 up, and the setup cover, through `navigation.setupSheet`, while it is
 (`presentedSheet(_:by:)` says which; neither presents over play or the dim).
@@ -217,6 +236,23 @@ sheet its draft and whether the model refused it.
   (`connectionFailureText`, every `ConnectionFailure` case), and a PC that
   wants a PIN replaces the sheet with the pair sheet. `onAppear` sends
   `pageAppeared(.addByAddress)`, which clears the stale event.
+- **Wired on this iPhone** (`LightningAdapterSheet`): from the Lightning
+  note (`AdapterNoteRow` over `adapterNote(port:)`), which a Lightning
+  iPhone shows on the Controllers tab while nothing is listed and under
+  the choices of setup's Input step, where the wired row reads "Through
+  Apple's Lightning to USB Camera Adapter" with an ADAPTER chip in place
+  of BEST. The state is `lightningAdapterSheetState(words:)`: the phone,
+  the adapter (`DishImage.adapter`) and the controller in a row, "This
+  iPhone has a Lightning port" with why a cable alone will not do, WHAT
+  YOU NEED as three steps (the adapter into the phone, the controller's
+  cable into the adapter, a charger into the USB 3 adapter's own port),
+  "Bluetooth needs no adapter", Apple's page for the adapter through
+  `openURL` (`DishLinks.lightningAdapter`), and Done, which is
+  `closeSheet`. The port behind all of it is `ShellFacts.port`, read once
+  by the scene from the hardware's model identifier; the same fact words
+  an attached pad's link "Lightning" in place of "USB-C", gives Help &
+  FAQ its "My wired controller doesn't show up" question, and lets Add a
+  controller's hint name the adapter.
 
 ### The scene
 
@@ -277,18 +313,19 @@ Today's pages and their mappers:
 | `ControllersPage` | `ControllersPageState` (`ControllersContent`: `empty` or `list`) | `controllersPageState(controllers:apply:paired:words:)` | A list of controller rows (glyph tile, name, the destination line with a dot and the link word, battery) over a separate "Add a controller" button with its hint, which sends `openSetup(.addController)`; with no controllers, the invitation above the same button. A row pushes its controller's page; a pad Dish cannot read says "Not supported" and opens nothing. The bind in flight or failed for a pad (`ShellFacts.apply`) speaks on its row in place of the destination ("Applying binding…", or why it failed, in the error colour), which is where setup's Bind lands (B6). A long press offers the row's actions and a swipe the quickest of them (`ControllerRowState.actions`, "Row actions" below): Open for the on-screen controller, Unbind for a bound controller, or Bind to with each paired PC for an unbound one. The heart on the toolbar (`DishTheme.pulse`) pushes Support Dish; TipKit's hints point at the heart, once a controller is listed, and at Add a controller (`ControllersHints`). |
 | `ConnectionsPage` | `ConnectionsPageState` (`title`, `add`, `ConnectionsContent`: `denied`, `empty`, `list`) | `connectionsPageState(facts:settingsURL:words:)` | PAIRED rows (online with the latency and the bound controllers, offline with when the PC was seen and Connect, needs pairing with Pair), each pushing the PC's page; FOUND ON <Wi-Fi> rows, each with Pair, and "Searching" in the header while a scan runs; the Moonlight hosts row (not tappable yet) and a footnote; the empty state; and, when Local Network is denied, "Dish can't see your network" with Open Settings through the scene's `settingsURL`. The plus on the toolbar opens Add a PC by address. `onAppear` sends `pageAppeared(.connections)`, which runs the clock and one scan. A PC that never advertised a name is known by its address (`connectionTitle`). A long press offers a row's actions and a swipe the quickest of them (`ConnectionRowState.actions`): a paired PC's Connect or Disconnect, Re-pair and Forget This PC, which asks first in the PC page's words (`ConnectionRowState.forget`), and a found PC's Pair. A pull on any state of the page, the empty ones included, looks again (`refreshConnections`) and lets go once the scan is in. |
 | `DiagnosticsPage` | `DiagnosticsPageState` | `diagnosticsPageState(facts:appVersion:locale:timeZone:words:)` | DISH (the app version, the protocol this build speaks, the Local Network status), CONNECTIONS (a card per paired or pooled PC: its address and link tier; a Moonlight host's card reads its session's phase, its name and versions, the running app, the control round trip and a line per pad it holds; and while a satellite session is up its protocol, epoch and controller bitmap against what was applied, the virtual-controller backend, the round trips, the missed heartbeats and the counters: sent, received, dropped and the replay guard), CONTROLLERS (a card per controller with its health as the dot and chip: its link, report and motion rates, type, battery, binding and its side of the wire), LOCK STATISTICS only in a `LOCK_STATS` build, and EVENTS (the flight recorder's newest thirty lines, newest first). Copy hands the whole transcript to the pasteboard through the model (`copyToPasteboard`), Share to a `ShareLink`; `onAppear` sends `pageAppeared(.diagnostics)`, which starts the source's 1 Hz tick, and `onDisappear` stops it. |
-| `ControllersPage` | `ControllersPageState` (`ControllersContent`: `empty` or `list`) | `controllersPageState(controllers:apply:words:)` | A list of controller rows (glyph tile, name, the destination line with a dot and the link word, battery) over a separate "Add a controller" button with its hint, which sends `openSetup(.addController)`; with no controllers, the invitation above the same button. A row pushes its controller's page; a pad Dish cannot read says "Not supported" and opens nothing. The bind in flight or failed for a pad (`ShellFacts.apply`) speaks on its row in place of the destination ("Applying binding…", or why it failed, in the error colour), which is where setup's Bind lands (B6). The heart on the toolbar (`DishTheme.pulse`) pushes Support Dish. |
+| `ControllersPage` | `ControllersPageState` (`rows`, the on-screen controller always among them; `adapter`, the Lightning note while no pad is listed) | `controllersPageState(controllers:apply:paired:port:words:)` | The controller rows (glyph tile, name, the destination line with a dot and the link word, battery) over a separate "Add a controller" button with its hint, which sends `openSetup(.addController)`. A row pushes its controller's page; a pad Dish cannot read says "Not supported" and opens nothing. The on-screen row's Open shows once a PC is bound to it. A pad's menu offers Open touchpad and Open mouse when the phone can lend them (`ControllerFact.surfaces`: `aimPlay(at:)`, then `openPlay`), Reconnect ahead of Unbind while its PC is lost (`connect`), and Find a PC (`select(.connections)`) while nothing is paired. The bind in flight or failed for a pad (`ShellFacts.apply`) speaks on its row in place of the destination ("Applying binding…", or why it failed, in the error colour), which is where setup's Bind lands (B6). The heart on the toolbar (`DishTheme.pulse`) pushes Support Dish. |
 | `ConnectionsPage` | `ConnectionsPageState` (`title`, `add`, `ConnectionsContent`: `denied`, `empty`, `list`) | `connectionsPageState(facts:settingsURL:words:)` | PAIRED rows (online with the latency and the bound controllers, offline with when the PC was seen and Connect, needs pairing with Pair), each pushing the PC's page; FOUND ON <Wi-Fi> rows, each with Pair, and "Searching" in the header while a scan runs; the Moonlight hosts row (not tappable yet) and a footnote; the empty state; and, when Local Network is denied, "Dish can't see your network" with Open Settings through the scene's `settingsURL`. The plus on the toolbar opens Add a PC by address. `onAppear` sends `pageAppeared(.connections)`, which runs the clock and one scan. A PC that never advertised a name is known by its address (`connectionTitle`). |
 | `SettingsPage` | `SettingsPageState` | `settingsPageState(preferences:forwarding:appVersion:words:)` | THIS IPHONE (Name on your PC, pushing `deviceName`), WHILE STREAMING (Keep screen on, Dim screen after), FORWARDED FEATURES (the global switches), SETUP & HELP (Setup guide, sending `openSetup(.guide)`), APPEARANCE (System, Light, Dark) and ABOUT (Support Dish with the heart, the version, Website, Source code and Privacy policy through `openURL`, and Open source licenses). Diagnostics is not built and has no row. |
-| `HelpPage` | `HelpPageState` | `helpPageState(words:)` | Walk me through setup (`openSetup(.guide)`), then CONCEPTS, BEST PERFORMANCE, TROUBLESHOOTING and ABOUT DISH as `DisclosureGroup`s, then LINKS. |
+| `HelpPage` | `HelpPageState` | `helpPageState(port:words:)` | Walk me through setup (`openSetup(.guide)`), then CONCEPTS, BEST PERFORMANCE, TROUBLESHOOTING (one question more on a Lightning iPhone: the wired pad that never shows up) and ABOUT DISH as `DisclosureGroup`s, then LINKS. |
 | `SupportPage` | `SupportPageState` (`SupportShelfState`: `loading`, `tips`, `unavailable`; `SupportNoticeState`: `none`, `thanks`, `note`) | `supportPageState(support:words:)` | The heart, the pitch, the three tips with StoreKit's own prices (`model.tip`), the outcome, and Restore purchases (`model.restoreTips`); `onAppear` sends `pageAppeared(.support)`, which loads the shelf. |
 | `LicensesPage` | `LicensesPageState` (`LicensesContent`: `missing` or `notice`) | `licensesPageState(notice:appVersion:words:)` | The bundled `THIRD_PARTY.md`, handed down by the scene as `\.thirdPartyNotice`, then the LGPL notice and "Dish 0.1.0 · TinkerNorth · LGPL-3.0". |
-| `ControllerPage` | `ControllerPageState` (`ControllerContent`: `pad` or `gone`) | `controllerPageState(controllers:paired:apply:pads:id:words:)` | C1: the status card (name, link, family, battery, the dot of the PC it sends to), BINDING with the destination (`BindingDestinationState`: the PC's name with its dot and Unbind, through `unbind(slotId:)`; or "Bind to" as a `Menu` of the paired PCs, through `bind(slotId:to:)`, with the hint to pair one first while there is none), the apply inline under it (`ApplyRowState`: "Applying binding…" with a spinner, "Binding applied", or why it failed with Try again, which binds to the same PC again) and Emulate as (a `Picker` through `setEmulatedType`; for a pad bound to a Moonlight host the protocol's Auto, Xbox, PlayStation and Nintendo through `setMoonlightEmulatedType`, with the line saying what Auto sends), FUNCTIONS (a `Toggle` per switch the pad has, through `setControllerFeature`; the Motion row carries a line under it, `MotionRowStatus`, worded from `motionIndicatorFor` and in the warning colour when the satellite is to blame) and the microphone and speaker footnote, then a Dead zones row that pushes `Page.deadZones(id:)` (left out for the on-screen gamepad) and TELEMETRY (`ControllerTelemetryState`: Gamepad, then Motion and Touch for a pad that has the hardware, each a rate in Hz off `shellFacts.diagnostics.pads`, the same `InputRateTracker` readings Diagnostics shows; drawn only once the pad has sent a report, the on-screen gamepad included). The page runs the source's tick while it shows, through `pageAppeared(.controller)`; the title is the pad's name and the subtitle "84% battery · USB-C". A pad that left while the page was open shows "This controller isn’t connected to your iPhone." |
+| `ControllerPage` | `ControllerPageState` (`ControllerContent`: `pad` or `gone`) | `controllerPageState(controllers:paired:apply:pads:port:id:words:)` | C1: the status card (name, link, family, battery, the dot of the PC it sends to), then Open for the on-screen controller once a PC is bound to it, and Open touchpad and Open mouse for a pad the phone can lend them to (`SurfaceButtonState`, through `aimPlay(at:)` and `openPlay`), BINDING with the destination (`BindingDestinationState`: the PC's name with its dot, Reconnect while it is lost (`connect`) and Unbind, through `unbind(slotId:)`; or "Bind to" as a `Menu` of the paired PCs, through `bind(slotId:to:)`; or, with none paired, Find a PC, which selects the Connections tab, with the hint saying why), the apply inline under it (`ApplyRowState`: "Applying binding…" with a spinner, "Binding applied", or why it failed with Try again, which binds to the same PC again) and Emulate as (a `Picker` through `setEmulatedType`; for a pad bound to a Moonlight host the protocol's Auto, Xbox, PlayStation and Nintendo through `setMoonlightEmulatedType`, with the line saying what Auto sends), FUNCTIONS (a `Toggle` per switch the pad has, through `setControllerFeature`; the Motion row carries a line under it, `MotionRowStatus`, worded from `motionIndicatorFor` and in the warning colour when the satellite is to blame) and the microphone and speaker footnote, then a Dead zones row that pushes `Page.deadZones(id:)` (left out for the on-screen gamepad) and TELEMETRY (`ControllerTelemetryState`: Gamepad, then Motion and Touch for a pad that has the hardware, each a rate in Hz off `shellFacts.diagnostics.pads`, the same `InputRateTracker` readings Diagnostics shows; drawn only once the pad has sent a report, the on-screen gamepad included). The page runs the source's tick while it shows, through `pageAppeared(.controller)`; the title is the pad's name and the subtitle "84% battery · USB-C". A pad that left while the page was open shows "This controller isn’t connected to your iPhone." |
 | `PcDetailPage` | `PcDetailPageState` (`PcDetailContent`: `pc` or `gone`) | `pcDetailPageState(facts:id:words:)` | D2, a paired PC: the status card ("Online · 4 ms", when it was seen, or "Needs pairing", over "Satellite 2.1.11 · Protocol 3 · 192.168.1.24", with what is known), CARRYING · 2 OF 4 with each bound controller on its slot (or "Nothing bound yet"), WHAT CARRIES each way from the satellite's capabilities (motion while its backend is up, the return path while its feedback is; left out until probed), then Re-pair (the pair sheet), Disconnect while the session is up or Connect while the PC rests (neither while its key was revoked), and Forget This PC, a destructive `confirmationDialog` titled "Forget This PC" that names how many controllers stop streaming, pops the page and calls `forget`. A PC forgotten while its page was open shows "This PC is no longer remembered." under the generic title "PC". |
 | `DeviceNamePage` | `DeviceNamePageState` | `deviceNamePageState(preferences:words:)` | A text field whose draft is the page's own `@State`, committed with `setDeviceName`. |
 | `DeadZonesPage` | `DeadZonesPageState` (`DeadZonesContent`: `pad` or `gone`) | `deadZonesPageState(id:controllers:zones:words:)` | A controller's Dead zones: the stick and trigger dead zones as sliders over the desktops' 0 to 30 percent with a readout each, through `setStickDeadzone` and `setTriggerDeadzone` as they move, and Reset to defaults through `resetDeadzones`; the page's subtitle is the pad's name, and a pad that left shows "This controller isn’t connected to your iPhone." |
 | `PairSheet` | `PairSheetState` (`card(PairCardState)` or `ended`) | `pairSheetState(pairing:serverId:deviceName:typed:words:)` | "The sheets" above: the cells, the request with its code, the outcomes and Rename this iPhone. |
 | `AddByAddressSheet` | `AddByAddressSheetState` | `addByAddressSheetState(draft:rejected:connecting:lastEvent:words:)` | "The sheets" above: the field, the default port, Connect with its spinner, the refusal or the failure. |
+| `LightningAdapterSheet` | `LightningAdapterSheetState` | `lightningAdapterSheetState(words:)` | "The sheets" above: the phone, the adapter and the controller, why a cable alone will not do, the three steps, the Bluetooth aside, Apple's page and Done. |
 | the shell | `[TabItemState]`, `SessionBarState?`, `TabLayout`, `RowOpening`, `TabDetailState` | `tabItems(facts:words:)`, `sessionBarState(_:words:)`, `tabLayout(_:width:)`, `rowOpening(_:layout:)`, `listSelection(_:layout:)`, `tabDetailState(_:opened:facts:words:)` | The tab titles, symbols and the Connections badge; the accessory's two shapes; on an iPad, which tabs split, what a row does in each layout, and the column beside a split's list. |
 
 ### Row actions and pull to refresh

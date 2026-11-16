@@ -59,6 +59,9 @@ enum Sheet: Hashable {
     case pair(serverId: String)
     /// Add a PC by address.
     case addByAddress
+    /// What a wired pad needs on a Lightning iPhone: the adapter, drawn and
+    /// explained, from the Lightning note.
+    case lightningAdapter
 }
 
 /// Who presents the sheet: the tabs while no cover is up, the setup cover
@@ -176,6 +179,11 @@ func sheetHost(_ state: NavigationState) -> SheetHost? {
     case .setup: .setup
     case .play, .dim: nil
     }
+}
+
+/// Whether the low-power dim could rise now: the bare tabs are on screen.
+func dimAllowed(_ state: NavigationState) -> Bool {
+    state.cover == nil && state.sheet == nil
 }
 
 /// The sheet `host` presents: the one on screen while it is the host.
@@ -310,7 +318,7 @@ private func sheetOpened(_ state: NavigationState, _ sheet: Sheet) -> Navigation
 private func begun(_ sheet: Sheet) -> [NavigationEffect] {
     switch sheet {
     case let .pair(serverId): [.beginPairing(serverId: serverId)]
-    case .addByAddress: []
+    case .addByAddress, .lightningAdapter: []
     }
 }
 
@@ -324,7 +332,7 @@ private func sheetDropped(_ state: NavigationState) -> NavigationStep {
 private func cancelled(_ sheet: Sheet?) -> [NavigationEffect] {
     switch sheet {
     case let .pair(serverId): [.cancelPairing(serverId: serverId)]
-    case .addByAddress, nil: []
+    case .addByAddress, .lightningAdapter, nil: []
     }
 }
 
@@ -347,7 +355,7 @@ private func pairSheetRaised(_ state: NavigationState, serverId: String) -> Shee
 private func pairSheetLowered(_ sheet: Sheet?) -> Sheet? {
     switch sheet {
     case .pair: nil
-    case .addByAddress, nil: sheet
+    case .addByAddress, .lightningAdapter, nil: sheet
     }
 }
 

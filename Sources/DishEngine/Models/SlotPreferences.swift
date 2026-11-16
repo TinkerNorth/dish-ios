@@ -82,16 +82,21 @@ package enum SlotSwitch: CaseIterable, Hashable {
 }
 
 /// The switches that reach the wire, the hot path and the return paths for
-/// one controller: the global switch and the controller's own, both on. The
-/// trigger effects and the player LEDs have no global switch.
-package func effectiveFlags(global: ForwardingFlags, slot: SlotPreferences) -> ForwardingFlags {
+/// one controller: the global switch and the controller's own, both on, and
+/// the screen the phone lends it.
+package func effectiveFlags(
+    global: ForwardingFlags,
+    slot: SlotPreferences,
+    phoneSurface: PhoneSurface? = nil
+) -> ForwardingFlags {
     ForwardingFlags(
         motion: global.motion && slot.motion,
         touchpad: global.touchpad && slot.touchpad,
         rumble: global.rumble && slot.rumble,
         lightbar: global.lightbar && slot.lightbar,
         triggerEffects: slot.triggerEffects,
-        playerLeds: slot.playerLeds
+        playerLeds: slot.playerLeds,
+        phoneSurface: phoneSurface
     )
 }
 

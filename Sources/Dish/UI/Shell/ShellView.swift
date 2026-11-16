@@ -23,15 +23,29 @@ struct ShellView: View {
             }
         }
         .tabViewStyle(.sidebarAdaptable)
-        .modifier(SessionAccessory(state: sessionBarState(model.shellFacts.session), dim: dim, play: play, reconnect: model.reconnect))
+        .modifier(SessionAccessory(
+            state: sessionBarState(model.shellFacts.session, lowPower: model.shellFacts.lowPower),
+            dim: dim,
+            play: play,
+            reconnect: model.reconnect
+        ))
         .tabBarMinimizeBehavior(.onScrollDown)
         .sheet(item: navigation.tabsSheet) { ShellSheet(sheet: $0) }
         .fullScreenCover(item: navigation.cover) { ShellCover(cover: $0) }
         .onChange(of: pairingSheetId(model.openPairing)) { _, serverId in pairingChanged(serverId) }
+        .onChange(of: model.shellFacts.lowPower.due) { _, due in lowPowerMoved(due) }
+        .onChange(of: dimAllowed(navigation.state), initial: true) { _, allowed in model.setDimAllowed(allowed) }
     }
 
     private func dim() {
         navigation.send(.dim)
+    }
+
+    /// The countdown ended: the dim rises and the model hears it.
+    private func lowPowerMoved(_ due: Bool) {
+        guard due else { return }
+        navigation.send(.dim)
+        model.lowPowerHandled()
     }
 
     private func play() {

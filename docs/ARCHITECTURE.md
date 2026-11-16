@@ -195,7 +195,16 @@ for play, an iPad follows the device on every screen. The same fact tells the
 engine which device it is (`deviceKind(_:)` into `AppModel`'s `deviceKind`), so
 a device with no name of its own introduces itself to the satellite as "iPhone"
 or "iPad" (`wireDeviceName`); the words that name the device (about nineteen
-catalog keys) are device variations in the String Catalog, which the OS picks. It puts `WindowReader`
+catalog keys) are device variations in the String Catalog, which the OS picks.
+It reads the hardware's model identifier once too (`unameMachine()`, or the
+simulator's `SIMULATOR_MODEL_IDENTIFIER`, through `hardwareModel(machine:simulated:)`
+in `Scene/DeviceModel.swift`), which the engine's `devicePort(modelIdentifier:)`
+turns into `AppModel`'s `devicePort`: iOS names no port to an app, and the
+Lightning note hangs on it. It installs a `TouchWatcher` on every window and
+keeps a `ScreenDimmer` (`Scene/LowPowerScreen.swift`), the two UIKit seams
+behind the low-power dim: each touch restarts the model's countdown
+(`touched()`), the dim cover's rise drops the screen's brightness to 0.01, and
+its fall, or the background, gives back what the screen had. It puts `WindowReader`
 (`Scene/WindowReader.swift`) at the window's root, the one reader of the
 window's size classes and shape, which hands them down as `windowFacts`; the
 iPad's layouts (the split tabs, the setup cover's column, the gamepad's
@@ -214,7 +223,10 @@ What `AppModel` publishes today:
   the heartbeat window, `.stoppedResponding` while its acks falter),
   `localNetwork` from the last scan, `preferences` (the stores' state), `now`
   (the clock) and `setup` (the walk, nil while the cover is down), `deadzones`
-  (each tuned pad's) and `forwarding` (the global switches, `FeatureSettings`);
+  (each tuned pad's), `forwarding` (the global switches, `FeatureSettings`),
+  `port` (the device's, `DevicePort`, as the scene read it from the hardware)
+  and `lowPower` (the countdown, `LowPowerWatch`, armed while a session streams
+  and the shell says the dim may rise);
   `found` also lists a PC typed by its address that the pool holds and that is
   not paired. Beside it,
   for the pages the next wave draws: `openPairing` (the card),

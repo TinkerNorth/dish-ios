@@ -18,6 +18,13 @@ struct ControllerActions {
     let unbind: @MainActor () -> Void
     /// The Dead zones row: that page, pushed.
     let openDeadZones: @MainActor () -> Void
+    /// The touchpad or the mouse the phone lends the pad: that screen, over
+    /// the pad's slot.
+    let openSurface: @MainActor (PlayScreen) -> Void
+    /// Reach for the PC the pad is bound to, by its connection id.
+    let reconnect: @MainActor (String) -> Void
+    /// Nothing paired to bind to: the Connections tab.
+    let findPC: @MainActor () -> Void
 
     /// Controls that do nothing, for a preview.
     @MainActor static let preview = ControllerActions(
@@ -27,7 +34,10 @@ struct ControllerActions {
         open: {},
         bind: { _ in },
         unbind: {},
-        openDeadZones: {}
+        openDeadZones: {},
+        openSurface: { _ in },
+        reconnect: { _ in },
+        findPC: {}
     )
 }
 
@@ -53,6 +63,7 @@ struct ControllerPage: View {
                 paired: model.shellFacts.paired,
                 apply: model.shellFacts.apply,
                 pads: model.shellFacts.diagnostics.pads,
+                port: model.shellFacts.port,
                 id: id
             ),
             actions: ControllerActions(
@@ -62,9 +73,22 @@ struct ControllerPage: View {
                 open: openGamepad,
                 bind: bind,
                 unbind: unbind,
-                openDeadZones: openDeadZones
+                openDeadZones: openDeadZones,
+                openSurface: openSurface,
+                reconnect: model.connect,
+                findPC: findPC
             )
         )
+    }
+
+    /// The phone is aimed at this pad, then its screen opens over the pad's slot.
+    private func openSurface(_ screen: PlayScreen) {
+        model.aimPlay(at: id)
+        navigation.send(.openPlay(screen))
+    }
+
+    private func findPC() {
+        navigation.send(.select(.connections))
     }
 
     private func setFeature(_ feature: SlotSwitch, _ enabled: Bool) {
@@ -130,6 +154,11 @@ private struct ControllerPadSections: View {
             ControllerStatusCard(state: state.status)
             if let open = state.open {
                 Button(open, systemImage: PlaySymbol.resume, action: actions.open)
+                    .font(DishFont.headline)
+                    .foregroundStyle(DishTheme.primary)
+            }
+            ForEach(state.surfaces) { surface in
+                Button(surface.title, systemImage: surface.symbol) { actions.openSurface(surface.screen) }
                     .font(DishFont.headline)
                     .foregroundStyle(DishTheme.primary)
             }

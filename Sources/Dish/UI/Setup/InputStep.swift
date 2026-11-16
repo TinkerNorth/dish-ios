@@ -6,11 +6,14 @@ import DishEngine
 import SwiftUI
 
 /// B2, Input · 1 of 3: a pad iOS already sees comes first with its Use
-/// button, then the three ways in. A pick moves the walk on.
+/// button, then the three ways in, and on a Lightning iPhone the note that
+/// a wired pad needs the adapter, which opens its sheet. A pick moves the
+/// walk on.
 struct InputStep: View {
     let state: InputStepState
 
     @Environment(AppModel.self) private var model
+    @Environment(NavigationStore.self) private var navigation
 
     var body: some View {
         List {
@@ -34,8 +37,17 @@ struct InputStep: View {
                 Text(state.footnote)
                     .font(DishFont.detail)
             }
+            if let adapter = state.adapter {
+                Section {
+                    AdapterNoteRow(state: adapter, more: whatYouNeed)
+                }
+            }
         }
         .listStyle(.insetGrouped)
+    }
+
+    private func whatYouNeed() {
+        navigation.send(.openSheet(.lightningAdapter))
     }
 }
 
@@ -96,9 +108,17 @@ private struct SetupChoiceRowView: View {
 #Preview("Nothing seen") {
     InputStep(state: inputStepState(PreviewSetup.nothingSeen))
         .environment(PreviewSetup.emptyModel())
+        .environment(PreviewSetup.navigation())
 }
 
 #Preview("A pad seen") {
     InputStep(state: inputStepState(PreviewSetup.padsAndPCs))
         .environment(PreviewSetup.emptyModel())
+        .environment(PreviewSetup.navigation())
+}
+
+#Preview("Lightning iPhone") {
+    InputStep(state: inputStepState(PreviewSetup.lightning))
+        .environment(PreviewSetup.emptyModel())
+        .environment(PreviewSetup.navigation())
 }

@@ -194,7 +194,7 @@ func playCoverState(facts: ShellFacts, screen: PlayScreen, window: WindowFacts, 
     let emulateAs = facts.play?.emulateAs ?? InputKind.onScreen.defaultEmulation
     return PlayCoverState(
         screen: screen,
-        pill: playPill(facts.session, words: words),
+        pill: playPill(facts.session, destination: facts.play?.destination, words: words),
         pause: pauseMenuState(play: facts.play, screen: screen, words: words),
         gamepad: gamepadCoverState(emulateAs),
         mouse: MouseCoverState(
@@ -210,8 +210,12 @@ func playCoverState(facts: ShellFacts, screen: PlayScreen, window: WindowFacts, 
 }
 
 /// "Living Room PC" and its latency; a PC that stopped answering says so.
-func playPill(_ session: SessionFact?, words: L10n = .app) -> PlayPillState? {
-    guard let session else { return nil }
+/// `destination` is the served slot's PC, lost while no session is up.
+func playPill(_ session: SessionFact?, destination: DestinationFact? = nil, words: L10n = .app) -> PlayPillState? {
+    guard let session else {
+        guard let destination else { return nil }
+        return PlayPillState(pcName: destination.name, detail: words.connectionLost, dot: DishTheme.error, detailColor: DishTheme.error)
+    }
     switch session.phase {
     case .streaming:
         let detail = session.latencyMs.map(words.latency) ?? words.streaming
@@ -225,11 +229,20 @@ func pauseMenuState(play: PlayFacts?, screen: PlayScreen, words: L10n = .app) ->
     PauseMenuState(
         title: words.pause,
         resume: words.resume,
-        screens: PlayScreen.allCases.filter { $0 != screen }.map { pauseScreenItem($0, words: words) },
+        screens: pauseScreens(play: play, screen: screen, words: words),
         switches: pauseSwitches(play: play, screen: screen, words: words),
         stop: words.stopGamepad,
         hint: hintState(.stopGamepad, words: words)
     )
+}
+
+/// The other screens; a pad the phone lends them to has a gamepad of its own.
+private func pauseScreens(play: PlayFacts?, screen: PlayScreen, words: L10n) -> [PauseScreenItem] {
+    let offered: [PlayScreen] = switch play?.target {
+    case .pad: [.touchpad, .mouse]
+    case .onScreen, nil: PlayScreen.allCases
+    }
+    return offered.filter { $0 != screen }.map { pauseScreenItem($0, words: words) }
 }
 
 func playScreenTitle(_ screen: PlayScreen, words: L10n = .app) -> String {

@@ -14,7 +14,7 @@ final class AppModelPreferencesTests: XCTestCase {
 
     func testAFreshModelPublishesRealEmptyFactsAndTheDefaults() throws {
         let facts = try model().shellFacts
-        XCTAssertEqual(facts.controllers, [])
+        XCTAssertEqual(facts.controllers.map(\.id), [onScreenSlotId], "the on-screen controller is always listed")
         XCTAssertEqual(facts.paired, [])
         XCTAssertEqual(facts.found, [])
         XCTAssertFalse(facts.scanning)

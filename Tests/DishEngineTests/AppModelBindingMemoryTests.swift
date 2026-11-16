@@ -133,12 +133,11 @@ final class AppModelBindingMemoryTests: XCTestCase {
         XCTAssertEqual(bindings, [:])
     }
 
-    func testTheOnScreenGamepadIsBoundAgainOnceItIsListed() async {
+    /// The on-screen gamepad is always one of the controllers, so its
+    /// remembered binding is bound again at launch like a pad's.
+    func testTheOnScreenGamepadIsBoundAgainAtLaunch() async {
         rememberDenBinding(slotId: onScreenSlotId)
         launch(known: [den])
-        await settle()
-        XCTAssertNil(bindings[onScreenSlotId], "not listed yet")
-        model.openGamepad()
         let restored = await waitUntil { self.bindings[onScreenSlotId] == self.den.id }
         XCTAssertTrue(restored)
     }

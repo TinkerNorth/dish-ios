@@ -99,18 +99,6 @@ private struct ControllerDestinationLine: View {
 }
 
 /// The empty state's one line above the Add button.
-struct ControllersInvitation: View {
-    let text: String
-
-    var body: some View {
-        Text(text)
-            .font(DishFont.body)
-            .foregroundStyle(DishTheme.muted)
-            .multilineTextAlignment(.center)
-            .frame(maxWidth: .infinity)
-    }
-}
-
 /// Add a controller: a full-width capsule on the dim surface, the accent
 /// label with a plus, the hint under it, and TipKit's hint beside it.
 struct AddControllerButton: View {

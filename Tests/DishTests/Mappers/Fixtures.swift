@@ -28,7 +28,9 @@ enum FactsFixture {
         diagnostics: DiagnosticsSnapshot = DiagnosticsSnapshot(),
         diagnosticsEvents: [DiagnosticsEvent] = [],
         apply: ApplyFact? = nil,
-        addedByAddress: String? = nil
+        addedByAddress: String? = nil,
+        port: DevicePort = .usbC,
+        lowPower: LowPowerFact = .idle
     ) -> ShellFacts {
         ShellFacts(
             controllers: controllers,
@@ -45,7 +47,9 @@ enum FactsFixture {
             diagnostics: diagnostics,
             diagnosticsEvents: diagnosticsEvents,
             apply: apply,
-            addedByAddress: addedByAddress
+            addedByAddress: addedByAddress,
+            port: port,
+            lowPower: lowPower
         )
     }
 
@@ -55,12 +59,22 @@ enum FactsFixture {
 
     static func play(
         screen: PlayScreen = .gamepad,
+        target: PlayTarget = .onScreen,
+        destination: DestinationFact? = nil,
         emulateAs: EmulatedPad = .xboxWireless,
         rumble: Bool = true,
         motion: Bool = true,
         motionAvailability: PlayMotion = .padHasNone
     ) -> PlayFacts {
-        PlayFacts(screen: screen, emulateAs: emulateAs, rumble: rumble, motion: motion, motionAvailability: motionAvailability)
+        PlayFacts(
+            screen: screen,
+            target: target,
+            destination: destination,
+            emulateAs: emulateAs,
+            rumble: rumble,
+            motion: motion,
+            motionAvailability: motionAvailability
+        )
     }
 
     static let stopped = SessionFact(pcName: "Living Room PC", pads: 3, latencyMs: 4, phase: .stoppedResponding)

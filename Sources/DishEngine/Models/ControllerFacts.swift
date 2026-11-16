@@ -20,10 +20,14 @@ package enum LinkHealth: Equatable {
 
 /// The PC a controller sends to, and how it is answering.
 package struct DestinationFact: Equatable {
+    /// The PC's connection id, which Reconnect reaches for; empty in a
+    /// preview that names none.
+    package let id: String
     package let name: String
     package let health: LinkHealth
 
-    package init(name: String, health: LinkHealth) {
+    package init(id: String = "", name: String, health: LinkHealth) {
+        self.id = id
         self.name = name
         self.health = health
     }
@@ -87,6 +91,10 @@ package struct ControllerFact: Equatable, Identifiable {
     package let motion: MotionFact
     /// Nil unless the controller is bound to a Moonlight host.
     package let hostEmulation: HostEmulationFact?
+    /// The screens the phone can lend the pad: its touchpad or its mouse
+    /// sent through the pad's slot. Empty for a pad with a touchpad of its
+    /// own, and for the on-screen controller, whose screens are its own.
+    package let surfaces: [PlayScreen]
 
     package init(
         id: String,
@@ -99,7 +107,8 @@ package struct ControllerFact: Equatable, Identifiable {
         features: [ControllerFeatureFact] = [],
         supported: Bool = true,
         motion: MotionFact = MotionFact(carries: false, status: nil),
-        hostEmulation: HostEmulationFact? = nil
+        hostEmulation: HostEmulationFact? = nil,
+        surfaces: [PlayScreen] = []
     ) {
         self.id = id
         self.name = name
@@ -112,6 +121,7 @@ package struct ControllerFact: Equatable, Identifiable {
         self.supported = supported
         self.motion = motion
         self.hostEmulation = hostEmulation
+        self.surfaces = surfaces
     }
 }
 

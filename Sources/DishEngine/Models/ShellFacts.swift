@@ -40,6 +40,10 @@ package struct ShellFacts: Equatable {
     package let deadzones: [String: DeadzoneSetting]
     /// The global switches above every pad's own.
     package let forwarding: ForwardingFlags
+    /// The port this device hosts a wired pad through, read by the scene.
+    package let port: DevicePort
+    /// The low-power countdown while a session streams.
+    package let lowPower: LowPowerFact
 
     package init(
         controllers: [ControllerFact],
@@ -59,7 +63,9 @@ package struct ShellFacts: Equatable {
         apply: ApplyFact? = nil,
         addedByAddress: String? = nil,
         deadzones: [String: DeadzoneSetting] = [:],
-        forwarding: ForwardingFlags = ForwardingFlags()
+        forwarding: ForwardingFlags = ForwardingFlags(),
+        port: DevicePort = .usbC,
+        lowPower: LowPowerFact = .idle
     ) {
         self.controllers = controllers
         self.attachedPads = attachedPads
@@ -79,5 +85,7 @@ package struct ShellFacts: Equatable {
         self.addedByAddress = addedByAddress
         self.deadzones = deadzones
         self.forwarding = forwarding
+        self.port = port
+        self.lowPower = lowPower
     }
 }

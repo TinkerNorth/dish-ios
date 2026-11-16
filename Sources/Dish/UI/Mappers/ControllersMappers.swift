@@ -16,8 +16,14 @@ enum DestinationLine: Equatable {
 enum ControllerRowAction: Hashable {
     /// The on-screen controller's gamepad.
     case open
+    /// The touchpad or the mouse screen the phone lends the pad, over its slot.
+    case openSurface(slotId: String, screen: PlayScreen)
     case bind(slotId: String, connectionId: String)
     case unbind(slotId: String)
+    /// Reach for the PC the pad is bound to, which was lost.
+    case reconnect(connectionId: String)
+    /// Nothing paired to bind to: the Connections tab.
+    case findPC
 }
 
 /// One controller row (A2).
@@ -39,12 +45,6 @@ struct ControllerRowState: Equatable, Identifiable {
     let actions: RowActionsState<ControllerRowAction>
 }
 
-/// What sits above the Add button: the rows, or an invitation.
-enum ControllersContent: Equatable {
-    case empty(invitation: String)
-    case list([ControllerRowState])
-}
-
 /// A toolbar button that pushes a page: its accessibility title and glyph.
 struct ToolbarLinkState: Equatable {
     let title: String
@@ -64,12 +64,15 @@ struct ControllersHints: Equatable {
 /// The Controllers tab.
 struct ControllersPageState: Equatable {
     let title: String
-    let content: ControllersContent
+    /// The pads iOS sees, then the on-screen controller, which is always listed.
+    let rows: [ControllerRowState]
     let addTitle: String
     let addHint: String
     /// The heart on the toolbar: Support Dish.
     let support: ToolbarLinkState
     let hints: ControllersHints
+    /// The Lightning note while no pad is listed; nil otherwise.
+    let adapter: AdapterNoteState?
 }
 
 /// The level at and below which a battery reads in the error colour.
@@ -77,46 +80,42 @@ private let lowBatteryPercent = 15
 
 /// `apply` is the bind in flight or just ended, which speaks on its pad's
 /// row in place of the destination; `paired` are the PCs a row's Bind to
-/// offers.
+/// offers; `port` is the one this device hosts a wired pad through.
 func controllersPageState(
     controllers: [ControllerFact],
     apply: ApplyFact? = nil,
     paired: [ConnectionFact] = [],
+    port: DevicePort = .usbC,
     words: L10n = .app
 ) -> ControllersPageState {
-    ControllersPageState(
+    let padListed = controllers.contains { $0.link != .onScreen }
+    return ControllersPageState(
         title: words.controllers,
-        content: controllersContent(controllers, apply: apply, paired: paired, words: words),
+        rows: controllers.map { controllerRow($0, apply: apply, paired: paired, port: port, words: words) },
         addTitle: words.addAController,
         addHint: words.addAControllerHint,
         support: ToolbarLinkState(title: words.supportDish, symbol: heartSymbol, page: .support),
-        hints: controllersHints(listed: !controllers.isEmpty, words: words)
+        hints: controllersHints(padListed: padListed, port: port, words: words),
+        adapter: padListed ? nil : adapterNote(port: port, words: words)
     )
 }
 
-/// The heart's hint waits until a controller is listed, so a new person
-/// meets Add a controller's first.
-private func controllersHints(listed: Bool, words: L10n) -> ControllersHints {
-    ControllersHints(support: listed ? hintState(.supportDish, words: words) : nil, add: hintState(.addController, words: words))
-}
-
-private func controllersContent(
-    _ controllers: [ControllerFact],
-    apply: ApplyFact?,
-    paired: [ConnectionFact],
-    words: L10n
-) -> ControllersContent {
-    guard !controllers.isEmpty else { return .empty(invitation: words.noControllersInvitation) }
-    return .list(controllers.map { controllerRow($0, apply: apply, paired: paired, words: words) })
+/// The heart's hint waits until a pad is listed.
+private func controllersHints(padListed: Bool, port: DevicePort, words: L10n) -> ControllersHints {
+    ControllersHints(
+        support: padListed ? hintState(.supportDish, words: words) : nil,
+        add: hintState(.addController, port: port, words: words)
+    )
 }
 
 func controllerRow(
     _ controller: ControllerFact,
     apply: ApplyFact? = nil,
     paired: [ConnectionFact] = [],
+    port: DevicePort = .usbC,
     words: L10n = .app
 ) -> ControllerRowState {
-    let line = rowLine(controller, apply: apply, words: words)
+    let line = rowLine(controller, apply: apply, port: port, words: words)
     return ControllerRowState(
         id: controller.id,
         symbol: controllerSymbol(controller.link),
@@ -126,25 +125,27 @@ func controllerRow(
         battery: controller.batteryPercent.map(words.batteryPercent),
         batteryColor: batteryColor(controller.batteryPercent),
         page: controller.supported ? .controller(id: controller.id) : nil,
-        open: opensPlay(controller.link) ? words.open : nil,
+        open: opensGamepad(controller) ? words.open : nil,
         actions: controllerRowActions(controller, paired: paired, words: words)
     )
 }
 
-/// Open for the on-screen controller, also under a swipe from the leading
-/// edge; Unbind for a bound controller, also under a swipe from the
-/// trailing edge, or Bind to with each paired PC for an unbound one. A pad
-/// Dish cannot read offers nothing.
+/// The row's menu and swipes: Open and the lent screens, Reconnect and
+/// Unbind for a bound controller, Bind to or Find a PC for an unbound one.
 func controllerRowActions(
     _ controller: ControllerFact,
     paired: [ConnectionFact],
     words: L10n = .app
 ) -> RowActionsState<ControllerRowAction> {
     guard controller.supported else { return .none }
-    let open = opensPlay(controller.link) ? [openItem(words: words)] : []
+    let open = opensGamepad(controller) ? [openItem(words: words)] : []
+    let screens = controller.surfaces.map { surfaceItem(controller.id, $0, words: words) }
     switch controller.destination {
-    case .some: return boundActions(controller.id, open: open, words: words)
-    case nil: return unboundActions(controller.id, open: open, paired: paired, words: words)
+    case let .some(destination):
+        let lost = destination.health == .lost ? destination.id : nil
+        return boundActions(controller.id, open: open, screens: screens, lost: lost, words: words)
+    case nil:
+        return unboundActions(controller.id, open: open, paired: paired, words: words)
     }
 }
 
@@ -152,9 +153,29 @@ private func openItem(words: L10n) -> RowActionItem<ControllerRowAction> {
     RowActionItem(action: .open, title: words.open, symbol: RowActionSymbol.open, destructive: false)
 }
 
+private func surfaceItem(_ slotId: String, _ screen: PlayScreen, words: L10n) -> RowActionItem<ControllerRowAction> {
+    RowActionItem(
+        action: .openSurface(slotId: slotId, screen: screen),
+        title: openSurfaceTitle(screen, words: words),
+        symbol: playScreenSymbol(screen),
+        destructive: false
+    )
+}
+
+/// "Open touchpad", "Open mouse"; the gamepad is the on-screen controller's own Open.
+func openSurfaceTitle(_ screen: PlayScreen, words: L10n = .app) -> String {
+    switch screen {
+    case .gamepad: words.open
+    case .touchpad: words.openTouchpad
+    case .mouse: words.openMouse
+    }
+}
+
 private func boundActions(
     _ slotId: String,
     open: [RowActionItem<ControllerRowAction>],
+    screens: [RowActionItem<ControllerRowAction>],
+    lost connectionId: String?,
     words: L10n
 ) -> RowActionsState<ControllerRowAction> {
     let unbind = RowActionItem(
@@ -163,17 +184,32 @@ private func boundActions(
         symbol: RowActionSymbol.unbind,
         destructive: true
     )
-    return RowActionsState(menu: (open + [unbind]).map(RowMenuEntry.item), leading: open, trailing: [unbind])
+    let reconnect = connectionId.map { id in
+        [RowActionItem(
+            action: ControllerRowAction.reconnect(connectionId: id),
+            title: words.reconnect,
+            symbol: RowActionSymbol.connect,
+            destructive: false
+        )]
+    } ?? []
+    return RowActionsState(
+        menu: (open + screens + reconnect + [unbind]).map(RowMenuEntry.item),
+        leading: open,
+        trailing: reconnect + [unbind]
+    )
 }
 
-/// Bind to is a submenu of the paired PCs; with none paired there is
-/// nothing to bind to.
+/// Bind to is a submenu of the paired PCs; with none paired, Find a PC.
 private func unboundActions(
     _ slotId: String,
     open: [RowActionItem<ControllerRowAction>],
     paired: [ConnectionFact],
     words: L10n
 ) -> RowActionsState<ControllerRowAction> {
+    guard !paired.isEmpty else {
+        let find = RowActionItem(action: ControllerRowAction.findPC, title: words.findAPC, symbol: RowActionSymbol.pair, destructive: false)
+        return RowActionsState(menu: (open + [find]).map(RowMenuEntry.item), leading: open, trailing: [find])
+    }
     let choices = paired.map { pc in
         RowActionItem(
             action: ControllerRowAction.bind(slotId: slotId, connectionId: pc.id),
@@ -182,7 +218,7 @@ private func unboundActions(
             destructive: false
         )
     }
-    let bindTo = choices.isEmpty ? [] : [RowMenuEntry.submenu(title: words.bindTo, symbol: RowActionSymbol.bind, items: choices)]
+    let bindTo = [RowMenuEntry.submenu(title: words.bindTo, symbol: RowActionSymbol.bind, items: choices)]
     return RowActionsState(menu: open.map(RowMenuEntry.item) + bindTo, leading: open, trailing: [])
 }
 
@@ -195,17 +231,17 @@ private struct RowLine {
 /// A bind that waits for its link would read lost, so the apply in flight
 /// or failed for this pad speaks first (B6); a done one leaves the PC's
 /// own line.
-private func rowLine(_ controller: ControllerFact, apply: ApplyFact?, words: L10n) -> RowLine {
-    guard let apply, apply.slotId == controller.id else { return pcLine(controller, words: words) }
+private func rowLine(_ controller: ControllerFact, apply: ApplyFact?, port: DevicePort, words: L10n) -> RowLine {
+    guard let apply, apply.slotId == controller.id else { return pcLine(controller, port: port, words: words) }
     switch apply.progress {
     case .running: return RowLine(destination: .note(words.applyingBinding), dot: DishTheme.muted)
     case let .failed(failure): return RowLine(destination: .note(applyFailureText(failure, words: words)), dot: DishTheme.error)
-    case .idle, .done: return pcLine(controller, words: words)
+    case .idle, .done: return pcLine(controller, port: port, words: words)
     }
 }
 
-private func pcLine(_ controller: ControllerFact, words: L10n) -> RowLine {
-    RowLine(destination: destinationLine(controller, words: words), dot: destinationDot(controller.destination?.health))
+private func pcLine(_ controller: ControllerFact, port: DevicePort, words: L10n) -> RowLine {
+    RowLine(destination: destinationLine(controller, port: port, words: words), dot: destinationDot(controller.destination?.health))
 }
 
 /// A pad's own name; the on-screen controller is worded here.
@@ -216,12 +252,9 @@ func controllerName(_ controller: ControllerFact, words: L10n = .app) -> String 
     }
 }
 
-/// Only the on-screen controller has a screen to open.
-func opensPlay(_ link: ControllerLink) -> Bool {
-    switch link {
-    case .usbC, .bluetooth: false
-    case .onScreen: true
-    }
+/// Only the on-screen controller has a gamepad to open, once it is bound.
+func opensGamepad(_ controller: ControllerFact) -> Bool {
+    controller.link == .onScreen && controller.destination != nil
 }
 
 func controllerSymbol(_ link: ControllerLink) -> String {
@@ -231,9 +264,10 @@ func controllerSymbol(_ link: ControllerLink) -> String {
     }
 }
 
-func linkWord(_ link: ControllerLink, words: L10n = .app) -> String {
+/// A pad attached to the device is worded by the device's port.
+func linkWord(_ link: ControllerLink, port: DevicePort = .usbC, words: L10n = .app) -> String {
     switch link {
-    case .usbC: words.linkUsbC
+    case .usbC: wiredLinkWord(port, words: words)
     case .bluetooth: words.linkBluetooth
     case .onScreen: words.linkOnScreen
     }
@@ -241,11 +275,11 @@ func linkWord(_ link: ControllerLink, words: L10n = .app) -> String {
 
 /// The link word while the PC answers; an unsteady PC says so in its place,
 /// and a lost one replaces the whole line, as D4 draws it.
-private func destinationLine(_ controller: ControllerFact, words: L10n) -> DestinationLine {
+private func destinationLine(_ controller: ControllerFact, port: DevicePort, words: L10n) -> DestinationLine {
     guard controller.supported else { return .note(words.notSupported) }
     guard let destination = controller.destination else { return .note(words.notBound) }
     switch destination.health {
-    case .online: return .bound(pcName: destination.name, detail: lineSeparator + linkWord(controller.link, words: words))
+    case .online: return .bound(pcName: destination.name, detail: lineSeparator + linkWord(controller.link, port: port, words: words))
     case .unsteady: return .bound(pcName: destination.name, detail: lineSeparator + words.unsteady)
     case .lost: return .note(words.connectionLost)
     }

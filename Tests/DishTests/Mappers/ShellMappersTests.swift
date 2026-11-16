@@ -48,6 +48,21 @@ final class ShellMappersTests: XCTestCase {
         )
     }
 
+    /// The last seconds of the low-power countdown take the streaming line,
+    /// on the full bar and the minimized one alike.
+    func testTheLowPowerCountdownTakesTheStreamingLine() {
+        let counting = LowPowerFact(countdown: 3, due: false)
+        XCTAssertEqual(
+            sessionBarState(FactsFixture.streaming(), lowPower: counting),
+            .streaming(pcName: "Living Room PC", line: "Low power in 3 s", shortLine: "Low power in 3 s", dim: "Dim", play: "Play")
+        )
+        XCTAssertEqual(
+            sessionBarState(FactsFixture.stopped, lowPower: counting),
+            sessionBarState(FactsFixture.stopped),
+            "a problem speaks first"
+        )
+    }
+
     func testAPCThatStoppedRespondingOffersReconnect() {
         XCTAssertEqual(
             sessionBarState(FactsFixture.stopped),

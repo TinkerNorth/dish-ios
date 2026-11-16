@@ -14,6 +14,13 @@ package enum LightbarMode: String, CaseIterable {
 /// The switches that reach the hot path and the return paths, as one value
 /// the main actor hands across. `touchpad` and `motion` gate what is sent,
 /// the others what the pad acts on.
+/// A screen the phone lends a slot while it is open on it: the touchpad,
+/// sent as the pad's own, or the mouse, sent as the host's.
+package enum PhoneSurface: Hashable {
+    case touchpad
+    case mouse
+}
+
 package struct ForwardingFlags: Hashable {
     package var motion = true
     package var touchpad = true
@@ -21,6 +28,9 @@ package struct ForwardingFlags: Hashable {
     package var lightbar = true
     package var triggerEffects = true
     package var playerLeds = true
+    /// The screen the phone lends the slot; nil for every slot but the one a
+    /// touchpad or mouse screen is open on.
+    package var phoneSurface: PhoneSurface?
 
     package init(
         motion: Bool = true,
@@ -28,7 +38,8 @@ package struct ForwardingFlags: Hashable {
         rumble: Bool = true,
         lightbar: Bool = true,
         triggerEffects: Bool = true,
-        playerLeds: Bool = true
+        playerLeds: Bool = true,
+        phoneSurface: PhoneSurface? = nil
     ) {
         self.motion = motion
         self.touchpad = touchpad
@@ -36,6 +47,7 @@ package struct ForwardingFlags: Hashable {
         self.lightbar = lightbar
         self.triggerEffects = triggerEffects
         self.playerLeds = playerLeds
+        self.phoneSurface = phoneSurface
     }
 }
 

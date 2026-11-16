@@ -45,7 +45,10 @@ final class AppModelBindingTests: XCTestCase {
         let frame = try XCTUnwrap(fixture.satellite.awaitFrame(opcode: FakeSatelliteOpcode.input))
         guard case let .input(ctrlIdx, _) = frame.detail else { return XCTFail("an input frame: \(frame.detail)") }
         XCTAssertEqual(ctrlIdx, 0, "the pad rides the index it holds")
-        XCTAssertEqual(model.shellFacts.controllers.first?.destination, DestinationFact(name: "Den PC", health: .online))
+        XCTAssertEqual(
+            model.shellFacts.controllers.first?.destination,
+            DestinationFact(id: fixture.serverId, name: "Den PC", health: .online)
+        )
     }
 
     func testBindingToASatelliteWithoutASessionReachesForItAndRidesTheSessionPut() async throws {
@@ -150,8 +153,9 @@ final class AppModelBindingTests: XCTestCase {
 
     /// The on-screen gamepad binds like a pad: its route reaches the
     /// satellite, its row names the PC, a pad leaving does not unbind it,
-    /// and Stop gamepad lets its binding go.
-    func testTheOnScreenGamepadBindsLikeAPadAndStopGamepadReleasesIt() async {
+    /// and Stop gamepad closes the screen and keeps the binding, as closing
+    /// Android's overlay does.
+    func testTheOnScreenGamepadBindsLikeAPadAndStopGamepadKeepsTheBinding() async {
         let live = await fixture.connectPaired()
         XCTAssertTrue(live)
         model.openGamepad()
@@ -159,7 +163,7 @@ final class AppModelBindingTests: XCTestCase {
         let done = await fixture.waitUntil { self.model.bindingProgress == .done }
         XCTAssertTrue(done, "\(model.bindingProgress)")
         let onScreen = model.shellFacts.controllers.first { $0.id == onScreenSlotId }
-        XCTAssertEqual(onScreen?.destination, DestinationFact(name: "Den PC", health: .online))
+        XCTAssertEqual(onScreen?.destination, DestinationFact(id: fixture.serverId, name: "Den PC", health: .online))
         XCTAssertNotNil(model.routing.table.get(onScreenSlotId), "the slot's feed has its route")
 
         fixture.source.slots = []
@@ -168,14 +172,73 @@ final class AppModelBindingTests: XCTestCase {
         XCTAssertEqual(model.network.hub.bindings, [onScreenSlotId: fixture.serverId], "a pad leaving unbinds only itself")
 
         model.stopOnScreenGamepad()
+        XCTAssertNil(model.shellFacts.play)
+        XCTAssertEqual(model.network.hub.bindings, [onScreenSlotId: fixture.serverId], "the binding outlives the screen")
+        XCTAssertNotNil(model.routing.table.get(onScreenSlotId))
+        model.unbind(slotId: onScreenSlotId)
         XCTAssertEqual(model.network.hub.bindings, [:])
         XCTAssertNil(model.routing.table.get(onScreenSlotId))
     }
 
-    /// The on-screen gamepad cannot be bound while it is not listed.
-    func testBindingAnUnlistedOnScreenGamepadFails() {
+    /// The on-screen gamepad is always one of the controllers, so it binds
+    /// with no screen open, from its row like any pad.
+    func testTheOnScreenGamepadBindsWithNoScreenOpen() async {
+        let live = await fixture.connectPaired()
+        XCTAssertTrue(live)
         model.bind(slotId: onScreenSlotId, to: fixture.serverId)
-        XCTAssertEqual(model.bindingProgress, .failed(.padGone))
+        let done = await fixture.waitUntil { self.model.bindingProgress == .done }
+        XCTAssertTrue(done, "\(model.bindingProgress)")
+        XCTAssertEqual(model.network.hub.bindings, [onScreenSlotId: fixture.serverId])
+    }
+
+    /// A pad with no touchpad of its own, bound to a satellite that grants
+    /// the mouse, is lent the mouse; an Xbox type renders no touchpad, so not
+    /// the touchpad; the on-screen controller's screens are its own.
+    func testAPadWithNoTouchpadOfItsOwnIsLentTheMouseOnceBound() async throws {
+        let xbox = ControllerSlot(
+            id: "xbox",
+            name: "Xbox Wireless Controller",
+            capabilities: ControllerCapabilities(hasRumble: true),
+            family: .xbox
+        )
+        let lent = try SatelliteModelFixture(self, pads: [xbox])
+        defer { lent.tearDown() }
+        let live = await lent.connectPaired()
+        XCTAssertTrue(live)
+        XCTAssertEqual(lent.model.shellFacts.controllers.first?.surfaces, [], "unbound, nothing is lent")
+        lent.model.bind(slotId: "xbox", to: lent.serverId)
+        let done = await lent.waitUntil { lent.model.bindingProgress == .done }
+        XCTAssertTrue(done, "\(lent.model.bindingProgress)")
+        XCTAssertEqual(lent.model.shellFacts.controllers.first?.surfaces, [.mouse])
+        XCTAssertEqual(lent.model.shellFacts.controllers.first { $0.id == onScreenSlotId }?.surfaces, [])
+    }
+
+    /// The mouse screen on a slot asks the host for mouse control: the
+    /// slot's descriptor declares the mouse and the session PUT requests the
+    /// feature, which the satellite grants; closing the screen takes both
+    /// back.
+    func testTheMouseScreenAsksTheHostForMouseControlWhileItIsOpen() async {
+        let live = await fixture.connectPaired()
+        XCTAssertTrue(live)
+        model.bind(slotId: onScreenSlotId, to: fixture.serverId)
+        let bound = await fixture.waitUntil { self.model.bindingProgress == .done }
+        XCTAssertTrue(bound, "\(model.bindingProgress)")
+        let conn = fixture.network.wifi.get(fixture.serverId)
+        XCTAssertEqual(conn?.descriptor(for: onScreenSlotId)?.touchpadMode, .off, "an Xbox type renders no touchpad, and no screen asks")
+        XCTAssertEqual(conn?.mouseControlGranted, false)
+
+        model.openMouse()
+        XCTAssertEqual(model.forwardingFlags(slotId: onScreenSlotId).phoneSurface, .mouse)
+        XCTAssertEqual(conn?.descriptor(for: onScreenSlotId)?.touchpadMode, .mouse)
+        XCTAssertEqual(conn?.wantsMouseControl, true)
+        let granted = await fixture.waitUntil { conn?.mouseControlGranted == true }
+        XCTAssertTrue(granted, "the re-PUT asks for the mouse and the satellite grants it")
+
+        model.closePlay()
+        XCTAssertNil(model.forwardingFlags(slotId: onScreenSlotId).phoneSurface)
+        XCTAssertEqual(conn?.descriptor(for: onScreenSlotId)?.touchpadMode, .off)
+        let released = await fixture.waitUntil { conn?.mouseControlGranted == false }
+        XCTAssertTrue(released, "the grant goes with the screen")
     }
 
     /// The satellite's word on motion comes back with the apply, reaches the

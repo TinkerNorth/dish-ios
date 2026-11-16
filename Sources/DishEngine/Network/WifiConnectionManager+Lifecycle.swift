@@ -105,6 +105,7 @@ extension WifiConnectionManager {
         let benignDrift = appliedMatchesDesired(desired: conn.desiredSlots(), applied: applied)
         if benignDrift {
             conn.setLastAppliedEpoch(view.epoch)
+            if view.mouseControl.granted != conn.wantsMouseControl { await rekeySession(conn) }
             return
         }
         conn.markDisconnected()

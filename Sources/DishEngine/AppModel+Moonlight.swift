@@ -104,11 +104,10 @@ package extension AppModel {
     /// switches and the hosts known, and converges only when it changed, so
     /// a failed session is not re-attempted by every unrelated change.
     /// The pads a host may be asked to carry: every pad iOS lists, and the
-    /// on-screen gamepad while it is one of the controllers. The desire
-    /// reads a slot's id and capabilities alone.
+    /// on-screen gamepad, which is always one of the controllers. The
+    /// desire reads a slot's id and capabilities alone.
     private var moonlightCarriableSlots: [ControllerSlot] {
-        guard onScreenListed.state else { return pads.source.slots }
-        return pads.source.slots + [ControllerSlot(id: onScreenSlotId, name: "", capabilities: onScreenCapabilities)]
+        pads.source.slots + [ControllerSlot(id: onScreenSlotId, name: "", capabilities: onScreenCapabilities)]
     }
 
     internal func refreshMoonlightDesire() {

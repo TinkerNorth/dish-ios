@@ -75,7 +75,8 @@ extension WifiConnectionManager {
             server: server,
             pairingKey: pairingKey,
             controllers: descriptors,
-            protocolVersion: conn.offeredProtocolVersion
+            protocolVersion: conn.offeredProtocolVersion,
+            mouseControl: conn.wantsMouseControl
         )
         switch Self.classifyOpen(resp) {
         case .unauthorized:
@@ -92,11 +93,14 @@ extension WifiConnectionManager {
         }
     }
 
+    /// `mouseControl` asks the host feature for the slots that want the
+    /// mouse; the grant comes back in the response.
     private func putSession(
         server: DiscoveredServer,
         pairingKey: Data,
         controllers: [ControllerDescriptor],
-        protocolVersion: Int
+        protocolVersion: Int,
+        mouseControl: Bool
     ) async -> SessionResponse {
         let proof = SessionCrypto.hmacProofHex(pairingKey: pairingKey, deviceId: deviceId)
         return await http.putSession(
@@ -106,7 +110,8 @@ extension WifiConnectionManager {
             deviceName: deviceName(),
             hmacProof: proof,
             controllers: controllers,
-            protocolVersion: protocolVersion
+            protocolVersion: protocolVersion,
+            mouseControl: mouseControl
         )
     }
 
@@ -231,6 +236,7 @@ extension WifiConnectionManager {
         clearStale(id)
         clearRetry(id)
         recordSlotOutcomes(response, sent: opened.sent, conn: conn)
+        conn.mouseControlGranted = response.mouseControl.granted
         await fetchCatalog(id: id, server: server)
         await fetchCapabilities(id: id, server: server)
         conn.markConnected(client: client, connectionId: grant.connectionId, epoch: response.epoch, hooks: makeHooks(id: id))
@@ -329,9 +335,11 @@ extension WifiConnectionManager {
         await cacheCapabilities(http.getCapabilities(ip: server.ip, port: server.httpPort), for: id)
     }
 
+    /// The probe's word on mouse control reaches the slots.
     func cacheCapabilities(_ probe: ServerCapabilitiesDTO, for id: String) {
         guard probe.reachable else { return }
         capabilities[id] = probe
+        get(id)?.setHostMouseControl(probe.host.mouseControl.supported && probe.host.mouseControl.available)
     }
 
     // MARK: - Proactive re-key
@@ -350,7 +358,8 @@ extension WifiConnectionManager {
             server: server,
             pairingKey: pairingKey,
             controllers: descriptors,
-            protocolVersion: conn.offeredProtocolVersion
+            protocolVersion: conn.offeredProtocolVersion,
+            mouseControl: conn.wantsMouseControl
         )
         if resp.unauthorized || resp.verdict == .unauthorized {
             handleTerminalAuth(id, loud: false)
@@ -373,6 +382,7 @@ extension WifiConnectionManager {
               case let .granted(grant) = Self.classifyOpen(resp),
               let material = Self.sessionMaterial(tokenHex: grant.tokenHex, saltHex: grant.saltHex, pairingKey: pairingKey),
               let udpPort = UInt16(exactly: server.udpPort) else { return }
+        conn.mouseControlGranted = resp.mouseControl.granted
         let negotiated = settleAccepted(echoedVersion: resp.protocolVersion)
         client.setConnectionParams(
             host: server.ip,

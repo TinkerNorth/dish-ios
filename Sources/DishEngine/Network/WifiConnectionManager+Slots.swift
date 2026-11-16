@@ -20,6 +20,13 @@ extension WifiConnectionManager {
         for index in pending.sorted() where conn.connectionId == connectionId {
             await syncIndex(index, conn: conn, connectionId: connectionId)
         }
+        await healMouseGrant(conn, connectionId: connectionId)
+    }
+
+    /// A whole PUT heals a mouse grant that differs from what the slots want.
+    private func healMouseGrant(_ conn: WifiConnection, connectionId: String) async {
+        guard conn.hasLiveSession, conn.connectionId == connectionId, conn.wantsMouseControl != conn.mouseControlGranted else { return }
+        await rekeySession(conn)
     }
 
     /// Ask the satellite again for one bound slot: an apply on a binding it

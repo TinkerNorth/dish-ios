@@ -21,9 +21,10 @@ enum SetupFixture {
         found: [SetupPCInput] = [],
         scanning: Bool = false,
         localNetwork: LocalNetworkStatus = .allowed,
-        byAddress: String? = nil
+        byAddress: String? = nil,
+        port: DevicePort = .usbC
     ) -> SetupInputs {
-        SetupInputs(detectedPads: pads, found: found, scanning: scanning, localNetwork: localNetwork, addedByAddress: byAddress)
+        SetupInputs(detectedPads: pads, found: found, scanning: scanning, localNetwork: localNetwork, addedByAddress: byAddress, port: port)
     }
 
     static func walk(_ start: SetupStart, _ events: [SetupEvent], localNetwork: LocalNetworkStatus = .allowed) -> SetupState {
@@ -38,6 +39,11 @@ final class SetupMappersTests: XCTestCase {
     func testEmptyFactsSeeNoPadsAndHearNoPCs() {
         let inputs = setupInputs(facts: FactsFixture.shell(localNetwork: .denied))
         XCTAssertEqual(inputs, SetupInputs(detectedPads: [], found: [], scanning: false, localNetwork: .denied))
+    }
+
+    func testTheDevicesPortReachesSetup() {
+        XCTAssertEqual(setupInputs(facts: FactsFixture.shell(port: .lightning)).port, .lightning)
+        XCTAssertEqual(setupInputs(facts: FactsFixture.shell()).port, .usbC)
     }
 
     func testTheFactsPadsAndPCsReachSetupPairedFirst() {
@@ -212,6 +218,25 @@ final class SetupMappersTests: XCTestCase {
             state.footnote,
             "Dish reads any controller iOS supports: DualSense, DualShock 4, Xbox Wireless and Switch Pro."
         )
+    }
+
+    /// A Lightning iPhone hosts no pad over a plain cable: the wired row says
+    /// the adapter is the way, in place of BEST, and the note under the
+    /// choices opens the sheet.
+    func testOnALightningIPhoneWiredRunsThroughTheAdapterAndTheNoteSaysSo() throws {
+        let state = inputStepState(SetupFixture.inputs(port: .lightning))
+        let wired = try XCTUnwrap(state.choices.first)
+        XCTAssertEqual(wired.pick, .wired)
+        XCTAssertEqual(wired.body, "Through Apple’s Lightning to USB Camera Adapter. Lowest latency.")
+        XCTAssertEqual(wired.chip, ChipState(text: "Adapter", tone: .warning))
+        XCTAssertEqual(state.adapter, adapterNote(port: .lightning))
+        XCTAssertEqual(state.choices.dropFirst().map(\.chip), [nil, nil], "the other ways in are as they were")
+        XCTAssertNil(inputStepState(SetupFixture.inputs()).adapter, "a USB-C iPhone hosts a pad over any data cable")
+    }
+
+    func testAPadPluggedIntoALightningIPhoneNamesItsPort() {
+        let state = inputStepState(SetupFixture.inputs(pads: [SetupFixture.dualSense, SetupFixture.xbox], port: .lightning))
+        XCTAssertEqual(state.found?.pads.map(\.detail), ["Plugged in · Lightning · 84%", "Connected · Bluetooth"])
     }
 
     func testASeenPadLeadsWithItsLinkAndBatteryAndPicksItself() {
