@@ -66,6 +66,12 @@ miss. `Tests/PARITY.md` lists everything not built.
 
 ### Changed
 
+- **A controller's page is its info page, with Edit.** A Controllers row
+  carries no button, as iOS keeps a row; its long-press menu and swipes
+  remain. The controller's page draws what it offers in a strip under its
+  card (Open gamepad, Open touchpad, Open mouse, Reconnect, Bind to, Find a
+  PC), BINDING, TELEMETRY and Unbind at the foot, and Edit on its toolbar
+  pushes Edit controller: Emulate as, Functions and Dead zones.
 - **The session accessory keeps Dim and loses Play.** The on-screen
   controller is a controller with its own Open now, so the accessory no
   longer opens its gamepad.

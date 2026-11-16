@@ -12,10 +12,11 @@ enum DestinationLine: Equatable {
     case note(String)
 }
 
-/// What a controller row's menu, swipes and Open do.
-enum ControllerRowAction: Hashable {
+/// What a controller offers: its row's long-press menu and swipes, and its
+/// page's strip under the card and Unbind at the foot.
+enum ControllerAction: Hashable {
     /// The on-screen controller's gamepad.
-    case open
+    case openGamepad
     /// The touchpad or the mouse screen the phone lends the pad, over its slot.
     case openSurface(slotId: String, screen: PlayScreen)
     case bind(slotId: String, connectionId: String)
@@ -39,10 +40,8 @@ struct ControllerRowState: Equatable, Identifiable {
     /// The controller's page; nil for a pad Dish cannot read, which has
     /// nothing to set.
     let page: Page?
-    /// The on-screen controller's Open, which raises its gamepad; nil for a pad.
-    let open: String?
     /// The long-press menu and the swipes.
-    let actions: RowActionsState<ControllerRowAction>
+    let actions: RowActionsState<ControllerAction>
 }
 
 /// A toolbar button that pushes a page: its accessibility title and glyph.
@@ -125,18 +124,18 @@ func controllerRow(
         battery: controller.batteryPercent.map(words.batteryPercent),
         batteryColor: batteryColor(controller.batteryPercent),
         page: controller.supported ? .controller(id: controller.id) : nil,
-        open: opensGamepad(controller) ? words.open : nil,
         actions: controllerRowActions(controller, paired: paired, words: words)
     )
 }
 
-/// The row's menu and swipes: Open and the lent screens, Reconnect and
-/// Unbind for a bound controller, Bind to or Find a PC for an unbound one.
+/// The row's menu and swipes, which the page's strip and foot are drawn
+/// from too: Open gamepad and the lent screens, Reconnect and Unbind for a
+/// bound controller, Bind to or Find a PC for an unbound one.
 func controllerRowActions(
     _ controller: ControllerFact,
     paired: [ConnectionFact],
     words: L10n = .app
-) -> RowActionsState<ControllerRowAction> {
+) -> RowActionsState<ControllerAction> {
     guard controller.supported else { return .none }
     let open = opensGamepad(controller) ? [openItem(words: words)] : []
     let screens = controller.surfaces.map { surfaceItem(controller.id, $0, words: words) }
@@ -149,11 +148,11 @@ func controllerRowActions(
     }
 }
 
-private func openItem(words: L10n) -> RowActionItem<ControllerRowAction> {
-    RowActionItem(action: .open, title: words.open, symbol: RowActionSymbol.open, destructive: false)
+private func openItem(words: L10n) -> RowActionItem<ControllerAction> {
+    RowActionItem(action: .openGamepad, title: words.openGamepad, symbol: RowActionSymbol.open, destructive: false)
 }
 
-private func surfaceItem(_ slotId: String, _ screen: PlayScreen, words: L10n) -> RowActionItem<ControllerRowAction> {
+private func surfaceItem(_ slotId: String, _ screen: PlayScreen, words: L10n) -> RowActionItem<ControllerAction> {
     RowActionItem(
         action: .openSurface(slotId: slotId, screen: screen),
         title: openSurfaceTitle(screen, words: words),
@@ -162,10 +161,10 @@ private func surfaceItem(_ slotId: String, _ screen: PlayScreen, words: L10n) ->
     )
 }
 
-/// "Open touchpad", "Open mouse"; the gamepad is the on-screen controller's own Open.
+/// "Open gamepad", "Open touchpad", "Open mouse".
 func openSurfaceTitle(_ screen: PlayScreen, words: L10n = .app) -> String {
     switch screen {
-    case .gamepad: words.open
+    case .gamepad: words.openGamepad
     case .touchpad: words.openTouchpad
     case .mouse: words.openMouse
     }
@@ -173,20 +172,20 @@ func openSurfaceTitle(_ screen: PlayScreen, words: L10n = .app) -> String {
 
 private func boundActions(
     _ slotId: String,
-    open: [RowActionItem<ControllerRowAction>],
-    screens: [RowActionItem<ControllerRowAction>],
+    open: [RowActionItem<ControllerAction>],
+    screens: [RowActionItem<ControllerAction>],
     lost connectionId: String?,
     words: L10n
-) -> RowActionsState<ControllerRowAction> {
+) -> RowActionsState<ControllerAction> {
     let unbind = RowActionItem(
-        action: ControllerRowAction.unbind(slotId: slotId),
+        action: ControllerAction.unbind(slotId: slotId),
         title: words.unbind,
         symbol: RowActionSymbol.unbind,
         destructive: true
     )
     let reconnect = connectionId.map { id in
         [RowActionItem(
-            action: ControllerRowAction.reconnect(connectionId: id),
+            action: ControllerAction.reconnect(connectionId: id),
             title: words.reconnect,
             symbol: RowActionSymbol.connect,
             destructive: false
@@ -202,17 +201,17 @@ private func boundActions(
 /// Bind to is a submenu of the paired PCs; with none paired, Find a PC.
 private func unboundActions(
     _ slotId: String,
-    open: [RowActionItem<ControllerRowAction>],
+    open: [RowActionItem<ControllerAction>],
     paired: [ConnectionFact],
     words: L10n
-) -> RowActionsState<ControllerRowAction> {
+) -> RowActionsState<ControllerAction> {
     guard !paired.isEmpty else {
-        let find = RowActionItem(action: ControllerRowAction.findPC, title: words.findAPC, symbol: RowActionSymbol.pair, destructive: false)
+        let find = RowActionItem(action: ControllerAction.findPC, title: words.findAPC, symbol: RowActionSymbol.pair, destructive: false)
         return RowActionsState(menu: (open + [find]).map(RowMenuEntry.item), leading: open, trailing: [find])
     }
     let choices = paired.map { pc in
         RowActionItem(
-            action: ControllerRowAction.bind(slotId: slotId, connectionId: pc.id),
+            action: ControllerAction.bind(slotId: slotId, connectionId: pc.id),
             title: connectionTitle(pc),
             symbol: connectionSymbol(pc.kind),
             destructive: false

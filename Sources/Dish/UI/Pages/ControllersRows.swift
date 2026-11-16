@@ -3,52 +3,38 @@
 
 import SwiftUI
 
-/// One controller: its glyph, name, destination line and battery. A row
-/// with a page opens it, pushed with a chevron from a stack, selected beside
-/// a split's list; a pad Dish cannot read has none. The on-screen
-/// controller also has Open, which raises its gamepad. A long press and a
-/// swipe offer the row's actions.
+/// One controller: its glyph, name, destination line and battery, and no
+/// button, as iOS keeps a row. A row with a page opens it, pushed with a
+/// chevron from a stack, selected beside a split's list; a pad Dish cannot
+/// read has none. A long press and a swipe offer the row's actions.
 struct ControllerRow: View {
     let state: ControllerRowState
     var layout = TabLayout.stack
     let open: @MainActor (Page) -> Void
-    let act: @MainActor (ControllerRowAction) -> Void
+    let act: @MainActor (ControllerAction) -> Void
 
     var body: some View {
         switch rowOpening(state.page, layout: layout) {
         case let .push(page):
-            line {
-                Button {
-                    open(page)
-                } label: {
-                    ControllerRowContent(state: state, disclosure: true)
-                }
-                .buttonStyle(.borderless)
+            Button {
+                open(page)
+            } label: {
+                ControllerRowContent(state: state, disclosure: true)
             }
+            .buttonStyle(.borderless)
+            .modifier(rowActions)
         case let .select(page):
-            line { ControllerRowContent(state: state, disclosure: false) }
+            ControllerRowContent(state: state, disclosure: false)
+                .modifier(rowActions)
                 .tag(page)
         case .inert:
-            line { ControllerRowContent(state: state, disclosure: false) }
+            ControllerRowContent(state: state, disclosure: false)
+                .modifier(rowActions)
         }
     }
 
-    /// The row's content, then the on-screen controller's Open.
-    private func line(@ViewBuilder _ content: () -> some View) -> some View {
-        HStack(spacing: DishSpace.s6) {
-            content()
-            if let title = state.open {
-                Button(title, action: play)
-                    .buttonStyle(.borderedProminent)
-                    .buttonBorderShape(.capsule)
-                    .font(DishFont.headline)
-            }
-        }
-        .modifier(RowActions(state: state.actions, perform: act))
-    }
-
-    private func play() {
-        act(.open)
+    private var rowActions: RowActions<ControllerAction> {
+        RowActions(state: state.actions, perform: act)
     }
 }
 

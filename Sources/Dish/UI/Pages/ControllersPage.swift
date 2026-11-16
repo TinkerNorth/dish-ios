@@ -42,23 +42,10 @@ struct ControllersPage: View {
         navigation.send(.show(page, in: .controllers))
     }
 
-    /// A row's Open, menu and swipes: the gamepad, or the binding through
-    /// the same intents the controller's page calls.
-    private func act(_ action: ControllerRowAction) {
-        switch action {
-        case .open: navigation.send(.openPlay(.gamepad))
-        case let .openSurface(slotId, screen): openSurface(slotId, screen)
-        case let .bind(slotId, connectionId): model.bind(slotId: slotId, to: connectionId)
-        case let .unbind(slotId): model.unbind(slotId: slotId)
-        case let .reconnect(connectionId): model.connect(connectionId)
-        case .findPC: navigation.send(.select(.connections))
-        }
-    }
-
-    /// The phone is aimed at the pad, then its screen opens over the pad's slot.
-    private func openSurface(_ slotId: String, _ screen: PlayScreen) {
-        model.aimPlay(at: slotId)
-        navigation.send(.openPlay(screen))
+    /// A row's menu and swipes: the controller's actions, through the
+    /// dispatch its page shares.
+    private func act(_ action: ControllerAction) {
+        ControllerActionRouter(model: model, navigation: navigation).perform(action)
     }
 
     private func addController() {
@@ -75,7 +62,7 @@ struct ControllersPageBody: View {
     var selection: Binding<Page?>?
     let add: () -> Void
     let open: @MainActor (Page) -> Void
-    let act: @MainActor (ControllerRowAction) -> Void
+    let act: @MainActor (ControllerAction) -> Void
     /// The Lightning note's way to its sheet.
     var more: @MainActor () -> Void = {}
 

@@ -206,6 +206,10 @@ enum DishSize {
     static let clientPinTracking: CGFloat = 4
     /// The corner of a card inside a sheet: the pair sheet's request.
     static let cardCorner: CGFloat = 16
+    /// The corner of a tile on a page's action strip, and the glyph's height,
+    /// which holds the words of every tile on one line.
+    static let actionTileCorner: CGFloat = 12
+    static let actionTileSymbol: CGFloat = 28
     /// The gamepad on an iPad on its side: a stick's base and thumb, a face
     /// button, a d-pad arm and a trigger rail.
     static let padStickRegular: CGFloat = 200

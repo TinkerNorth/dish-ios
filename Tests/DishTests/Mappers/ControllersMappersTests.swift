@@ -30,39 +30,44 @@ private enum RowItems {
         state: .online(latencyMs: 4, controllers: 1)
     )
     static let nameless = ConnectionFact(id: "office", name: "", address: "192.168.1.31", kind: .satellite, state: .offline(lastSeen: nil))
-    static let open = RowActionItem(action: ControllerRowAction.open, title: "Open", symbol: RowActionSymbol.open, destructive: false)
+    static let openGamepad = RowActionItem(
+        action: ControllerAction.openGamepad,
+        title: "Open gamepad",
+        symbol: RowActionSymbol.open,
+        destructive: false
+    )
     static let find = RowActionItem(
-        action: ControllerRowAction.findPC,
+        action: ControllerAction.findPC,
         title: "Find a PC",
         symbol: RowActionSymbol.pair,
         destructive: false
     )
     static let reconnect = RowActionItem(
-        action: ControllerRowAction.reconnect(connectionId: "lr"),
+        action: ControllerAction.reconnect(connectionId: "lr"),
         title: "Reconnect",
         symbol: RowActionSymbol.connect,
         destructive: false
     )
     static let touchpad = RowActionItem(
-        action: ControllerRowAction.openSurface(slotId: "pad", screen: .touchpad),
+        action: ControllerAction.openSurface(slotId: "pad", screen: .touchpad),
         title: "Open touchpad",
         symbol: "rectangle.and.hand.point.up.left",
         destructive: false
     )
     static let mouse = RowActionItem(
-        action: ControllerRowAction.openSurface(slotId: "pad", screen: .mouse),
+        action: ControllerAction.openSurface(slotId: "pad", screen: .mouse),
         title: "Open mouse",
         symbol: "cursorarrow",
         destructive: false
     )
     static let unbind = RowActionItem(
-        action: ControllerRowAction.unbind(slotId: "pad"),
+        action: ControllerAction.unbind(slotId: "pad"),
         title: "Unbind",
         symbol: RowActionSymbol.unbind,
         destructive: true
     )
 
-    static func bind(_ connectionId: String, _ name: String) -> RowActionItem<ControllerRowAction> {
+    static func bind(_ connectionId: String, _ name: String) -> RowActionItem<ControllerAction> {
         RowActionItem(
             action: .bind(slotId: "pad", connectionId: connectionId),
             title: name,
@@ -98,7 +103,6 @@ final class ControllersMappersTests: XCTestCase {
             battery: "84%",
             batteryColor: DishTheme.muted,
             page: .controller(id: "pad"),
-            open: nil,
             actions: RowActionsState(menu: [.item(RowItems.unbind)], leading: [], trailing: [RowItems.unbind])
         )
         XCTAssertEqual(state.rows, [row])
@@ -121,18 +125,12 @@ final class ControllersMappersTests: XCTestCase {
         XCTAssertNil(onScreen.battery, "the on-screen gamepad has no battery of its own")
     }
 
-    /// Open raises the gamepad only once a PC is bound to the on-screen
-    /// controller: unbound, it would send nowhere.
-    func testTheOnScreenControllerIsWordedAndOffersOpenOnceBound() {
+    /// A row carries no button: the on-screen controller's page is a row
+    /// away, like a pad's.
+    func testTheOnScreenControllerIsWordedAndHasItsPage() {
         let row = controllerRow(ControllerFixture.pad(name: "", link: .onScreen, battery: nil))
         XCTAssertEqual(row.name, "On-screen gamepad")
-        XCTAssertEqual(row.open, "Open")
-        XCTAssertEqual(row.page, .controller(id: "pad"), "its page is still a row away")
-        XCTAssertNil(
-            controllerRow(ControllerFixture.pad(name: "", link: .onScreen, battery: nil, destination: nil)).open,
-            "nothing to send to"
-        )
-        XCTAssertNil(controllerRow(ControllerFixture.pad()).open, "a pad has no gamepad to open")
+        XCTAssertEqual(row.page, .controller(id: "pad"))
     }
 
     func testAnUnsteadyPCIsCalledOutInPlaceOfTheLink() {
@@ -192,11 +190,17 @@ final class ControllersMappersTests: XCTestCase {
         XCTAssertEqual(actions, RowActionsState(menu: [.item(RowItems.unbind)], leading: [], trailing: [RowItems.unbind]))
     }
 
-    func testTheOnScreenControllerAlsoOffersOpenUnderALeadingSwipe() {
+    /// Open gamepad raises the gamepad only once a PC is bound to the
+    /// on-screen controller: unbound, it would send nowhere.
+    func testTheOnScreenControllerOffersOpenGamepadUnderALeadingSwipeOnceBound() {
         let actions = controllerRowActions(ControllerFixture.pad(name: "", link: .onScreen, battery: nil), paired: [])
         XCTAssertEqual(
             actions,
-            RowActionsState(menu: [.item(RowItems.open), .item(RowItems.unbind)], leading: [RowItems.open], trailing: [RowItems.unbind])
+            RowActionsState(
+                menu: [.item(RowItems.openGamepad), .item(RowItems.unbind)],
+                leading: [RowItems.openGamepad],
+                trailing: [RowItems.unbind]
+            )
         )
     }
 
@@ -214,7 +218,7 @@ final class ControllersMappersTests: XCTestCase {
 
     /// With no PC paired, Find a PC leads to the Connections tab, as
     /// Android's Find hosts does; the unbound on-screen controller has no
-    /// Open to offer beside it.
+    /// Open gamepad to offer beside it.
     func testWithNoPairedPCTheRowFindsAPC() {
         let actions = controllerRowActions(ControllerFixture.pad(destination: nil), paired: [])
         XCTAssertEqual(actions, RowActionsState(menu: [.item(RowItems.find)], leading: [], trailing: [RowItems.find]))
@@ -247,7 +251,7 @@ final class ControllersMappersTests: XCTestCase {
         )
         let actions = controllerRowActions(lent, paired: [RowItems.living])
         XCTAssertEqual(actions.menu, [.item(RowItems.touchpad), .item(RowItems.mouse), .item(RowItems.unbind)])
-        XCTAssertEqual(actions.leading, [], "the swipes keep to Open and Unbind")
+        XCTAssertEqual(actions.leading, [], "the swipes keep to Open gamepad and Unbind")
     }
 
     func testAPadDishCannotReadOffersNothing() {

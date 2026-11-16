@@ -18,6 +18,8 @@ enum Page: Hashable {
     case deviceName
     /// Controllers › a controller's own page, by its slot id.
     case controller(id: String)
+    /// Controllers › a controller › Edit controller, by its slot id.
+    case editController(id: String)
     /// Connections › a paired PC's page, by its connection id.
     case pcDetail(id: String)
     /// Settings › Setup & help › Help & FAQ.

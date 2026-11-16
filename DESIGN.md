@@ -156,6 +156,8 @@ Points. Every size a kit component sets is one of these names.
 | `DishSize.pinCellCorner` | 12 | A PIN cell's corner |
 | `DishSize.clientPinTracking` | 4 | The tracking of this iPhone's code on the pair sheet |
 | `DishSize.cardCorner` | 16 | The corner of a card inside a sheet: the pair sheet's request |
+| `DishSize.actionTileCorner` | 12 | The corner of a tile on a page's action strip |
+| `DishSize.actionTileSymbol` | 28 | The glyph's height on an action tile, which holds every tile's words on one line |
 | `DishSize.padStickRegular` | 200 | A stick's base on an iPad on its side |
 | `DishSize.padStickThumbRegular` | 92 | A stick's thumb on an iPad on its side |
 | `DishSize.padFaceRegular` | 76 | A face button on an iPad on its side |
@@ -240,7 +242,10 @@ Local Network primer and the adapter sheet), `SessionBar` (the
 session accessory), `PinCells` (a PIN's digits in a row of cells, the
 caret's cell outlined in the focus colour), `RowActions` (a row's long-press
 menu and swipes; a destructive swipe wears `DishTheme.error`, any other
-`DishTheme.primary`), `ForgetDialog` (Forget This PC's question) and
+`DishTheme.primary`), `ActionStrip` (the tiles under a page's card, each an
+action's glyph over its word, as Contacts lays out message and call; an
+entry with choices opens them as a menu), `ForgetDialog` (Forget This PC's
+question) and
 `HintTip` (a hint as TipKit's own popover, which iOS draws).
 
 Words are not design values but follow the same rule: a view reads them from

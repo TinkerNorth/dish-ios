@@ -86,6 +86,7 @@ final class ShellMappersTests: XCTestCase {
 
     func testAPushedControllerPageFallsBackToTheGenericTitle() {
         XCTAssertEqual(pageTitle(.controller(id: "pad")), "Controller")
+        XCTAssertEqual(pageTitle(.editController(id: "pad")), "Edit controller")
         XCTAssertEqual(pageTitle(.deviceName), "Name on your PC")
     }
 

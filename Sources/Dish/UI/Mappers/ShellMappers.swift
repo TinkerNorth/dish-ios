@@ -51,6 +51,7 @@ func pageTitle(_ page: Page, words: L10n = .app) -> String {
     switch page {
     case .deviceName: words.nameOnYourPC
     case .controller: words.controller
+    case .editController: words.editController
     case .pcDetail: words.pc
     case .help: words.helpAndFaq
     case .licenses: words.openSourceLicenses

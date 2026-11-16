@@ -14,11 +14,8 @@ private enum PadFixture {
     static func dualSense(
         link: ControllerLink = .usbC,
         battery: Int? = 84,
-        emulateAs: EmulatedPad = .dualSense,
         destination: DestinationFact? = nil,
-        features: [ControllerFeatureFact] = everySwitch,
-        motion: MotionFact = MotionFact(carries: false, status: nil),
-        hostEmulation: HostEmulationFact? = nil
+        features: [ControllerFeatureFact] = everySwitch
     ) -> ControllerFact {
         ControllerFact(
             id: "pad",
@@ -27,15 +24,17 @@ private enum PadFixture {
             batteryPercent: battery,
             destination: destination,
             family: .dualSense,
-            emulateAs: emulateAs,
-            features: features,
-            motion: motion,
-            hostEmulation: hostEmulation
+            emulateAs: .dualSense,
+            features: features
         )
     }
 
-    static func page(_ controller: ControllerFact, pads: [PadDiagnostics] = []) -> ControllerPadState? {
-        let state = controllerPageState(controllers: [controller], pads: pads, id: controller.id)
+    static func onScreen(bound destination: DestinationFact?) -> ControllerFact {
+        ControllerFact(id: "on-screen", name: "", link: .onScreen, batteryPercent: nil, destination: destination)
+    }
+
+    static func page(_ controller: ControllerFact, paired: [ConnectionFact] = [], pads: [PadDiagnostics] = []) -> ControllerPadState? {
+        let state = controllerPageState(controllers: [controller], paired: paired, pads: pads, id: controller.id)
         guard case let .pad(pad) = state.content else { return nil }
         return pad
     }
@@ -46,51 +45,75 @@ private enum PadFixture {
     }
 }
 
-/// The controller page (C1) without its PC half: the status card, the
-/// binding, the pad's switches and why two of them are missing.
+/// The paired PCs and the items the tests expect in the strip.
+private enum StripItems {
+    static let living = ConnectionFact(
+        id: "lr",
+        name: "Living Room PC",
+        address: "192.168.1.24",
+        kind: .satellite,
+        state: .offline(lastSeen: nil)
+    )
+    static let openGamepad = RowActionItem(
+        action: ControllerAction.openGamepad,
+        title: "Open gamepad",
+        symbol: RowActionSymbol.open,
+        destructive: false
+    )
+    static let touchpad = RowActionItem(
+        action: ControllerAction.openSurface(slotId: "pad", screen: .touchpad),
+        title: "Open touchpad",
+        symbol: "rectangle.and.hand.point.up.left",
+        destructive: false
+    )
+    static let mouse = RowActionItem(
+        action: ControllerAction.openSurface(slotId: "pad", screen: .mouse),
+        title: "Open mouse",
+        symbol: "cursorarrow",
+        destructive: false
+    )
+    static let reconnect = RowActionItem(
+        action: ControllerAction.reconnect(connectionId: "lr"),
+        title: "Reconnect",
+        symbol: RowActionSymbol.connect,
+        destructive: false
+    )
+    static let find = RowActionItem(action: ControllerAction.findPC, title: "Find a PC", symbol: RowActionSymbol.pair, destructive: false)
+
+    static func unbind(_ slotId: String) -> RowActionItem<ControllerAction> {
+        RowActionItem(action: .unbind(slotId: slotId), title: "Unbind", symbol: RowActionSymbol.unbind, destructive: true)
+    }
+
+    static func bind(_ connectionId: String, _ name: String) -> RowActionItem<ControllerAction> {
+        RowActionItem(
+            action: .bind(slotId: "pad", connectionId: connectionId),
+            title: name,
+            symbol: "antenna.radiowaves.left.and.right",
+            destructive: false
+        )
+    }
+}
+
+/// The controller page (C1): the pad's info page, with its strip of actions
+/// under the card, BINDING, TELEMETRY, Unbind at the foot and Edit on the
+/// toolbar.
 final class ControllerMappersTests: XCTestCase {
 
-    /// Open raises the gamepad only once a PC is bound to the on-screen
-    /// controller: unbound, it would send nowhere.
-    func testTheOnScreenControllersPageIsWordedAndOffersOpenOnceBound() throws {
-        let living = DestinationFact(id: "lr", name: "Living Room PC", health: .online)
-        let onScreen = ControllerFact(id: "on-screen", name: "", link: .onScreen, batteryPercent: nil, destination: living)
-        let state = controllerPageState(controllers: [onScreen], id: "on-screen")
-        XCTAssertEqual(state.title, "On-screen gamepad")
-        XCTAssertEqual(state.subtitle, "On-screen")
-        let page = try XCTUnwrap(PadFixture.page(onScreen))
-        XCTAssertEqual(page.open, "Open")
-        let unbound = ControllerFact(id: "on-screen", name: "", link: .onScreen, batteryPercent: nil, destination: nil)
-        XCTAssertNil(PadFixture.page(unbound)?.open, "nothing to send to yet")
-        XCTAssertNil(PadFixture.page(PadFixture.dualSense())?.open, "a pad has no gamepad to open")
-    }
+    // MARK: - The page
 
-    /// A pad with no touchpad of its own, bound to a satellite that grants
-    /// the mouse, gets the phone's touchpad and mouse under its card.
-    func testTheScreensThePhoneLendsAPadAreButtonsUnderItsCard() throws {
-        let lent = ControllerFact(
-            id: "pad",
-            name: "Xbox Wireless Controller",
-            link: .bluetooth,
-            batteryPercent: 41,
-            destination: DestinationFact(id: "lr", name: "Living Room PC", health: .online),
-            family: .xbox,
-            surfaces: [.touchpad, .mouse]
-        )
-        let page = try XCTUnwrap(PadFixture.page(lent))
-        XCTAssertEqual(page.surfaces, [
-            SurfaceButtonState(screen: .touchpad, title: "Open touchpad", symbol: "rectangle.and.hand.point.up.left"),
-            SurfaceButtonState(screen: .mouse, title: "Open mouse", symbol: "cursorarrow")
-        ])
-        XCTAssertEqual(PadFixture.page(PadFixture.dualSense())?.surfaces, [], "a DualSense streams its own trackpad")
-    }
-
-    func testThePageIsTitledByThePadAndSubtitledByItsBatteryAndLink() {
+    func testThePageIsTitledByThePadAndSubtitledByItsBatteryAndLinkWithEditOnTheToolbar() {
         let state = controllerPageState(controllers: [PadFixture.dualSense()], id: "pad")
         XCTAssertEqual(state.title, "DualSense")
         XCTAssertEqual(state.subtitle, "84% battery · USB-C")
+        XCTAssertEqual(state.edit, "Edit")
         let noBattery = controllerPageState(controllers: [PadFixture.dualSense(link: .bluetooth, battery: nil)], id: "pad")
         XCTAssertEqual(noBattery.subtitle, "Bluetooth", "a pad that reports no level shows its link alone")
+    }
+
+    func testTheOnScreenControllersPageIsWorded() {
+        let state = controllerPageState(controllers: [PadFixture.onScreen(bound: nil)], id: "on-screen")
+        XCTAssertEqual(state.title, "On-screen gamepad")
+        XCTAssertEqual(state.subtitle, "On-screen")
     }
 
     func testTheStatusCardNamesThePadItsLinkItsFamilyAndItsBattery() throws {
@@ -110,70 +133,116 @@ final class ControllerMappersTests: XCTestCase {
         XCTAssertEqual(pad.status.line, "Lightning · DualSense · 84%")
     }
 
-    func testAnUnboundPadOffersBindToEachPairedPC() {
-        let living = ConnectionFact(
-            id: "lr",
-            name: "Living Room PC",
-            address: "192.168.1.24",
-            kind: .satellite,
-            state: .offline(lastSeen: nil)
+    func testAPadThatLeftShowsItIsGoneUnderTheGenericTitleWithNothingToEdit() {
+        let state = controllerPageState(controllers: [], id: "pad")
+        XCTAssertEqual(state.title, "Controller")
+        XCTAssertEqual(state.subtitle, "", "no pad, no battery or link to word")
+        XCTAssertEqual(state.content, .gone(message: "This controller isn’t connected to your iPhone."))
+        XCTAssertNil(state.edit)
+    }
+
+    func testEachFamilyHasItsWord() {
+        XCTAssertEqual(
+            PadFamily.allFamilies.map { padFamilyName($0) },
+            ["DualSense", "DualShock 4", "Xbox Wireless", "Nintendo", "Controller"]
         )
+    }
+
+    // MARK: - The strip and the foot
+
+    /// Open gamepad is in the strip only once a PC is bound to the on-screen
+    /// controller: unbound, it would send nowhere.
+    func testTheOnScreenControllerOffersOpenGamepadInItsStripOnceBound() throws {
+        let living = DestinationFact(id: "lr", name: "Living Room PC", health: .online)
+        let bound = try XCTUnwrap(PadFixture.page(PadFixture.onScreen(bound: living)))
+        XCTAssertEqual(bound.actions.strip, [.item(StripItems.openGamepad)])
+        XCTAssertEqual(bound.actions.unbind, StripItems.unbind("on-screen"))
+        let unbound = try XCTUnwrap(PadFixture.page(PadFixture.onScreen(bound: nil)))
+        XCTAssertEqual(unbound.actions.strip, [.item(StripItems.find)], "nothing to send to yet, and nothing paired to bind to")
+        XCTAssertNil(unbound.actions.unbind)
+    }
+
+    /// A pad with no touchpad of its own, bound to a satellite that grants
+    /// the mouse, gets the phone's touchpad and mouse in its strip, each
+    /// over the pad's own slot.
+    func testTheScreensThePhoneLendsAPadAreInItsStrip() throws {
+        let lent = ControllerFact(
+            id: "pad",
+            name: "Xbox Wireless Controller",
+            link: .bluetooth,
+            batteryPercent: 41,
+            destination: DestinationFact(id: "lr", name: "Living Room PC", health: .online),
+            family: .xbox,
+            surfaces: [.touchpad, .mouse]
+        )
+        let page = try XCTUnwrap(PadFixture.page(lent))
+        XCTAssertEqual(page.actions.strip, [.item(StripItems.touchpad), .item(StripItems.mouse)])
+        XCTAssertEqual(page.actions.unbind, StripItems.unbind("pad"))
+    }
+
+    /// A bound pad whose PC answers and lends it nothing has no strip: the
+    /// card, BINDING and Unbind at the foot are its page.
+    func testABoundPadWithNothingToOpenHasNoStripAndUnbindAtTheFoot() throws {
+        let online = DestinationFact(name: "Living Room PC", health: .online)
+        let page = try XCTUnwrap(PadFixture.page(PadFixture.dualSense(destination: online)))
+        XCTAssertNil(page.actions.strip, "a DualSense streams its own trackpad, and the gamepad is the on-screen controller's")
+        XCTAssertEqual(page.actions.unbind, StripItems.unbind("pad"))
+        XCTAssertEqual(page.binding.destination, .bound(pcName: "Living Room PC", dot: DishTheme.success))
+        XCTAssertNil(page.binding.hint)
+        XCTAssertEqual(page.status.dot, DishTheme.success)
+    }
+
+    func testAPadWhosePCIsLostOffersReconnectInItsStrip() throws {
+        let lost = DestinationFact(id: "lr", name: "Living Room PC", health: .lost)
+        let page = try XCTUnwrap(PadFixture.page(PadFixture.dualSense(destination: lost)))
+        XCTAssertEqual(page.actions.strip, [.item(StripItems.reconnect)])
+        XCTAssertEqual(page.actions.unbind, StripItems.unbind("pad"))
+        XCTAssertEqual(page.binding.destination, .bound(pcName: "Living Room PC", dot: DishTheme.error))
+        XCTAssertEqual(page.status.dot, DishTheme.error)
+    }
+
+    /// Bind to is a menu of the paired PCs, each by its name, or its address
+    /// when it never advertised one.
+    func testAnUnboundPadOffersBindToEachPairedPCInItsStrip() throws {
         let office = ConnectionFact(id: "office", name: "", address: "192.168.1.31", kind: .satellite, state: .needsPairing)
-        let state = controllerPageState(controllers: [PadFixture.dualSense()], paired: [living, office], id: "pad")
-        guard case let .pad(pad) = state.content else { return XCTFail("a pad's page") }
-        XCTAssertEqual(pad.binding.title, "Binding")
-        XCTAssertEqual(pad.binding.destinationTitle, "Destination")
-        XCTAssertEqual(pad.binding.destination, .unbound(
-            bindTo: "Bind to",
-            choices: [BindChoice(id: "lr", name: "Living Room PC"), BindChoice(id: "office", name: "192.168.1.31")]
-        ))
-        XCTAssertNil(pad.apply)
+        let page = try XCTUnwrap(PadFixture.page(PadFixture.dualSense(), paired: [StripItems.living, office]))
+        let bindTo = RowMenuEntry.submenu(
+            title: "Bind to",
+            symbol: RowActionSymbol.bind,
+            items: [StripItems.bind("lr", "Living Room PC"), StripItems.bind("office", "192.168.1.31")]
+        )
+        XCTAssertEqual(page.actions.strip, [bindTo])
+        XCTAssertNil(page.actions.unbind)
+        XCTAssertEqual(page.binding.title, "Binding")
+        XCTAssertEqual(page.binding.destinationTitle, "Destination")
+        XCTAssertEqual(page.binding.destination, .unbound(note: "Not bound"))
+        XCTAssertNil(page.binding.hint, "there is a PC to bind to")
     }
 
     /// With no PC paired there is nothing to bind to: Find a PC leads to the
-    /// Connections tab, as Android's Find hosts does, and the hint says why.
-    func testWithNoPairedPCTheBindRowFindsAPCInstead() throws {
-        let binding = try XCTUnwrap(PadFixture.page(PadFixture.dualSense())).binding
-        XCTAssertEqual(binding.destination, .nowhereToBind(
-            findPC: "Find a PC",
-            hint: "Pair a PC on the Connections tab to bind this controller."
-        ))
+    /// Connections tab, as Android's Find hosts does, and the footer says why.
+    func testWithNoPairedPCTheStripFindsAPCAndTheFooterSaysWhy() throws {
+        let page = try XCTUnwrap(PadFixture.page(PadFixture.dualSense()))
+        XCTAssertEqual(page.actions.strip, [.item(StripItems.find)])
+        XCTAssertEqual(page.binding.destination, .unbound(note: "Not bound"))
+        XCTAssertEqual(page.binding.hint, "Pair a PC on the Connections tab to bind this controller.")
     }
 
-    func testABoundPadNamesItsPCAndOffersUnbind() throws {
-        let bound = ControllerFact(
-            id: "pad",
-            name: "DualSense",
-            link: .usbC,
-            batteryPercent: 84,
-            destination: DestinationFact(name: "Living Room PC", health: .online),
-            family: .dualSense,
-            emulateAs: .dualSense
-        )
-        let pad = try XCTUnwrap(PadFixture.page(bound))
-        XCTAssertEqual(
-            pad.binding.destination,
-            .bound(pcName: "Living Room PC", dot: DishTheme.success, unbind: "Unbind", reconnect: nil)
-        )
-        XCTAssertEqual(pad.status.dot, DishTheme.success)
-        let lost = ControllerFact(
-            id: "pad",
-            name: "DualSense",
-            link: .usbC,
-            batteryPercent: 84,
-            destination: DestinationFact(id: "lr", name: "Living Room PC", health: .lost)
-        )
-        XCTAssertEqual(
-            PadFixture.page(lost)?.binding.destination,
-            .bound(
-                pcName: "Living Room PC",
-                dot: DishTheme.error,
-                unbind: "Unbind",
-                reconnect: ReconnectState(title: "Reconnect", connectionId: "lr")
-            ),
-            "a lost PC offers Reconnect"
-        )
+    /// The page offers what the row's menu does, in the row's order, but
+    /// Unbind, which takes the binding away, stands alone at the foot.
+    func testThePageDrawsTheRowsMenuAsItsStripWithUnbindAtTheFoot() {
+        let unbind = StripItems.unbind("pad")
+        let menu: [RowMenuEntry<ControllerAction>] = [.item(StripItems.touchpad), .item(StripItems.reconnect), .item(unbind)]
+        let actions = controllerPageActions(RowActionsState(menu: menu, leading: [], trailing: [StripItems.reconnect, unbind]))
+        XCTAssertEqual(actions.strip, [.item(StripItems.touchpad), .item(StripItems.reconnect)])
+        XCTAssertEqual(actions.unbind, unbind)
+        let alone = controllerPageActions(RowActionsState(menu: [.item(unbind)], leading: [], trailing: [unbind]))
+        XCTAssertNil(alone.strip, "nothing but Unbind leaves no strip")
+        XCTAssertEqual(alone.unbind, unbind)
+        XCTAssertEqual(controllerPageActions(.none), ControllerPageActions(strip: nil, unbind: nil))
     }
+
+    // MARK: - The apply
 
     private func apply(_ progress: ApplyProgress, slotId: String = "pad") -> ApplyRowState? {
         let fact = ApplyFact(slotId: slotId, connectionId: "lr", progress: progress)
@@ -211,129 +280,6 @@ final class ControllerMappersTests: XCTestCase {
         XCTAssertEqual(apply(.failed(.padGone))?.retry, "Try again")
     }
 
-    func testEmulateAsOffersEveryTypeAndSelectsThePadsPick() throws {
-        let binding = try XCTUnwrap(PadFixture.page(PadFixture.dualSense(emulateAs: .xboxWireless))).binding
-        XCTAssertEqual(binding.emulateTitle, "Emulate as")
-        XCTAssertEqual(binding.emulateAs, .xboxWireless)
-        XCTAssertEqual(binding.emulateOptions.map(\.pad), EmulatedPad.allCases)
-        XCTAssertEqual(binding.emulateOptions.map(\.name), ["DualSense", "DualShock 4", "Xbox Wireless", "Switch Pro"])
-    }
-
-    func testAPadBoundToAHostOffersTheProtocolsFourInPlaceOfDishsPads() throws {
-        let hostEmulation = HostEmulationFact(type: Int(MoonlightControllerType.nintendo), isOverride: true)
-        let destination = DestinationFact(name: "Study PC", health: .online)
-        let controller = PadFixture.dualSense(destination: destination, hostEmulation: hostEmulation)
-        let host = try XCTUnwrap(PadFixture.page(controller)?.binding.hostEmulate)
-        XCTAssertEqual(host.options.map(\.label), ["Auto", "Xbox", "PlayStation", "Nintendo"])
-        XCTAssertEqual(host.selection, 3)
-        XCTAssertEqual(host.detail, "Dish asks Study PC to plug in this controller. Some hosts override the choice.")
-        let auto = HostEmulationFact(type: Int(MoonlightControllerType.auto), isOverride: false)
-        let following = try XCTUnwrap(PadFixture.page(PadFixture.dualSense(destination: destination, hostEmulation: auto))?.binding
-            .hostEmulate)
-        XCTAssertNil(following.selection)
-        XCTAssertEqual(following.detail, "Auto sends PlayStation for this controller.", "the DualSense has motion")
-        let plain = PadFixture.dualSense(destination: destination, features: [], hostEmulation: auto)
-        XCTAssertEqual(
-            try XCTUnwrap(PadFixture.page(plain)?.binding.hostEmulate).detail,
-            "Auto sends Xbox for this controller.",
-            "no gyroscope, no PlayStation"
-        )
-    }
-
-    func testAPadOnASatelliteOrBoundToNoneKeepsDishsFourPads() {
-        XCTAssertNil(PadFixture.page(PadFixture.dualSense())?.binding.hostEmulate)
-        let onSatellite = PadFixture.dualSense(destination: DestinationFact(name: "Den", health: .online))
-        XCTAssertNil(PadFixture.page(onSatellite)?.binding.hostEmulate)
-    }
-
-    func testFunctionsListTheSwitchesThePadHasInTheBoardsOrder() throws {
-        let functions = try XCTUnwrap(PadFixture.page(PadFixture.dualSense())?.functions)
-        XCTAssertEqual(functions.title, "Functions")
-        XCTAssertEqual(functions.rows.map(\.title), ["Motion", "Rumble", "Adaptive triggers", "Light bar", "Player LEDs", "Touchpad"])
-        XCTAssertEqual(functions.rows.map(\.feature), SlotSwitch.allCases)
-        XCTAssertTrue(functions.rows.allSatisfy(\.isOn))
-        XCTAssertEqual(Set(functions.rows.map(\.symbol)).count, functions.rows.count, "each switch has its own glyph")
-    }
-
-    func testOnlyTheMotionRowCarriesTheSatellitesWord() throws {
-        let functions = try XCTUnwrap(PadFixture.page(PadFixture.dualSense())?.functions)
-        XCTAssertNotNil(functions.rows.first { $0.feature == .motion }?.status)
-        XCTAssertTrue(functions.rows.filter { $0.feature != .motion }.allSatisfy { $0.status == nil })
-    }
-
-    func testTheMotionRowReadsEachStateOfTheGyroChipAndOnlyTheSatellitesFaultsWarn() throws {
-        func status(_ motion: MotionFact, on: Bool = true, features: [ControllerFeatureFact]? = nil) throws -> MotionRowStatus {
-            let all = features ?? [ControllerFeatureFact(feature: .motion, enabled: on)]
-            let controller = PadFixture.dualSense(features: all, motion: motion)
-            let rows = try XCTUnwrap(PadFixture.page(controller)?.functions).rows
-            return try XCTUnwrap(rows.first { $0.feature == .motion }?.status)
-        }
-        let sinks = MotionBackendStatus(sinkSupportedForType: true, backendOk: true)
-        XCTAssertEqual(try status(MotionFact(carries: true, status: sinks)), MotionRowStatus(text: "Motion: streaming", warns: false))
-        XCTAssertEqual(try status(MotionFact(carries: true, status: nil)).text, "Motion: streaming", "no word yet reads as fine")
-        XCTAssertEqual(try status(MotionFact(carries: false, status: nil)), MotionRowStatus(text: "Motion: not sent", warns: false))
-        XCTAssertEqual(try status(MotionFact(carries: true, status: sinks), on: false).text, "Motion: turned off")
-        let noSink = MotionBackendStatus(sinkSupportedForType: false, backendOk: true)
-        XCTAssertEqual(
-            try status(MotionFact(carries: true, status: noSink)),
-            MotionRowStatus(text: "Motion: host can’t receive", warns: true)
-        )
-        let broken = MotionBackendStatus(sinkSupportedForType: true, backendOk: false)
-        XCTAssertEqual(
-            try status(MotionFact(carries: true, status: broken)),
-            MotionRowStatus(text: "Motion: server can’t deliver", warns: true)
-        )
-    }
-
-    func testEveryMotionIndicatorStateHasItsLine() {
-        let lines = [MotionIndicatorState.unavailable, .userDisabled, .notForwarded, .noHostSink, .backendBroken, .forwarding]
-            .map { motionRowStatus($0).text }
-        XCTAssertEqual(Set(lines).count, 6)
-        XCTAssertEqual(motionRowStatus(.unavailable).text, "Motion: no gyroscope")
-        XCTAssertFalse(motionRowStatus(.unavailable).warns)
-    }
-
-    func testASwitchTheUserTurnedOffReadsOffAndAMissingOneIsLeftOut() throws {
-        let features = [ControllerFeatureFact(feature: .rumble, enabled: false)]
-        let functions = try XCTUnwrap(PadFixture.page(PadFixture.dualSense(features: features))?.functions)
-        XCTAssertEqual(functions.rows.map(\.feature), [.rumble])
-        XCTAssertEqual(functions.rows.map(\.isOn), [false])
-    }
-
-    func testAPadWithNoSwitchesHasNoFunctionsSection() {
-        XCTAssertNil(PadFixture.page(PadFixture.dualSense(features: []))?.functions)
-    }
-
-    func testTheFootnoteSaysWhyTheMicrophoneAndSpeakerAreMissing() throws {
-        let pad = try XCTUnwrap(PadFixture.page(PadFixture.dualSense()))
-        XCTAssertEqual(pad.footnote, "Microphone and controller speaker aren’t open to apps on iOS, so Dish leaves them out.")
-    }
-
-    func testAPadThatLeftShowsItIsGoneUnderTheGenericTitle() {
-        let state = controllerPageState(controllers: [], id: "pad")
-        XCTAssertEqual(state.title, "Controller")
-        XCTAssertEqual(state.subtitle, "", "no pad, no battery or link to word")
-        XCTAssertEqual(state.content, .gone(message: "This controller isn’t connected to your iPhone."))
-    }
-
-    func testEachFamilyHasItsWord() {
-        XCTAssertEqual(
-            PadFamily.allFamilies.map { padFamilyName($0) },
-            ["DualSense", "DualShock 4", "Xbox Wireless", "Nintendo", "Controller"]
-        )
-    }
-
-    // MARK: - Dead zones
-
-    func testAPadOffersItsDeadZonesPage() {
-        XCTAssertEqual(PadFixture.page(PadFixture.dualSense())?.deadZones, "Dead zones")
-    }
-
-    func testTheOnScreenGamepadHasNoDeadZonesToTune() {
-        let onScreen = ControllerFact(id: "on-screen", name: "", link: .onScreen, batteryPercent: nil, destination: nil)
-        XCTAssertNil(PadFixture.page(onScreen)?.deadZones)
-    }
-
     // MARK: - Telemetry
 
     func testTelemetryNamesTheReportMotionAndTouchRatesOfAPadThatReports() throws {
@@ -369,7 +315,7 @@ final class ControllerMappersTests: XCTestCase {
     }
 
     func testTheOnScreenGamepadShowsItsTelemetryToo() throws {
-        let onScreen = ControllerFact(id: "on-screen", name: "", link: .onScreen, batteryPercent: nil, destination: nil)
+        let onScreen = PadFixture.onScreen(bound: nil)
         let reading = PadFixture.reading(of: onScreen, rates: PadRates(reportHz: 60, motionHz: 0))
         let telemetry = try XCTUnwrap(PadFixture.page(onScreen, pads: [reading])?.telemetry)
         XCTAssertEqual(telemetry.rows.map(\.value), ["60 Hz"])
