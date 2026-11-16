@@ -130,8 +130,9 @@ no `isEnabled:` form and an empty accessory still draws its glass. The session
 is the live satellite carrying the most pads (`AppModel+Session.swift`).
 
 - **Expanded**, with the tab bar at full height: the PC's name over
-  "Streaming · 3 pads · 4 ms", a Dim button (moon) and a Play button (the
-  on-screen gamepad). A `stoppedResponding` session, one whose heartbeat acks
+  "Streaming · 3 pads · 4 ms" and a Dim button (moon); the on-screen
+  gamepad opens from its own row and page, not from here. A
+  `stoppedResponding` session, one whose heartbeat acks
   falter, draws "Stopped responding" in the error colour with a Reconnect
   button, the Connections tab wears a badge of 1 (`connectionsBadge`), and
   the controller rows bound to that PC say "Connection lost" and offer
@@ -142,8 +143,8 @@ is the live satellite carrying the most pads (`AppModel+Session.swift`).
 - **Inline**, while the tab bar is minimized (`.tabBarMinimizeBehavior(.onScrollDown)`):
   `SessionBar` reads `tabViewBottomAccessoryPlacement` and draws the short line
   alone, "3 pads · 4 ms", or the warning alone.
-- A button whose closure is nil is left out. Dim sends `navigation.send(.dim)`;
-  Play sends `openPlay(.gamepad)`; Reconnect calls `model.reconnect`, which
+- A Reconnect whose closure is nil is left out. Dim sends `navigation.send(.dim)`;
+  Reconnect calls `model.reconnect`, which
   closes the faltering session and opens it again. TipKit's dim hint points
   at Dim until the person has dimmed once ("Hints (TipKit)").
 
@@ -161,7 +162,11 @@ the `Cover` case and `NavigationCoverageTests` requires a
   `openPlay(screen)` raises it and starts the screen on the on-screen
   controller (effect `startPlay`); `closePlay`, Stop gamepad and a system
   dismissal lower it and release what it held (effect `endPlay`). A cover
-  replacing another ends it. On an iPhone the scene locks the window to
+  replacing another ends it. It rises and falls without the cover's own
+  slide (`playCoverMoves(from:to:)`, which the store applies in a
+  transaction with animations disabled), so the window's turn to landscape
+  and back is the one motion; the pause menu moving between screens keeps
+  the cover up. On an iPhone the scene locks the window to
   landscape while it is up (`screenOrientation(for:idiom:)`, the
   `OrientationLock` app delegate) and to portrait otherwise; an iPad's
   window follows the device ("On an iPad"). It is dark, hides the status bar and the
@@ -549,6 +554,6 @@ a step's state and may use the environment's `openURL`.
 
 No shortcuts of Dish's own. On an iPad with a keyboard the system's own
 focus moves through the sidebar and a split's list, which selects with it
-like a tap. VoiceOver labels are part of the views (the Dim and Play buttons
+like a tap. VoiceOver labels are part of the views (the Dim button
 name themselves, the glyph tiles hide from VoiceOver, the dim is an
 accessibility button), and every row text is a Dynamic Type style.

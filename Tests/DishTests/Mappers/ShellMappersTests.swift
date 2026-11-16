@@ -37,14 +37,14 @@ final class ShellMappersTests: XCTestCase {
     func testAStreamingSessionNamesItsPCPadsAndLatency() {
         XCTAssertEqual(
             sessionBarState(FactsFixture.streaming()),
-            .streaming(pcName: "Living Room PC", line: "Streaming · 3 pads · 4 ms", shortLine: "3 pads · 4 ms", dim: "Dim", play: "Play")
+            .streaming(pcName: "Living Room PC", line: "Streaming · 3 pads · 4 ms", shortLine: "3 pads · 4 ms", dim: "Dim")
         )
     }
 
     func testASessionWithNoLatencyYetLeavesItOut() {
         XCTAssertEqual(
             sessionBarState(FactsFixture.streaming(pads: 2, latencyMs: nil)),
-            .streaming(pcName: "Living Room PC", line: "Streaming · 2 pads", shortLine: "2 pads", dim: "Dim", play: "Play")
+            .streaming(pcName: "Living Room PC", line: "Streaming · 2 pads", shortLine: "2 pads", dim: "Dim")
         )
     }
 
@@ -54,7 +54,7 @@ final class ShellMappersTests: XCTestCase {
         let counting = LowPowerFact(countdown: 3, due: false)
         XCTAssertEqual(
             sessionBarState(FactsFixture.streaming(), lowPower: counting),
-            .streaming(pcName: "Living Room PC", line: "Low power in 3 s", shortLine: "Low power in 3 s", dim: "Dim", play: "Play")
+            .streaming(pcName: "Living Room PC", line: "Low power in 3 s", shortLine: "Low power in 3 s", dim: "Dim")
         )
         XCTAssertEqual(
             sessionBarState(FactsFixture.stopped, lowPower: counting),

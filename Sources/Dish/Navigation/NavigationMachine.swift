@@ -181,6 +181,20 @@ func sheetHost(_ state: NavigationState) -> SheetHost? {
     }
 }
 
+/// Whether a play cover rises or falls between two states. The play
+/// screens turn the window, and the cover's own slide fighting that turn is
+/// what the store leaves out.
+func playCoverMoves(from before: Cover?, to after: Cover?) -> Bool {
+    isPlay(before) != isPlay(after)
+}
+
+private func isPlay(_ cover: Cover?) -> Bool {
+    switch cover {
+    case .play: true
+    case .setup, .dim, nil: false
+    }
+}
+
 /// Whether the low-power dim could rise now: the bare tabs are on screen.
 func dimAllowed(_ state: NavigationState) -> Bool {
     state.cover == nil && state.sheet == nil

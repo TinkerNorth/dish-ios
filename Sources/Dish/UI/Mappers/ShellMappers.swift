@@ -25,8 +25,8 @@ struct TabItemState: Equatable, Identifiable {
 /// The session accessory: the live link on every tab.
 enum SessionBarState: Equatable {
     /// `line` under the PC's name; `shortLine` alone while the tab bar is
-    /// minimized. `dim` and `play` label the two buttons.
-    case streaming(pcName: String, line: String, shortLine: String, dim: String, play: String)
+    /// minimized; `dim` labels the one button.
+    case streaming(pcName: String, line: String, shortLine: String, dim: String)
     /// The PC stopped answering: the warning line and Reconnect.
     case problem(pcName: String, line: String, reconnect: String)
 }
@@ -108,10 +108,10 @@ private func streamingBar(_ session: SessionFact, lowPower: LowPowerFact, words:
     let shortLine = counts.joined(separator: lineSeparator)
     let line = ([words.streaming] + counts).joined(separator: lineSeparator)
     guard let seconds = lowPower.countdown else {
-        return .streaming(pcName: session.pcName, line: line, shortLine: shortLine, dim: words.dim, play: words.play)
+        return .streaming(pcName: session.pcName, line: line, shortLine: shortLine, dim: words.dim)
     }
     let countdown = words.lowPowerIn(seconds)
-    return .streaming(pcName: session.pcName, line: countdown, shortLine: countdown, dim: words.dim, play: words.play)
+    return .streaming(pcName: session.pcName, line: countdown, shortLine: countdown, dim: words.dim)
 }
 
 // MARK: - A tab's list beside its page, on a regular width

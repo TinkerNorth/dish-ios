@@ -145,7 +145,7 @@ enum DishSize {
     static let rowGlyphCorner: CGFloat = 10
     /// The glyph inside the tile.
     static let rowGlyphSymbol: CGFloat = 20
-    /// The session accessory's round Dim and Play buttons.
+    /// The session accessory's round Dim button.
     static let sessionButton: CGFloat = 44
     /// The glyph inside a session accessory button.
     static let sessionButtonSymbol: CGFloat = 16

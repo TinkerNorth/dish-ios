@@ -125,7 +125,7 @@ Points. Every size a kit component sets is one of these names.
 | `DishSize.rowGlyph` | 40 | The glyph tile at the head of a row |
 | `DishSize.rowGlyphCorner` | 10 | The tile's corner |
 | `DishSize.rowGlyphSymbol` | 20 | The glyph inside the tile |
-| `DishSize.sessionButton` | 44 | The session accessory's round Dim and Play buttons |
+| `DishSize.sessionButton` | 44 | The session accessory's round Dim button |
 | `DishSize.sessionButtonSymbol` | 16 | The glyph inside a session accessory button |
 | `DishSize.statusDot` | 8 | The small coloured status dot |
 | `DishSize.welcomeMark` | 112 | The brand mark on the welcome |

@@ -51,7 +51,7 @@ private func dimCard(_ facts: ShellFacts, words: L10n) -> DimCardState? {
     guard let bar = sessionBarState(facts.session, words: words) else { return nil }
     let pads = facts.controllers.compactMap { dimPadRow($0, words: words) }
     switch bar {
-    case let .streaming(pcName, line, _, _, _):
+    case let .streaming(pcName, line, _, _):
         return DimCardState(pcName: pcName, line: line, dot: DishTheme.success, lineColor: DishTheme.dimText, pads: pads)
     case let .problem(pcName, line, _):
         return DimCardState(pcName: pcName, line: line, dot: DishTheme.error, lineColor: DishTheme.error, pads: pads)

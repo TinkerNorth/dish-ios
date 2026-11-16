@@ -3,14 +3,13 @@
 
 import SwiftUI
 
-/// The session accessory: the PC, how the link is doing, Dim and Play, or
+/// The session accessory: the PC, how the link is doing and Dim, or
 /// Reconnect once the PC stops responding. While the tab bar is minimized
-/// the accessory is inline and carries the short line alone. A nil action
-/// leaves its button out; TipKit's hint, when given, points at Dim.
+/// the accessory is inline and carries the short line alone. A nil
+/// Reconnect leaves its button out; TipKit's hint, when given, points at Dim.
 struct SessionBar: View {
     let state: SessionBarState
     let dim: () -> Void
-    let play: (() -> Void)?
     let reconnect: (() -> Void)?
     var dimHint: HintState?
 
@@ -25,22 +24,13 @@ struct SessionBar: View {
 
     @ViewBuilder private var expanded: some View {
         switch state {
-        case let .streaming(pcName, line, _, dimTitle, playTitle):
+        case let .streaming(pcName, line, _, dimTitle):
             HStack(spacing: DishSpace.s6) {
                 RowGlyph(symbol: satelliteSymbol)
                 SessionBarTitles(pcName: pcName, line: line, lineFont: DishFont.monoDetail, lineColor: DishTheme.muted)
                 Spacer(minLength: DishSpace.s4)
                 SessionRoundButton(title: dimTitle, symbol: "moon.fill", tint: DishTheme.onSurface, fill: DishTheme.surfaceDim, action: dim)
                     .hint(dimHint)
-                if let play {
-                    SessionRoundButton(
-                        title: playTitle,
-                        symbol: "play.fill",
-                        tint: DishTheme.onPrimary,
-                        fill: DishTheme.primary,
-                        action: play
-                    )
-                }
             }
             .padding(.horizontal, DishSpace.s4)
         case let .problem(pcName, line, reconnectTitle):
@@ -67,7 +57,7 @@ private struct SessionBarInline: View {
 
     var body: some View {
         switch state {
-        case let .streaming(_, _, shortLine, _, _):
+        case let .streaming(_, _, shortLine, _):
             Text(shortLine).font(DishFont.monoDetail).foregroundStyle(DishTheme.onSurface)
         case let .problem(_, line, _):
             Text(line).font(DishFont.detail).foregroundStyle(DishTheme.error)
@@ -125,7 +115,7 @@ private struct SessionBarPreview: View {
             }
         }
         .tabViewBottomAccessory {
-            SessionBar(state: state, dim: {}, play: {}, reconnect: {})
+            SessionBar(state: state, dim: {}, reconnect: {})
         }
     }
 }
@@ -137,8 +127,7 @@ private let previewWords = L10n.app
         pcName: "Living Room PC",
         line: [previewWords.streaming, previewWords.padCount(3), previewWords.latency(4)].joined(separator: lineSeparator),
         shortLine: [previewWords.padCount(3), previewWords.latency(4)].joined(separator: lineSeparator),
-        dim: previewWords.dim,
-        play: previewWords.play
+        dim: previewWords.dim
     ))
 }
 

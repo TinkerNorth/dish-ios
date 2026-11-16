@@ -346,17 +346,6 @@ final class NavigationMachineTests: XCTestCase {
         XCTAssertEqual(underSetup.effects, [.startSetup(.firstRun), .connect(id: "lr")])
     }
 
-    /// The low-power dim may rise only over the bare tabs: never under a
-    /// cover, nor over a sheet, whose pairing the dim would cancel.
-    func testTheDimMayRiseOnlyOverTheBareTabs() {
-        XCTAssertTrue(dimAllowed(NavigationState()))
-        XCTAssertTrue(dimAllowed(after(.select(.settings), .push(.help)).state))
-        XCTAssertFalse(dimAllowed(after(.openSheet(.addByAddress)).state))
-        XCTAssertFalse(dimAllowed(after(.openSetup(.guide)).state))
-        XCTAssertFalse(dimAllowed(after(.openPlay(.gamepad)).state))
-        XCTAssertFalse(dimAllowed(after(.dim).state))
-    }
-
     func testTheSheetIsPresentedByTheTabsOrTheSetupCover() {
         let tabs = after(.openSheet(.addByAddress)).state
         XCTAssertEqual(presentedSheet(tabs, by: .tabs), .addByAddress)

@@ -57,9 +57,19 @@ final class NavigationStore {
     func send(_ event: NavigationEvent) {
         let before = state
         let step = reduceNavigation(before, event)
-        state = step.state
+        move(to: step.state, from: before)
         step.effects.forEach(run)
         if let hint = learnedHint(event, from: before, to: step.state) { learned(hint) }
+    }
+
+    /// A play cover rises and falls without the cover's slide, so the
+    /// window's turn is the one motion; every other move animates as SwiftUI
+    /// would.
+    private func move(to next: NavigationState, from before: NavigationState) {
+        guard playCoverMoves(from: before.cover, to: next.cover) else { return state = next }
+        var still = Transaction()
+        still.disablesAnimations = true
+        withTransaction(still) { state = next }
     }
 
     private func run(_ effect: NavigationEffect) {

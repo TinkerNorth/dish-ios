@@ -64,6 +64,15 @@ miss. `Tests/PARITY.md` lists everything not built.
   hardware's model identifier once and the engine maps it; a device the
   table does not know reads as USB-C and sees no note.
 
+### Changed
+
+- **The session accessory keeps Dim and loses Play.** The on-screen
+  controller is a controller with its own Open now, so the accessory no
+  longer opens its gamepad.
+- **The play screens rise and fall without the cover's slide.** The slide
+  fought the window's turn to landscape and back; now the turn is the one
+  motion.
+
 ### Fixed
 
 - **The scene builds its objects once.** SwiftUI calls the scene's

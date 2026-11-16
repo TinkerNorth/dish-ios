@@ -26,7 +26,6 @@ struct ShellView: View {
         .modifier(SessionAccessory(
             state: sessionBarState(model.shellFacts.session, lowPower: model.shellFacts.lowPower),
             dim: dim,
-            play: play,
             reconnect: model.reconnect
         ))
         .tabBarMinimizeBehavior(.onScrollDown)
@@ -46,10 +45,6 @@ struct ShellView: View {
         guard due else { return }
         navigation.send(.dim)
         model.lowPowerHandled()
-    }
-
-    private func play() {
-        navigation.send(.openPlay(.gamepad))
     }
 
     private func pairingChanged(_ serverId: String?) {
@@ -149,17 +144,16 @@ private struct PageView: View {
 
 /// The accessory, attached only while there is a session to show: iOS 26.0
 /// has no `isEnabled:` form, and an empty accessory still draws its glass.
-/// Play opens the on-screen gamepad; Reconnect brings a stopped PC back.
+/// Reconnect brings a stopped PC back.
 private struct SessionAccessory: ViewModifier {
     let state: SessionBarState?
     let dim: () -> Void
-    let play: () -> Void
     let reconnect: () -> Void
 
     func body(content: Content) -> some View {
         if let state {
             content.tabViewBottomAccessory {
-                SessionBar(state: state, dim: dim, play: play, reconnect: reconnect, dimHint: hintState(.dim))
+                SessionBar(state: state, dim: dim, reconnect: reconnect, dimHint: hintState(.dim))
             }
         } else {
             content
