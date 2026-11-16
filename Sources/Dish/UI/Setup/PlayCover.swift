@@ -18,11 +18,14 @@ struct PlayCover: View {
     @Environment(\.windowFacts) private var window
 
     var body: some View {
-        PlayCoverBody(state: playCoverState(facts: model.shellFacts, screen: screen, window: window), actions: actions)
-            .statusBarHidden()
-            .persistentSystemOverlays(.hidden)
-            .defersSystemGestures(on: .all)
-            .environment(\.colorScheme, .dark)
+        PlayCoverBody(
+            state: playCoverState(play: model.playFacts, session: model.sessionFacts.session, screen: screen, window: window),
+            actions: actions
+        )
+        .statusBarHidden()
+        .persistentSystemOverlays(.hidden)
+        .defersSystemGestures(on: .all)
+        .environment(\.colorScheme, .dark)
     }
 
     private var actions: PlayActions {

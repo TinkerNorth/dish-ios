@@ -31,7 +31,7 @@ final class PlayMappersTests: XCTestCase {
         let pill = cover(session: FactsFixture.streaming()).pill
         XCTAssertEqual(
             pill,
-            PlayPillState(pcName: "Living Room PC", detail: "4 ms", dot: DishTheme.success, detailColor: DishTheme.success)
+            PlayPillState(pcName: "Living Room PC", detail: "4 ms", mark: .dot(DishTheme.success), detailColor: DishTheme.success)
         )
     }
 
@@ -42,7 +42,7 @@ final class PlayMappersTests: XCTestCase {
     func testAPCThatStoppedAnsweringTurnsThePillToTheError() {
         let pill = cover(session: FactsFixture.stopped).pill
         XCTAssertEqual(pill?.detail, "Stopped responding")
-        XCTAssertEqual(pill?.dot, DishTheme.error)
+        XCTAssertEqual(pill?.mark, .dot(DishTheme.error))
     }
 
     func testWithNoSessionThereIsNoPill() {
@@ -56,13 +56,26 @@ final class PlayMappersTests: XCTestCase {
         let pill = cover(FactsFixture.play(destination: lost)).pill
         XCTAssertEqual(
             pill,
-            PlayPillState(pcName: "Living Room PC", detail: "Connection lost", dot: DishTheme.error, detailColor: DishTheme.error)
+            PlayPillState(pcName: "Living Room PC", detail: "Connection lost", mark: .dot(DishTheme.error), detailColor: DishTheme.error)
         )
         XCTAssertEqual(
             cover(FactsFixture.play(destination: lost), session: FactsFixture.streaming()).pill?.detail,
             "4 ms",
             "the session's word first"
         )
+    }
+
+    /// A served slot whose PC is being reached for spins, and the session
+    /// coming back at the person's asking spins the same way.
+    func testAPCBeingReachedForSpinsOnThePill() {
+        let reaching = DestinationFact(id: "lr", name: "Living Room PC", health: .connecting)
+        XCTAssertEqual(
+            cover(FactsFixture.play(destination: reaching)).pill,
+            PlayPillState(pcName: "Living Room PC", detail: "Connecting…", mark: .busy, detailColor: DishTheme.muted)
+        )
+        XCTAssertEqual(cover(session: FactsFixture.reconnecting).pill?.mark, .busy)
+        let online = DestinationFact(id: "lr", name: "Living Room PC", health: .online)
+        XCTAssertEqual(cover(FactsFixture.play(destination: online)).pill?.detail, "Online", "a PC up with no session word yet")
     }
 
     // MARK: - The pause menu

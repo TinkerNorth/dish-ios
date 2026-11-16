@@ -33,7 +33,7 @@ struct ControllerRowState: Equatable, Identifiable {
     let symbol: String
     let name: String
     let destination: DestinationLine
-    let dot: Color
+    let mark: StatusMark
     /// Nil when the controller reports no level.
     let battery: String?
     let batteryColor: Color
@@ -120,7 +120,7 @@ func controllerRow(
         symbol: controllerSymbol(controller.link),
         name: controllerName(controller, words: words),
         destination: line.destination,
-        dot: line.dot,
+        mark: line.mark,
         battery: controller.batteryPercent.map(words.batteryPercent),
         batteryColor: batteryColor(controller.batteryPercent),
         page: controller.supported ? .controller(id: controller.id) : nil,
@@ -221,10 +221,10 @@ private func unboundActions(
     return RowActionsState(menu: open.map(RowMenuEntry.item) + bindTo, leading: open, trailing: [])
 }
 
-/// A row's second line and its dot.
+/// A row's second line and its mark.
 private struct RowLine {
     let destination: DestinationLine
-    let dot: Color
+    let mark: StatusMark
 }
 
 /// A bind that waits for its link would read lost, so the apply in flight
@@ -233,14 +233,14 @@ private struct RowLine {
 private func rowLine(_ controller: ControllerFact, apply: ApplyFact?, port: DevicePort, words: L10n) -> RowLine {
     guard let apply, apply.slotId == controller.id else { return pcLine(controller, port: port, words: words) }
     switch apply.progress {
-    case .running: return RowLine(destination: .note(words.applyingBinding), dot: DishTheme.muted)
-    case let .failed(failure): return RowLine(destination: .note(applyFailureText(failure, words: words)), dot: DishTheme.error)
+    case .running: return RowLine(destination: .note(words.applyingBinding), mark: .busy)
+    case let .failed(failure): return RowLine(destination: .note(applyFailureText(failure, words: words)), mark: .dot(DishTheme.error))
     case .idle, .done: return pcLine(controller, port: port, words: words)
     }
 }
 
 private func pcLine(_ controller: ControllerFact, port: DevicePort, words: L10n) -> RowLine {
-    RowLine(destination: destinationLine(controller, port: port, words: words), dot: destinationDot(controller.destination?.health))
+    RowLine(destination: destinationLine(controller, port: port, words: words), mark: destinationMark(controller.destination?.health))
 }
 
 /// A pad's own name; the on-screen controller is worded here.
@@ -272,22 +272,33 @@ func linkWord(_ link: ControllerLink, port: DevicePort = .usbC, words: L10n = .a
     }
 }
 
-/// The link word while the PC answers; an unsteady PC says so in its place,
-/// and a lost one replaces the whole line, as D4 draws it.
+/// The link word while the PC answers; a PC being reached for says so in
+/// its place, and a lost one replaces the whole line, as D4 draws it.
 private func destinationLine(_ controller: ControllerFact, port: DevicePort, words: L10n) -> DestinationLine {
     guard controller.supported else { return .note(words.notSupported) }
     guard let destination = controller.destination else { return .note(words.notBound) }
     switch destination.health {
     case .online: return .bound(pcName: destination.name, detail: lineSeparator + linkWord(controller.link, port: port, words: words))
-    case .unsteady: return .bound(pcName: destination.name, detail: lineSeparator + words.unsteady)
+    case .connecting: return .bound(pcName: destination.name, detail: lineSeparator + words.connecting)
     case .lost: return .note(words.connectionLost)
     }
 }
 
+/// The dot of the PC's health, or the spinner while it is being reached for.
+func destinationMark(_ health: LinkHealth?) -> StatusMark {
+    switch health {
+    case .online: .dot(DishTheme.success)
+    case .connecting: .busy
+    case .lost: .dot(DishTheme.error)
+    case nil: .dot(DishTheme.muted)
+    }
+}
+
+/// The health as a colour alone, for a card that draws no spinner.
 func destinationDot(_ health: LinkHealth?) -> Color {
     switch health {
     case .online: DishTheme.success
-    case .unsteady: DishTheme.warning
+    case .connecting: DishTheme.warning
     case .lost: DishTheme.error
     case nil: DishTheme.muted
     }

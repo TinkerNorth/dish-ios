@@ -34,7 +34,7 @@ struct EditControllerPage: View {
 
     var body: some View {
         EditControllerPageBody(
-            state: editControllerPageState(controllers: model.shellFacts.controllers, id: id),
+            state: editControllerPageState(controllers: model.controllersFacts.controllers, id: id),
             actions: EditControllerActions(
                 setFeature: setFeature,
                 setEmulateAs: setEmulateAs,
@@ -91,7 +91,12 @@ private struct EditControllerSections: View {
     let actions: EditControllerActions
 
     var body: some View {
-        ControllerEmulateSection(state: state.emulate, setEmulateAs: actions.setEmulateAs, setHostEmulateAs: actions.setHostEmulateAs)
+        ControllerEmulateSection(
+            state: state.emulate,
+            updating: state.updating,
+            setEmulateAs: actions.setEmulateAs,
+            setHostEmulateAs: actions.setHostEmulateAs
+        )
         if let functions = state.functions {
             ControllerFunctionsSection(state: functions, footnote: state.footnote, setFeature: actions.setFeature)
         } else {

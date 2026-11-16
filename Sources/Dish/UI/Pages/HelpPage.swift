@@ -12,7 +12,7 @@ struct HelpPage: View {
     @Environment(\.openURL) private var openURL
 
     var body: some View {
-        HelpPageBody(state: helpPageState(port: model.shellFacts.port), walkThrough: walkThrough, open: open)
+        HelpPageBody(state: helpPageState(port: model.controllersFacts.port), walkThrough: walkThrough, open: open)
     }
 
     private func walkThrough() {

@@ -44,6 +44,13 @@ final class DimMappersTests: XCTestCase {
         XCTAssertEqual(card?.lineColor, DishTheme.error)
     }
 
+    func testAPCBeingBroughtBackTurnsTheCardToTheWarning() {
+        let card = dimCoverState(facts: FactsFixture.shell(session: FactsFixture.reconnecting)).card
+        XCTAssertEqual(card?.line, "Connecting…")
+        XCTAssertEqual(card?.dot, DishTheme.warning)
+        XCTAssertEqual(card?.lineColor, DishTheme.dimText)
+    }
+
     func testTheCardListsTheBoundControllersThatReportALevel() {
         let controllers = [
             ControllerFact(id: "ds", name: "DualSense", link: .usbC, batteryPercent: 84, destination: living),

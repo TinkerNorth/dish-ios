@@ -60,6 +60,36 @@ final class AppModelSessionTests: XCTestCase {
         XCTAssertEqual(fixture.satellite.sessionPuts.count, 2)
     }
 
+    /// A PC the person reaches for, with a pad bound to it, is the
+    /// accessory's reconnecting until its session is up.
+    func testReachingForAPCWithPadsBoundShowsAsReconnecting() async {
+        fixture.prePair()
+        fixture.model.bind(slotId: "pad", to: fixture.serverId)
+        XCTAssertEqual(fixture.model.sessionFacts.session?.phase, .reconnecting)
+        XCTAssertEqual(fixture.model.sessionFacts.session?.pcName, "Den PC")
+        XCTAssertEqual(fixture.model.sessionFacts.session?.pads, 1)
+        XCTAssertNil(fixture.model.sessionFacts.session?.latencyMs)
+        let streaming = await fixture.waitUntil { self.fixture.model.sessionFacts.session?.phase == .streaming }
+        XCTAssertTrue(streaming)
+    }
+
+    /// The foreground's silent sweep reaches for the same PC and shows no
+    /// accessory: only the person's own reach does.
+    func testASilentReconnectIsNotTheAccessorys() async {
+        let live = await fixture.connectPaired()
+        XCTAssertTrue(live)
+        fixture.model.bind(slotId: "pad", to: fixture.serverId)
+        let settled = await fixture.waitUntil { self.fixture.model.reaching.state.isEmpty }
+        XCTAssertTrue(settled, "the reach is forgotten once the link settled")
+        fixture.model.enteredBackground()
+        XCTAssertNil(fixture.model.sessionFacts.session)
+        fixture.model.enteredForeground()
+        XCTAssertEqual(fixture.network.wifi.get(fixture.serverId)?.state, .linking, "the sweep reaches for the PC")
+        XCTAssertNil(fixture.model.sessionFacts.session, "a silent reach shows no accessory")
+        let back = await fixture.waitUntil { self.fixture.model.sessionFacts.session?.phase == .streaming }
+        XCTAssertTrue(back)
+    }
+
     func testTheBackgroundClosesEverySessionAndTheForegroundReachesForThem() async {
         let live = await fixture.connectPaired()
         XCTAssertTrue(live)
@@ -75,7 +105,7 @@ final class AppModelSessionTests: XCTestCase {
         XCTAssertEqual(sessionPhase(.unstable), .stoppedResponding)
         XCTAssertEqual(linkHealth(.connected), .online)
         XCTAssertEqual(linkHealth(.unstable), .lost, "a PC that stopped responding reads lost on its rows (D4)")
-        XCTAssertEqual(linkHealth(.connecting), .unsteady)
+        XCTAssertEqual(linkHealth(.connecting), .connecting)
         XCTAssertEqual(linkHealth(.saved), .lost)
         XCTAssertTrue(sessionIsUp(.unstable))
         XCTAssertFalse(sessionIsUp(.connecting))

@@ -58,6 +58,13 @@ final class EditControllerMappersTests: XCTestCase {
         XCTAssertEqual(state.content, .gone(message: "This controller isn’t connected to your iPhone."))
     }
 
+    /// While the PC applies what was just set, the page says Updating.
+    func testUpdatingShowsWhileThePCAppliesWhatWasSet() {
+        let applying = DestinationFact(name: "Living Room PC", health: .online, updating: true)
+        XCTAssertEqual(PadFixture.page(PadFixture.dualSense(destination: applying))?.updating, "Updating…")
+        XCTAssertNil(PadFixture.page(PadFixture.dualSense())?.updating)
+    }
+
     // MARK: - Emulate as
 
     func testEmulateAsOffersEveryTypeAndSelectsThePadsPick() throws {

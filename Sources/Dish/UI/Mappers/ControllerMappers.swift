@@ -10,13 +10,13 @@ struct ControllerStatusState: Equatable {
     let symbol: String
     let title: String
     let line: String
-    let dot: Color
+    let mark: StatusMark
 }
 
 /// BINDING › Destination: the PC the pad sends to beside its dot, or that
 /// nothing is bound.
 enum BindingDestinationState: Equatable {
-    case bound(pcName: String, dot: Color)
+    case bound(pcName: String, mark: StatusMark)
     case unbound(note: String)
 }
 
@@ -71,6 +71,8 @@ struct ControllerPadState: Equatable {
     let binding: ControllerBindingState
     /// The bind in flight or just ended for this pad; nil otherwise.
     let apply: ApplyRowState?
+    /// "Updating…" while the PC applies the pad's settings; nil otherwise.
+    let updating: String?
     /// Nil until the pad has sent a report.
     let telemetry: ControllerTelemetryState?
 }
@@ -139,7 +141,7 @@ private func controllerPadState(
             symbol: controllerSymbol(controller.link),
             title: controllerName(controller, words: words),
             line: statusLine(controller, port: port, words: words),
-            dot: destinationDot(controller.destination?.health)
+            mark: destinationMark(controller.destination?.health)
         ),
         actions: controllerPageActions(controllerRowActions(controller, paired: paired, words: words)),
         binding: ControllerBindingState(
@@ -149,8 +151,15 @@ private func controllerPadState(
             hint: bindingHint(controller, paired: paired, words: words)
         ),
         apply: applyRowState(apply, slotId: controller.id, words: words),
+        updating: updatingLine(controller, words: words),
         telemetry: telemetryState(controller, readings: pads, words: words)
     )
+}
+
+/// "Updating…" while the PC the pad is bound to applies its settings.
+func updatingLine(_ controller: ControllerFact, words: L10n = .app) -> String? {
+    guard controller.destination?.updating == true else { return nil }
+    return words.updating
 }
 
 /// The page offers what the row's menu does: all of it but Unbind in the
@@ -181,7 +190,7 @@ private func menuItem(_ entry: RowMenuEntry<ControllerAction>) -> RowActionItem<
 /// The PC the pad sends to beside its dot, or Not bound.
 private func bindingDestination(_ controller: ControllerFact, words: L10n) -> BindingDestinationState {
     guard let destination = controller.destination else { return .unbound(note: words.notBound) }
-    return .bound(pcName: destination.name, dot: destinationDot(destination.health))
+    return .bound(pcName: destination.name, mark: destinationMark(destination.health))
 }
 
 /// Unbound with nothing paired, the footer says where to pair a PC.

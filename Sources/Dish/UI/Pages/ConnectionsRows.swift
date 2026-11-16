@@ -53,7 +53,7 @@ struct ConnectionRow: View {
     private func perform(_ action: ConnectionRowAction) {
         switch action {
         case .forget: forgetAsked = true
-        case .pair, .connect, .disconnect: act(action)
+        case .pair, .connect, .reconnect, .cancel, .disconnect: act(action)
         }
     }
 
@@ -71,13 +71,12 @@ private struct ConnectionRowContent: View {
         HStack(spacing: DishSpace.s6) {
             RowGlyph(symbol: state.symbol)
             VStack(alignment: .leading, spacing: DishSpace.s1) {
-                Text(state.name).font(DishFont.mono).bold().foregroundStyle(DishTheme.onSurface)
+                Text(state.name).font(DishFont.mono).bold().foregroundStyle(DishTheme.onSurface).lineLimit(1)
                 HStack(spacing: DishSpace.s3) {
-                    StatusDot(color: state.dot)
-                    Text(state.line).font(DishFont.detail).foregroundStyle(DishTheme.muted)
+                    StatusMarkView(mark: state.mark)
+                    Text(state.line).font(DishFont.detail).foregroundStyle(state.lineColor).lineLimit(2)
                 }
             }
-            .lineLimit(1)
             Spacer(minLength: DishSpace.s4)
             if disclosure {
                 Image(systemName: DishSymbol.disclosure).font(DishFont.detail).foregroundStyle(DishTheme.muted)

@@ -35,11 +35,11 @@ struct ControllerPage: View {
     private var controllerBody: some View {
         ControllerPageBody(
             state: controllerPageState(
-                controllers: model.shellFacts.controllers,
-                paired: model.shellFacts.paired,
-                apply: model.shellFacts.apply,
-                pads: model.shellFacts.diagnostics.pads,
-                port: model.shellFacts.port,
+                controllers: model.controllersFacts.controllers,
+                paired: model.connectionsFacts.paired,
+                apply: model.controllersFacts.apply,
+                pads: model.diagnosticsFacts.snapshot.pads,
+                port: model.controllersFacts.port,
                 id: id
             ),
             actions: ControllerActions(act: ControllerActionRouter(model: model, navigation: navigation).perform, edit: edit)
@@ -100,7 +100,7 @@ private struct ControllerPadSections: View {
             .listRowBackground(EmptyView())
             .listRowInsets(EdgeInsets())
         }
-        ControllerBindingSection(state: state.binding, apply: state.apply, retry: retry)
+        ControllerBindingSection(state: state.binding, apply: state.apply, updating: state.updating, retry: retry)
         if let telemetry = state.telemetry {
             ControllerTelemetrySection(state: telemetry)
         }

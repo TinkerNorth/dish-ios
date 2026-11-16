@@ -145,7 +145,7 @@ extension WifiConnectionManager {
         case .retryLower:
             return true
         case let .failed(failure):
-            emitFailureIfUserInitiated(intent, failure)
+            emitFailureIfUserInitiated(conn.id, intent, failure)
             return false
         }
     }
@@ -166,7 +166,7 @@ extension WifiConnectionManager {
         if intent != .userInitiated {
             markStale(id)
         }
-        emitFailureIfUserInitiated(intent, .noSharedKey)
+        emitFailureIfUserInitiated(id, intent, .noSharedKey)
     }
 
     /// Down, moved or malformed. A TOFU mismatch aborted the handshake before
@@ -176,9 +176,9 @@ extension WifiConnectionManager {
         conn.markDisconnected()
         let identityChanged = pinMismatches.consume(server.ip)
         if identityChanged {
-            emitFailureIfUserInitiated(intent, .identityChanged)
+            emitFailureIfUserInitiated(id, intent, .identityChanged)
         } else if intent == .userInitiated {
-            emit(.failure(.sessionRefused(detail: detail)))
+            emit(.failure(serverId: id, .sessionRefused(detail: detail)))
         } else {
             scheduleRetry(id)
         }
@@ -206,7 +206,7 @@ extension WifiConnectionManager {
               let udpPort = UInt16(exactly: server.udpPort) else
         {
             conn.markDisconnected()
-            emitFailureIfUserInitiated(intent, .badSessionMaterial)
+            emitFailureIfUserInitiated(id, intent, .badSessionMaterial)
             return
         }
         // The SETTLED version, never the offer: a pre-versioning satellite
@@ -223,7 +223,7 @@ extension WifiConnectionManager {
         guard aimed else {
             conn.markDisconnected()
             if intent == .userInitiated {
-                emit(.failure(.sessionLinkFailed))
+                emit(.failure(serverId: id, .sessionLinkFailed))
             } else {
                 scheduleRetry(id)
             }
@@ -262,7 +262,7 @@ extension WifiConnectionManager {
             recordMotionStatus(applied, connectionId: conn.id, slotId: slotId)
             onSlotApplied?(conn.id, slotId)
         } else {
-            reportSlotNotApplied(slotId)
+            reportSlotNotApplied(slotId, on: conn.id)
         }
     }
 
@@ -304,8 +304,8 @@ extension WifiConnectionManager {
         await fetchCatalog(id: id, server: server)
     }
 
-    func reportSlotNotApplied(_ slotId: String) {
-        emit(.failure(.controllerNotApplied))
+    func reportSlotNotApplied(_ slotId: String, on id: String) {
+        emit(.failure(serverId: id, .controllerNotApplied))
         onSlotRegistrationFailed?(slotId)
     }
 

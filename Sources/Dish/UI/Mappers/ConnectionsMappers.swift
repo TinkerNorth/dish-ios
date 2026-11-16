@@ -6,11 +6,14 @@ import DishEngine
 import SwiftUI
 
 /// What a row's button, menu and swipes do: Pair (and Re-pair) opens the
-/// sheet, Connect reaches for the PC, Disconnect closes its session, and
-/// Forget drops it once the person confirmed.
+/// sheet, Connect reaches for the PC, Reconnect brings one that stopped
+/// responding back, Cancel stops a reach, Disconnect closes its session,
+/// and Forget drops it once the person confirmed.
 enum ConnectionRowAction: Hashable {
     case pair(serverId: String)
     case connect(id: String)
+    case reconnect(id: String)
+    case cancel(id: String)
     case disconnect(id: String)
     case forget(id: String)
 }
@@ -28,8 +31,11 @@ struct ConnectionRowState: Equatable, Identifiable {
     let symbol: String
     let name: String
     let line: String
-    let dot: Color
-    /// Nil while the row needs no button: a paired PC whose session is up.
+    /// The error colour while the line words a failure.
+    let lineColor: Color
+    let mark: StatusMark
+    /// Nil while the row needs no button: a paired PC whose session is up,
+    /// or one being reached for.
     let button: ConnectionRowButton?
     /// The PC's page; nil for a PC Dish has not paired with.
     let page: Page?
@@ -93,7 +99,7 @@ struct ConnectionsPageState: Equatable {
 
 /// `facts.now` words an offline PC's last sighting; `settingsURL` is where
 /// Open Settings goes.
-func connectionsPageState(facts: ShellFacts, settingsURL: URL?, words: L10n = .app) -> ConnectionsPageState {
+func connectionsPageState(facts: ConnectionsFacts, settingsURL: URL?, words: L10n = .app) -> ConnectionsPageState {
     ConnectionsPageState(
         title: tabTitle(.connections, words: words),
         add: words.addAPCByAddress,
@@ -102,7 +108,7 @@ func connectionsPageState(facts: ShellFacts, settingsURL: URL?, words: L10n = .a
     )
 }
 
-private func connectionsContent(_ facts: ShellFacts, settingsURL: URL?, words: L10n) -> ConnectionsContent {
+private func connectionsContent(_ facts: ConnectionsFacts, settingsURL: URL?, words: L10n) -> ConnectionsContent {
     switch facts.localNetwork {
     case .denied: .denied(networkDenied(settingsURL: settingsURL, words: words))
     case .unknown, .allowed: reachablePage(facts, words: words)
@@ -110,7 +116,7 @@ private func connectionsContent(_ facts: ShellFacts, settingsURL: URL?, words: L
 }
 
 /// With nothing paired, found or being looked for, a short empty state.
-private func reachablePage(_ facts: ShellFacts, words: L10n) -> ConnectionsContent {
+private func reachablePage(_ facts: ConnectionsFacts, words: L10n) -> ConnectionsContent {
     let nothingYet = facts.paired.isEmpty && facts.found.isEmpty && !facts.scanning
     guard !nothingYet else { return .empty(title: words.noPCsYet, body: words.noPCsYetBody) }
     return .list(connectionsList(facts, now: facts.now, words: words))
@@ -126,7 +132,7 @@ private func networkDenied(settingsURL: URL?, words: L10n) -> NetworkDeniedState
     )
 }
 
-private func connectionsList(_ facts: ShellFacts, now: Date, words: L10n) -> ConnectionsListState {
+private func connectionsList(_ facts: ConnectionsFacts, now: Date, words: L10n) -> ConnectionsListState {
     ConnectionsListState(
         paired: pairedSection(facts.paired, now: now, words: words),
         found: foundSection(facts, now: now, words: words),
@@ -142,7 +148,7 @@ private func pairedSection(_ paired: [ConnectionFact], now: Date, words: L10n) -
 }
 
 /// The network's name is not readable yet, so the title says "your Wi-Fi".
-private func foundSection(_ facts: ShellFacts, now: Date, words: L10n) -> FoundSectionState? {
+private func foundSection(_ facts: ConnectionsFacts, now: Date, words: L10n) -> FoundSectionState? {
     let nothingToShow = facts.found.isEmpty && !facts.scanning
     guard !nothingToShow else { return nil }
     return FoundSectionState(
@@ -158,7 +164,8 @@ func connectionRow(_ connection: ConnectionFact, now: Date, paired: Bool = false
         symbol: connectionSymbol(connection.kind),
         name: connectionTitle(connection),
         line: connectionLine(connection, now: now, words: words),
-        dot: connectionDot(connection.state),
+        lineColor: connectionLineColor(connection),
+        mark: connectionMark(connection),
         button: rowButton(connection, paired: paired, words: words),
         page: paired ? .pcDetail(id: connection.id) : nil,
         actions: connectionRowActions(connection, paired: paired, words: words),
@@ -199,8 +206,9 @@ private func foundActions(_ id: String, words: L10n) -> RowActionsState<Connecti
     return RowActionsState(menu: [.item(pair)], leading: [pair], trailing: [])
 }
 
-/// Disconnect while the session is up, Connect while the PC rests, and
-/// neither while its key was revoked, as on the PC's page.
+/// Disconnect while the session is up, Reconnect while it stopped
+/// responding, Cancel while the PC is being reached for, Connect while it
+/// rests, and nothing while its key was revoked, as on the PC's page.
 private func pairedFirstAction(_ connection: ConnectionFact, words: L10n) -> [RowActionItem<ConnectionRowAction>] {
     switch connection.state {
     case .online:
@@ -210,6 +218,10 @@ private func pairedFirstAction(_ connection: ConnectionFact, words: L10n) -> [Ro
             symbol: RowActionSymbol.disconnect,
             destructive: false
         )]
+    case .unsteady:
+        [RowActionItem(action: .reconnect(id: connection.id), title: words.reconnect, symbol: RowActionSymbol.connect, destructive: false)]
+    case .connecting:
+        [RowActionItem(action: .cancel(id: connection.id), title: words.cancel, symbol: RowActionSymbol.cancel, destructive: false)]
     case .offline:
         [RowActionItem(action: .connect(id: connection.id), title: words.connect, symbol: RowActionSymbol.connect, destructive: false)]
     case .needsPairing:
@@ -222,11 +234,13 @@ func connectionTitle(_ connection: ConnectionFact) -> String {
     connection.name.isEmpty ? connection.address : connection.name
 }
 
-/// Pair for a PC that wants a PIN, Connect for a paired one that rests, and
-/// nothing while its session is up.
+/// Pair for a PC that wants a PIN, Connect for a paired one that rests,
+/// Reconnect for one that stopped responding, and nothing while its
+/// session is up or it is being reached for.
 private func rowButton(_ connection: ConnectionFact, paired: Bool, words: L10n) -> ConnectionRowButton? {
     switch connection.state {
-    case .online: nil
+    case .online, .connecting: nil
+    case .unsteady: paired ? ConnectionRowButton(title: words.reconnect, action: .reconnect(id: connection.id)) : nil
     case .offline: paired ? ConnectionRowButton(title: words.connect, action: .connect(id: connection.id)) : nil
     case .needsPairing: ConnectionRowButton(title: words.pair, action: .pair(serverId: connection.id))
     }
@@ -241,15 +255,47 @@ func connectionSymbol(_ kind: ConnectionKind) -> String {
     }
 }
 
-/// A row's second line: the link with its latency and pads, when the PC was
-/// last seen, or that it wants a PIN at its address.
+/// A row's second line: why the person's last attempt failed, else the
+/// link with its latency and pads, that the PC stopped responding, that it
+/// is being reached for, when it was last seen, or that it wants a PIN at
+/// its address.
 func connectionLine(_ connection: ConnectionFact, now: Date, words: L10n = .app) -> String {
+    guard let notice = connection.notice else { return stateLine(connection, now: now, words: words) }
+    return connectionFailureText(notice, name: connectionTitle(connection), words: words)
+}
+
+private func stateLine(_ connection: ConnectionFact, now: Date, words: L10n) -> String {
     switch connection.state {
     case let .online(latencyMs, controllers):
         [words.online, words.latency(latencyMs), words.controllerCount(controllers)].joined(separator: lineSeparator)
+    case let .unsteady(_, controllers):
+        [words.stoppedResponding, words.controllerCount(controllers)].joined(separator: lineSeparator)
+    case .connecting: words.connecting
     case let .offline(lastSeen?): words.offlineSeen(relativeDay(lastSeen, now: now, words: words))
     case .offline(nil): words.offline
     case .needsPairing: words.needsPairingAt(connection.address)
+    }
+}
+
+/// The line wears the error colour while it words a failure.
+func connectionLineColor(_ connection: ConnectionFact) -> Color {
+    connection.notice == nil ? DishTheme.muted : DishTheme.error
+}
+
+/// The state's dot, the error's while a failure is worded, and the spinner
+/// while the PC is being reached for.
+func connectionMark(_ connection: ConnectionFact) -> StatusMark {
+    guard connection.notice == nil else { return .dot(DishTheme.error) }
+    return stateMark(connection.state)
+}
+
+private func stateMark(_ state: ConnectionState) -> StatusMark {
+    switch state {
+    case .online: .dot(DishTheme.success)
+    case .unsteady: .dot(DishTheme.error)
+    case .connecting: .busy
+    case .offline: .dot(DishTheme.muted)
+    case .needsPairing: .dot(DishTheme.warning)
     }
 }
 
@@ -259,12 +305,4 @@ func relativeDay(_ date: Date, now: Date, words: L10n = .app) -> String {
     formatter.locale = words.catalog.locale
     formatter.dateTimeStyle = .named
     return formatter.localizedString(for: date, relativeTo: now)
-}
-
-func connectionDot(_ state: ConnectionState) -> Color {
-    switch state {
-    case .online: DishTheme.success
-    case .offline: DishTheme.muted
-    case .needsPairing: DishTheme.warning
-    }
 }

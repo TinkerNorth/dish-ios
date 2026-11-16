@@ -16,7 +16,8 @@ struct SetupCover: View {
     @Environment(\.windowFacts) private var window
 
     var body: some View {
-        let cover = setupCoverState(facts: model.shellFacts, width: window.width)
+        let inputs = setupInputs(controllers: model.controllersFacts, connections: model.connectionsFacts)
+        let cover = setupCoverState(setup: model.setup, inputs: inputs, width: window.width)
         if let cover {
             NavigationStack {
                 step(cover.step)

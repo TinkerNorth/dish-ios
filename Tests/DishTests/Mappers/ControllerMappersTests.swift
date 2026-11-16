@@ -122,7 +122,7 @@ final class ControllerMappersTests: XCTestCase {
             symbol: "gamecontroller",
             title: "DualSense",
             line: "USB-C · DualSense · 84%",
-            dot: DishTheme.muted
+            mark: .dot(DishTheme.muted)
         ))
     }
 
@@ -187,9 +187,29 @@ final class ControllerMappersTests: XCTestCase {
         let page = try XCTUnwrap(PadFixture.page(PadFixture.dualSense(destination: online)))
         XCTAssertNil(page.actions.strip, "a DualSense streams its own trackpad, and the gamepad is the on-screen controller's")
         XCTAssertEqual(page.actions.unbind, StripItems.unbind("pad"))
-        XCTAssertEqual(page.binding.destination, .bound(pcName: "Living Room PC", dot: DishTheme.success))
+        XCTAssertEqual(page.binding.destination, .bound(pcName: "Living Room PC", mark: .dot(DishTheme.success)))
         XCTAssertNil(page.binding.hint)
-        XCTAssertEqual(page.status.dot, DishTheme.success)
+        XCTAssertEqual(page.status.mark, .dot(DishTheme.success))
+    }
+
+    /// While the PC applies the pad's settings, BINDING says Updating; at
+    /// rest it says nothing.
+    func testUpdatingShowsWhileThePCAppliesThePadsSettings() throws {
+        let applying = DestinationFact(name: "Living Room PC", health: .online, updating: true)
+        let page = try XCTUnwrap(PadFixture.page(PadFixture.dualSense(destination: applying)))
+        XCTAssertEqual(page.updating, "Updating…")
+        let settled = DestinationFact(name: "Living Room PC", health: .online)
+        XCTAssertNil(PadFixture.page(PadFixture.dualSense(destination: settled))?.updating)
+        XCTAssertNil(PadFixture.page(PadFixture.dualSense())?.updating, "nothing bound, nothing applied")
+    }
+
+    /// A PC being reached for marks the card and the destination with the spinner.
+    func testAPCBeingReachedForSpinsOnTheCardAndTheDestination() throws {
+        let reaching = DestinationFact(id: "lr", name: "Living Room PC", health: .connecting)
+        let page = try XCTUnwrap(PadFixture.page(PadFixture.dualSense(destination: reaching)))
+        XCTAssertEqual(page.status.mark, .busy)
+        XCTAssertEqual(page.binding.destination, .bound(pcName: "Living Room PC", mark: .busy))
+        XCTAssertNil(page.actions.strip, "Reconnect waits until the PC is lost")
     }
 
     func testAPadWhosePCIsLostOffersReconnectInItsStrip() throws {
@@ -197,8 +217,8 @@ final class ControllerMappersTests: XCTestCase {
         let page = try XCTUnwrap(PadFixture.page(PadFixture.dualSense(destination: lost)))
         XCTAssertEqual(page.actions.strip, [.item(StripItems.reconnect)])
         XCTAssertEqual(page.actions.unbind, StripItems.unbind("pad"))
-        XCTAssertEqual(page.binding.destination, .bound(pcName: "Living Room PC", dot: DishTheme.error))
-        XCTAssertEqual(page.status.dot, DishTheme.error)
+        XCTAssertEqual(page.binding.destination, .bound(pcName: "Living Room PC", mark: .dot(DishTheme.error)))
+        XCTAssertEqual(page.status.mark, .dot(DishTheme.error))
     }
 
     /// Bind to is a menu of the paired PCs, each by its name, or its address

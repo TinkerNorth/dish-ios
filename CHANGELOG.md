@@ -66,6 +66,25 @@ miss. `Tests/PARITY.md` lists everything not built.
 
 ### Changed
 
+- **Every step of a link shows.** A PC being reached for reads
+  "Connecting…" with a spinner on its row and page, with Cancel; one that
+  stopped responding reads so in the error colour with Reconnect, on the
+  row, the page and the accessory alike; a pad bound to a PC being reached
+  for says so on its row, its page and the play pill.
+- **A failed attempt is worded where it happened.** Why an attempt you made
+  on a PC failed stays on its row and page, in the error colour, until the
+  next attempt or until the PC is up, with Connect or Pair to try again; a
+  silent retry says nothing. The address sheet's spinner and error are the
+  engine's facts about the typed PC.
+- **The accessory shows a PC coming back.** Your own reach for a PC that
+  carries pads shows on every tab with a spinner until it is up; the
+  Connections badge counts every PC that needs you, a key revoked or an
+  attempt failed included.
+- **Updating while the PC applies a pad.** A switch flipped or Emulate as
+  picked on a bound pad shows "Updating…" on the pad's page and its edit
+  page while the PC takes it.
+- **The facts come in slices.** Each page reads the slice it maps, so it
+  re-renders for that alone; Diagnostics alone reads the whole.
 - **A controller's page is its info page, with Edit.** A Controllers row
   carries no button, as iOS keeps a row; its long-press menu and swipes
   remain. The controller's page draws what it offers in a strip under its

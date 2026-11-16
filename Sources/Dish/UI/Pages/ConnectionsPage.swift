@@ -33,7 +33,7 @@ struct ConnectionsPage: View {
     var body: some View {
         let layout = tabLayout(.connections, width: window.width)
         ConnectionsPageBody(
-            state: connectionsPageState(facts: model.shellFacts, settingsURL: settingsURL),
+            state: connectionsPageState(facts: model.connectionsFacts, settingsURL: settingsURL),
             layout: layout,
             selection: listSelection(navigation.listSelection(of: .connections), layout: layout),
             actions: ConnectionsActions(open: open, act: act, add: addByAddress, refresh: refresh, rescan: model.startScan)
@@ -53,6 +53,8 @@ struct ConnectionsPage: View {
         switch action {
         case let .pair(serverId): navigation.send(.openSheet(.pair(serverId: serverId)))
         case let .connect(id): model.connect(id)
+        case let .reconnect(id): model.reconnect(id)
+        case let .cancel(id): model.disconnect(id)
         case let .disconnect(id): model.disconnect(id)
         case let .forget(id): model.forget(id)
         }
@@ -186,7 +188,7 @@ private struct ConnectionsList: View {
         setup: nil
     )
     NavigationStack {
-        ConnectionsPageBody(state: connectionsPageState(facts: facts, settingsURL: nil), actions: .preview)
+        ConnectionsPageBody(state: connectionsPageState(facts: facts.connectionsFacts, settingsURL: nil), actions: .preview)
     }
 }
 
@@ -205,7 +207,7 @@ private struct ConnectionsList: View {
     )
     NavigationStack {
         ConnectionsPageBody(
-            state: connectionsPageState(facts: facts, settingsURL: URL(string: "app-settings:")),
+            state: connectionsPageState(facts: facts.connectionsFacts, settingsURL: URL(string: "app-settings:")),
             actions: .preview
         )
     }

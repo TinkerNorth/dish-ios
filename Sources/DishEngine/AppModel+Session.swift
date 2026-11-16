@@ -6,18 +6,23 @@ import Foundation
 
 /// The session the accessory shows on every tab: the live PC, a satellite
 /// or a Moonlight host, carrying the most pads, its pads, its latency, and
-/// whether it stopped answering; Reconnect brings a faltering one back.
+/// whether it stopped answering; Reconnect brings a faltering one back,
+/// and while the person's reach for a PC with pads bound is under way, the
+/// accessory shows it coming back.
 package extension AppModel {
 
-    /// Nil while no PC has a session up.
+    /// Nil while no PC has a session up and none is being brought back.
     internal var sessionFact: SessionFact? {
-        guard let row = sessionConnection else { return nil }
-        return SessionFact(
-            pcName: row.name,
-            pads: row.boundSlotIds.count,
-            latencyMs: row.latencyMs.map(wholeMilliseconds),
-            phase: sessionPhase(row.live)
-        )
+        if let row = sessionConnection {
+            return SessionFact(
+                pcName: row.name,
+                pads: row.boundSlotIds.count,
+                latencyMs: row.latencyMs.map(wholeMilliseconds),
+                phase: sessionPhase(row.live)
+            )
+        }
+        guard let row = reconnectingConnection else { return nil }
+        return SessionFact(pcName: row.name, pads: row.boundSlotIds.count, latencyMs: nil, phase: .reconnecting)
     }
 
     /// The accessory's Reconnect: a session that stopped answering closes
@@ -26,8 +31,7 @@ package extension AppModel {
     func reconnect() {
         guard let row = sessionConnection else { return }
         guard !ConnectionHub.isMoonlight(row.id) else { return network.moonlight.retrySessions() }
-        if row.live == .unstable { network.wifi.disconnect(id: row.id) }
-        connect(row.id)
+        reconnect(row.id)
     }
 
     /// The app is leaving the foreground: iOS will suspend it, so every
@@ -48,6 +52,14 @@ package extension AppModel {
     private var sessionConnection: ConnectionSummary? {
         let up = network.hub.connections.filter { sessionIsUp($0.live) }
         return up.max { $0.boundSlotIds.count < $1.boundSlotIds.count }
+    }
+
+    /// The PC the person reached for that carries pads, while the pool
+    /// reaches it; a silent retry is never one.
+    private var reconnectingConnection: ConnectionSummary? {
+        let reachedFor = reaching.state
+        let reached = network.hub.connections.filter { reachedFor.contains($0.id) && $0.live == .connecting && !$0.boundSlotIds.isEmpty }
+        return reached.max { $0.boundSlotIds.count < $1.boundSlotIds.count }
     }
 }
 

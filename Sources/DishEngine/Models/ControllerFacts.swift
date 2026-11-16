@@ -14,7 +14,8 @@ package enum ControllerLink: Equatable {
 /// How well the PC a controller is bound to is answering.
 package enum LinkHealth: Equatable {
     case online
-    case unsteady
+    /// Being reached for right now.
+    case connecting
     case lost
 }
 
@@ -25,11 +26,14 @@ package struct DestinationFact: Equatable {
     package let id: String
     package let name: String
     package let health: LinkHealth
+    /// Whether the PC is applying the controller's settings right now.
+    package let updating: Bool
 
-    package init(id: String = "", name: String, health: LinkHealth) {
+    package init(id: String = "", name: String, health: LinkHealth, updating: Bool = false) {
         self.id = id
         self.name = name
         self.health = health
+        self.updating = updating
     }
 }
 

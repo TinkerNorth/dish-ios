@@ -28,7 +28,7 @@ enum FactsFixture {
         diagnostics: DiagnosticsSnapshot = DiagnosticsSnapshot(),
         diagnosticsEvents: [DiagnosticsEvent] = [],
         apply: ApplyFact? = nil,
-        addedByAddress: String? = nil,
+        addedByAddress: AddedByAddressFact? = nil,
         port: DevicePort = .usbC,
         lowPower: LowPowerFact = .idle
     ) -> ShellFacts {
@@ -78,6 +78,7 @@ enum FactsFixture {
     }
 
     static let stopped = SessionFact(pcName: "Living Room PC", pads: 3, latencyMs: 4, phase: .stoppedResponding)
+    static let reconnecting = SessionFact(pcName: "Living Room PC", pads: 2, latencyMs: nil, phase: .reconnecting)
 }
 
 /// The windows the mapper tests lay out in, as the scene reads them.

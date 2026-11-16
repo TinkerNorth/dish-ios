@@ -12,7 +12,11 @@ import Synchronization
 /// the user may need to hear about.
 package enum ConnectionEvent: Equatable {
     case pairingRequired(DiscoveredServer)
-    case failure(ConnectionFailure)
+    /// An attempt the person made on the satellite failed; its rows carry
+    /// the reason until the next attempt.
+    case failure(serverId: String, ConnectionFailure)
+    /// A scan the person asked for failed.
+    case scanFailed(ConnectionFailure)
     /// A pairing attempt's failure, which the pairing card for that satellite
     /// shows itself.
     case pairingFailed(serverId: String, failure: ConnectionFailure)
@@ -280,9 +284,9 @@ package final class WifiConnectionManager {
 
     /// A failure is surfaced only for an attempt the user made; automatic
     /// attempts report through the row's state.
-    func emitFailureIfUserInitiated(_ intent: ConnectIntent, _ failure: ConnectionFailure) {
+    func emitFailureIfUserInitiated(_ id: String, _ intent: ConnectIntent, _ failure: ConnectionFailure) {
         if intent == .userInitiated {
-            emit(.failure(failure))
+            emit(.failure(serverId: id, failure))
         }
     }
 
@@ -364,7 +368,7 @@ package final class WifiConnectionManager {
         clearRetry(id)
         connections[id]?.markDisconnected()
         if loud {
-            emit(.failure(.repairNeeded))
+            emit(.failure(serverId: id, .repairNeeded))
         }
     }
 

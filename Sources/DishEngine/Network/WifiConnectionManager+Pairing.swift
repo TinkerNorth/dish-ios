@@ -74,7 +74,7 @@ extension WifiConnectionManager {
 
     private func failPairing(_ conn: WifiConnection, _ failure: ConnectionFailure) {
         conn.markDisconnected()
-        emit(.failure(failure))
+        emit(.failure(serverId: conn.id, failure))
     }
 
     /// A failure the pairing card shows, keyed to its satellite.

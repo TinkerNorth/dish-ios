@@ -65,21 +65,26 @@ struct SetupPCInput: Equatable {
     let paired: Bool
 }
 
+/// The whole, for a test that holds one.
+func setupInputs(facts: ShellFacts) -> SetupInputs {
+    setupInputs(controllers: facts.controllersFacts, connections: facts.connectionsFacts)
+}
+
 /// What setup reads from the shell's facts: the pads attached right now,
 /// the paired PCs first and then the ones a scan heard, whether a scan runs,
 /// and the Local Network status.
-func setupInputs(facts: ShellFacts) -> SetupInputs {
-    let pairedIds = Set(facts.paired.map(\.id))
-    let heard = facts.found.filter { !pairedIds.contains($0.id) }
-    let paired = facts.paired.map { setupPCInput($0, paired: true) }
+func setupInputs(controllers: ControllersFacts, connections: ConnectionsFacts) -> SetupInputs {
+    let pairedIds = Set(connections.paired.map(\.id))
+    let heard = connections.found.filter { !pairedIds.contains($0.id) }
+    let paired = connections.paired.map { setupPCInput($0, paired: true) }
     let found = heard.map { setupPCInput($0, paired: false) }
     return SetupInputs(
-        detectedPads: facts.attachedPads.map(setupPadInput),
+        detectedPads: controllers.attachedPads.map(setupPadInput),
         found: paired + found,
-        scanning: facts.scanning,
-        localNetwork: facts.localNetwork,
-        addedByAddress: facts.addedByAddress,
-        port: facts.port
+        scanning: connections.scanning,
+        localNetwork: connections.localNetwork,
+        addedByAddress: connections.addedByAddress?.id,
+        port: controllers.port
     )
 }
 
@@ -131,9 +136,13 @@ struct SetupCoverState: Equatable {
     let column: CGFloat?
 }
 
+/// The whole, for a test that holds one.
 func setupCoverState(facts: ShellFacts, width: SizeClass, words: L10n = .app) -> SetupCoverState? {
-    guard let walk = facts.setup else { return nil }
-    let inputs = setupInputs(facts: facts)
+    setupCoverState(setup: facts.setup, inputs: setupInputs(facts: facts), width: width, words: words)
+}
+
+func setupCoverState(setup: SetupState?, inputs: SetupInputs, width: SizeClass, words: L10n = .app) -> SetupCoverState? {
+    guard let walk = setup else { return nil }
     return SetupCoverState(
         chrome: setupChromeState(walk, words: words),
         step: setupStepState(walk, inputs, words: words),

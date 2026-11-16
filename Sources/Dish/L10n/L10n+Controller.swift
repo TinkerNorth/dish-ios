@@ -29,6 +29,11 @@ extension L10n {
         catalog.text("Edit controller")
     }
 
+    /// The PC is applying the controller's settings.
+    var updating: String {
+        catalog.text("Updating…")
+    }
+
     var nintendo: String {
         catalog.text("Nintendo")
     }

@@ -16,7 +16,7 @@ struct ControllerStatusCard: View {
             VStack(alignment: .leading, spacing: DishSpace.s1) {
                 Text(state.title).font(DishFont.headline).foregroundStyle(DishTheme.onSurface)
                 HStack(spacing: DishSpace.s3) {
-                    StatusDot(color: state.dot)
+                    StatusMarkView(mark: state.mark)
                     Text(state.line).font(DishFont.monoDetail).foregroundStyle(DishTheme.muted)
                 }
             }
@@ -26,12 +26,14 @@ struct ControllerStatusCard: View {
     }
 }
 
-/// BINDING › Destination: the PC the pad sends to beside its dot, or Not
-/// bound; the apply inline while one runs or just ended; with no PC paired,
-/// the footer that says where to pair one.
+/// BINDING › Destination: the PC the pad sends to beside its mark, or Not
+/// bound; the apply inline while one runs or just ended; Updating while
+/// the PC applies the pad's settings; with no PC paired, the footer that
+/// says where to pair one.
 struct ControllerBindingSection: View {
     let state: ControllerBindingState
     let apply: ApplyRowState?
+    let updating: String?
     /// Try again, with the PC the bind is to reach again.
     let retry: @MainActor (String) -> Void
 
@@ -43,6 +45,9 @@ struct ControllerBindingSection: View {
             .foregroundStyle(DishTheme.onSurface)
             if let apply {
                 ApplyRow(state: apply, retry: retry)
+            }
+            if let updating {
+                BusyRow(text: updating)
             }
         } header: {
             SectionEyebrow(title: state.title, color: DishTheme.muted)
@@ -56,9 +61,9 @@ struct ControllerBindingSection: View {
 
     @ViewBuilder private var destination: some View {
         switch state.destination {
-        case let .bound(pcName, dot):
+        case let .bound(pcName, mark):
             HStack(spacing: DishSpace.s3) {
-                StatusDot(color: dot)
+                StatusMarkView(mark: mark)
                 Text(pcName).font(DishFont.mono)
             }
         case let .unbound(note):
@@ -85,6 +90,18 @@ private struct ApplyRow: View {
                     .buttonBorderShape(.capsule)
                     .font(DishFont.detail)
             }
+        }
+    }
+}
+
+/// Something the PC is doing for the pad right now: the spinner and its word.
+struct BusyRow: View {
+    let text: String
+
+    var body: some View {
+        HStack(spacing: DishSpace.s4) {
+            ProgressView().controlSize(.small)
+            Text(text).font(DishFont.detail).foregroundStyle(DishTheme.muted)
         }
     }
 }

@@ -18,10 +18,10 @@ struct ControllersPage: View {
         let layout = tabLayout(.controllers, width: window.width)
         ControllersPageBody(
             state: controllersPageState(
-                controllers: model.shellFacts.controllers,
-                apply: model.shellFacts.apply,
-                paired: model.shellFacts.paired,
-                port: model.shellFacts.port
+                controllers: model.controllersFacts.controllers,
+                apply: model.controllersFacts.apply,
+                paired: model.connectionsFacts.paired,
+                port: model.controllersFacts.port
             ),
             layout: layout,
             selection: listSelection(navigation.listSelection(of: .controllers), layout: layout),
@@ -123,7 +123,7 @@ struct ControllersPageBody: View {
             name: "On-screen gamepad",
             link: .onScreen,
             batteryPercent: nil,
-            destination: DestinationFact(name: "Office PC", health: .unsteady)
+            destination: DestinationFact(name: "Office PC", health: .connecting)
         )
     ]
     NavigationStack {

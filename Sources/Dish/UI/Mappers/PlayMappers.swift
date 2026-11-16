@@ -10,7 +10,7 @@ import SwiftUI
 struct PlayPillState: Equatable {
     let pcName: String
     let detail: String
-    let dot: Color
+    let mark: StatusMark
     let detailColor: Color
 }
 
@@ -190,12 +190,23 @@ enum PlaySymbol {
     static let scrollDown = "chevron.down"
 }
 
+/// The whole, for a test or a preview that holds one.
 func playCoverState(facts: ShellFacts, screen: PlayScreen, window: WindowFacts, words: L10n = .app) -> PlayCoverState {
-    let emulateAs = facts.play?.emulateAs ?? InputKind.onScreen.defaultEmulation
+    playCoverState(play: facts.play, session: facts.session, screen: screen, window: window, words: words)
+}
+
+func playCoverState(
+    play: PlayFacts?,
+    session: SessionFact?,
+    screen: PlayScreen,
+    window: WindowFacts,
+    words: L10n = .app
+) -> PlayCoverState {
+    let emulateAs = play?.emulateAs ?? InputKind.onScreen.defaultEmulation
     return PlayCoverState(
         screen: screen,
-        pill: playPill(facts.session, destination: facts.play?.destination, words: words),
-        pause: pauseMenuState(play: facts.play, screen: screen, words: words),
+        pill: playPill(session, destination: play?.destination, words: words),
+        pause: pauseMenuState(play: play, screen: screen, words: words),
         gamepad: gamepadCoverState(emulateAs),
         mouse: MouseCoverState(
             eyebrow: words.mouse,
@@ -209,19 +220,43 @@ func playCoverState(facts: ShellFacts, screen: PlayScreen, window: WindowFacts, 
     )
 }
 
-/// "Living Room PC" and its latency; a PC that stopped answering says so.
-/// `destination` is the served slot's PC, lost while no session is up.
+/// "Living Room PC" and its latency; a PC that stopped answering or is
+/// being reached for says so. `destination` is the served slot's PC, which
+/// speaks while no session is up.
 func playPill(_ session: SessionFact?, destination: DestinationFact? = nil, words: L10n = .app) -> PlayPillState? {
-    guard let session else {
-        guard let destination else { return nil }
-        return PlayPillState(pcName: destination.name, detail: words.connectionLost, dot: DishTheme.error, detailColor: DishTheme.error)
-    }
+    guard let session else { return destinationPill(destination, words: words) }
     switch session.phase {
     case .streaming:
         let detail = session.latencyMs.map(words.latency) ?? words.streaming
-        return PlayPillState(pcName: session.pcName, detail: detail, dot: DishTheme.success, detailColor: DishTheme.success)
+        return PlayPillState(pcName: session.pcName, detail: detail, mark: .dot(DishTheme.success), detailColor: DishTheme.success)
     case .stoppedResponding:
-        return PlayPillState(pcName: session.pcName, detail: words.stoppedResponding, dot: DishTheme.error, detailColor: DishTheme.error)
+        return PlayPillState(
+            pcName: session.pcName,
+            detail: words.stoppedResponding,
+            mark: .dot(DishTheme.error),
+            detailColor: DishTheme.error
+        )
+    case .reconnecting:
+        return PlayPillState(pcName: session.pcName, detail: words.connecting, mark: .busy, detailColor: DishTheme.muted)
+    }
+}
+
+/// The served slot's PC with no session up: answering, being reached for,
+/// or lost, so the screen never goes quiet without a word.
+private func destinationPill(_ destination: DestinationFact?, words: L10n) -> PlayPillState? {
+    guard let destination else { return nil }
+    switch destination.health {
+    case .online:
+        return PlayPillState(pcName: destination.name, detail: words.online, mark: .dot(DishTheme.success), detailColor: DishTheme.success)
+    case .connecting:
+        return PlayPillState(pcName: destination.name, detail: words.connecting, mark: .busy, detailColor: DishTheme.muted)
+    case .lost:
+        return PlayPillState(
+            pcName: destination.name,
+            detail: words.connectionLost,
+            mark: .dot(DishTheme.error),
+            detailColor: DishTheme.error
+        )
     }
 }
 

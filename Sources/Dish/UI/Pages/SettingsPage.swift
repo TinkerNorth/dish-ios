@@ -30,8 +30,8 @@ struct SettingsPage: View {
     var body: some View {
         SettingsPageBody(
             state: settingsPageState(
-                preferences: model.shellFacts.preferences,
-                forwarding: model.shellFacts.forwarding,
+                preferences: model.preferencesFacts,
+                forwarding: model.forwardingFacts,
                 appVersion: appVersion
             ),
             actions: SettingsActions(

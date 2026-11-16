@@ -111,7 +111,8 @@ package extension AppModel {
     /// unbound.
     internal func destination(slotId: String) -> DestinationFact? {
         guard let row = network.hub.boundConnection(slotId: slotId) else { return nil }
-        return DestinationFact(id: row.id, name: row.name, health: linkHealth(row.live))
+        let updating = network.wifi.get(row.id)?.isRegisteringController ?? false
+        return DestinationFact(id: row.id, name: row.name, health: linkHealth(row.live), updating: updating)
     }
 
     // MARK: - Routes
@@ -195,6 +196,7 @@ package extension AppModel {
     // MARK: - Following the satellite
 
     internal func clientChanged() {
+        clearNoticesOfLiveRows()
         refreshRouting()
         guard let watch = applyWatch, sessionIsUp(network.hub.summary(watch.connectionId)?.live) else { return }
         advanceApply(.putSent)
@@ -249,11 +251,11 @@ func sessionIsUp(_ live: LinkState?) -> Bool {
 
 /// How the PC a controller is bound to is answering: a PC whose acks falter
 /// has stopped responding, so its rows read lost while the accessory offers
-/// Reconnect (D4); a PC being reached for is unsteady.
+/// Reconnect (D4); a PC being reached for says so.
 func linkHealth(_ live: LinkState) -> LinkHealth {
     switch live {
     case .connected: .online
-    case .connecting: .unsteady
+    case .connecting: .connecting
     case .unstable, .stale, .saved, .ready: .lost
     }
 }

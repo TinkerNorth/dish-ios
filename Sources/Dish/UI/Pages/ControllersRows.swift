@@ -49,7 +49,7 @@ private struct ControllerRowContent: View {
             VStack(alignment: .leading, spacing: DishSpace.s1) {
                 Text(state.name).font(DishFont.body).foregroundStyle(DishTheme.onSurface)
                 HStack(spacing: DishSpace.s3) {
-                    StatusDot(color: state.dot)
+                    StatusMarkView(mark: state.mark)
                     ControllerDestinationLine(line: state.destination)
                 }
             }

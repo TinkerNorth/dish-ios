@@ -65,9 +65,12 @@ package final class AppModel {
     package internal(set) var moonlightPin: MoonlightPinPrompt?
     /// The last thing a Moonlight host had to say; the hosts page words it.
     package internal(set) var lastMoonlightEvent: MoonlightConnectionEvent?
-    /// The last thing the pool had to say: a failure, or a satellite that
-    /// wants a PIN. The pages word it.
-    package internal(set) var lastConnectionEvent: ConnectionEvent?
+    /// Why the last attempt the person made on each PC failed, by its id,
+    /// kept until the next attempt or until the PC is up.
+    let attemptNotices = StateSource<[String: ConnectionFailure]>(initial: [:])
+    /// The PCs the person is reaching for right now, by id, pruned as their
+    /// links settle; a silent retry is never one of them.
+    let reaching = StateSource<Set<String>>(initial: [])
     /// The one bind in flight and where it stands.
     package internal(set) var bindingProgress = ApplyProgress.idle
     /// The pad and the PC of the last bind asked for; the apply fact names them.
@@ -115,6 +118,7 @@ package final class AppModel {
         applyStoredDeadzones()
         pads.source.processor.setDeadzones(deviceId: onScreenSlotId, GamepadInputProcessor.Deadzones())
         wireNetwork()
+        followReaching()
         wireDiagnostics()
         wireMoonlight()
         observeBindingMemory()
@@ -181,40 +185,5 @@ package final class AppModel {
     /// The setup walk on screen; nil while the cover is down.
     package var setup: SetupState? {
         setupSource.state
-    }
-
-    package var shellFacts: ShellFacts {
-        ShellFacts(
-            controllers: controllerFacts,
-            attachedPads: attachedPadFacts,
-            paired: pairedFacts,
-            found: foundFacts,
-            scanning: network.wifi.isScanning,
-            session: sessionFact,
-            localNetwork: localNetwork.status,
-            preferences: preferencesFacts,
-            now: clock.state,
-            setup: setup,
-            support: supportSource.state,
-            play: playFacts,
-            diagnostics: diagnostics.state,
-            diagnosticsEvents: diagnosticsLog.state,
-            apply: applyFact,
-            addedByAddress: addedByAddress?.id,
-            deadzones: pads.deadzones.state,
-            forwarding: pads.features.flags,
-            port: devicePort,
-            lowPower: lowPower.state
-        )
-    }
-
-    private var preferencesFacts: PreferencesFacts {
-        let streaming = streaming.state
-        return PreferencesFacts(
-            deviceName: device.state,
-            keepScreenOn: streaming.keepScreenOn,
-            dimAfter: streaming.dimAfter,
-            appearance: appearance.state
-        )
     }
 }

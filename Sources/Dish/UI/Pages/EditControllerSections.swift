@@ -9,6 +9,8 @@ import SwiftUI
 /// bound to a Moonlight host, with the footer saying what Auto sends.
 struct ControllerEmulateSection: View {
     let state: ControllerEmulateState
+    /// "Updating…" while the PC applies what was just set.
+    let updating: String?
     let setEmulateAs: @MainActor (EmulatedPad) -> Void
     /// A pad on a Moonlight host: the protocol's type, nil for Auto.
     let setHostEmulateAs: @MainActor (Int?) -> Void
@@ -16,6 +18,9 @@ struct ControllerEmulateSection: View {
     var body: some View {
         Section {
             picker
+            if let updating {
+                BusyRow(text: updating)
+            }
         } footer: {
             if let host = state.host {
                 Text(host.detail).font(DishFont.detail).foregroundStyle(DishTheme.muted)

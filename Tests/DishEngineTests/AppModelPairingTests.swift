@@ -93,7 +93,8 @@ final class AppModelPairingTests: XCTestCase {
         model.connect(fixture.serverId)
         let opened = await fixture.waitUntil { self.model.openPairing != nil }
         XCTAssertTrue(opened, "a reachable satellite with no key asks for a PIN")
-        XCTAssertEqual(model.lastConnectionEvent, .pairingRequired(fixture.server))
+        XCTAssertEqual(model.openPairing?.server, fixture.server, "the card names the satellite that asked")
+        XCTAssertNil(model.connectionsFacts.found.first?.notice, "a PC that answered left no failure")
     }
 
     /// Rename this iPhone: the name the satellite sees changes, and the

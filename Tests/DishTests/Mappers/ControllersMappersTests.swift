@@ -99,7 +99,7 @@ final class ControllersMappersTests: XCTestCase {
             symbol: "gamecontroller",
             name: "DualSense",
             destination: .bound(pcName: "Living Room PC", detail: " · USB-C"),
-            dot: DishTheme.success,
+            mark: .dot(DishTheme.success),
             battery: "84%",
             batteryColor: DishTheme.muted,
             page: .controller(id: "pad"),
@@ -111,7 +111,7 @@ final class ControllersMappersTests: XCTestCase {
     func testAPadDishCannotReadSaysSoAndOpensNothing() {
         let row = controllerRow(ControllerFixture.pad(destination: nil, supported: false))
         XCTAssertEqual(row.destination, .note("Not supported"))
-        XCTAssertEqual(row.dot, DishTheme.muted)
+        XCTAssertEqual(row.mark, .dot(DishTheme.muted))
         XCTAssertNil(row.page, "there is nothing to set on a pad Dish cannot read")
     }
 
@@ -133,22 +133,24 @@ final class ControllersMappersTests: XCTestCase {
         XCTAssertEqual(row.page, .controller(id: "pad"))
     }
 
-    func testAnUnsteadyPCIsCalledOutInPlaceOfTheLink() {
-        let row = controllerRow(ControllerFixture.pad(destination: DestinationFact(name: "Office PC", health: .unsteady)))
-        XCTAssertEqual(row.destination, .bound(pcName: "Office PC", detail: " · Unsteady"))
-        XCTAssertEqual(row.dot, DishTheme.warning)
+    /// A PC being reached for says so in the link's place, with the spinner
+    /// for its mark.
+    func testAPCBeingReachedForIsCalledOutInPlaceOfTheLink() {
+        let row = controllerRow(ControllerFixture.pad(destination: DestinationFact(name: "Office PC", health: .connecting)))
+        XCTAssertEqual(row.destination, .bound(pcName: "Office PC", detail: " · Connecting…"))
+        XCTAssertEqual(row.mark, .busy)
     }
 
     func testALostPCReplacesTheDestinationLine() {
         let row = controllerRow(ControllerFixture.pad(destination: DestinationFact(name: "Living Room PC", health: .lost)))
         XCTAssertEqual(row.destination, .note("Connection lost"))
-        XCTAssertEqual(row.dot, DishTheme.error)
+        XCTAssertEqual(row.mark, .dot(DishTheme.error))
     }
 
     func testAnUnboundControllerSaysSo() {
         let row = controllerRow(ControllerFixture.pad(destination: nil))
         XCTAssertEqual(row.destination, .note("Not bound"))
-        XCTAssertEqual(row.dot, DishTheme.muted)
+        XCTAssertEqual(row.mark, .dot(DishTheme.muted))
     }
 
     func testALowBatteryTurnsTheErrorColour() {
@@ -169,10 +171,10 @@ final class ControllersMappersTests: XCTestCase {
     func testAnApplyOnTheRowReplacesItsDestinationLine() {
         let running = row(apply: ApplyFact(slotId: "pad", connectionId: "lr", progress: .running(.binding)))
         XCTAssertEqual(running?.destination, .note("Applying binding…"))
-        XCTAssertEqual(running?.dot, DishTheme.muted)
+        XCTAssertEqual(running?.mark, .busy, "the apply spins")
         let failed = row(apply: ApplyFact(slotId: "pad", connectionId: "lr", progress: .failed(.hostUnreachable)))
         XCTAssertEqual(failed?.destination, .note("The PC didn’t answer in time."))
-        XCTAssertEqual(failed?.dot, DishTheme.error)
+        XCTAssertEqual(failed?.mark, .dot(DishTheme.error))
     }
 
     func testADoneApplyAndAnotherPadsApplyLeaveTheRowAlone() {

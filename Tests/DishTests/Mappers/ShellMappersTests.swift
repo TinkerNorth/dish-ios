@@ -27,7 +27,35 @@ final class ShellMappersTests: XCTestCase {
     func testTheBadgeIsOnlyForAPCThatStoppedResponding() {
         XCTAssertNil(connectionsBadge(session: nil))
         XCTAssertNil(connectionsBadge(session: FactsFixture.streaming()))
+        XCTAssertNil(connectionsBadge(session: FactsFixture.reconnecting), "a PC coming back needs nothing yet")
         XCTAssertEqual(connectionsBadge(session: FactsFixture.stopped), 1)
+    }
+
+    /// The badge also counts each paired PC that needs the person: a key
+    /// the PC revoked, or an attempt that failed.
+    func testTheBadgeCountsThePairedPCsThatNeedThePerson() {
+        let revoked = ConnectionFact(id: "den", name: "Den PC", address: "192.168.1.41", kind: .satellite, state: .needsPairing)
+        let failed = ConnectionFact(
+            id: "office",
+            name: "Office PC",
+            address: "192.168.1.40",
+            kind: .satellite,
+            state: .offline(lastSeen: nil),
+            notice: .unreachable(detail: "")
+        )
+        let fine = ConnectionFact(
+            id: "lr",
+            name: "Living Room PC",
+            address: "192.168.1.24",
+            kind: .satellite,
+            state: .online(latencyMs: 4, controllers: 1)
+        )
+        XCTAssertEqual(connectionsBadge(session: nil, paired: [revoked, failed, fine]), 2)
+        XCTAssertEqual(connectionsBadge(session: FactsFixture.stopped, paired: [revoked]), 2)
+        XCTAssertNil(connectionsBadge(session: nil, paired: [fine]))
+        XCTAssertTrue(needsAttention(revoked))
+        XCTAssertTrue(needsAttention(failed))
+        XCTAssertFalse(needsAttention(fine))
     }
 
     func testThereIsNoSessionBarWhileNothingStreams() {
@@ -61,6 +89,14 @@ final class ShellMappersTests: XCTestCase {
             sessionBarState(FactsFixture.stopped),
             "a problem speaks first"
         )
+    }
+
+    /// While the PC the person reached for comes back, the accessory shows
+    /// it with the spinner's line and no button.
+    func testAPCBeingBroughtBackShowsAsReconnecting() {
+        XCTAssertEqual(sessionBarState(FactsFixture.reconnecting), .reconnecting(pcName: "Living Room PC", line: "Connecting…"))
+        let counting = LowPowerFact(countdown: 3, due: false)
+        XCTAssertEqual(sessionBarState(FactsFixture.reconnecting, lowPower: counting), sessionBarState(FactsFixture.reconnecting))
     }
 
     func testAPCThatStoppedRespondingOffersReconnect() {

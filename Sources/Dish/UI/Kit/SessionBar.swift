@@ -3,10 +3,11 @@
 
 import SwiftUI
 
-/// The session accessory: the PC, how the link is doing and Dim, or
-/// Reconnect once the PC stops responding. While the tab bar is minimized
-/// the accessory is inline and carries the short line alone. A nil
-/// Reconnect leaves its button out; TipKit's hint, when given, points at Dim.
+/// The session accessory: the PC, how the link is doing and Dim, Reconnect
+/// once the PC stops responding, or the spinner while the PC is being
+/// brought back. While the tab bar is minimized the accessory is inline and
+/// carries the short line alone. A nil Reconnect leaves its button out;
+/// TipKit's hint, when given, points at Dim.
 struct SessionBar: View {
     let state: SessionBarState
     let dim: () -> Void
@@ -47,11 +48,20 @@ struct SessionBar: View {
                 }
             }
             .padding(.horizontal, DishSpace.s4)
+        case let .reconnecting(pcName, line):
+            HStack(spacing: DishSpace.s6) {
+                RowGlyph(symbol: satelliteSymbol)
+                SessionBarTitles(pcName: pcName, line: line, lineFont: DishFont.detail, lineColor: DishTheme.muted)
+                Spacer(minLength: DishSpace.s4)
+                ProgressView()
+            }
+            .padding(.horizontal, DishSpace.s4)
         }
     }
 }
 
-/// The inline accessory: the short line, or the warning alone.
+/// The inline accessory: the short line, the warning alone, or the
+/// spinner beside its line.
 private struct SessionBarInline: View {
     let state: SessionBarState
 
@@ -61,6 +71,11 @@ private struct SessionBarInline: View {
             Text(shortLine).font(DishFont.monoDetail).foregroundStyle(DishTheme.onSurface)
         case let .problem(_, line, _):
             Text(line).font(DishFont.detail).foregroundStyle(DishTheme.error)
+        case let .reconnecting(_, line):
+            HStack(spacing: DishSpace.s3) {
+                ProgressView().controlSize(.mini)
+                Text(line).font(DishFont.detail).foregroundStyle(DishTheme.muted)
+            }
         }
     }
 }

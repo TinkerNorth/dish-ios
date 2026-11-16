@@ -72,7 +72,8 @@ final class SetupMappersTests: XCTestCase {
     }
 
     func testThePCAddedByAddressReachesSetup() {
-        let facts = FactsFixture.shell(addedByAddress: "wifi:192.168.1.50:9876")
+        let added = AddedByAddressFact(id: "wifi:192.168.1.50:9876", reaching: true, failure: nil)
+        let facts = FactsFixture.shell(addedByAddress: added)
         XCTAssertEqual(setupInputs(facts: facts).addedByAddress, "wifi:192.168.1.50:9876")
     }
 

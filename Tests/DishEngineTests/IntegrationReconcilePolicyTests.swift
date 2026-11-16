@@ -69,7 +69,7 @@ final class IntegrationReconcilePolicyTests: XCTestCase {
 
     private var failures: [ConnectionFailure] {
         events.compactMap {
-            if case let .failure(failure) = $0 { return failure }
+            if case let .failure(_, failure) = $0 { return failure }
             return nil
         }
     }

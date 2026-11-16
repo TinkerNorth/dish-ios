@@ -65,8 +65,10 @@ public struct DishScene: Scene {
                 .environment(\.appVersion, shortVersion(of: .main))
                 .environment(\.thirdPartyNotice, notice)
                 .modifier(WindowReader())
-                .preferredColorScheme(colorScheme(for: model.shellFacts.preferences.appearance))
-                .onChange(of: idleTimerDisabled(facts: model.shellFacts), initial: true) { holdScreenOn($1) }
+                .preferredColorScheme(colorScheme(for: model.preferencesFacts.appearance))
+                .onChange(of: idleTimerDisabled(session: model.sessionFacts.session, preferences: model.preferencesFacts), initial: true) {
+                    holdScreenOn($1)
+                }
                 .onChange(of: screenOrientation(for: navigation.state.cover, idiom: idiom), initial: true) { turn(to: $1) }
                 .onChange(of: navigation.state.cover == .dim) { _, dimmed in dim(dimmed) }
                 .onChange(of: scenePhase) { scenePhaseChanged($1) }
@@ -162,7 +164,7 @@ private struct SceneRoot {
         orientation.follow(screenOrientation(for: navigation.state.cover, idiom: idiom))
         self.model = model
         self.navigation = navigation
-        router = IntentRouter(send: { navigation.send($0) }, paired: { model.shellFacts.paired })
+        router = IntentRouter(send: { navigation.send($0) }, paired: { model.connectionsFacts.paired })
     }
 }
 

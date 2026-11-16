@@ -15,7 +15,7 @@ struct ShellView: View {
 
     var body: some View {
         TabView(selection: navigation.tab) {
-            ForEach(tabItems(facts: model.shellFacts)) { item in
+            ForEach(tabItems(session: model.sessionFacts.session, paired: model.connectionsFacts.paired)) { item in
                 SwiftUI.Tab(item.title, systemImage: item.symbol, value: item.tab) {
                     TabStack(tab: item.tab)
                 }
@@ -24,7 +24,7 @@ struct ShellView: View {
         }
         .tabViewStyle(.sidebarAdaptable)
         .modifier(SessionAccessory(
-            state: sessionBarState(model.shellFacts.session, lowPower: model.shellFacts.lowPower),
+            state: sessionBarState(model.sessionFacts.session, lowPower: model.sessionFacts.lowPower),
             dim: dim,
             reconnect: model.reconnect
         ))
@@ -32,7 +32,7 @@ struct ShellView: View {
         .sheet(item: navigation.tabsSheet) { ShellSheet(sheet: $0) }
         .fullScreenCover(item: navigation.cover) { ShellCover(cover: $0) }
         .onChange(of: pairingSheetId(model.openPairing)) { _, serverId in pairingChanged(serverId) }
-        .onChange(of: model.shellFacts.lowPower.due) { _, due in lowPowerMoved(due) }
+        .onChange(of: model.sessionFacts.lowPower.due) { _, due in lowPowerMoved(due) }
         .onChange(of: dimAllowed(navigation.state), initial: true) { _, allowed in model.setDimAllowed(allowed) }
     }
 
@@ -97,9 +97,14 @@ private struct TabDetail: View {
     var body: some View {
         let opened = navigation.state.opened(in: tab)
         NavigationStack(path: navigation.detailPath(of: tab)) {
-            TabDetailRoot(state: tabDetailState(tab, opened: opened, facts: model.shellFacts))
-                .id(opened)
-                .navigationDestination(for: Page.self) { PageView(page: $0) }
+            TabDetailRoot(state: tabDetailState(
+                tab,
+                opened: opened,
+                controllers: model.controllersFacts.controllers,
+                paired: model.connectionsFacts.paired
+            ))
+            .id(opened)
+            .navigationDestination(for: Page.self) { PageView(page: $0) }
         }
     }
 }

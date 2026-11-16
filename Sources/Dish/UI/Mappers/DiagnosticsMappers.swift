@@ -306,7 +306,7 @@ func healthText(_ controller: ControllerFact, words: L10n = .app) -> String {
     guard let destination = controller.destination else { return words.notBound }
     switch destination.health {
     case .online: return words.online
-    case .unsteady: return words.unsteady
+    case .connecting: return words.connecting
     case .lost: return words.connectionLost
     }
 }

@@ -11,8 +11,8 @@ import Foundation
 package extension AppModel {
 
     /// The screen on display, the slot it serves, and the on-screen
-    /// controller's switches.
-    internal var playFacts: PlayFacts? {
+    /// controller's switches; nil while no screen is up.
+    var playFacts: PlayFacts? {
         guard let screen = playSource.state else { return nil }
         let switches = pads.switches.preferences(for: onScreenSlotId)
         return PlayFacts(

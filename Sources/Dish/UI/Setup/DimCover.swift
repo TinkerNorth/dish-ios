@@ -12,9 +12,16 @@ struct DimCover: View {
     @Environment(NavigationStore.self) private var navigation
 
     var body: some View {
-        DimCoverBody(state: dimCoverState(facts: model.shellFacts), wake: wake)
-            .onAppear { model.pageAppeared(.dim) }
-            .onDisappear { model.pageDisappeared(.dim) }
+        DimCoverBody(
+            state: dimCoverState(
+                session: model.sessionFacts.session,
+                controllers: model.controllersFacts.controllers,
+                now: model.connectionsFacts.now
+            ),
+            wake: wake
+        )
+        .onAppear { model.pageAppeared(.dim) }
+        .onDisappear { model.pageDisappeared(.dim) }
     }
 
     private func wake() {

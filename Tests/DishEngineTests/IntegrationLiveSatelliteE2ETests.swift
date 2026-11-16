@@ -85,7 +85,7 @@ final class IntegrationLiveSatelliteE2ETests: XCTestCase {
     private var failures: [ConnectionFailure] {
         events.compactMap {
             switch $0 {
-            case let .failure(failure), let .pairingFailed(_, failure): failure
+            case let .failure(_, failure), let .pairingFailed(_, failure), let .scanFailed(failure): failure
             case .pairingRequired: nil
             }
         }

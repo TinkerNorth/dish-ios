@@ -90,7 +90,7 @@ final class AppModelBindingTests: XCTestCase {
         let failed = await fixture.waitUntil { self.model.bindingProgress == .failed(.rejected) }
         XCTAssertTrue(failed, "\(model.bindingProgress)")
         XCTAssertEqual(model.network.hub.bindings, [:])
-        XCTAssertEqual(model.lastConnectionEvent, .failure(.controllerNotApplied))
+        XCTAssertNil(model.connectionsFacts.paired.first?.notice, "the refusal is the apply's word on the pad's row, not the PC's")
     }
 
     func testAPadThatLeavesLetsItsBindingGo() async {

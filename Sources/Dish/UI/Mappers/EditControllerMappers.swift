@@ -82,6 +82,8 @@ struct ControllerFunctionsState: Equatable {
 /// The edit page for a pad that is attached.
 struct EditControllerPadState: Equatable {
     let id: String
+    /// "Updating…" while the PC applies what was just set; nil otherwise.
+    let updating: String?
     let emulate: ControllerEmulateState
     /// Nil for a pad with no switch to offer: the section is left out.
     let functions: ControllerFunctionsState?
@@ -120,6 +122,7 @@ private func editControllerPadState(_ controller: ControllerFact, words: L10n) -
     let rows = controller.features.map { functionRow($0, of: controller, words: words) }
     return EditControllerPadState(
         id: controller.id,
+        updating: updatingLine(controller, words: words),
         emulate: ControllerEmulateState(
             title: words.setupEmulateAs,
             emulateAs: controller.emulateAs,

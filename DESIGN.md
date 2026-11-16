@@ -242,7 +242,9 @@ Local Network primer and the adapter sheet), `SessionBar` (the
 session accessory), `PinCells` (a PIN's digits in a row of cells, the
 caret's cell outlined in the focus colour), `RowActions` (a row's long-press
 menu and swipes; a destructive swipe wears `DishTheme.error`, any other
-`DishTheme.primary`), `ActionStrip` (the tiles under a page's card, each an
+`DishTheme.primary`), `StatusMarkView` (a `StatusMark` beside a line: the
+dot of a state, or the smallest spinner of something under way), `ActionStrip`
+(the tiles under a page's card, each an
 action's glyph over its word, as Contacts lays out message and call; an
 entry with choices opens them as a menu), `ForgetDialog` (Forget This PC's
 question) and

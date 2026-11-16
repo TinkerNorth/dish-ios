@@ -18,7 +18,7 @@ struct SupportPage: View {
 
     var body: some View {
         SupportPageBody(
-            state: supportPageState(support: model.shellFacts.support),
+            state: supportPageState(support: model.supportFacts),
             actions: SupportActions(tip: tip, restore: restore, retry: retry)
         )
         .onAppear { model.pageAppeared(.support) }

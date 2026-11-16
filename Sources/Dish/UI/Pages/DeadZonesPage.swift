@@ -24,7 +24,7 @@ struct DeadZonesPage: View {
 
     var body: some View {
         DeadZonesPageBody(
-            state: deadZonesPageState(id: id, controllers: model.shellFacts.controllers, zones: model.shellFacts.deadzones),
+            state: deadZonesPageState(id: id, controllers: model.controllersFacts.controllers, zones: model.controllersFacts.deadzones),
             actions: DeadZonesActions(setStick: setStick, setTrigger: setTrigger, reset: reset)
         )
     }
