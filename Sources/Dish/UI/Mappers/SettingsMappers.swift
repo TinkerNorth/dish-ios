@@ -1,8 +1,10 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 // Copyright (C) 2026 Dish contributors.
 
+import DishCore
 import DishEngine
 import Foundation
+import SwiftUI
 
 /// THIS IPHONE.
 struct DeviceSectionState: Equatable {
@@ -72,6 +74,26 @@ struct ForwardedFeaturesSectionState: Equatable {
     let footer: String
 }
 
+/// The line under Read over Bluetooth: where the Steam Controllers stand,
+/// in the warning colour when the person has something to change.
+struct SteamBluetoothLine: Equatable {
+    let text: String
+    let warns: Bool
+
+    var color: Color {
+        warns ? DishTheme.warning : DishTheme.muted
+    }
+}
+
+/// STEAM CONTROLLERS: the opt-in, where it stands, and why it exists.
+struct SteamControllersSectionState: Equatable {
+    let title: String
+    let toggleTitle: String
+    let isOn: Bool
+    let line: SteamBluetoothLine
+    let footer: String
+}
+
 /// SETUP & HELP: Setup guide, Help & FAQ and Diagnostics.
 struct SetupHelpSectionState: Equatable {
     let title: String
@@ -120,6 +142,7 @@ struct SettingsPageState: Equatable {
     let device: DeviceSectionState
     let streaming: StreamingSectionState
     let features: ForwardedFeaturesSectionState
+    let steamControllers: SteamControllersSectionState
     let help: SetupHelpSectionState
     let appearance: AppearanceSectionState
     let about: AboutSectionState
@@ -128,6 +151,7 @@ struct SettingsPageState: Equatable {
 func settingsPageState(
     preferences: PreferencesFacts,
     forwarding: ForwardingFlags = ForwardingFlags(),
+    steamBluetooth: SteamBluetoothStatus = .off,
     appVersion: String,
     words: L10n = .app
 ) -> SettingsPageState {
@@ -141,6 +165,7 @@ func settingsPageState(
         ),
         streaming: streamingSection(preferences, words: words),
         features: forwardedFeatures(forwarding, words: words),
+        steamControllers: steamControllersSection(steamBluetooth, words: words),
         help: SetupHelpSectionState(
             title: words.setupAndHelp,
             guide: words.setupGuide,
@@ -190,6 +215,29 @@ private func forwardedFeatures(_ flags: ForwardingFlags, words: L10n) -> Forward
         lightBarDetail: words.lightbarDetail,
         footer: words.featuresFootnote
     )
+}
+
+private func steamControllersSection(_ status: SteamBluetoothStatus, words: L10n) -> SteamControllersSectionState {
+    SteamControllersSectionState(
+        title: words.steamControllers,
+        toggleTitle: words.readOverBluetooth,
+        isOn: status != .off,
+        line: steamBluetoothLine(status, words: words),
+        footer: words.steamControllersFooter
+    )
+}
+
+/// Each state its own line; the ones the person can act on warn.
+func steamBluetoothLine(_ status: SteamBluetoothStatus, words: L10n = .app) -> SteamBluetoothLine {
+    switch status {
+    case .off: SteamBluetoothLine(text: words.steamBluetoothUnused, warns: false)
+    case .waiting: SteamBluetoothLine(text: words.steamBluetoothWaiting, warns: false)
+    case .on: SteamBluetoothLine(text: words.steamBluetoothReading, warns: false)
+    case .bluetoothOff: SteamBluetoothLine(text: words.steamBluetoothPoweredOff, warns: true)
+    case .refused: SteamBluetoothLine(text: words.steamBluetoothRefused, warns: true)
+    case .restricted: SteamBluetoothLine(text: words.steamBluetoothRestricted, warns: true)
+    case .unsupported: SteamBluetoothLine(text: words.steamBluetoothUnsupported, warns: true)
+    }
 }
 
 /// The light bar picker's option words.

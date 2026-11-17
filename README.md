@@ -208,12 +208,13 @@ view obeys.
 
 ## Protocol
 
-Not yet implemented. When it is, this client will offer **protocol 3**, with
-control on `:9443` (HTTPS REST), data on `:9876` (encrypted UDP) and discovery
-on `:9879`, as the fleet does. The client-server contract lives in one place,
+This client offers **protocol 4** and still speaks 1, with control on `:9443`
+(HTTPS REST) and data on `:9876` (encrypted UDP), as the fleet does; it finds
+satellites over mDNS, since the legacy `:9879` beacon needs Apple's multicast
+entitlement. The client-server contract lives in one place,
 [`satellite/docs/contract.md`][contract]; nothing here restates it.
 [`docs/contract.md`](docs/contract.md) maps each contract concept to the Swift
-file that will implement it.
+file that implements it.
 
 [contract]: https://github.com/TinkerNorth/satellite/blob/main/docs/contract.md
 

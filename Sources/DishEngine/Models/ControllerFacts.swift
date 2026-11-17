@@ -74,6 +74,18 @@ package struct HostEmulationFact: Equatable {
     }
 }
 
+/// A Steam Controller's trackpad pick: the picks its model offers, in the
+/// picker's order, and the one in force.
+package struct TrackpadsFact: Equatable {
+    package let choices: [TouchpadPick]
+    package let pick: TouchpadPick
+
+    package init(choices: [TouchpadPick], pick: TouchpadPick) {
+        self.choices = choices
+        self.pick = pick
+    }
+}
+
 /// A controller Dish knows: a pad on a link, or the on-screen gamepad.
 package struct ControllerFact: Equatable, Identifiable {
     package let id: String
@@ -99,6 +111,9 @@ package struct ControllerFact: Equatable, Identifiable {
     /// sent through the pad's slot. Empty for a pad with a touchpad of its
     /// own, and for the on-screen controller, whose screens are its own.
     package let surfaces: [PlayScreen]
+    /// A Steam Controller's trackpads, in place of the Touchpad switch; nil
+    /// for every other controller.
+    package let trackpads: TrackpadsFact?
 
     package init(
         id: String,
@@ -112,7 +127,8 @@ package struct ControllerFact: Equatable, Identifiable {
         supported: Bool = true,
         motion: MotionFact = MotionFact(carries: false, status: nil),
         hostEmulation: HostEmulationFact? = nil,
-        surfaces: [PlayScreen] = []
+        surfaces: [PlayScreen] = [],
+        trackpads: TrackpadsFact? = nil
     ) {
         self.id = id
         self.name = name
@@ -126,6 +142,7 @@ package struct ControllerFact: Equatable, Identifiable {
         self.motion = motion
         self.hostEmulation = hostEmulation
         self.surfaces = surfaces
+        self.trackpads = trackpads
     }
 }
 

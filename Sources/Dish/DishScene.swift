@@ -2,6 +2,7 @@
 // Copyright (C) 2026 Dish contributors.
 
 import AppIntents
+import DishCore
 import DishEngine
 import SwiftUI
 import UIKit
@@ -129,7 +130,7 @@ public struct DishScene: Scene {
 }
 
 /// The composition root the scene keeps: the model over the device's
-/// stores and sockets, the navigation store over the model's intents, and
+/// stores, sockets and battery, the navigation store over the model's intents, and
 /// the router App Intents post through. TipKit is configured and the window
 /// turned for the first time as it is made. The hardware's model identifier
 /// is read here, once, for the port the device hosts a wired pad through.
@@ -147,6 +148,7 @@ private struct SceneRoot {
         let model = AppModel(
             defaults: .standard,
             pasteboard: SystemPasteboard(),
+            deviceBattery: SystemDeviceBattery(),
             deviceKind: deviceKind(idiom),
             devicePort: devicePort(modelIdentifier: hardware)
         )
@@ -194,5 +196,39 @@ private func shortVersion(of bundle: Bundle) -> String {
 final class SystemPasteboard: Pasteboard {
     func copy(_ text: String) {
         UIPasteboard.general.string = text
+    }
+}
+
+/// The iPhone's or iPad's own battery behind the model's `DeviceBattery`
+/// seam: the one place `UIDevice`'s battery is read. iOS reports a level
+/// only to an app that turned battery monitoring on, so it is turned on as
+/// this is made, and stays on for the process.
+@MainActor
+final class SystemDeviceBattery: DeviceBattery {
+    init() {
+        UIDevice.current.isBatteryMonitoringEnabled = true
+    }
+
+    var reading: BatteryReading? {
+        deviceBatteryReading(level: UIDevice.current.batteryLevel, state: UIDevice.current.batteryState)
+    }
+}
+
+/// `UIDevice`'s battery as a reading; none while iOS knows neither its level
+/// nor its state (monitoring off, or a simulator).
+func deviceBatteryReading(level: Float, state: UIDevice.BatteryState) -> BatteryReading? {
+    let reading = BatteryReading(level: batteryPercent(level), state: deviceChargeState(state))
+    let saysNothing = reading.level == nil && reading.state == .unknown
+    return saysNothing ? nil : reading
+}
+
+/// UIKit's charge state in the reading's words: unplugged is discharging.
+private func deviceChargeState(_ state: UIDevice.BatteryState) -> BatteryChargeState {
+    switch state {
+    case .unplugged: .discharging
+    case .charging: .charging
+    case .full: .full
+    case .unknown: .unknown
+    @unknown default: .unknown
     }
 }

@@ -17,7 +17,7 @@ extension AppModel {
     /// the new state.
     func observeBindingMemory() {
         withObservationTracking {
-            _ = pads.source.slots
+            _ = pads.slots
             _ = network.wifi.connections
             _ = network.wifi.rememberedServers
             _ = network.moonlight.rememberedHosts

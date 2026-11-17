@@ -44,7 +44,7 @@ final class DiagnosticsPageMappersTests: XCTestCase {
     private static let emptyTranscript = """
     Dish
     App version: 0.1.0
-    Protocol: v3
+    Protocol: v4
     Local Network: Not asked yet
 
     Connections

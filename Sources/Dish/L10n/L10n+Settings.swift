@@ -87,6 +87,54 @@ extension L10n {
         catalog.text("Version")
     }
 
+    // MARK: - Steam Controllers
+
+    var steamControllers: String {
+        catalog.text("Steam Controllers")
+    }
+
+    var readOverBluetooth: String {
+        catalog.text("Read over Bluetooth")
+    }
+
+    var steamBluetoothUnused: String {
+        catalog.text("Dish doesn’t use Bluetooth until you turn this on.")
+    }
+
+    var steamBluetoothWaiting: String {
+        catalog.text("Waiting for Bluetooth.")
+    }
+
+    var steamBluetoothReading: String {
+        catalog.text("Reading the Steam Controllers paired in Settings › Bluetooth.")
+    }
+
+    var steamBluetoothPoweredOff: String {
+        catalog.text("Bluetooth is turned off.")
+    }
+
+    var steamBluetoothRefused: String {
+        paragraph(
+            catalog.text("Dish isn’t allowed to use Bluetooth."),
+            catalog.text("Allow it in Settings › Privacy & Security › Bluetooth.")
+        )
+    }
+
+    var steamBluetoothRestricted: String {
+        catalog.text("Bluetooth is restricted on this device.")
+    }
+
+    var steamBluetoothUnsupported: String {
+        catalog.text("This device has no Bluetooth LE.")
+    }
+
+    var steamControllersFooter: String {
+        paragraph(
+            catalog.text("iOS doesn’t offer Steam Controllers to games, so Dish reads them over Bluetooth itself."),
+            catalog.text("Turning this on asks for Bluetooth.")
+        )
+    }
+
     // MARK: - Name on your PC
 
     var deviceNamePageFooter: String {

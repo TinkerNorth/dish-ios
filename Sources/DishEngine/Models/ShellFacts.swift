@@ -131,6 +131,8 @@ package struct ShellFacts: Equatable {
     package let port: DevicePort
     /// The low-power countdown while a session streams.
     package let lowPower: LowPowerFact
+    /// Where Steam Controllers over Bluetooth stand.
+    package let steamBluetooth: SteamBluetoothStatus
 
     package init(
         controllers: [ControllerFact],
@@ -152,7 +154,8 @@ package struct ShellFacts: Equatable {
         deadzones: [String: DeadzoneSetting] = [:],
         forwarding: ForwardingFlags = ForwardingFlags(),
         port: DevicePort = .usbC,
-        lowPower: LowPowerFact = .idle
+        lowPower: LowPowerFact = .idle,
+        steamBluetooth: SteamBluetoothStatus = .off
     ) {
         self.controllers = controllers
         self.attachedPads = attachedPads
@@ -172,6 +175,7 @@ package struct ShellFacts: Equatable {
         self.addedByAddress = addedByAddress
         self.deadzones = deadzones
         self.forwarding = forwarding
+        self.steamBluetooth = steamBluetooth
         self.port = port
         self.lowPower = lowPower
     }
@@ -186,7 +190,8 @@ package struct ShellFacts: Equatable {
         support: SupportFacts,
         play: PlayFacts?,
         diagnostics: DiagnosticsFacts,
-        forwarding: ForwardingFlags
+        forwarding: ForwardingFlags,
+        steamBluetooth: SteamBluetoothStatus = .off
     ) {
         self.init(
             controllers: controllers.controllers,
@@ -208,7 +213,8 @@ package struct ShellFacts: Equatable {
             deadzones: controllers.deadzones,
             forwarding: forwarding,
             port: controllers.port,
-            lowPower: session.lowPower
+            lowPower: session.lowPower,
+            steamBluetooth: steamBluetooth
         )
     }
 

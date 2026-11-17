@@ -15,6 +15,14 @@ package protocol FeedbackActuators: Sendable {
     func playerLeds(_ slotId: String, player: Int)
 }
 
+/// Where the slots another source drives are acted on, by the prefix of
+/// their ids: that source's queue and its actuators.
+struct FeedbackLane {
+    let prefix: String
+    let queue: DispatchSerialQueue
+    let actuators: any FeedbackActuators
+}
+
 /// The pads' feedback: one serial queue at the input queue's quality that
 /// owns every actuator, and each slot's record of the commands waiting for it.
 @MainActor
@@ -24,15 +32,24 @@ package final class PadFeedback {
     /// One per slot, made on first use and kept, so a burst that spans a
     /// routing refresh still drains once.
     private var pads: [String: FeedbackPad] = [:]
+    private var lanes: [FeedbackLane] = []
 
     package init(actuators: any FeedbackActuators, queue: DispatchSerialQueue) {
         self.actuators = actuators
         self.queue = queue
     }
 
+    /// The slots whose ids start with `prefix` drain on `queue` into
+    /// `actuators` from now on: one hop from the receive loop to the queue
+    /// that owns them.
+    package func drive(slotsPrefixed prefix: String, on queue: DispatchSerialQueue, with actuators: any FeedbackActuators) {
+        lanes.append(FeedbackLane(prefix: prefix, queue: queue, actuators: actuators))
+    }
+
     package func pad(for slotId: String) -> FeedbackPad {
         if let pad = pads[slotId] { return pad }
-        let pad = FeedbackPad(slotId: slotId, queue: queue, actuators: actuators)
+        let lane = lanes.first { slotId.hasPrefix($0.prefix) }
+        let pad = FeedbackPad(slotId: slotId, queue: lane?.queue ?? queue, actuators: lane?.actuators ?? actuators)
         pads[slotId] = pad
         return pad
     }

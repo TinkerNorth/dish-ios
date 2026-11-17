@@ -19,6 +19,9 @@ package struct ControllerCapabilities: Hashable {
     package var hasTriggerEffects = false
     /// The pad has player-indicator LEDs the framework drives by player index.
     package var hasPlayerLeds = false
+    /// The pad sources the protocol 4 extended buttons
+    /// (`ProtocolConstants.extButton*`): the `extendedButtons` claim.
+    package var hasExtendedButtons = false
 
     package init(
         hasMotion: Bool = false,
@@ -27,7 +30,8 @@ package struct ControllerCapabilities: Hashable {
         hasLightbar: Bool = false,
         hasBattery: Bool = false,
         hasTriggerEffects: Bool = false,
-        hasPlayerLeds: Bool = false
+        hasPlayerLeds: Bool = false,
+        hasExtendedButtons: Bool = false
     ) {
         self.hasMotion = hasMotion
         self.hasTouchpad = hasTouchpad
@@ -36,26 +40,10 @@ package struct ControllerCapabilities: Hashable {
         self.hasBattery = hasBattery
         self.hasTriggerEffects = hasTriggerEffects
         self.hasPlayerLeds = hasPlayerLeds
+        self.hasExtendedButtons = hasExtendedButtons
     }
 
     package static let none = ControllerCapabilities()
-}
-
-/// Charging state for a battery reading, from `GCDeviceBattery.State`.
-package enum BatteryChargeState: Hashable {
-    case unknown, discharging, charging, full
-}
-
-/// A battery reading. `level` is 0...100, or nil when the controller
-/// reports a state but not a percentage.
-package struct BatteryReading: Hashable {
-    package var level: Int?
-    package var state: BatteryChargeState = .unknown
-
-    package init(level: Int? = nil, state: BatteryChargeState = .unknown) {
-        self.level = level
-        self.state = state
-    }
 }
 
 /// The physical pad's family, decided once at attach from the framework's
@@ -95,9 +83,10 @@ func namedPadFamily(productCategory: String, vendorName: String?) -> PadFamily {
     return namesNintendo ? .nintendo : .other
 }
 
-/// One controller GameController vends, as the bridge publishes it. A pad
-/// without the extended profile is listed but not read: iOS has no HID
-/// access, so dish-mac's profile and Direct paths have no counterpart.
+/// One controller Dish lists: a pad GameController vends, as the bridge
+/// publishes it, or a Steam Controller read over Bluetooth. A pad without
+/// the extended profile is listed but not read: iOS has no HID access, so
+/// dish-mac's profile and USB Direct paths have no counterpart.
 package struct ControllerSlot: Identifiable, Hashable {
     package let id: String
     package let name: String
@@ -108,6 +97,9 @@ package struct ControllerSlot: Identifiable, Hashable {
     package var family: PadFamily
     /// The pad has the extended profile, so Dish reads it.
     package var readable: Bool
+    /// A Steam Controller's trackpads, which its pick lands; none for every
+    /// other pad.
+    package var trackpads: SteamTrackpads
 
     package init(
         id: String,
@@ -116,7 +108,8 @@ package struct ControllerSlot: Identifiable, Hashable {
         capabilities: ControllerCapabilities = .none,
         battery: BatteryReading? = nil,
         family: PadFamily = .other,
-        readable: Bool = true
+        readable: Bool = true,
+        trackpads: SteamTrackpads = .none
     ) {
         self.id = id
         self.name = name
@@ -125,5 +118,6 @@ package struct ControllerSlot: Identifiable, Hashable {
         self.battery = battery
         self.family = family
         self.readable = readable
+        self.trackpads = trackpads
     }
 }

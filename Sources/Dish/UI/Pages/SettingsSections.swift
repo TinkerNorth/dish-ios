@@ -78,6 +78,29 @@ struct ForwardedFeaturesSection: View {
     }
 }
 
+/// STEAM CONTROLLERS › Read over Bluetooth, with where they stand under it.
+struct SteamControllersSection: View {
+    let state: SteamControllersSectionState
+    let set: @MainActor (Bool) -> Void
+
+    var body: some View {
+        Section {
+            Toggle(isOn: Binding(get: { state.isOn }, set: { set($0) })) {
+                VStack(alignment: .leading, spacing: DishSpace.s1) {
+                    Text(state.toggleTitle)
+                    Text(state.line.text).font(DishFont.detail).foregroundStyle(state.line.color)
+                }
+            }
+        } header: {
+            SectionEyebrow(title: state.title, color: DishTheme.muted)
+        } footer: {
+            SettingsFooter(text: state.footer)
+        }
+        .foregroundStyle(DishTheme.onSurface)
+        .listRowBackground(DishTheme.surface)
+    }
+}
+
 /// SETUP & HELP › Setup guide, Help & FAQ, Diagnostics.
 struct SetupHelpSection: View {
     let state: SetupHelpSectionState

@@ -229,6 +229,7 @@ final class DiagnosticsMappersTests: XCTestCase {
         XCTAssertEqual(
             advertisedText(0xFFFF),
             "Analog triggers · Rumble · Motion · Light bar · Adaptive triggers · Player LEDs · Microphone · Speaker · Haptic audio"
+                + " · Extra buttons"
         )
         XCTAssertEqual(wireTouchpadText(.off), "off")
         XCTAssertEqual(wireTouchpadText(.mouse), "mouse")
@@ -239,7 +240,7 @@ final class DiagnosticsMappersTests: XCTestCase {
     func testTheAppLinesNameTheVersionsAndTheLocalNetwork() {
         XCTAssertEqual(appLines(appVersion: "0.1.0", localNetwork: .allowed), [
             FactLine(key: "App version", value: "0.1.0"),
-            FactLine(key: "Protocol", value: "v3"),
+            FactLine(key: "Protocol", value: "v4"),
             FactLine(key: "Local Network", value: "Allowed")
         ])
         XCTAssertEqual(localNetworkText(.unknown), "Not asked yet")

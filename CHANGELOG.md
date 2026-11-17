@@ -20,15 +20,6 @@ lockstep across the repos share a version number.
 
 ## [Unreleased]
 
-The shell, the protocol core, the controller bridge, the network engine,
-Moonlight hosts, the play screens, Help, Support, Licenses, Diagnostics, the
-pair sheet, the Connections rows and the PC's page are built, on the iPhone and
-the iPad: a Satellite or a Moonlight host is found, paired with from a row, from
-setup or by its address, bound to a pad or the on-screen gamepad, and streamed
-to. The rows answer a long press and a swipe, Siri and Shortcuts can open the
-play screens, dim and connect, and TipKit points at what a new person might
-miss. `Tests/PARITY.md` lists everything not built.
-
 ### Added
 
 - **The on-screen controller is always listed.** As Android's Virtual
@@ -132,7 +123,52 @@ miss. `Tests/PARITY.md` lists everything not built.
   threw them away. The scene now holds its root in `OnFirstUse`, which makes
   it the first time the kept build reads it, so a process makes one.
 
+## [1.0.0] - 2026-11-15
+
+The shell, the protocol core, the controller bridge, the network engine,
+Moonlight hosts, the play screens, Help, Support, Licenses, Diagnostics, the
+pair sheet, the Connections rows and the PC's page are built, on the iPhone and
+the iPad: a Satellite or a Moonlight host is found, paired with from a row, from
+setup or by its address, bound to a pad or the on-screen gamepad, and streamed
+to. The rows answer a long press and a swipe, Siri and Shortcuts can open the
+play screens, dim and connect, and TipKit points at what a new person might
+miss. `Tests/PARITY.md` lists everything not built.
+
 ### Added
+
+- **Room on the wire for a controller's extra buttons.** `[wire-coordinated]`
+  Protocol 4. Dish now speaks Satellite protocol 4: on a session that settled
+  on it, every controller report carries a second word for the buttons an
+  Xbox pad does not have, and a controller that sends them says so in its
+  capabilities, shown as "Extra buttons" on Diagnostics. An older Satellite
+  keeps working at protocol 3 and is sent exactly what it was sent before.
+- **An Xbox Elite controller's back paddles reach the PC.** On a Satellite
+  that speaks protocol 4, the four paddles of an Xbox Elite Wireless
+  Controller Series 2 travel in that word under the names SDL gives them: P1
+  and P2 are the right hand's upper and lower paddles, P3 and P4 the left
+  hand's. iOS addresses the paddles only while the controller is on its
+  default profile; on any other profile they press the buttons they are
+  mapped to. Not yet tried with a real Elite.
+- **The DualSense Edge is a controller type.** Every Emulate as picker lists
+  the DualSense Edge last: the DualSense with two back buttons and two Fn
+  buttons, which is where an Xbox Elite's four paddles land in a game. It is
+  never picked for you, and on a Satellite that does not offer it the pad is
+  emulated as a DualSense. Not yet tried against a host that offers the type.
+- **A Steam Controller paired over Bluetooth is a controller.** Turn on
+  Settings › Steam Controllers › Read over Bluetooth and a Steam Controller
+  paired in Settings › Bluetooth, the 2015 model or the 2026 one, shows up in
+  Controllers out of its keyboard-and-mouse mode, the way it does on Android
+  and the Mac: its buttons, sticks, triggers, gyro, back buttons and grips
+  reach the PC, its trackpads are the right stick, the touchpad or off on its
+  page (the 2015 model's right trackpad is the right stick until you pick
+  otherwise, the 2026 model's are the touchpad when the type it is emulated
+  as has one), and the 2026 model rumbles. iOS never offers these
+  controllers to apps, so Dish reads them over Bluetooth itself; the switch
+  is off on a fresh install, turning it on is what asks for Bluetooth, and
+  the row says when Bluetooth is off, refused or missing. The controller
+  reports no battery over Bluetooth, so the PC is sent the iPhone's. Turning
+  the switch off gives each controller its keyboard and mouse back. Not yet
+  tried with either controller.
 
 - **The iPad.** Dish runs on the iPad as well as the iPhone, turning every
   way on every screen. The tabs open into a sidebar from the bar along the
@@ -354,4 +390,70 @@ miss. `Tests/PARITY.md` lists everything not built.
   as `dish-ios.ipa` when they do not, Grype, SPDX and CycloneDX SBOMs, cosign
   keyless signatures, `SHA256SUMS` and SLSA L3 provenance).
 
-[Unreleased]: https://github.com/TinkerNorth/dish-ios/commits/main
+### Changed
+
+- **A controller's battery on the PC is the lower of the controller's and
+  the iPhone's.** The battery Dish sends a Satellite or a Moonlight host for
+  a controller is now the lower of the controller's own charge and the
+  iPhone's or iPad's, with the charging state of whichever is lower; a
+  controller that reports no battery sends the iPhone's, and an unknown
+  level loses to any known one. A wired controller that reports its charge
+  is treated like any other. The controller's row, its page and Diagnostics
+  still show the controller's own battery. The simulator reports no battery
+  for the iPhone, so there every controller sends its own.
+
+### Fixed
+
+- **A failed Settings test no longer fails the next run.** The UI tests
+  read Rumble as on and Steam Controllers over Bluetooth as off, a fresh
+  install's switches, but the simulator kept whatever a run left: one that
+  failed between two flips of Rumble left it off, and every later run on
+  that simulator failed at its first check. CI starts each run on a new
+  simulator, so only a reused one showed it. Every launch now starts the
+  two switches at a fresh install's values, as it already does the Local
+  Network primer.
+- **iOS asks for the local network in your language.** The question iOS
+  puts before Dish first looks for Satellite on your Wi‑Fi was in English
+  whatever the iPhone's language. It is now in Bosnian, German, Spanish,
+  French and Brazilian Portuguese too, as the Bluetooth question is.
+- **CI reads its iPad back before the UI tests run on it.** The iPad lane
+  created its simulator and trusted `simctl bootstatus`; on one runner the
+  device was gone a minute later and xcodebuild listed no simulator at all,
+  on another the UI test runner timed out before any test ran, and each cost
+  the whole run. `scripts/ci-simulator.sh` now creates the iPad on the newest
+  runtime that supports it, requires `simctl list` to show it booted after
+  the boot and again right before xcodebuild (recreating it when it is not),
+  and runs xcodebuild once more only on those two runner errors, never on a
+  failing test.
+- **The UI tests wait for what the app ends in, not for a clock.** On a
+  slow CI runner the iPad lane failed when a five-second wait for the
+  Add a PC by address sheet ran out, and when the "Searching" label of
+  a scan had already gone by the time the test looked for it. Every wait
+  in `App/UITests` is now an expectation on a state the app reaches,
+  with a shared patience of thirty seconds that ends the moment it is
+  met: a scan is read on Diagnostics, where it leaves the Local Network
+  allowed (and not asked yet while no scan ran), a sheet's lowering is
+  waited for, and the two polls that slept are expectations too.
+- **The Settings test holds the Rumble switch until the switch takes the
+  press.** On GitHub's iPhone the test sometimes lost a flip of Rumble: the
+  tap landed on the switch itself and reached the app, but lifted before
+  the switch's press had begun, so the switch ignored it and the test
+  failed thirty seconds later. A switch takes a touch only once its press
+  has begun, about a frame after the touch lands, and XCUITest's tap lifts
+  after 50 ms, which a slow runner's simulator sometimes needs more than.
+  Each flip now holds the switch for half a second.
+- **The on-screen gamepad sends its PC the iPhone's battery.** The
+  on-screen gamepad bound to a Satellite or a Moonlight host sent no battery
+  at all, where dish-android's sends the phone's. It now sends the iPhone's
+  or iPad's charge and charging state every 30 seconds while it is among the
+  controllers, like a controller with no battery of its own, and a Moonlight
+  host is told at arrival that it has one.
+- **The scene builds its objects once.** SwiftUI calls the scene's
+  initializer again on its own (at launch and on a scene phase change) and
+  keeps only the first build's state; each extra call used to build a whole
+  model, which reached for the remembered PCs, and a navigation store, then
+  threw them away. The scene now holds its root in `OnFirstUse`, which makes
+  it the first time the kept build reads it, so a process makes one.
+
+[Unreleased]: https://github.com/TinkerNorth/dish-ios/compare/1.0.0...main
+[1.0.0]: https://github.com/TinkerNorth/dish-ios/releases/tag/1.0.0

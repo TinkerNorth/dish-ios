@@ -10,8 +10,15 @@ import Foundation
 extension SatelliteClient {
 
     func sendReport(controllerIndex: Int, report: GamepadReport) {
-        sendEncrypted(msgType: ProtocolConstants.msgInput, payloadCount: ProtocolConstants.inputPayloadBytes) { out in
-            Encoders.writeInputPayload(controllerIndex: UInt8(truncatingIfNeeded: controllerIndex), report: report, into: out)
+        let settled = settledProtocolVersion
+        let payloadCount = ProtocolConstants.inputPayloadBytes(settledVersion: settled)
+        sendEncrypted(msgType: ProtocolConstants.msgInput, payloadCount: payloadCount) { out in
+            Encoders.writeInputPayload(
+                controllerIndex: UInt8(truncatingIfNeeded: controllerIndex),
+                report: report,
+                settledVersion: settled,
+                into: out
+            )
         }
     }
 

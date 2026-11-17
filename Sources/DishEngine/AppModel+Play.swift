@@ -45,10 +45,10 @@ package extension AppModel {
     }
 
     /// What the on-screen gamepad claims on a satellite: the phone's motion
-    /// when it has the sensors, the touchpad screen, and the Taptic Engine
-    /// as its rumble.
+    /// when it has the sensors, the touchpad screen, the Taptic Engine as
+    /// its rumble, and the phone's battery.
     internal var onScreenCapabilities: ControllerCapabilities {
-        ControllerCapabilities(hasMotion: onScreen.hasMotionSensor, hasTouchpad: true, hasRumble: true)
+        ControllerCapabilities(hasMotion: onScreen.hasMotionSensor, hasTouchpad: true, hasRumble: true, hasBattery: true)
     }
 
     /// The screens the phone can lend a pad bound to a satellite.
@@ -147,7 +147,7 @@ package extension AppModel {
     /// The slot the phone's touches serve, as the play screens word it.
     private var playTargetFact: PlayTarget {
         guard playTarget != onScreenSlotId else { return .onScreen }
-        let name = pads.source.slots.first { $0.id == playTarget }?.name ?? playTarget
+        let name = pads.slots.first { $0.id == playTarget }?.name ?? playTarget
         return .pad(id: playTarget, name: name)
     }
 

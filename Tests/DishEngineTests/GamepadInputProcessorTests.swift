@@ -107,6 +107,12 @@ final class GamepadInputProcessorTests: XCTestCase {
         XCTAssertEqual(applyDeadzones(above, zones), above)
     }
 
+    func testApplyDeadzonesNeverTouchesTheExtendedButtons() {
+        let zones = GamepadInputProcessor.Deadzones(stickFlat: .max, triggerFlat: 255)
+        let paddles = GamepadReport(lx: 5, extButtons: 0x1FFF)
+        XCTAssertEqual(applyDeadzones(paddles, zones), GamepadReport(extButtons: 0x1FFF))
+    }
+
     func testPublishAppliesDifferentDeadzonesPerDevice() {
         let processor = processor()
         let recorder = InputRecorder()

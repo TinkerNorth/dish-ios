@@ -63,7 +63,7 @@ package extension AppModel {
     /// A pad iOS lists, or the on-screen gamepad, which is always one of
     /// the controllers; nothing else can be bound.
     private func bindablePad(_ slotId: String) -> BindablePad? {
-        if let slot = pads.source.slots.first(where: { $0.id == slotId }) {
+        if let slot = pads.slots.first(where: { $0.id == slotId }) {
             return BindablePad(capabilities: slot.capabilities, family: slot.family.emulatedPad)
         }
         guard slotId == onScreenSlotId else { return nil }
@@ -129,6 +129,7 @@ package extension AppModel {
         returnPaths.route(snapshot, global: pads.features.flags)
         moonlightFeedback.route(snapshot, global: pads.features.flags)
         pushSlotFlags()
+        pushTrackpadPicks()
         refreshMoonlightDesire()
     }
 
@@ -173,7 +174,7 @@ package extension AppModel {
     /// apply waiting on it ends.
     internal func followAttachedPads() {
         withObservationTracking {
-            _ = pads.source.slots
+            _ = pads.slots
         } onChange: { [weak self] in
             Task { @MainActor [weak self] in self?.attachedPadsChanged() }
         }
@@ -190,7 +191,7 @@ package extension AppModel {
     /// The slots a binding may hold: the pads iOS lists, and the on-screen
     /// gamepad, which is always one of the controllers.
     internal var presentSlotIds: Set<String> {
-        Set(pads.source.slots.map(\.id)).union([onScreenSlotId])
+        Set(pads.slots.map(\.id)).union([onScreenSlotId])
     }
 
     // MARK: - Following the satellite

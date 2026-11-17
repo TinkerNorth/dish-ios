@@ -1,0 +1,90 @@
+{
+  "sourceLanguage" : "en",
+  "strings" : {
+    "NSBluetoothAlwaysUsageDescription" : {
+      "comment" : "The Bluetooth question: asked when the person turns on Settings › Steam Controllers › Read over Bluetooth.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dish čita Steam kontrolere koje uparite i šalje njihov unos direktno vašem PC-ju."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dish liest die Steam Controller, die du koppelst, und sendet ihre Eingaben direkt an deinen PC."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dish reads the Steam Controllers you pair and sends their input straight to your PC."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dish lee los mandos Steam que emparejas y envía sus entradas directamente a tu PC."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dish lit les manettes Steam que vous appairez et envoie leurs commandes directement à votre PC."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O Dish lê os controles Steam que você pareia e envia os comandos deles direto ao seu PC."
+          }
+        }
+      }
+    },
+    "NSLocalNetworkUsageDescription" : {
+      "comment" : "The Local Network question: asked by the first scan for Satellite.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dish pronalazi Satellite na vašoj Wi‑Fi mreži i šalje unos kontrolera direktno vašem PC-ju."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dish findet Satellite in deinem WLAN und sendet Controller-Eingaben direkt an deinen PC."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dish finds Satellite on your Wi‑Fi and sends controller input straight to your PC."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dish encuentra Satellite en tu Wi‑Fi y envía las entradas del mando directamente a tu PC."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dish trouve Satellite sur votre Wi‑Fi et envoie les commandes de la manette directement à votre PC."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O Dish encontra o Satellite no seu Wi‑Fi e envia os comandos do controle direto ao seu PC."
+          }
+        }
+      }
+    }
+  },
+  "version" : "1.0"
+}

@@ -15,6 +15,8 @@ struct ControllerActions {
     let setHostEmulateAs: @MainActor (Int?) -> Void
     /// The Dead zones row: that page, pushed.
     let openDeadZones: @MainActor () -> Void
+    /// A Steam Controller's trackpads.
+    let setTrackpads: @MainActor (TouchpadPick) -> Void
 
     /// Controls that do nothing, for a preview.
     @MainActor static let preview = ControllerActions(
@@ -22,7 +24,8 @@ struct ControllerActions {
         setFeature: { _, _ in },
         setEmulateAs: { _ in },
         setHostEmulateAs: { _ in },
-        openDeadZones: {}
+        openDeadZones: {},
+        setTrackpads: { _ in }
     )
 }
 
@@ -59,7 +62,8 @@ struct ControllerPage: View {
                 setFeature: setFeature,
                 setEmulateAs: setEmulateAs,
                 setHostEmulateAs: setHostEmulateAs,
-                openDeadZones: openDeadZones
+                openDeadZones: openDeadZones,
+                setTrackpads: setTrackpads
             )
         )
     }
@@ -78,6 +82,10 @@ struct ControllerPage: View {
 
     private func openDeadZones() {
         navigation.send(.push(.deadZones(id: id)))
+    }
+
+    private func setTrackpads(_ pick: TouchpadPick) {
+        model.setTrackpadPick(slotId: id, pick)
     }
 }
 
@@ -118,7 +126,12 @@ private struct ControllerPadSections: View {
         ControllerBindingSection(state: state.binding, apply: state.apply, updating: state.updating, bind: bind, findPC: findPC)
         ControllerEmulateSection(state: state.emulate, setEmulateAs: actions.setEmulateAs, setHostEmulateAs: actions.setHostEmulateAs)
         if let functions = state.functions {
-            ControllerFunctionsSection(state: functions, footnote: state.footnote, setFeature: actions.setFeature)
+            ControllerFunctionsSection(
+                state: functions,
+                footnote: state.footnote,
+                setFeature: actions.setFeature,
+                setTrackpads: actions.setTrackpads
+            )
         } else {
             Section {} footer: {
                 Text(state.footnote).font(DishFont.detail).foregroundStyle(DishTheme.muted)
@@ -184,6 +197,21 @@ private struct ControllerPadSections: View {
     let onScreen = ControllerFact(id: "on-screen", name: "", link: .onScreen, batteryPercent: nil, destination: nil)
     NavigationStack {
         ControllerPageBody(state: controllerPageState(controllers: [onScreen], id: "on-screen"), actions: .preview)
+    }
+}
+
+#Preview("Steam Controller (2026), Bluetooth") {
+    let pad = ControllerFact(
+        id: "ble:pad",
+        name: "Valve Steam Controller (2026, Bluetooth)",
+        link: .bluetooth,
+        batteryPercent: nil,
+        destination: nil,
+        features: [ControllerFeatureFact(feature: .motion, enabled: true), ControllerFeatureFact(feature: .rumble, enabled: true)],
+        trackpads: TrackpadsFact(choices: [.pad, .off], pick: .off)
+    )
+    NavigationStack {
+        ControllerPageBody(state: controllerPageState(controllers: [pad], id: "ble:pad"), actions: .preview)
     }
 }
 

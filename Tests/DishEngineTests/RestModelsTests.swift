@@ -182,6 +182,16 @@ final class RestModelsTests: XCTestCase {
         XCTAssertEqual(caps["motion"], true)
         XCTAssertEqual(caps["analogTriggers"], true)
         XCTAssertEqual(caps["lightbar"], false)
+        XCTAssertEqual(caps["extendedButtons"], false, "the protocol 4 claim always rides the caps object")
+    }
+
+    func testTheExtendedButtonsClaimIsWrittenUnderItsContractKey() throws {
+        var descriptor = ControllerDescriptor()
+        descriptor.caps = ProtocolConstants.capExtendedButtons
+        let data = try JSONEncoder().encode(descriptor)
+        let obj = try XCTUnwrap(JSONSerialization.jsonObject(with: data) as? [String: Any])
+        let caps = try XCTUnwrap(obj["caps"] as? [String: Bool])
+        XCTAssertEqual(caps.filter(\.value).map(\.key), ["extendedButtons"])
     }
 
     func testDualSenseDescriptorRoundTripsAppliedType() throws {
@@ -205,23 +215,24 @@ final class RestModelsTests: XCTestCase {
 
     func testCatalogParsesTheFakeSatelliteFixture() throws {
         // Pin the DTO to the exact wire the harness (and the real satellite)
-        // emit — the four offered types, their slugs, features and artwork.
+        // emit — the five offered types, their slugs, features and artwork.
         let catalog = try JSONDecoder().decode(
             CatalogDTO.self, from: Data(FakeSatelliteRest.catalogJSON.utf8)
         )
         XCTAssertEqual(catalog.locale, "en")
-        XCTAssertEqual(catalog.protocolVersion, 3)
+        XCTAssertEqual(catalog.protocolVersion, 4)
         XCTAssertEqual(catalog.catalogVersion, 2)
         XCTAssertEqual(catalog.serverVersion, "1.6.0")
-        XCTAssertEqual(catalog.controllerTypes.map(\.id), [0, 1, 2, 3])
-        XCTAssertEqual(catalog.controllerTypes.map { $0.emulates?.sdlType }, ["xbox360", "ps4", "ps5", "switchpro"])
+        XCTAssertEqual(catalog.controllerTypes.map(\.id), [0, 1, 2, 3, 4])
+        XCTAssertEqual(catalog.controllerTypes.map { $0.emulates?.sdlType }, ["xbox360", "ps4", "ps5", "switchpro", "ps5"])
+        XCTAssertEqual(catalog.controllerTypes[4].emulates?.usb, ["054c:0df2"], "the Edge is a ps5 pad with its own product id")
         XCTAssertEqual(catalog.controllerTypes[2].emulates?.usb, ["054c:0ce6"])
         XCTAssertTrue(catalog.controllerTypes[2].features.triggerEffects.supported)
         XCTAssertTrue(catalog.controllerTypes[2].features.hapticAudio.supported)
         XCTAssertFalse(catalog.controllerTypes[1].features.playerLeds.supported)
         XCTAssertEqual(catalog.controllerTypes[1].features.touchpad.modes, ["ds4"])
         XCTAssertEqual(catalog.controllerTypes[1].features.motion.requires, "vigembus>=1.17")
-        XCTAssertEqual(catalog.controllerTypes.map(\.slug), ["xbox360", "ds4", "dualsense", "switchpro"])
+        XCTAssertEqual(catalog.controllerTypes.map(\.slug), ["xbox360", "ds4", "dualsense", "switchpro", "dualsenseedge"])
         let ds4 = catalog.controllerTypes[1]
         XCTAssertEqual(ds4.name, "DualShock 4")
         XCTAssertEqual(ds4.shortName, "PlayStation")

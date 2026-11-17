@@ -124,34 +124,31 @@ jobs:
       # Controllers and Connections split, and the windows turn with the
       # device. The package's suites do not depend on the device, so only the
       # UI bundle runs, over the build above (same flags, no rebuild).
+      #
+      # scripts/ci-simulator.sh creates the iPad, reads it back from
+      # `simctl list` as Booted after `bootstatus` and again right before
+      # xcodebuild (recreating it when it is not), and runs xcodebuild once
+      # more only when the runner, not a test, failed. Run 43076579363:
+      # attempt 2's `bootstatus -b` returned after 3:22 with no boot stage
+      # printed and a minute later xcodebuild listed no simulator at all;
+      # attempt 3 found the iPad and the UI test runner timed out loading
+      # Accessibility before any test ran.
       - name: Create and boot the iPad the UI tests run on
         run: |
           set -euo pipefail
-          runtime="$(xcrun simctl list runtimes -j | python3 -I -c '
-          import json, sys
-          runtimes = [r for r in json.load(sys.stdin)["runtimes"] if r["platform"] == "iOS" and r["isAvailable"]]
-          runtimes.sort(key=lambda r: tuple(int(part) for part in r["version"].split(".")))
-          print(runtimes[-1]["identifier"] if runtimes else "")
-          ')"
-          devicetype="$(xcrun simctl list devicetypes -j | python3 -I -c '
-          import json, sys
-          names = [d["identifier"] for d in json.load(sys.stdin)["devicetypes"] if d["name"].startswith("iPad Pro 11-inch")]
-          print(sorted(names)[-1] if names else "")
-          ')"
-          udid="$(xcrun simctl create "CI iPad" "$devicetype" "$runtime")"
-          xcrun simctl bootstatus "$udid" -b
-          echo "IPAD_DESTINATION=platform=iOS Simulator,id=$udid" >> "$GITHUB_ENV"
+          udid="$(scripts/ci-simulator.sh create "CI iPad" "iPad Pro 11-inch")"
+          echo "IPAD_UDID=$udid" >> "$GITHUB_ENV"
 
       - name: UI tests on iPad
         run: |
           set -euo pipefail
-          xcodebuild test \
-            -project Dish.xcodeproj \
-            -scheme DishApp \
-            -destination "$IPAD_DESTINATION" \
-            -only-testing:DishUITests \
-            -enableCodeCoverage YES \
-            CODE_SIGNING_ALLOWED=NO
+          scripts/ci-simulator.sh run "$IPAD_UDID" "CI iPad" "iPad Pro 11-inch" \
+            xcodebuild test \
+              -project Dish.xcodeproj \
+              -scheme DishApp \
+              -only-testing:DishUITests \
+              -enableCodeCoverage YES \
+              CODE_SIGNING_ALLOWED=NO
 
       - name: Build release
         run: |

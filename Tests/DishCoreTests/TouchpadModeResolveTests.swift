@@ -32,6 +32,13 @@ final class TouchpadModeResolveTests: XCTestCase {
         XCTAssertEqual(resolveTouchpadMode(pick: .off, padHasTouchpad: true, typeOffersDs4: true, hostMouseControl: true), .off)
     }
 
+    func testTheStickPickDeclaresOffOnTheWire() {
+        XCTAssertEqual(resolveTouchpadMode(pick: .stick, padHasTouchpad: true, typeOffersDs4: true, hostMouseControl: true), .off)
+        XCTAssertEqual(TouchpadPick(wireName: "stick"), .stick, "stored as dish-mac and dish-android store it")
+        XCTAssertEqual(TouchpadPick.stick.wireName, "stick")
+        XCTAssertTrue(isValidTouchpadPickName("stick"))
+    }
+
     func testTheWireNamesRoundTripAndUnknownNamesReadAsOff() {
         XCTAssertEqual(TouchpadPick(wireName: "ds4"), .pad)
         XCTAssertEqual(TouchpadPick(wireName: "mouse"), .mouse)

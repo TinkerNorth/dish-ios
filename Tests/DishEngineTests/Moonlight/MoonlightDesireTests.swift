@@ -69,6 +69,7 @@ final class MoonlightDesireTests: XCTestCase {
         XCTAssertEqual(MoonlightDesire.controllerType(.dualShock4), MoonlightControllerType.playStation)
         XCTAssertEqual(MoonlightDesire.controllerType(.xboxWireless), MoonlightControllerType.xbox)
         XCTAssertEqual(MoonlightDesire.controllerType(.switchPro), MoonlightControllerType.nintendo)
+        XCTAssertEqual(MoonlightDesire.controllerType(.dualSenseEdge), MoonlightControllerType.playStation, "the protocol has no Edge")
     }
 
     func testTheDesireNamesOnlyMoonlightBindingsWhosePadIsPresent() {

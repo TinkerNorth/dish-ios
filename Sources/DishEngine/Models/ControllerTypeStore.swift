@@ -60,6 +60,7 @@ func storedWord(_ pad: EmulatedPad) -> String {
     case .dualShock4: "dualshock4"
     case .xboxWireless: "xbox"
     case .switchPro: "switchpro"
+    case .dualSenseEdge: "dualsenseedge"
     }
 }
 

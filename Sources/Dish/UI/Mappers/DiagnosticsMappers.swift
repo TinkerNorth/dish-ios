@@ -346,6 +346,7 @@ func wireCapText(_ cap: WireCap, words: L10n = .app) -> String {
     case .mic: words.microphone
     case .speaker: words.carriesSpeaker
     case .hapticAudio: words.hapticAudio
+    case .extendedButtons: words.extraButtons
     }
 }
 

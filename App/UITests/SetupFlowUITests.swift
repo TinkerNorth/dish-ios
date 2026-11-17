@@ -18,37 +18,37 @@ final class SetupFlowUITests: XCTestCase {
 
     func testAFirstRunOpensOnTheWelcomeAndSkipLandsOnControllers() {
         let app = ShellUI.launch(welcomeCompleted: false)
-        XCTAssertTrue(ShellUI.element(Self.welcomeTitle, in: app).waitForExistence(timeout: 10))
+        XCTAssertTrue(ShellUI.element(Self.welcomeTitle, in: app).waitForExistence(timeout: ShellUI.patience))
         app.buttons["Skip"].firstMatch.tap()
-        XCTAssertTrue(ShellUI.element(Self.addController, in: app).waitForExistence(timeout: 5))
+        XCTAssertTrue(ShellUI.element(Self.addController, in: app).waitForExistence(timeout: ShellUI.patience))
         XCTAssertTrue(ShellUI.tab("Controllers", in: app).isSelected)
     }
 
     func testACompletedWelcomeOpensOnTheTabs() {
         let app = ShellUI.launch(welcomeCompleted: true)
-        XCTAssertTrue(ShellUI.element(Self.addController, in: app).waitForExistence(timeout: 10))
+        XCTAssertTrue(ShellUI.element(Self.addController, in: app).waitForExistence(timeout: ShellUI.patience))
         XCTAssertFalse(ShellUI.element(Self.welcomeTitle, in: app).exists)
     }
 
     func testAddAControllerOpensTheInputStepAndSkipComesBack() {
         let app = ShellUI.launch(welcomeCompleted: true)
-        XCTAssertTrue(ShellUI.element(Self.addController, in: app).waitForExistence(timeout: 10))
+        XCTAssertTrue(ShellUI.element(Self.addController, in: app).waitForExistence(timeout: ShellUI.patience))
         ShellUI.element(Self.addController, in: app).tap()
-        XCTAssertTrue(ShellUI.element(Self.inputTitle, in: app).waitForExistence(timeout: 5))
+        XCTAssertTrue(ShellUI.element(Self.inputTitle, in: app).waitForExistence(timeout: ShellUI.patience))
         app.buttons["Skip"].firstMatch.tap()
-        XCTAssertTrue(ShellUI.element(Self.addController, in: app).waitForExistence(timeout: 5))
+        XCTAssertTrue(ShellUI.element(Self.addController, in: app).waitForExistence(timeout: ShellUI.patience))
     }
 
     func testTheSetupGuideReopensTheWelcomeFromSettings() {
         let app = ShellUI.launch(welcomeCompleted: true)
-        XCTAssertTrue(ShellUI.element(Self.addController, in: app).waitForExistence(timeout: 10))
+        XCTAssertTrue(ShellUI.element(Self.addController, in: app).waitForExistence(timeout: ShellUI.patience))
         ShellUI.tab("Settings", in: app).tap()
         let guide = ShellUI.scrolled(to: ShellUI.element("Setup guide", in: app), in: app)
-        XCTAssertTrue(guide.waitForExistence(timeout: 5))
+        XCTAssertTrue(guide.waitForExistence(timeout: ShellUI.patience))
         guide.tap()
-        XCTAssertTrue(ShellUI.element(Self.welcomeTitle, in: app).waitForExistence(timeout: 5))
+        XCTAssertTrue(ShellUI.element(Self.welcomeTitle, in: app).waitForExistence(timeout: ShellUI.patience))
         app.buttons["Skip"].firstMatch.tap()
-        XCTAssertTrue(ShellUI.tab("Controllers", in: app).waitForExistence(timeout: 5))
+        XCTAssertTrue(ShellUI.tab("Controllers", in: app).waitForExistence(timeout: ShellUI.patience))
         XCTAssertTrue(ShellUI.tab("Controllers", in: app).isSelected, "Skip lands on Controllers from anywhere")
     }
 }

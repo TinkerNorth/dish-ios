@@ -337,6 +337,10 @@ extension L10n {
         catalog.text("Haptic audio")
     }
 
+    var extraButtons: String {
+        catalog.text("Extra buttons")
+    }
+
     // MARK: - The lock statistics
 
     func lockCounts(_ acquisitions: Int, _ contended: Int) -> String {

@@ -49,6 +49,11 @@ package extension AppModel {
         pads.features.flags
     }
 
+    /// Where Steam Controllers over Bluetooth stand.
+    var steamBluetoothFacts: SteamBluetoothStatus {
+        steamBluetoothStatus(enabled: pads.steamSetting.enabled, radio: pads.steam.radio)
+    }
+
     var supportFacts: SupportFacts {
         supportSource.state
     }
@@ -67,7 +72,8 @@ package extension AppModel {
             support: supportFacts,
             play: playFacts,
             diagnostics: diagnosticsFacts,
-            forwarding: forwardingFacts
+            forwarding: forwardingFacts,
+            steamBluetooth: steamBluetoothFacts
         )
     }
 }

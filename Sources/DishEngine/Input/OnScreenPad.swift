@@ -12,7 +12,7 @@ package let onScreenSlotId = "on-screen"
 /// so a rail is a full press there.
 package func hasAnalogTriggers(_ pad: EmulatedPad) -> Bool {
     switch pad {
-    case .dualSense, .dualShock4, .xboxWireless: true
+    case .dualSense, .dualShock4, .xboxWireless, .dualSenseEdge: true
     case .switchPro: false
     }
 }

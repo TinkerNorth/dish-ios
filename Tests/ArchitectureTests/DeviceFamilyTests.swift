@@ -44,15 +44,36 @@ final class DeviceFamilyTests: XCTestCase {
         XCTAssertEqual(try orientations("UISupportedInterfaceOrientations"), Self.uprightOrOnItsSide)
     }
 
-    /// A fresh runner may list no simulator by name, so CI creates its iPad
-    /// (the newest iPad Pro 11-inch on the newest runtime) and runs the UI
-    /// tests on it by id.
-    func testCIRunsTheUITestsOnAnIPadToo() throws {
+    /// A fresh runner may list no simulator by name, and one it created and
+    /// booted has gone missing by the time xcodebuild looked, so CI makes its
+    /// iPad (the newest iPad Pro 11-inch, on the newest runtime that supports
+    /// it) through `scripts/ci-simulator.sh` and runs the UI tests through it
+    /// too, which reads the iPad back as booted first.
+    func testCIRunsTheUITestsOnAnIPadItCreatedAndReadBack() throws {
         let workflow = try RepoFiles.read(".github/workflows/ios-ci.yml")
-        XCTAssertTrue(workflow.contains(#"startswith("iPad Pro 11-inch")"#), "ios-ci.yml makes its iPad an iPad Pro 11-inch")
-        XCTAssertTrue(workflow.contains("xcrun simctl create"), "the runner's iPad is created and booted, not assumed")
-        XCTAssertTrue(workflow.contains(#"-destination "$IPAD_DESTINATION""#), "the UI tests run on that iPad")
+        XCTAssertTrue(
+            workflow.contains(#"scripts/ci-simulator.sh create "CI iPad" "iPad Pro 11-inch""#),
+            "ios-ci.yml makes its iPad an iPad Pro 11-inch, through the script"
+        )
+        XCTAssertTrue(workflow.contains(#"scripts/ci-simulator.sh run "$IPAD_UDID""#), "the UI tests run on that iPad, through the script")
         XCTAssertTrue(workflow.contains("-only-testing:DishUITests"), "the iPad pass runs the UI bundle alone")
+    }
+
+    /// The script creates and boots the device, trusts `simctl list` over
+    /// `bootstatus` for whether it is there, and runs xcodebuild once more
+    /// only for the two errors the runner produced on its own: the device
+    /// gone before xcodebuild looked, and the UI test runner never starting.
+    func testTheSimulatorScriptCreatesReadsBackAndRetriesOnlyTheRunnersOwnErrors() throws {
+        let script = try RepoFiles.read("scripts/ci-simulator.sh")
+        XCTAssertTrue(script.contains("xcrun simctl create"), "the device is created, not assumed")
+        XCTAssertTrue(script.contains("xcrun simctl bootstatus"), "and booted")
+        XCTAssertTrue(script.contains("xcrun simctl list devices -j"), "and read back from the device list")
+        XCTAssertTrue(script.contains(#""Booted available""#), "as booted and available")
+        XCTAssertTrue(
+            script.contains("Unable to find a device matching the provided destination specifier"),
+            "xcodebuild runs again when the device was gone"
+        )
+        XCTAssertTrue(script.contains("The test runner failed to initialize for UI testing"), "and when the UI test runner never started")
     }
 
     func testTheLocalGateRunsTheSameIPad() throws {
