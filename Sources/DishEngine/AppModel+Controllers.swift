@@ -30,9 +30,10 @@ package extension AppModel {
         }
     }
 
-    /// The switches in force for a pad: the global ones and its own.
+    /// The switches in force for a pad: the global ones, its own, and the
+    /// screen the phone lends it.
     func forwardingFlags(slotId: String) -> ForwardingFlags {
-        effectiveFlags(global: pads.features.flags, slot: slotPreferencesInForce(slotId))
+        effectiveFlags(global: pads.features.flags, slot: slotPreferencesInForce(slotId), phoneSurface: phoneSurface(on: slotId))
     }
 
     /// A pad's own switches; a Steam Controller's touchpad is on while its
@@ -173,6 +174,7 @@ package extension AppModel {
             supported: slot.readable,
             motion: motionFact(slotId: slot.id),
             hostEmulation: network.hub.hostEmulation(slotId: slot.id),
+            surfaces: phoneSurfaces(slotId: slot.id, capabilities: slot.capabilities),
             trackpads: trackpadsFact(slot)
         )
     }

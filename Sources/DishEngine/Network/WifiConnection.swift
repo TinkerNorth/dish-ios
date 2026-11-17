@@ -64,6 +64,8 @@ package final class WifiConnection: Identifiable, FeedbackRouteTarget {
     @ObservationIgnored private(set) var lastHeartbeatAck: HeartbeatAck?
     /// The epoch of the topology last applied; -1 while no session.
     @ObservationIgnored private(set) var lastAppliedEpoch = -1
+    /// What the last session PUT said of mouse control.
+    @ObservationIgnored var mouseControlGranted = false
     /// Set when the manager's reconcile GET launches, cleared when it lands.
     @ObservationIgnored private(set) var reconcileInFlight = false
     /// The controller indices whose descriptor changed while live and wait

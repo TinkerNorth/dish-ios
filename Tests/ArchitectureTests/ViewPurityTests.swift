@@ -39,6 +39,8 @@ import XCTest
 ///   `@Environment(\.verticalSizeClass)`, `userInterfaceIdiom`. Every file
 ///   under `Sources/Dish` but the scene and its seams, which read them once
 ///   and hand them down as `windowFacts` and the device's idiom.
+/// - V14 a page reads its slice: `model.shellFacts`, the whole, anywhere but
+///   `DiagnosticsPage.swift`, the one page that reads across the slices.
 ///
 /// "Pages" are every view but the components, which own their states: the
 /// kit and the theme.
@@ -157,6 +159,18 @@ final class ViewPurityTests: XCTestCase {
         for file in files {
             let offenders = try RepoFiles.offendingLines(in: file) { Self.isCode($0) && Self.matches(regex, $0) }
             XCTAssertEqual(offenders, [], "V13: \(file) reads the window's traits; take `windowFacts` from the environment")
+        }
+    }
+
+    /// V14: a page reads the slice it maps and re-renders for that alone;
+    /// the whole is Diagnostics', which reads across the slices.
+    func testOnlyDiagnosticsReadsTheWholeFacts() throws {
+        let regex = try NSRegularExpression(pattern: #"\bmodel\.shellFacts\b"#)
+        let files = try viewFiles.filter { $0 != "Sources/Dish/UI/Pages/DiagnosticsPage.swift" }
+        XCTAssertGreaterThan(files.count, 20, "the sweep must see the pages")
+        for file in files {
+            let offenders = try RepoFiles.offendingLines(in: file) { Self.isCode($0) && Self.matches(regex, $0) }
+            XCTAssertEqual(offenders, [], "V14: \(file) reads the whole facts; read the slice the page maps")
         }
     }
 

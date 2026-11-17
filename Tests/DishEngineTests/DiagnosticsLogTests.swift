@@ -63,6 +63,16 @@ final class DiagnosticsLogTests: XCTestCase {
 
     // MARK: - Pads
 
+    /// The on-screen gamepad is always one of the controllers, so coming and
+    /// going is nothing to log; its bindings still are.
+    func testTheOnScreenGamepadNeverAttachesOrDetaches() {
+        let onScreen = PadSnapshot(id: "on-screen", name: .onScreenGamepad, boundId: "", boundLabel: "")
+        XCTAssertEqual(padEvents(before: [], after: [onScreen], atMs: 1), [])
+        XCTAssertEqual(padEvents(before: [onScreen], after: [], atMs: 2), [])
+        let bound = PadSnapshot(id: "on-screen", name: .onScreenGamepad, boundId: "den", boundLabel: "Den")
+        XCTAssertEqual(padEvents(before: [onScreen], after: [bound], atMs: 3).map(\.kind), [.padBound])
+    }
+
     func testAPadLogsItsArrivalItsBindingsAndItsDeparture() {
         XCTAssertEqual(padEvents(before: [], after: [pad("ds")], atMs: 1), [DiagnosticsEvent(atMs: 1, kind: .padAttached, subject: "Ds")])
         XCTAssertEqual(

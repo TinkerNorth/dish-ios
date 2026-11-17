@@ -61,7 +61,8 @@ final class PcDetailMappersTests: XCTestCase {
         XCTAssertEqual(detail.status, PcStatusState(
             symbol: satelliteSymbol,
             line: "Online · 4 ms",
-            dot: DishTheme.success,
+            lineColor: DishTheme.muted,
+            mark: .dot(DishTheme.success),
             detail: "Satellite 2.1.11 · Protocol 3 · 192.168.1.24"
         ))
     }
@@ -70,7 +71,7 @@ final class PcDetailMappersTests: XCTestCase {
         let pc = PcFixture.pc(state: .offline(lastSeen: PcFixture.yesterday), bound: [], version: nil, protocolVersion: nil, features: nil)
         let detail = try XCTUnwrap(PcFixture.detail(pc))
         XCTAssertEqual(detail.status.line, "Offline · seen yesterday")
-        XCTAssertEqual(detail.status.dot, DishTheme.muted)
+        XCTAssertEqual(detail.status.mark, .dot(DishTheme.muted))
         XCTAssertEqual(detail.status.detail, "192.168.1.24")
         XCTAssertNil(detail.carries, "nothing probed yet")
         let never = PcFixture.pc(state: .offline(lastSeen: nil), version: "2.1.11", protocolVersion: nil)
@@ -81,7 +82,7 @@ final class PcDetailMappersTests: XCTestCase {
     func testAPCThatRevokedItsKeyNeedsPairing() throws {
         let detail = try XCTUnwrap(PcFixture.detail(PcFixture.pc(state: .needsPairing, protocolVersion: nil)))
         XCTAssertEqual(detail.status.line, "Needs pairing")
-        XCTAssertEqual(detail.status.dot, DishTheme.warning)
+        XCTAssertEqual(detail.status.mark, .dot(DishTheme.warning))
     }
 
     func testCarryingListsEachBoundControllerOnItsSlot() throws {
@@ -121,11 +122,45 @@ final class PcDetailMappersTests: XCTestCase {
             PcActionState(action: .repair, title: "Re-pair"),
             PcActionState(action: .disconnect, title: "Disconnect")
         ])
+        XCTAssertEqual(PcFixture.detail(PcFixture.pc(state: .unsteady(latencyMs: 40, controllers: 2)))?.actions, [
+            PcActionState(action: .repair, title: "Re-pair"),
+            PcActionState(action: .reconnect, title: "Reconnect")
+        ])
+        XCTAssertEqual(PcFixture.detail(PcFixture.pc(state: .connecting))?.actions, [
+            PcActionState(action: .repair, title: "Re-pair"),
+            PcActionState(action: .cancel, title: "Cancel")
+        ])
         XCTAssertEqual(PcFixture.detail(PcFixture.pc(state: .offline(lastSeen: nil)))?.actions, [
             PcActionState(action: .repair, title: "Re-pair"),
             PcActionState(action: .connect, title: "Connect")
         ])
         XCTAssertEqual(PcFixture.detail(PcFixture.pc(state: .needsPairing))?.actions, [PcActionState(action: .repair, title: "Re-pair")])
+    }
+
+    /// The card words each step of the link: being reached for with the
+    /// spinner, stopped responding in the error colour, and why the last
+    /// attempt failed, in the error colour, over the state.
+    func testTheCardWordsAReachAFalterAndAFailure() throws {
+        let reaching = try XCTUnwrap(PcFixture.detail(PcFixture.pc(state: .connecting)))
+        XCTAssertEqual(reaching.status.line, "Connecting…")
+        XCTAssertEqual(reaching.status.mark, .busy)
+        XCTAssertEqual(reaching.status.lineColor, DishTheme.muted)
+        let faltering = try XCTUnwrap(PcFixture.detail(PcFixture.pc(state: .unsteady(latencyMs: 40, controllers: 2))))
+        XCTAssertEqual(faltering.status.line, "Stopped responding")
+        XCTAssertEqual(faltering.status.mark, .dot(DishTheme.error))
+        let failed = ConnectionFact(
+            id: "lr",
+            name: "Living Room PC",
+            address: "192.168.1.24",
+            kind: .satellite,
+            state: .offline(lastSeen: nil),
+            notice: .unreachable(detail: "timed out")
+        )
+        let detail = try XCTUnwrap(PcFixture.detail(failed))
+        XCTAssertEqual(detail.status.line, "Couldn’t reach Living Room PC. Make sure it’s on and on your network.")
+        XCTAssertEqual(detail.status.lineColor, DishTheme.error)
+        XCTAssertEqual(detail.status.mark, .dot(DishTheme.error))
+        XCTAssertEqual(detail.actions.map(\.action), [.repair, .connect], "Connect tries again")
     }
 
     func testForgetAsksFirstAndNamesWhatStops() throws {

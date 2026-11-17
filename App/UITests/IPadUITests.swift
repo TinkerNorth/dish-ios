@@ -33,10 +33,10 @@ final class IPadUITests: XCTestCase {
 
     func testThePlayCoverOpensOnTheIPadsSideAndStandsAlongTheBottomUpright() {
         XCUIDevice.shared.orientation = .landscapeLeft
-        let app = ShellUI.launch(welcomeCompleted: true)
-        ShellUI.listTheOnScreenGamepad(in: app)
-        let open = app.buttons["Open"].firstMatch
-        XCTAssertTrue(open.waitForExistence(timeout: ShellUI.patience))
+        let app = ShellUI.launch(welcomeCompleted: true, extraArguments: ShellUI.withARememberedPC)
+        ShellUI.bindTheOnScreenGamepad(in: app)
+        let open = app.buttons["Open gamepad"].firstMatch
+        XCTAssertTrue(open.waitForExistence(timeout: ShellUI.patience), "the gamepad opens from its row once a PC is bound to it")
         open.tap()
         let pause = app.buttons["Pause"].firstMatch
         XCTAssertTrue(pause.waitForExistence(timeout: ShellUI.patience))

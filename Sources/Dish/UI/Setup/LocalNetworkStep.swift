@@ -26,6 +26,7 @@ struct LocalNetworkStep: View {
                     .accessibilityElement(children: .combine)
                 }
             }
+            .listRowBackground(DishTheme.surface)
         }
         .listStyle(.insetGrouped)
         .safeAreaInset(edge: .bottom) {
@@ -50,32 +51,16 @@ private struct PrimerIllustration: View {
 
     var body: some View {
         HStack(spacing: DishSpace.s12) {
-            PrimerTile(symbol: DishSymbol.phone, label: thisIPhone)
+            IllustrationTile(symbol: DishSymbol.phone, label: thisIPhone)
             Image(systemName: DishSymbol.wifi)
                 .font(DishFont.feature)
                 .foregroundStyle(DishTheme.primary)
-            PrimerTile(symbol: DishSymbol.pc, label: yourPC)
+            IllustrationTile(symbol: DishSymbol.pc, label: yourPC)
         }
         .frame(maxWidth: .infinity)
         .listRowSeparator(.hidden)
         .listRowBackground(Color.clear)
         .accessibilityHidden(true)
-    }
-}
-
-private struct PrimerTile: View {
-    let symbol: String
-    let label: String
-
-    var body: some View {
-        VStack(spacing: DishSpace.s4) {
-            Image(systemName: symbol)
-                .font(DishFont.feature)
-                .foregroundStyle(DishTheme.primary)
-                .frame(width: DishSize.primerTile, height: DishSize.primerTile)
-                .background(DishTheme.primaryFill, in: RoundedRectangle(cornerRadius: DishSize.rowGlyphCorner))
-            SectionEyebrow(title: label, color: DishTheme.muted)
-        }
     }
 }
 

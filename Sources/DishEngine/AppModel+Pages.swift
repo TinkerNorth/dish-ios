@@ -47,7 +47,7 @@ package extension AppModel {
             diagnostics.start()
             return nil
         case .addByAddress:
-            lastConnectionEvent = nil
+            clearAddedByAddressNotice()
             return nil
         case .moonlightHosts:
             scanMoonlightHosts()

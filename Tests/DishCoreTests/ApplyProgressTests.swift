@@ -44,6 +44,15 @@ final class ApplyProgressTests: XCTestCase {
         XCTAssertEqual(reduceApply(onHost, .budgetSpent), .failed(.hostUnreachable))
     }
 
+    /// The link the run waited for failed: the run ends unreachable at once,
+    /// not when the budget runs out; an idle or ended run ignores it.
+    func testTheLinkFailingEndsTheRunUnreachableAtOnce() {
+        XCTAssertEqual(reduceApply(waiting, .linkFailed), .failed(.hostUnreachable))
+        XCTAssertEqual(reduceApply(onHost, .linkFailed), .failed(.hostUnreachable))
+        XCTAssertEqual(reduceApply(.idle, .linkFailed), .idle)
+        XCTAssertEqual(reduceApply(.done, .linkFailed), .done)
+    }
+
     func testThePadLeavingEndsTheRun() {
         XCTAssertEqual(reduceApply(onHost, .padGone), .failed(.padGone))
         XCTAssertEqual(reduceApply(.idle, .padGone), .failed(.padGone), "a pad gone before the start fails the start")

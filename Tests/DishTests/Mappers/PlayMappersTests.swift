@@ -31,7 +31,7 @@ final class PlayMappersTests: XCTestCase {
         let pill = cover(session: FactsFixture.streaming()).pill
         XCTAssertEqual(
             pill,
-            PlayPillState(pcName: "Living Room PC", detail: "4 ms", dot: DishTheme.success, detailColor: DishTheme.success)
+            PlayPillState(pcName: "Living Room PC", detail: "4 ms", mark: .dot(DishTheme.success), detailColor: DishTheme.success)
         )
     }
 
@@ -42,11 +42,47 @@ final class PlayMappersTests: XCTestCase {
     func testAPCThatStoppedAnsweringTurnsThePillToTheError() {
         let pill = cover(session: FactsFixture.stopped).pill
         XCTAssertEqual(pill?.detail, "Stopped responding")
-        XCTAssertEqual(pill?.dot, DishTheme.error)
+        XCTAssertEqual(pill?.mark, .dot(DishTheme.error))
     }
 
     func testWithNoSessionThereIsNoPill() {
         XCTAssertNil(cover().pill)
+    }
+
+    /// A served slot bound to a PC with no session up reads lost, so the
+    /// screen never goes quiet without a word.
+    func testAServedSlotWhosePCIsDownReadsLost() {
+        let lost = DestinationFact(id: "lr", name: "Living Room PC", health: .lost)
+        let pill = cover(FactsFixture.play(destination: lost)).pill
+        XCTAssertEqual(
+            pill,
+            PlayPillState(pcName: "Living Room PC", detail: "Connection lost", mark: .dot(DishTheme.error), detailColor: DishTheme.error)
+        )
+        XCTAssertEqual(
+            cover(FactsFixture.play(destination: lost), session: FactsFixture.streaming()).pill?.detail,
+            "4 ms",
+            "the session's word first"
+        )
+    }
+
+    /// A served slot whose PC is being reached for spins, and the session
+    /// coming back at the person's asking spins the same way.
+    func testAPCBeingReachedForSpinsOnThePill() {
+        let reaching = DestinationFact(id: "lr", name: "Living Room PC", health: .connecting)
+        XCTAssertEqual(
+            cover(FactsFixture.play(destination: reaching)).pill,
+            PlayPillState(pcName: "Living Room PC", detail: "Connecting…", mark: .busy, detailColor: DishTheme.muted)
+        )
+        XCTAssertEqual(cover(session: FactsFixture.reconnecting).pill?.mark, .busy)
+        let failed = SessionFact(pcName: "Living Room PC", pads: 1, latencyMs: nil, phase: .failed(.dataPathBlocked))
+        XCTAssertEqual(
+            cover(session: failed).pill?.detail,
+            "Connection lost",
+            "the pill has no room for the reason; the accessory words it"
+        )
+        XCTAssertEqual(cover(session: failed).pill?.mark, .dot(DishTheme.error))
+        let online = DestinationFact(id: "lr", name: "Living Room PC", health: .online)
+        XCTAssertEqual(cover(FactsFixture.play(destination: online)).pill?.detail, "Online", "a PC up with no session word yet")
     }
 
     // MARK: - The pause menu
@@ -63,6 +99,14 @@ final class PlayMappersTests: XCTestCase {
         XCTAssertEqual(cover(screen: .touchpad).pause.screens.map(\.title), ["Gamepad", "Mouse"])
         XCTAssertEqual(cover(screen: .mouse).pause.screens.map(\.screen), [.gamepad, .touchpad])
         XCTAssertEqual(cover(screen: .mouse).pause.screens.map(\.symbol), ["gamecontroller", "rectangle.and.hand.point.up.left"])
+    }
+
+    /// A pad the phone lends its screens to has a gamepad of its own, so
+    /// the pause menu moves only between the touchpad and the mouse.
+    func testAPadsPauseMenuMovesBetweenTheTouchpadAndTheMouseAlone() {
+        let pad = FactsFixture.play(screen: .mouse, target: .pad(id: "pad", name: "Xbox Wireless Controller"))
+        XCTAssertEqual(cover(pad, screen: .mouse).pause.screens.map(\.screen), [.touchpad])
+        XCTAssertEqual(cover(pad, screen: .touchpad).pause.screens.map(\.screen), [.mouse])
     }
 
     func testOnlyTheGamepadHasSwitches() {

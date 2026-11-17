@@ -16,7 +16,7 @@ struct ControllerStatusCard: View {
             VStack(alignment: .leading, spacing: DishSpace.s1) {
                 Text(state.title).font(DishFont.headline).foregroundStyle(DishTheme.onSurface)
                 HStack(spacing: DishSpace.s3) {
-                    StatusDot(color: state.dot)
+                    StatusMarkView(mark: state.mark)
                     Text(state.line).font(DishFont.monoDetail).foregroundStyle(DishTheme.muted)
                 }
             }
@@ -26,84 +26,97 @@ struct ControllerStatusCard: View {
     }
 }
 
-/// BINDING › Destination with Unbind, or Bind to a paired PC; the apply
-/// inline while one runs or just ended; Emulate as.
+/// BINDING › Destination: the PC the pad sends to beside its mark, or Not
+/// bound, which opens the menu of the active PCs to bind to, or Find a PC
+/// when none is up; the apply inline while one runs or just ended;
+/// Updating while the PC applies the pad's settings; the footer that says
+/// what to do on the Connections tab when nothing can be picked.
 struct ControllerBindingSection: View {
     let state: ControllerBindingState
     let apply: ApplyRowState?
-    let actions: ControllerActions
+    let updating: String?
+    /// Bind to the PC, by its connection id; Try again binds to the same one.
+    let bind: @MainActor (String) -> Void
+    /// Nothing to bind to: the Connections tab.
+    let findPC: @MainActor () -> Void
 
     var body: some View {
         Section {
-            destination
+            picker
             if let apply {
-                ApplyRow(state: apply, retry: actions.bind)
+                ApplyRow(state: apply, retry: bind)
             }
-            emulate
+            if let updating {
+                BusyRow(text: updating)
+            }
         } header: {
             SectionEyebrow(title: state.title, color: DishTheme.muted)
+        } footer: {
+            if let hint = state.hint {
+                Text(hint).font(DishFont.detail).foregroundStyle(DishTheme.muted)
+            }
         }
         .listRowBackground(DishTheme.surface)
     }
 
-    /// Dish's four pads, or the protocol's four while the pad is on a Moonlight host.
-    @ViewBuilder private var emulate: some View {
-        if let host = state.hostEmulate {
-            Picker(state.emulateTitle, selection: Binding(get: { host.selection }, set: { actions.setHostEmulateAs($0) })) {
-                ForEach(host.options) { Text($0.label).tag($0.id) }
+    /// The destination row opens the active PCs as a menu, the current one
+    /// checked; with none up, the row stands alone over Find a PC.
+    @ViewBuilder private var picker: some View {
+        switch state.picker {
+        case let .choices(choices):
+            Menu {
+                ForEach(choices) { choice in
+                    BindChoiceButton(choice: choice, bind: bind)
+                }
+            } label: {
+                LabeledContent(state.destinationTitle) {
+                    HStack(spacing: DishSpace.s3) {
+                        destination
+                        Image(systemName: PlaySymbol.emulate).font(DishFont.detail).foregroundStyle(DishTheme.muted)
+                    }
+                }
+                .foregroundStyle(DishTheme.onSurface)
+                .contentShape(Rectangle())
             }
-            .pickerStyle(.menu)
-            .foregroundStyle(DishTheme.onSurface)
-            Text(host.detail).font(DishFont.detail).foregroundStyle(DishTheme.muted)
-        } else {
-            Picker(state.emulateTitle, selection: Binding(get: { state.emulateAs }, set: { actions.setEmulateAs($0) })) {
-                ForEach(state.emulateOptions) { Text($0.name).tag($0.pad) }
+        case let .findPC(title):
+            LabeledContent(state.destinationTitle) {
+                destination
             }
-            .pickerStyle(.menu)
             .foregroundStyle(DishTheme.onSurface)
+            RowButton(action: findPC) {
+                Label(title, systemImage: RowActionSymbol.pair).font(DishFont.body).foregroundStyle(DishTheme.primary)
+            }
         }
     }
 
     @ViewBuilder private var destination: some View {
         switch state.destination {
-        case let .bound(pcName, dot, unbind):
-            LabeledContent(state.destinationTitle) {
-                HStack(spacing: DishSpace.s3) {
-                    StatusDot(color: dot)
-                    Text(pcName).font(DishFont.mono)
-                }
+        case let .bound(pcName, mark):
+            HStack(spacing: DishSpace.s3) {
+                StatusMarkView(mark: mark)
+                Text(pcName).font(DishFont.mono)
             }
-            .foregroundStyle(DishTheme.onSurface)
-            Button(unbind, role: .destructive, action: actions.unbind)
-        case let .unbound(bindTo, choices, hint):
-            Menu {
-                ForEach(choices) { choice in
-                    Button(choice.name) { actions.bind(choice.id) }
-                }
-            } label: {
-                BindToRow(title: state.destinationTitle, bindTo: bindTo)
-            }
-            .disabled(choices.isEmpty)
-            if let hint {
-                Text(hint).font(DishFont.detail).foregroundStyle(DishTheme.muted)
-            }
+        case let .unbound(note):
+            Text(note).foregroundStyle(DishTheme.muted)
         }
     }
 }
 
-/// Destination · Bind to ›, the menu's label.
-private struct BindToRow: View {
-    let title: String
-    let bindTo: String
+/// One PC of the menu; the one the pad sends to wears the check.
+private struct BindChoiceButton: View {
+    let choice: BindChoice
+    let bind: @MainActor (String) -> Void
 
     var body: some View {
-        HStack(spacing: DishSpace.s4) {
-            Text(title).foregroundStyle(DishTheme.onSurface)
-            Spacer()
-            Text(bindTo).font(DishFont.body).foregroundStyle(DishTheme.primary)
-            Image(systemName: DishSymbol.disclosure).font(DishFont.detail).foregroundStyle(DishTheme.muted)
+        Button {
+            bind(choice.id)
+        } label: {
+            if choice.current {
+                Label(choice.name, systemImage: "checkmark")
+            } else {
+                Text(choice.name)
+            }
         }
-        .contentShape(Rectangle())
     }
 }
 
@@ -129,20 +142,28 @@ private struct ApplyRow: View {
     }
 }
 
-/// Dead zones ›: the row that pushes the page.
-struct ControllerDeadZonesSection: View {
-    let title: String
-    let open: @MainActor () -> Void
+/// Something the PC is doing for the pad right now: the spinner and its word.
+struct BusyRow: View {
+    let text: String
+
+    var body: some View {
+        HStack(spacing: DishSpace.s4) {
+            ProgressView().controlSize(.small)
+            Text(text).font(DishFont.detail).foregroundStyle(DishTheme.muted)
+        }
+    }
+}
+
+/// Unbind, alone at the foot of the page, where iOS keeps what takes
+/// something away.
+struct ControllerUnbindSection: View {
+    let item: RowActionItem<ControllerAction>
+    let perform: @MainActor (ControllerAction) -> Void
 
     var body: some View {
         Section {
-            Button(action: open) {
-                HStack(spacing: DishSpace.s4) {
-                    Text(title).foregroundStyle(DishTheme.onSurface)
-                    Spacer()
-                    Image(systemName: DishSymbol.disclosure).font(DishFont.detail).foregroundStyle(DishTheme.muted)
-                }
-                .contentShape(Rectangle())
+            RowButton { perform(item.action) } label: {
+                Text(item.title).font(DishFont.body).foregroundStyle(DishTheme.error)
             }
         }
         .listRowBackground(DishTheme.surface)
@@ -165,6 +186,42 @@ struct ControllerTelemetrySection: View {
             SectionEyebrow(title: state.title, color: DishTheme.muted)
         }
         .listRowBackground(DishTheme.surface)
+    }
+}
+
+/// Emulate as: Dish's four pads, or the protocol's four while the pad is
+/// bound to a Moonlight host, with the footer saying what Auto sends.
+struct ControllerEmulateSection: View {
+    let state: ControllerEmulateState
+    let setEmulateAs: @MainActor (EmulatedPad) -> Void
+    /// A pad on a Moonlight host: the protocol's type, nil for Auto.
+    let setHostEmulateAs: @MainActor (Int?) -> Void
+
+    var body: some View {
+        Section {
+            picker
+        } footer: {
+            if let host = state.host {
+                Text(host.detail).font(DishFont.detail).foregroundStyle(DishTheme.muted)
+            }
+        }
+        .listRowBackground(DishTheme.surface)
+    }
+
+    @ViewBuilder private var picker: some View {
+        if let host = state.host {
+            Picker(state.title, selection: Binding(get: { host.selection }, set: { setHostEmulateAs($0) })) {
+                ForEach(host.options) { Text($0.label).tag($0.id) }
+            }
+            .pickerStyle(.menu)
+            .foregroundStyle(DishTheme.onSurface)
+        } else {
+            Picker(state.title, selection: Binding(get: { state.emulateAs }, set: { setEmulateAs($0) })) {
+                ForEach(state.options) { Text($0.name).tag($0.pad) }
+            }
+            .pickerStyle(.menu)
+            .foregroundStyle(DishTheme.onSurface)
+        }
     }
 }
 
@@ -211,6 +268,25 @@ struct ControllerFunctionsSection: View {
             SectionEyebrow(title: state.title, color: DishTheme.muted)
         } footer: {
             Text(footnote).font(DishFont.detail).foregroundStyle(DishTheme.muted)
+        }
+        .listRowBackground(DishTheme.surface)
+    }
+}
+
+/// Dead zones ›: the row that pushes the page.
+struct ControllerDeadZonesSection: View {
+    let title: String
+    let open: @MainActor () -> Void
+
+    var body: some View {
+        Section {
+            RowButton(action: open) {
+                HStack(spacing: DishSpace.s4) {
+                    Text(title).foregroundStyle(DishTheme.onSurface)
+                    Spacer()
+                    Image(systemName: DishSymbol.disclosure).font(DishFont.detail).foregroundStyle(DishTheme.muted)
+                }
+            }
         }
         .listRowBackground(DishTheme.surface)
     }

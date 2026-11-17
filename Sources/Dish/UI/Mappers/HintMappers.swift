@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 // Copyright (C) 2026 Dish contributors.
 
+import DishEngine
 import SwiftUI
 
 /// A hint TipKit shows beside a control until the person does what it
@@ -27,7 +28,9 @@ struct HintState: Equatable {
     let urgent: Bool
 }
 
-func hintState(_ hint: Hint, words: L10n = .app) -> HintState {
+/// `port` words Add a controller's: a Lightning iPhone's wired road runs
+/// through the adapter.
+func hintState(_ hint: Hint, port: DevicePort = .usbC, words: L10n = .app) -> HintState {
     switch hint {
     case .supportDish:
         HintState(
@@ -41,7 +44,7 @@ func hintState(_ hint: Hint, words: L10n = .app) -> HintState {
         HintState(
             id: "dish.hint.add-a-controller",
             title: words.bringTheControllerYouOwn,
-            message: words.pairYourPadHintMessage,
+            message: addControllerHintMessage(port, words: words),
             symbol: "gamecontroller",
             urgent: false
         )
@@ -61,6 +64,15 @@ func hintState(_ hint: Hint, words: L10n = .app) -> HintState {
             symbol: "moon.fill",
             urgent: false
         )
+    }
+}
+
+/// Pads pair in Settings; on a Lightning iPhone the wired road runs through
+/// the adapter, and the hint says so.
+private func addControllerHintMessage(_ port: DevicePort, words: L10n) -> String {
+    switch port {
+    case .usbC: words.pairYourPadHintMessage
+    case .lightning: words.pairYourPadThroughTheAdapterHintMessage
     }
 }
 

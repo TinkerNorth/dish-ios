@@ -16,10 +16,11 @@ enum WindowWay {
     }
 }
 
-/// What the UI tests share on an iPhone and an iPad: the launch, an element
-/// by its label, a tab wherever the device draws it, an iPad's sidebar, the
-/// walk that lists the on-screen gamepad, Diagnostics, and the waits, which
-/// end on a state the app reaches, never on a clock of their own.
+/// What the UI tests share on an iPhone and an iPad: the launch, a
+/// remembered PC to launch with, an element by its label, a tab wherever the
+/// device draws it, an iPad's sidebar, the walk that binds the on-screen
+/// gamepad, Diagnostics, and the waits, which end on a state the app
+/// reaches, never on a clock of their own.
 @MainActor
 enum ShellUI {
 
@@ -53,9 +54,32 @@ enum ShellUI {
         return app
     }
 
+    /// A remembered satellite with no key, as the store keeps its rows
+    /// (JSON under `wifi_list`): the Connections tab lists it as paired, and
+    /// with no key nothing reaches for it.
+    static let rememberedName = "Test PC"
+    static let remembered =
+        #"[{"id":"mid:wave-g3","name":"Test PC","ip":"192.0.2.10","udpPort":9876,"pairPort":9443,"httpPort":9443,"machineId":"wave-g3"}]"#
+
+    /// The launch arguments that list the remembered PC, so setup's pick
+    /// step and the Connections tab offer it.
+    static let withARememberedPC = ["-wifi_list", plistData(remembered)]
+
+    /// An old-style property list's data, which the argument domain reads:
+    /// the bytes in hex between angle brackets.
+    static func plistData(_ text: String) -> String {
+        "<" + Data(text.utf8).map { String(format: "%02x", $0) }.joined() + ">"
+    }
+
     /// Any element labelled `label`, whatever SwiftUI made of it.
     static func element(_ label: String, in app: XCUIApplication) -> XCUIElement {
         app.descendants(matching: .any).matching(NSPredicate(format: "label == %@", label)).firstMatch
+    }
+
+    /// Any element whose label starts with `label`: a row whose children are
+    /// combined reads its name first.
+    static func element(startingWith label: String, in app: XCUIApplication) -> XCUIElement {
+        app.descendants(matching: .any).matching(NSPredicate(format: "label BEGINSWITH %@", label)).firstMatch
     }
 
     /// A tab's button: in the tab bar on an iPhone, and in the bar along the
@@ -92,20 +116,25 @@ enum ShellUI {
         XCTAssertTrue(element("Local Network", in: app).waitForExistence(timeout: patience))
     }
 
-    /// Setup's walk with the on-screen gamepad and no PC to bind it to: Bind
-    /// still lists the gamepad among the controllers, with Open, and lands
-    /// on Controllers.
-    static func listTheOnScreenGamepad(in app: XCUIApplication) {
+    /// Setup's walk that binds the on-screen gamepad to the remembered PC
+    /// (`withARememberedPC`): Add a controller, the on-screen gamepad,
+    /// Continue past the Local Network primer while iOS has not been asked
+    /// yet, the PC on the pick step, then Bind, which lands on Controllers
+    /// with the gamepad listed and bound.
+    static func bindTheOnScreenGamepad(in app: XCUIApplication) {
         let add = element("Add a controller", in: app)
         XCTAssertTrue(add.waitForExistence(timeout: patience))
         add.tap()
         XCTAssertTrue(element("How do you want to play?", in: app).waitForExistence(timeout: patience))
         let onScreen = scrolled(to: app.staticTexts["On-screen gamepad"].firstMatch, in: app)
         onScreen.tap()
-        byAddress(in: app).tap()
-        let cancel = app.buttons["Cancel"].firstMatch
-        XCTAssertTrue(cancel.waitForExistence(timeout: patience))
-        cancel.tap()
+        let primer = app.buttons["Continue"].firstMatch
+        if primer.waitForExistence(timeout: patience) {
+            primer.tap()
+        }
+        let pc = element(startingWith: rememberedName, in: app)
+        XCTAssertTrue(pc.waitForExistence(timeout: patience), "the remembered PC is on the pick step")
+        pc.tap()
         let bind = app.buttons["Bind"].firstMatch
         XCTAssertTrue(bind.waitForExistence(timeout: patience))
         bind.tap()
@@ -119,17 +148,6 @@ enum ShellUI {
             app.swipeUp()
         }
         return element
-    }
-
-    /// Add a PC by address: on the primer while iOS has not been asked about
-    /// the Local Network, or on Pick your PC once it has. Whichever step the
-    /// input step led to is waited for, not guessed from a clock.
-    private static func byAddress(in app: XCUIApplication) -> XCUIElement {
-        let primer = app.buttons["Add my PC by address instead"].firstMatch
-        let pick = app.buttons["Add a PC by address"].firstMatch
-        let eitherStep = NSPredicate { _, _ in primer.exists || pick.exists }
-        XCTAssertTrue(holds(eitherStep), "the input step led to the primer or to Pick your PC")
-        return primer.exists ? primer : pick
     }
 
     /// Whether the window comes to stand `way` in time, as the system turns

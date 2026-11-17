@@ -17,7 +17,7 @@ private enum ConnectionsFixture {
     }
 
     static func page(_ facts: ShellFacts) -> ConnectionsContent {
-        connectionsPageState(facts: facts, settingsURL: settings).content
+        connectionsPageState(facts: facts.connectionsFacts, settingsURL: settings).content
     }
 
     static func list(_ facts: ShellFacts) throws -> ConnectionsListState {
@@ -66,7 +66,7 @@ private enum ConnectionItems {
 final class ConnectionsMappersTests: XCTestCase {
 
     func testThePageIsTitledAndItsToolbarAddsAPCByAddress() {
-        let state = connectionsPageState(facts: FactsFixture.shell(), settingsURL: nil)
+        let state = connectionsPageState(facts: FactsFixture.shell().connectionsFacts, settingsURL: nil)
         XCTAssertEqual(state.title, "Connections")
         XCTAssertEqual(state.add, "Add a PC by address")
         XCTAssertEqual(state.scan, "Scan", "beside the list on an iPad, where a pull does not reach the refresh")
@@ -114,7 +114,8 @@ final class ConnectionsMappersTests: XCTestCase {
         ]))
         XCTAssertEqual(list.paired?.title, "Paired")
         XCTAssertEqual(list.paired?.rows.map(\.line), ["Online · 4 ms · 3 controllers", "Offline · seen yesterday", "Offline"])
-        XCTAssertEqual(list.paired?.rows.map(\.dot), [DishTheme.success, DishTheme.muted, DishTheme.muted])
+        XCTAssertEqual(list.paired?.rows.map(\.mark), [.dot(DishTheme.success), .dot(DishTheme.muted), .dot(DishTheme.muted)])
+        XCTAssertEqual(list.paired?.rows.map(\.lineColor), [DishTheme.muted, DishTheme.muted, DishTheme.muted])
         XCTAssertEqual(
             list.paired?.rows.map(\.symbol),
             ["antenna.radiowaves.left.and.right", "antenna.radiowaves.left.and.right", "desktopcomputer"]
@@ -130,7 +131,8 @@ final class ConnectionsMappersTests: XCTestCase {
             symbol: "antenna.radiowaves.left.and.right",
             name: "Den PC",
             line: "Needs pairing · 192.168.1.40",
-            dot: DishTheme.warning,
+            lineColor: DishTheme.muted,
+            mark: .dot(DishTheme.warning),
             button: ConnectionRowButton(title: "Pair", action: .pair(serverId: "Den PC")),
             page: nil,
             actions: RowActionsState(menu: [.item(pair)], leading: [pair], trailing: []),
@@ -180,6 +182,84 @@ final class ConnectionsMappersTests: XCTestCase {
         XCTAssertEqual(connectionSymbol(.satellite), satelliteSymbol)
         XCTAssertEqual(connectionSymbol(.moonlight), "desktopcomputer")
         XCTAssertEqual(connectionSymbol(.bluetooth), satelliteSymbol)
+    }
+
+    // MARK: - Every step of a link, on its row
+
+    /// A PC being reached for spins, says so, and carries no button; its
+    /// menu and leading swipe offer Cancel.
+    func testAPCBeingReachedForSpinsAndOffersCancel() {
+        let row = connectionRow(ConnectionsFixture.pc("Office PC", state: .connecting), now: FactsFixture.now, paired: true)
+        XCTAssertEqual(row.line, "Connecting…")
+        XCTAssertEqual(row.mark, .busy)
+        XCTAssertNil(row.button)
+        let cancel = RowActionItem(
+            action: ConnectionRowAction.cancel(id: "Office PC"),
+            title: "Cancel",
+            symbol: "xmark",
+            destructive: false
+        )
+        XCTAssertEqual(row.actions, ConnectionItems.paired(cancel, "Office PC"))
+    }
+
+    /// A PC that stopped responding says so with its pads in the error
+    /// colour and offers Reconnect, on the row and under the leading swipe.
+    func testAPCThatStoppedRespondingOffersReconnect() {
+        let row = connectionRow(
+            ConnectionsFixture.pc("Living Room PC", state: .unsteady(latencyMs: 40, controllers: 2)),
+            now: FactsFixture.now,
+            paired: true
+        )
+        XCTAssertEqual(row.line, "Stopped responding · 2 controllers")
+        XCTAssertEqual(row.mark, .dot(DishTheme.error))
+        XCTAssertEqual(row.button, ConnectionRowButton(title: "Reconnect", action: .reconnect(id: "Living Room PC")))
+        let reconnect = RowActionItem(
+            action: ConnectionRowAction.reconnect(id: "Living Room PC"),
+            title: "Reconnect",
+            symbol: RowActionSymbol.connect,
+            destructive: false
+        )
+        XCTAssertEqual(row.actions, ConnectionItems.paired(reconnect, "Living Room PC"))
+    }
+
+    /// The person's last attempt that failed is worded on the row in the
+    /// error colour, over the state, with Connect to try again.
+    func testAFailedAttemptIsWordedOnTheRowWithConnectToTryAgain() {
+        let failed = ConnectionFact(
+            id: "Office PC",
+            name: "Office PC",
+            address: "192.168.1.40",
+            kind: .satellite,
+            state: .offline(lastSeen: nil),
+            notice: .unreachable(detail: "timed out")
+        )
+        let row = connectionRow(failed, now: FactsFixture.now, paired: true)
+        XCTAssertEqual(row.line, "Couldn’t reach Office PC. Make sure it’s on and on your network.")
+        XCTAssertEqual(row.lineColor, DishTheme.error)
+        XCTAssertEqual(row.mark, .dot(DishTheme.error))
+        XCTAssertEqual(row.button, ConnectionRowButton(title: "Connect", action: .connect(id: "Office PC")))
+        let revoked = ConnectionFact(
+            id: "Den PC",
+            name: "Den PC",
+            address: "192.168.1.41",
+            kind: .satellite,
+            state: .needsPairing,
+            notice: .repairNeeded
+        )
+        let repair = connectionRow(revoked, now: FactsFixture.now, paired: true)
+        XCTAssertEqual(repair.line, "This satellite no longer recognizes this device. Re-pair needed.")
+        XCTAssertEqual(repair.button, ConnectionRowButton(title: "Pair", action: .pair(serverId: "Den PC")))
+    }
+
+    /// A PC typed by its address reads connecting on the found rows while
+    /// the pool reaches for it, with Pair kept for when it answers.
+    func testATypedPCBeingReachedForSpinsAmongTheFound() throws {
+        let typed = ConnectionFact(id: "wifi:192.168.1.50:9876", name: "", address: "192.168.1.50", kind: .satellite, state: .connecting)
+        let list = try ConnectionsFixture.list(FactsFixture.shell(found: [typed]))
+        let row = try XCTUnwrap(list.found?.rows.first)
+        XCTAssertEqual(row.line, "Connecting…")
+        XCTAssertEqual(row.mark, .busy)
+        XCTAssertNil(row.button)
     }
 
     // MARK: - The long-press menu and the swipes

@@ -18,22 +18,9 @@ final class ConnectionsUITests: XCTestCase {
 
     private static let addByAddress = "Add a PC by address"
     private static let addressExample = "192.168.1.50"
-    private static let rememberedName = "Test PC"
     private static let noPCsYet = "No PCs yet"
     private static let localNetworkNotAsked = "Not asked yet"
     private static let localNetworkAllowed = "Allowed"
-
-    /// One remembered satellite with no key, as the store keeps its rows
-    /// (JSON under `wifi_list`): the tab lists it as paired, and with no key
-    /// nothing reaches for it.
-    private static let remembered =
-        #"[{"id":"mid:wave-g3","name":"Test PC","ip":"192.0.2.10","udpPort":9876,"pairPort":9443,"httpPort":9443,"machineId":"wave-g3"}]"#
-
-    /// An old-style property list's data, which the argument domain reads:
-    /// the bytes in hex between angle brackets.
-    private static func plistData(_ text: String) -> String {
-        "<" + Data(text.utf8).map { String(format: "%02x", $0) }.joined() + ">"
-    }
 
     /// The Connections tab, wherever the device draws its tabs, with the
     /// primer unseen unless a test says so.
@@ -43,11 +30,6 @@ final class ConnectionsUITests: XCTestCase {
         XCTAssertTrue(connections.waitForExistence(timeout: ShellUI.patience))
         connections.tap()
         return app
-    }
-
-    /// Any element labelled with `label` or starting with it.
-    private func element(startingWith label: String, in app: XCUIApplication) -> XCUIElement {
-        app.descendants(matching: .any).matching(NSPredicate(format: "label BEGINSWITH %@", label)).firstMatch
     }
 
     /// The empty page, once it is drawn: no PC answers the simulator.
@@ -106,8 +88,8 @@ final class ConnectionsUITests: XCTestCase {
     /// A swipe from the trailing edge of a paired PC's row reveals Forget
     /// This PC on the row itself, which asks before the PC goes.
     func testASwipeOnAPairedRowRevealsForgetThisPC() {
-        let app = launchOnConnections(["-wifi_list", Self.plistData(Self.remembered)])
-        let row = element(startingWith: Self.rememberedName, in: app)
+        let app = launchOnConnections(["-wifi_list", ShellUI.plistData(ShellUI.remembered)])
+        let row = ShellUI.element(startingWith: ShellUI.rememberedName, in: app)
         XCTAssertTrue(row.waitForExistence(timeout: ShellUI.patience), "the remembered PC is listed as paired")
         row.swipeLeft()
         let forget = app.buttons["Forget This PC"].firstMatch

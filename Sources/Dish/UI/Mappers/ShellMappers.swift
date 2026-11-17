@@ -25,15 +25,29 @@ struct TabItemState: Equatable, Identifiable {
 /// The session accessory: the live link on every tab.
 enum SessionBarState: Equatable {
     /// `line` under the PC's name; `shortLine` alone while the tab bar is
-    /// minimized. `dim` and `play` label the two buttons.
-    case streaming(pcName: String, line: String, shortLine: String, dim: String, play: String)
+    /// minimized; `dim` labels the one button.
+    case streaming(pcName: String, line: String, shortLine: String, dim: String)
     /// The PC stopped answering: the warning line and Reconnect.
     case problem(pcName: String, line: String, reconnect: String)
+    /// The PC the person reached for is being connected to: the spinner and
+    /// its line, no button.
+    case reconnecting(pcName: String, line: String)
 }
 
+/// The whole, for a test that holds one.
 func tabItems(facts: ShellFacts, words: L10n = .app) -> [TabItemState] {
+    tabItems(session: facts.session, paired: facts.paired, words: words)
+}
+
+/// `session` and `paired` carry the Connections badge.
+func tabItems(session: SessionFact?, paired: [ConnectionFact], words: L10n = .app) -> [TabItemState] {
     Tab.allCases.map { tab in
-        TabItemState(tab: tab, title: tabTitle(tab, words: words), symbol: tabSymbol(tab), badge: tabBadge(tab, facts: facts))
+        TabItemState(
+            tab: tab,
+            title: tabTitle(tab, words: words),
+            symbol: tabSymbol(tab),
+            badge: tabBadge(tab, session: session, paired: paired)
+        )
     }
 }
 
@@ -73,9 +87,9 @@ func tabSymbol(_ tab: Tab) -> String {
 /// the session accessory and a Satellite PC's row.
 let satelliteSymbol = "antenna.radiowaves.left.and.right"
 
-private func tabBadge(_ tab: Tab, facts: ShellFacts) -> Int? {
+private func tabBadge(_ tab: Tab, session: SessionFact?, paired: [ConnectionFact]) -> Int? {
     switch tab {
-    case .connections: connectionsBadge(session: facts.session)
+    case .connections: connectionsBadge(session: session, paired: paired)
     case .controllers, .settings: nil
     }
 }
@@ -86,27 +100,64 @@ func pairingSheetId(_ open: OpenPairing?) -> String? {
     open?.server.id
 }
 
-/// One badge while the session's PC has stopped responding, shown once.
-func connectionsBadge(session: SessionFact?) -> Int? {
-    switch session?.phase {
-    case .stoppedResponding: 1
-    case .streaming, nil: nil
+/// What on Connections needs the person: the session's PC that stopped
+/// responding, and each paired PC whose key was revoked or whose last
+/// attempt failed; nil while nothing does.
+func connectionsBadge(session: SessionFact?, paired: [ConnectionFact] = []) -> Int? {
+    let pcs = paired.filter(needsAttention)
+    let counted = Set(pcs.map(\.id))
+    let sessionApart = sessionNeedsAttention(session?.phase) && !counted.contains(session?.id ?? "")
+    let count = pcs.count + (sessionApart ? 1 : 0)
+    return count == 0 ? nil : count
+}
+
+private func sessionNeedsAttention(_ phase: SessionPhase?) -> Bool {
+    switch phase {
+    case .stoppedResponding, .failed: true
+    case .streaming, .reconnecting, nil: false
     }
 }
 
-func sessionBarState(_ session: SessionFact?, words: L10n = .app) -> SessionBarState? {
+/// A paired PC whose key was revoked, whose acks falter, or whose last
+/// attempt failed.
+func needsAttention(_ pc: ConnectionFact) -> Bool {
+    let revoked = pc.state == .needsPairing
+    let failed = pc.notice != nil
+    return revoked || failed || isUnsteady(pc.state)
+}
+
+private func isUnsteady(_ state: ConnectionState) -> Bool {
+    switch state {
+    case .unsteady: true
+    case .online, .connecting, .offline, .needsPairing: false
+    }
+}
+
+/// `lowPower` is the countdown: its last seconds take the streaming line.
+func sessionBarState(_ session: SessionFact?, lowPower: LowPowerFact = .idle, words: L10n = .app) -> SessionBarState? {
     guard let session else { return nil }
     switch session.phase {
-    case .streaming: return streamingBar(session, words: words)
+    case .streaming: return streamingBar(session, lowPower: lowPower, words: words)
     case .stoppedResponding: return .problem(pcName: session.pcName, line: words.stoppedResponding, reconnect: words.reconnect)
+    case .reconnecting: return .reconnecting(pcName: session.pcName, line: words.connecting)
+    case let .failed(failure):
+        return .problem(
+            pcName: session.pcName,
+            line: connectionFailureText(failure, name: session.pcName, words: words),
+            reconnect: words.reconnect
+        )
     }
 }
 
-private func streamingBar(_ session: SessionFact, words: L10n) -> SessionBarState {
+private func streamingBar(_ session: SessionFact, lowPower: LowPowerFact, words: L10n) -> SessionBarState {
     let counts = [words.padCount(session.pads)] + [session.latencyMs.map(words.latency)].compactMap(\.self)
     let shortLine = counts.joined(separator: lineSeparator)
     let line = ([words.streaming] + counts).joined(separator: lineSeparator)
-    return .streaming(pcName: session.pcName, line: line, shortLine: shortLine, dim: words.dim, play: words.play)
+    guard let seconds = lowPower.countdown else {
+        return .streaming(pcName: session.pcName, line: line, shortLine: shortLine, dim: words.dim)
+    }
+    let countdown = words.lowPowerIn(seconds)
+    return .streaming(pcName: session.pcName, line: countdown, shortLine: countdown, dim: words.dim)
 }
 
 // MARK: - A tab's list beside its page, on a regular width
@@ -140,17 +191,19 @@ func listSelection(_ selection: Binding<Page?>, layout: TabLayout) -> Binding<Pa
 enum RowOpening: Equatable {
     /// A stack's row pushes its page, with a chevron.
     case push(Page)
-    /// A split list's row is selected, and its page shows beside the list.
-    case select(Page)
+    /// A split list's row is selected, and its page shows beside the list;
+    /// `selected` while it is the one open.
+    case select(Page, selected: Bool)
     /// A row with no page opens nothing.
     case inert
 }
 
-func rowOpening(_ page: Page?, layout: TabLayout) -> RowOpening {
+/// `selection` is the page a split's detail shows, which marks its row.
+func rowOpening(_ page: Page?, layout: TabLayout, selection: Page? = nil) -> RowOpening {
     guard let page else { return .inert }
     switch layout {
     case .stack: return .push(page)
-    case .split: return .select(page)
+    case .split: return .select(page, selected: selection == page)
     }
 }
 
@@ -164,30 +217,57 @@ enum TabDetailState: Equatable {
     case blank
 }
 
+/// The whole, for a test that holds one.
 func tabDetailState(_ tab: Tab, opened: Page?, facts: ShellFacts, words: L10n = .app) -> TabDetailState {
-    guard let opened else { return detailInvitation(tab, facts: facts, words: words) }
+    tabDetailState(tab, opened: opened, controllers: facts.controllers, paired: facts.paired, words: words)
+}
+
+func tabDetailState(
+    _ tab: Tab,
+    opened: Page?,
+    controllers: [ControllerFact],
+    paired: [ConnectionFact],
+    words: L10n = .app
+) -> TabDetailState {
+    guard let opened else { return detailInvitation(tab, controllers: controllers, paired: paired, words: words) }
     return .page(opened)
 }
 
 /// A controller Dish can read, or a paired PC, is a row that opens a page.
-private func detailInvitation(_ tab: Tab, facts: ShellFacts, words: L10n) -> TabDetailState {
+private func detailInvitation(_ tab: Tab, controllers: [ControllerFact], paired: [ConnectionFact], words: L10n) -> TabDetailState {
     switch tab {
     case .controllers:
-        let somethingToOpen = facts.controllers.contains(where: \.supported)
+        let somethingToOpen = controllers.contains(where: \.supported)
         return somethingToOpen ? .pick(title: words.pickAController, symbol: tabSymbol(.controllers)) : .blank
     case .connections:
-        let somethingToOpen = !facts.paired.isEmpty
+        let somethingToOpen = !paired.isEmpty
         return somethingToOpen ? .pick(title: words.pickAPC, symbol: satelliteSymbol) : .blank
     case .settings:
         return .blank
     }
 }
 
-/// iOS suspends Dish when the screen locks, so the idle timer is held off
-/// while a session is up and the person asked to keep the screen on.
+/// The whole, for a test that holds one.
 func idleTimerDisabled(facts: ShellFacts) -> Bool {
-    let sessionUp = facts.session != nil
-    return sessionUp && facts.preferences.keepScreenOn
+    idleTimerDisabled(session: facts.session, preferences: facts.preferences)
+}
+
+/// iOS suspends Dish when the screen locks, so the idle timer is held off
+/// while a pad streams and the person asked to keep the screen on: a
+/// session up with a pad bound to it (one that stopped responding keeps
+/// Reconnect on screen); a bare connection, a session being brought back
+/// or failed, lets the phone lock like any other app.
+func idleTimerDisabled(session: SessionFact?, preferences: PreferencesFacts) -> Bool {
+    guard let session else { return false }
+    let padStreams = sessionIsUp(session.phase) && session.pads > 0
+    return padStreams && preferences.keepScreenOn
+}
+
+private func sessionIsUp(_ phase: SessionPhase) -> Bool {
+    switch phase {
+    case .streaming, .stoppedResponding: true
+    case .reconnecting, .failed: false
+    }
 }
 
 /// The scheme the Appearance setting forces; nil follows the system.

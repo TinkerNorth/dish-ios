@@ -66,9 +66,12 @@ public struct DishScene: Scene {
                 .environment(\.appVersion, shortVersion(of: .main))
                 .environment(\.thirdPartyNotice, notice)
                 .modifier(WindowReader())
-                .preferredColorScheme(colorScheme(for: model.shellFacts.preferences.appearance))
-                .onChange(of: idleTimerDisabled(facts: model.shellFacts), initial: true) { holdScreenOn($1) }
+                .preferredColorScheme(colorScheme(for: model.preferencesFacts.appearance))
+                .onChange(of: idleTimerDisabled(session: model.sessionFacts.session, preferences: model.preferencesFacts), initial: true) {
+                    holdScreenOn($1)
+                }
                 .onChange(of: screenOrientation(for: navigation.state.cover, idiom: idiom), initial: true) { turn(to: $1) }
+                .onChange(of: navigation.state.cover == .dim) { _, dimmed in dim(dimmed) }
                 .onChange(of: scenePhase) { scenePhaseChanged($1) }
         }
     }
@@ -77,10 +80,34 @@ public struct DishScene: Scene {
     /// graceful way there and are reached for again on the way back.
     private func scenePhaseChanged(_ phase: ScenePhase) {
         switch phase {
-        case .background: model.enteredBackground()
-        case .active: model.enteredForeground()
+        case .background:
+            model.enteredBackground()
+            dim(false)
+        case .active:
+            model.enteredForeground()
+            watchTouches()
+            dim(navigation.state.cover == .dim)
         case .inactive: break
         @unknown default: break
+        }
+    }
+
+    private var windowScenes: [UIWindowScene] {
+        UIApplication.shared.connectedScenes.compactMap { $0 as? UIWindowScene }
+    }
+
+    private func dim(_ dimmed: Bool) {
+        guard let screen = windowScenes.first?.screen else { return }
+        root.value.dimmer.apply(dimmed, to: screen)
+    }
+
+    /// A watcher on every window, once.
+    private func watchTouches() {
+        let model = model
+        for window in windowScenes.flatMap(\.windows) where !(window.gestureRecognizers ?? []).contains(where: { $0 is TouchWatcher }) {
+            let watcher = TouchWatcher(target: nil, action: nil)
+            watcher.onTouch = { model.touched() }
+            window.addGestureRecognizer(watcher)
         }
     }
 
@@ -105,20 +132,25 @@ public struct DishScene: Scene {
 /// The composition root the scene keeps: the model over the device's
 /// stores, sockets and battery, the navigation store over the model's intents, and
 /// the router App Intents post through. TipKit is configured and the window
-/// turned for the first time as it is made.
+/// turned for the first time as it is made. The hardware's model identifier
+/// is read here, once, for the port the device hosts a wired pad through.
 @MainActor
 private struct SceneRoot {
     let model: AppModel
     let navigation: NavigationStore
     let router: IntentRouter
+    /// Keeps the brightness the dim found, to give it back.
+    let dimmer = ScreenDimmer()
 
     init(orientation: OrientationLock, idiom: DeviceIdiom) {
         TipKitTips.configure(hidden: UserDefaults.standard.bool(forKey: TipKitTips.hiddenKey))
+        let hardware = hardwareModel(machine: unameMachine(), simulated: ProcessInfo.processInfo.environment[simulatedModelKey])
         let model = AppModel(
             defaults: .standard,
             pasteboard: SystemPasteboard(),
             deviceBattery: SystemDeviceBattery(),
-            deviceKind: deviceKind(idiom)
+            deviceKind: deviceKind(idiom),
+            devicePort: devicePort(modelIdentifier: hardware)
         )
         let navigation = NavigationStore(
             onboarding: model.onboarding,
@@ -134,7 +166,7 @@ private struct SceneRoot {
         orientation.follow(screenOrientation(for: navigation.state.cover, idiom: idiom))
         self.model = model
         self.navigation = navigation
-        router = IntentRouter(send: { navigation.send($0) }, paired: { model.shellFacts.paired })
+        router = IntentRouter(send: { navigation.send($0) }, paired: { model.connectionsFacts.paired })
     }
 }
 

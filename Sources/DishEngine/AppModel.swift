@@ -34,6 +34,8 @@ package final class AppModel {
     @ObservationIgnored let recorder: DiagnosticsRecorder
     /// The clipboard, the scene's to fill.
     let pasteboard: any Pasteboard
+    /// The port this device hosts a wired pad through, as the scene read it.
+    let devicePort: DevicePort
     let setupSource = StateSource<SetupState?>(initial: nil)
     let supportSource = StateSource<SupportFacts>(initial: .initial)
     /// The on-screen controller's slot: its touches, its resend loop, its motion.
@@ -41,8 +43,14 @@ package final class AppModel {
     let onScreenBattery: DeviceBatteryCadence
     /// The play screen on display; nil while none is.
     let playSource = StateSource<PlayScreen?>(initial: nil)
-    /// Whether the on-screen controller is one of the controllers.
-    let onScreenListed = StateSource<Bool>(initial: false)
+    /// The slot the phone's touchpad or mouse screen serves: the on-screen
+    /// controller, or a pad the phone was aimed at before the screen opened.
+    var playTarget = onScreenSlotId
+    /// The low-power countdown while a session streams.
+    package let lowPower: LowPowerWatch
+    /// Whether the shell could raise the dim now: the tabs are on screen,
+    /// with no cover or sheet over them.
+    let dimAllowed = StateSource<Bool>(initial: false)
     /// Each pad's route, from the bindings and the live clients.
     @ObservationIgnored let routing = InputRouting()
     /// The satellites' return paths to the pads bound on them.
@@ -59,9 +67,12 @@ package final class AppModel {
     package internal(set) var moonlightPin: MoonlightPinPrompt?
     /// The last thing a Moonlight host had to say; the hosts page words it.
     package internal(set) var lastMoonlightEvent: MoonlightConnectionEvent?
-    /// The last thing the pool had to say: a failure, or a satellite that
-    /// wants a PIN. The pages word it.
-    package internal(set) var lastConnectionEvent: ConnectionEvent?
+    /// Why the last attempt the person made on each PC failed, by its id,
+    /// kept until the next attempt or until the PC is up.
+    let attemptNotices = StateSource<[String: ConnectionFailure]>(initial: [:])
+    /// The PCs the person is reaching for right now, by id, pruned as their
+    /// links settle; a silent retry is never one of them.
+    let reaching = StateSource<Set<String>>(initial: [])
     /// The one bind in flight and where it stands.
     package internal(set) var bindingProgress = ApplyProgress.idle
     /// The pad and the PC of the last bind asked for; the apply fact names them.
@@ -84,6 +95,8 @@ package final class AppModel {
         resendTicker: any Ticker,
         diagnostics: DiagnosticsSource = DiagnosticsSource(ticker: TimerTicker()),
         pasteboard: any Pasteboard = InertPasteboard(),
+        devicePort: DevicePort = .usbC,
+        lowPowerTicker: any Ticker = TimerTicker(),
         deviceBattery: any DeviceBattery = InertDeviceBattery(),
         batteryTicker: any Ticker = TimerTicker()
     ) {
@@ -98,6 +111,8 @@ package final class AppModel {
         self.tips = tips
         self.diagnostics = diagnostics
         self.pasteboard = pasteboard
+        self.devicePort = devicePort
+        lowPower = LowPowerWatch(ticker: lowPowerTicker)
         let log = DiagnosticsLogStore()
         diagnosticsLog = log
         recorder = DiagnosticsRecorder(store: log)
@@ -108,11 +123,14 @@ package final class AppModel {
         applyStoredDeadzones()
         pads.source.processor.setDeadzones(deviceId: onScreenSlotId, GamepadInputProcessor.Deadzones())
         wireNetwork()
+        followReaching()
         wireDiagnostics()
         wireMoonlight()
         observeBindingMemory()
         restoreStandingBindings()
+        observeLowPower()
         resumeSteamControllers()
+        onScreenBattery.start(onScreenSlotId)
     }
 
     /// Every store over the same defaults, the wall clock, the pads iOS
@@ -136,6 +154,8 @@ package final class AppModel {
         deviceBattery: any DeviceBattery = InertDeviceBattery(),
         batteryTicker: any Ticker = TimerTicker(),
         deviceKind: DeviceKind = .phone,
+        devicePort: DevicePort = .usbC,
+        lowPowerTicker: any Ticker = TimerTicker(),
         steamRadio: @escaping SteamRadioFactory = { CoreBluetoothRadio(events: $0, queue: $1) },
         steamClock: (any SteamClock)? = nil
     ) {
@@ -163,6 +183,8 @@ package final class AppModel {
             resendTicker: resendTicker,
             diagnostics: diagnostics,
             pasteboard: pasteboard,
+            devicePort: devicePort,
+            lowPowerTicker: lowPowerTicker,
             deviceBattery: deviceBattery,
             batteryTicker: batteryTicker
         )
@@ -187,39 +209,5 @@ package final class AppModel {
     /// The setup walk on screen; nil while the cover is down.
     package var setup: SetupState? {
         setupSource.state
-    }
-
-    package var shellFacts: ShellFacts {
-        ShellFacts(
-            controllers: controllerFacts,
-            attachedPads: attachedPadFacts,
-            paired: pairedFacts,
-            found: foundFacts,
-            scanning: network.wifi.isScanning,
-            session: sessionFact,
-            localNetwork: localNetwork.status,
-            preferences: preferencesFacts,
-            now: clock.state,
-            setup: setup,
-            support: supportSource.state,
-            play: playFacts,
-            diagnostics: diagnostics.state,
-            diagnosticsEvents: diagnosticsLog.state,
-            apply: applyFact,
-            addedByAddress: addedByAddress?.id,
-            deadzones: pads.deadzones.state,
-            forwarding: pads.features.flags,
-            steamBluetooth: steamBluetoothStatus(enabled: pads.steamSetting.enabled, radio: pads.steam.radio)
-        )
-    }
-
-    private var preferencesFacts: PreferencesFacts {
-        let streaming = streaming.state
-        return PreferencesFacts(
-            deviceName: device.state,
-            keepScreenOn: streaming.keepScreenOn,
-            dimAfter: streaming.dimAfter,
-            appearance: appearance.state
-        )
     }
 }

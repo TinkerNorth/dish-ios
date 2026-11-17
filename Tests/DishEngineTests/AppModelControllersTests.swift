@@ -41,16 +41,27 @@ final class AppModelControllersTests: XCTestCase {
         return try (AppModel(defaults: TestDefaults.fresh(self), controllerSource: source), source)
     }
 
-    func testNoPadNoControllerAndNoAttachedPad() throws {
+    /// The scene reads the hardware's port and hands it in; a model told
+    /// nothing takes the port that needs no note.
+    func testThePortTheSceneReadsRidesTheFacts() throws {
         let (model, _) = try model([])
-        XCTAssertEqual(model.shellFacts.controllers, [])
+        XCTAssertEqual(model.shellFacts.port, .usbC)
+        let lightning = try AppModel(defaults: TestDefaults.fresh(self), controllerSource: FakeControllerSource(), devicePort: .lightning)
+        XCTAssertEqual(lightning.shellFacts.port, .lightning)
+    }
+
+    /// With no pad, the on-screen controller is still listed, as Android's
+    /// Virtual Controller always is; setup has no pad to offer.
+    func testNoPadLeavesTheOnScreenControllerAloneAndNoAttachedPad() throws {
+        let (model, _) = try model([])
+        XCTAssertEqual(model.shellFacts.controllers.map(\.id), [onScreenSlotId])
         XCTAssertEqual(model.shellFacts.attachedPads, [])
     }
 
     func testEveryListedPadIsAControllerWithTheSwitchesItsHardwareCarries() throws {
         let (model, _) = try model([dualSense, xbox, remote])
         let controllers = model.shellFacts.controllers
-        XCTAssertEqual(controllers.map(\.id), [dualSense.id, xbox.id, remote.id])
+        XCTAssertEqual(controllers.map(\.id), [dualSense.id, xbox.id, remote.id, onScreenSlotId], "the pads, then the on-screen controller")
         let first = try XCTUnwrap(controllers.first)
         XCTAssertEqual(first.name, "DualSense Wireless Controller")
         XCTAssertEqual(first.link, .usbC)
@@ -75,7 +86,7 @@ final class AppModelControllersTests: XCTestCase {
     func testTheFactsFollowTheSourcesSlots() throws {
         let (model, source) = try model([])
         source.slots = [xbox]
-        XCTAssertEqual(model.shellFacts.controllers.map(\.id), [xbox.id])
+        XCTAssertEqual(model.shellFacts.controllers.map(\.id), [xbox.id, onScreenSlotId])
     }
 
     func testAFlippedSwitchIsTheControllersFactAndItsFlags() throws {

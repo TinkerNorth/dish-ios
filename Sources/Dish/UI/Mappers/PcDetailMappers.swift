@@ -10,7 +10,9 @@ import SwiftUI
 struct PcStatusState: Equatable {
     let symbol: String
     let line: String
-    let dot: Color
+    /// The error colour while the line words a failure.
+    let lineColor: Color
+    let mark: StatusMark
     let detail: String
 }
 
@@ -40,6 +42,10 @@ struct PcCarriesState: Equatable {
 enum PcAction: Equatable {
     case repair
     case connect
+    /// A PC that stopped responding: its session closes and opens again.
+    case reconnect
+    /// A PC being reached for: the reach stops.
+    case cancel
     case disconnect
 }
 
@@ -83,36 +89,55 @@ struct PcDetailPageState: Equatable {
     let content: PcDetailContent
 }
 
+/// The whole, for a test or a preview that holds one.
 func pcDetailPageState(facts: ShellFacts, id: String, words: L10n = .app) -> PcDetailPageState {
-    guard let pc = facts.paired.first(where: { $0.id == id }) else {
-        return PcDetailPageState(title: pageTitle(.pcDetail(id: id), words: words), content: .gone(message: words.pcNoLongerRemembered))
-    }
-    return PcDetailPageState(title: connectionTitle(pc), content: .pc(pcDetailState(pc, facts: facts, words: words)))
+    pcDetailPageState(connections: facts.connectionsFacts, controllers: facts.controllers, id: id, words: words)
 }
 
-private func pcDetailState(_ pc: ConnectionFact, facts: ShellFacts, words: L10n) -> PcDetailState {
+/// `controllers` name the pads the PC carries; `connections.now` words its last sighting.
+func pcDetailPageState(
+    connections: ConnectionsFacts,
+    controllers: [ControllerFact],
+    id: String,
+    words: L10n = .app
+) -> PcDetailPageState {
+    guard let pc = connections.paired.first(where: { $0.id == id }) else {
+        return PcDetailPageState(title: pageTitle(.pcDetail(id: id), words: words), content: .gone(message: words.pcNoLongerRemembered))
+    }
+    return PcDetailPageState(
+        title: connectionTitle(pc),
+        content: .pc(pcDetailState(pc, controllers: controllers, now: connections.now, words: words))
+    )
+}
+
+private func pcDetailState(_ pc: ConnectionFact, controllers: [ControllerFact], now: Date, words: L10n) -> PcDetailState {
     PcDetailState(
         id: pc.id,
         status: PcStatusState(
             symbol: connectionSymbol(pc.kind),
-            line: statusLine(pc, now: facts.now, words: words),
-            dot: connectionDot(pc.state),
+            line: statusLine(pc, now: now, words: words),
+            lineColor: connectionLineColor(pc),
+            mark: connectionMark(pc),
             detail: statusDetail(pc, words: words)
         ),
-        carrying: carrying(pc, controllers: facts.controllers, words: words),
+        carrying: carrying(pc, controllers: controllers, words: words),
         carries: pc.features.map { carries($0, words: words) },
         actions: pcActions(pc.state, words: words),
         forget: forgetState(bound: pc.boundControllerIds.count, words: words)
     )
 }
 
-/// "Online · 4 ms", when the PC was last seen, or that it wants a PIN; the
-/// pads it carries have their own section.
+/// Why the last attempt failed, else "Online · 4 ms", that the PC stopped
+/// responding, that it is being reached for, when it was last seen, or
+/// that it wants a PIN; the pads it carries have their own section.
 private func statusLine(_ pc: ConnectionFact, now: Date, words: L10n) -> String {
+    guard pc.notice == nil else { return connectionLine(pc, now: now, words: words) }
     switch pc.state {
-    case let .online(latencyMs, _): [words.online, words.latency(latencyMs)].joined(separator: lineSeparator)
-    case .offline: connectionLine(pc, now: now, words: words)
-    case .needsPairing: words.setupNeedsPairing
+    case let .online(latencyMs, _): return [words.online, words.latency(latencyMs)].joined(separator: lineSeparator)
+    case .unsteady: return words.stoppedResponding
+    case .connecting: return words.connecting
+    case .offline: return connectionLine(pc, now: now, words: words)
+    case .needsPairing: return words.setupNeedsPairing
     }
 }
 
@@ -160,13 +185,16 @@ private func carries(_ features: SatelliteFeaturesFact, words: L10n) -> PcCarrie
     )
 }
 
-/// Re-pair always; Disconnect while the session is up, Connect while the
-/// PC rests, and neither while its key was revoked, since a connect would
-/// only fail.
+/// Re-pair always; Disconnect while the session is up, Reconnect while it
+/// stopped responding, Cancel while the PC is being reached for, Connect
+/// while it rests, and nothing more while its key was revoked, since a
+/// connect would only fail.
 private func pcActions(_ state: ConnectionState, words: L10n) -> [PcActionState] {
     let repair = PcActionState(action: .repair, title: words.repair)
     switch state {
     case .online: return [repair, PcActionState(action: .disconnect, title: words.disconnect)]
+    case .unsteady: return [repair, PcActionState(action: .reconnect, title: words.reconnect)]
+    case .connecting: return [repair, PcActionState(action: .cancel, title: words.cancel)]
     case .offline: return [repair, PcActionState(action: .connect, title: words.connect)]
     case .needsPairing: return [repair]
     }

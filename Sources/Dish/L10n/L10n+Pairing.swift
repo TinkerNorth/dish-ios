@@ -63,6 +63,14 @@ extension L10n {
         catalog.format("Couldn’t reach %@. Make sure it’s on and on your network.", name)
     }
 
+    func noDataGetsThrough(_ name: String) -> String {
+        catalog.format("No data gets through to %@. The network may block traffic between devices, or the PC’s firewall does.", name)
+    }
+
+    func anotherDeviceTookOver(_ name: String) -> String {
+        catalog.format("Another device took over %@. Connect to take it back.", name)
+    }
+
     func notApprovedYet(_ name: String) -> String {
         catalog.format("%@ hasn’t approved the pairing yet.", name)
     }

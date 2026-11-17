@@ -47,6 +47,8 @@ public enum ApplyEvent: Equatable, Sendable {
     case hostConfirmed
     case hostRejected
     case budgetSpent
+    /// The link the run waited for failed to come up.
+    case linkFailed
     case padGone
     case cancelled
     case dismissed
@@ -66,7 +68,7 @@ private func idleApply(_ event: ApplyEvent) -> ApplyProgress {
     switch event {
     case let .started(path): startedApply(path)
     case .padGone: .failed(.padGone)
-    case .putSent, .hostConfirmed, .hostRejected, .budgetSpent, .cancelled, .dismissed: .idle
+    case .putSent, .hostConfirmed, .hostRejected, .budgetSpent, .linkFailed, .cancelled, .dismissed: .idle
     }
 }
 
@@ -83,7 +85,7 @@ private func runningApply(_ step: ApplyStep, _ event: ApplyEvent) -> ApplyProgre
     case .putSent: .running(.applyingOnHost)
     case .hostConfirmed: .done
     case .hostRejected: .failed(.rejected)
-    case .budgetSpent: .failed(.hostUnreachable)
+    case .budgetSpent, .linkFailed: .failed(.hostUnreachable)
     case .padGone: .failed(.padGone)
     case .cancelled: cancelledApply(step)
     case .started, .dismissed: .running(step)
@@ -102,7 +104,7 @@ private func endedApply(_ progress: ApplyProgress, _ event: ApplyEvent) -> Apply
     switch event {
     case let .started(path): startedApply(path)
     case .dismissed: .idle
-    case .putSent, .hostConfirmed, .hostRejected, .budgetSpent, .padGone, .cancelled: progress
+    case .putSent, .hostConfirmed, .hostRejected, .budgetSpent, .linkFailed, .padGone, .cancelled: progress
     }
 }
 

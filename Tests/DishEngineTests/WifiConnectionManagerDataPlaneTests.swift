@@ -305,7 +305,7 @@ final class WifiConnectionManagerDataPlaneTests: XCTestCase {
         var failures: [ConnectionFailure] = []
         manager.onSlotRegistrationFailed = { failedSlots.append($0) }
         manager.onEvent = { event in
-            if case let .failure(failure) = event { failures.append(failure) }
+            if case let .failure(_, failure, _) = event { failures.append(failure) }
         }
 
         // Partial success is a 200 (contract §Error model): the slot draws a

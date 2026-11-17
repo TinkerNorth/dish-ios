@@ -27,6 +27,8 @@ package func hasAnalogTriggers(_ pad: EmulatedPad) -> Bool {
 @MainActor
 package final class OnScreenPad {
     private let feed: PadFeed
+    /// Where the touches go: its own feed, or a pad's.
+    private var touchFeed: PadFeed
     private let ticker: any Ticker
     private let sensor: any MotionSensor
     private let now: @MainActor () -> UInt64
@@ -47,9 +49,15 @@ package final class OnScreenPad {
 
     package init(feed: PadFeed, ticker: any Ticker, sensor: any MotionSensor, now: @escaping @MainActor () -> UInt64 = uptimeNs) {
         self.feed = feed
+        touchFeed = feed
         self.ticker = ticker
         self.sensor = sensor
         self.now = now
+    }
+
+    /// Aim the touches at a slot's feed from now on.
+    package func aimTouch(at target: PadFeed) {
+        touchFeed = target
     }
 
     /// Whether this iPhone has the motion sensors the Motion switch needs.
@@ -87,7 +95,7 @@ package final class OnScreenPad {
         let step = reduceTouchSurface(surface, event)
         surface = step.state
         if resentTouch == nil { resentTouch = .idle }
-        feed.publishTouchpad(step.sample)
+        touchFeed.publishTouchpad(step.sample)
     }
 
     package func useAnalogTriggers(_ analog: Bool) {
@@ -137,7 +145,7 @@ package final class OnScreenPad {
         let current = surface.sample()
         resentTouch = current
         guard touchPacer.resendDue(changed: current != last, nowNs: nowNs) else { return }
-        feed.publishTouchpad(current)
+        touchFeed.publishTouchpad(current)
     }
 
     private func read(_ reading: DeviceMotionReading) {

@@ -41,6 +41,9 @@ enum PreviewSetup {
 
     static let refused = SetupInputs(detectedPads: [], found: [], scanning: false, localNetwork: .denied)
 
+    /// A Lightning iPhone with nothing seen, for the note under the choices.
+    static let lightning = SetupInputs(detectedPads: [], found: [], scanning: false, localNetwork: .unknown, port: .lightning)
+
     static let reviewDraft = SetupDraft(
         input: .detectedPad(id: "pad-1", family: .dualSense),
         destination: .satellite(id: "lr"),

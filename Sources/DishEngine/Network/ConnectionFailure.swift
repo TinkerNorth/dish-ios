@@ -43,4 +43,10 @@ package enum ConnectionFailure: Equatable {
     case localNetworkDenied
     /// A PIN pairing was refused; `detail` is the satellite's `error` string.
     case pairingRejected(detail: String?)
+    /// The session opened over HTTPS, but no heartbeat ack ever came back
+    /// over UDP before it died: the network keeps the two devices apart.
+    case dataPathBlocked
+    /// A newer PUT, another device's, took the session; only the person
+    /// takes it back.
+    case sessionReplaced
 }

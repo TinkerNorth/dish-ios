@@ -154,13 +154,15 @@ final class AppModelDiagnosticsTests: XCTestCase {
         XCTAssertTrue(detached, "\(diagnosed.events)")
     }
 
-    func testTheOnScreenGamepadIsLoggedAsItself() async throws {
+    /// The on-screen gamepad is always one of the controllers: it never
+    /// attaches or detaches, so its screens opening and closing log nothing.
+    func testTheOnScreenGamepadIsNeverLoggedAsAttachedOrDetached() async throws {
         let diagnosed = try DiagnosedModel(self)
+        XCTAssertEqual(diagnosed.events, [])
         diagnosed.model.openPlay(.gamepad)
-        let listed = await settled { diagnosed.events.map(\.kind) == [.padAttached] }
-        XCTAssertTrue(listed, "\(diagnosed.events)")
-        XCTAssertEqual(diagnosed.events.first?.subject, .onScreenGamepad)
         diagnosed.model.closePlay()
+        let quiet = await settled { diagnosed.events.isEmpty }
+        XCTAssertTrue(quiet, "\(diagnosed.events)")
     }
 }
 

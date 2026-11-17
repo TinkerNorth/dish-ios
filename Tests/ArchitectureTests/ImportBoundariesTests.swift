@@ -47,10 +47,12 @@ final class ImportBoundariesTests: XCTestCase {
     ]
 
     /// The only files of the UI library that may import UIKit: the theme's
-    /// dynamic colours, the scene, and the app delegate the scene turns the
-    /// window through (UIKit asks a delegate for the orientations it allows).
+    /// dynamic colours, the scene, the app delegate the scene turns the
+    /// window through (UIKit asks a delegate for the orientations it allows),
+    /// and the window's touch watcher and screen dimmer the scene installs.
     private static let uikitFiles: Set = [
-        "Sources/Dish/UI/Theme.swift", "Sources/Dish/DishScene.swift", "Sources/Dish/Scene/Orientation.swift"
+        "Sources/Dish/UI/Theme.swift", "Sources/Dish/DishScene.swift", "Sources/Dish/Scene/Orientation.swift",
+        "Sources/Dish/Scene/LowPowerScreen.swift"
     ]
     /// Where App Intents may be imported: the intents themselves (an intent
     /// is a navigation event), the scene that hands them their router, and

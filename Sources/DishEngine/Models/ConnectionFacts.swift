@@ -4,9 +4,14 @@
 import DishCore
 import Foundation
 
-/// Where a PC stands with this iPhone.
+/// Where a PC stands with this iPhone, every step of the way: being
+/// reached for, up, faltering, resting, or waiting for a PIN.
 package enum ConnectionState: Equatable {
     case online(latencyMs: Int, controllers: Int)
+    /// Live, but the heartbeat acks falter: the PC has stopped responding.
+    case unsteady(latencyMs: Int, controllers: Int)
+    /// Being reached for right now.
+    case connecting
     /// `lastSeen` is nil when the PC was never reached from this install.
     case offline(lastSeen: Date?)
     case needsPairing
@@ -29,13 +34,16 @@ package struct SatelliteFeaturesFact: Equatable {
 /// `ConnectionKind` from the link-tier ladder. A paired PC also carries
 /// what its page shows: the controllers bound to it in the order of the
 /// indices they hold, the satellite's version once probed, the protocol a
-/// live session speaks, and what it can carry each way.
+/// live session speaks, and what it can carry each way. `notice` is why the
+/// last attempt the person made on it failed, carried until the next
+/// attempt or until the PC is up.
 package struct ConnectionFact: Equatable, Identifiable {
     package let id: String
     package let name: String
     package let address: String
     package let kind: ConnectionKind
     package let state: ConnectionState
+    package let notice: ConnectionFailure?
     package let boundControllerIds: [String]
     /// Nil until the satellite was probed, and for one that reports none.
     package let satelliteVersion: String?
@@ -50,6 +58,7 @@ package struct ConnectionFact: Equatable, Identifiable {
         address: String,
         kind: ConnectionKind,
         state: ConnectionState,
+        notice: ConnectionFailure? = nil,
         boundControllerIds: [String] = [],
         satelliteVersion: String? = nil,
         protocolVersion: Int? = nil,
@@ -60,6 +69,7 @@ package struct ConnectionFact: Equatable, Identifiable {
         self.address = address
         self.kind = kind
         self.state = state
+        self.notice = notice
         self.boundControllerIds = boundControllerIds
         self.satelliteVersion = satelliteVersion
         self.protocolVersion = protocolVersion
@@ -81,24 +91,59 @@ package struct ApplyFact: Equatable {
     }
 }
 
-/// Whether the PC a session streams to is still answering.
+/// Whether the PC a session streams to is still answering, or is being
+/// reached for again at the person's asking.
 package enum SessionPhase: Equatable {
     case streaming
     case stoppedResponding
+    /// No session is up; the PC the person reached for, with pads bound to
+    /// it, is being connected to.
+    case reconnecting
+    /// The PC with pads bound to it cannot be used, and the rows say why;
+    /// Reconnect tries again.
+    case failed(ConnectionFailure)
 }
 
-/// The live link the session accessory shows on every tab.
+/// The live link the session accessory shows on every tab, or the one
+/// being brought back.
 package struct SessionFact: Equatable {
+    /// The PC's connection id; empty in a fixture that names none.
+    package let id: String
     package let pcName: String
     package let pads: Int
-    /// Nil until the first round trip is measured.
+    /// Nil until the first round trip is measured, and while reconnecting.
     package let latencyMs: Int?
     package let phase: SessionPhase
 
-    package init(pcName: String, pads: Int, latencyMs: Int?, phase: SessionPhase) {
+    package init(id: String = "", pcName: String, pads: Int, latencyMs: Int?, phase: SessionPhase) {
+        self.id = id
         self.pcName = pcName
         self.pads = pads
         self.latencyMs = latencyMs
         self.phase = phase
+    }
+}
+
+/// The PC the person typed by its address this run: whether the pool is
+/// reaching for it now, and why the attempt failed when it did.
+package struct AddedByAddressFact: Equatable {
+    package let id: String
+    package let reaching: Bool
+    package let failure: ConnectionFailure?
+
+    package init(id: String, reaching: Bool, failure: ConnectionFailure?) {
+        self.id = id
+        self.reaching = reaching
+        self.failure = failure
+    }
+}
+
+/// A failure the last attempt left, shown while the PC is neither up with
+/// its acks flowing nor being reached for again; a session that falters
+/// shows the failure that explains it.
+package func attemptNotice(_ failure: ConnectionFailure?, live: LinkState) -> ConnectionFailure? {
+    switch live {
+    case .connected, .connecting: nil
+    case .unstable, .stale, .saved, .ready: failure
     }
 }

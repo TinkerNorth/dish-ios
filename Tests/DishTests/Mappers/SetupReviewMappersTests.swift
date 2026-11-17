@@ -45,6 +45,13 @@ final class SetupReviewMappersTests: XCTestCase {
         XCTAssertEqual(state.pad, ReviewEndState(symbol: "gamecontroller", name: "DualSense", detail: "USB-C · 84%", dot: nil))
     }
 
+    /// A Lightning iPhone's wired end, chosen or seen, is on its port.
+    func testOnALightningIPhoneAWiredEndIsWordedByItsPort() {
+        let lightning = SetupFixture.inputs(pads: [SetupFixture.dualSense], port: .lightning)
+        XCTAssertEqual(review(.wired, .byAddress, inputs: lightning).pad?.detail, "Lightning")
+        XCTAssertEqual(review(seenDualSense, .byAddress, inputs: lightning).pad?.detail, "Lightning · 84%")
+    }
+
     func testAPadThatLeftShowsItsFamilyAlone() {
         let state = review(.detectedPad(id: "gone", family: .switchPro), .byAddress)
         XCTAssertEqual(state.pad, ReviewEndState(symbol: "gamecontroller", name: "Switch Pro", detail: nil, dot: nil))

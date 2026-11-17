@@ -9,7 +9,7 @@ struct DeviceNamePage: View {
     @Environment(AppModel.self) private var model
 
     var body: some View {
-        DeviceNamePageBody(state: deviceNamePageState(preferences: model.shellFacts.preferences), save: model.setDeviceName)
+        DeviceNamePageBody(state: deviceNamePageState(preferences: model.preferencesFacts), save: model.setDeviceName)
     }
 }
 

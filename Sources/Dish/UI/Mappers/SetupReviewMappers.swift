@@ -2,6 +2,7 @@
 // Copyright (C) 2026 Dish contributors.
 
 import DishCore
+import DishEngine
 import Foundation
 import SwiftUI
 
@@ -91,7 +92,12 @@ func reviewStepState(_ draft: SetupDraft, _ inputs: SetupInputs, words: L10n = .
 private func reviewPad(_ input: InputKind, _ inputs: SetupInputs, words: L10n) -> ReviewEndState {
     switch input {
     case let .detectedPad(id, family): seenPad(id: id, family: family, inputs, words: words)
-    case .wired: ReviewEndState(symbol: "gamecontroller", name: words.wiredController, detail: words.usbC, dot: nil)
+    case .wired: ReviewEndState(
+            symbol: "gamecontroller",
+            name: words.wiredController,
+            detail: wiredLinkWord(inputs.port, words: words),
+            dot: nil
+        )
     case .bluetooth: ReviewEndState(symbol: "gamecontroller", name: words.bluetoothController, detail: words.setupBluetooth, dot: nil)
     case .onScreen: ReviewEndState(symbol: "iphone", name: words.onScreenGamepad, detail: words.setupThisIPhone, dot: nil)
     }
@@ -102,7 +108,7 @@ private func seenPad(id: String, family: EmulatedPad, _ inputs: SetupInputs, wor
     guard let pad = inputs.detectedPads.first(where: { $0.id == id }) else {
         return ReviewEndState(symbol: "gamecontroller", name: emulatedPadName(family, words: words), detail: nil, dot: nil)
     }
-    let parts = [setupPadLinkWord(pad.link, words: words)] + setupBatteryWord(pad.batteryPercent, words: words)
+    let parts = [setupPadLinkWord(pad.link, port: inputs.port, words: words)] + setupBatteryWord(pad.batteryPercent, words: words)
     return ReviewEndState(symbol: "gamecontroller", name: pad.name, detail: parts.joined(separator: lineSeparator), dot: nil)
 }
 

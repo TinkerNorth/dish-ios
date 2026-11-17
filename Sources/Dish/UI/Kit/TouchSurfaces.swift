@@ -140,7 +140,7 @@ struct PlayPill: View {
         HStack(spacing: DishSpace.s4) {
             Image(systemName: symbol).foregroundStyle(DishTheme.brandGlyph)
             Text(state.pcName).font(DishFont.padLabel).foregroundStyle(DishTheme.onSurface)
-            StatusDot(color: state.dot)
+            StatusMarkView(mark: state.mark)
             Text(state.detail).font(DishFont.monoDetail).foregroundStyle(state.detailColor)
         }
         .lineLimit(1)

@@ -4,19 +4,21 @@
 import DishCore
 import Foundation
 
-/// The play screens' facts and intents: the on-screen controller is a slot
-/// of its own, listed among the controllers once opened or bound; a play
-/// screen opens on it and closes releasing everything it held; the pause
-/// menu flips its Rumble and Motion and picks what it is emulated as; Stop
-/// gamepad takes it off the list. The touches go straight to its feed.
+/// The play screens' facts and intents: a screen opens on the on-screen
+/// controller, always one of the controllers, or lends the phone's touchpad
+/// or mouse to the pad the phone was aimed at, and closes releasing what it
+/// held. The touches go straight to the aimed slot's feed.
 package extension AppModel {
 
-    /// The screen on display and the on-screen controller's switches.
-    internal var playFacts: PlayFacts? {
+    /// The screen on display, the slot it serves, and the on-screen
+    /// controller's switches; nil while no screen is up.
+    var playFacts: PlayFacts? {
         guard let screen = playSource.state else { return nil }
         let switches = pads.switches.preferences(for: onScreenSlotId)
         return PlayFacts(
             screen: screen,
+            target: playTargetFact,
+            destination: destination(slotId: playTarget),
             emulateAs: onScreenEmulateAs,
             rumble: switches.rumble,
             motion: switches.motion,
@@ -24,10 +26,9 @@ package extension AppModel {
         )
     }
 
-    /// The on-screen controller as the Controllers tab lists it; its name is
-    /// the app's to word.
+    /// The on-screen controller as the Controllers tab lists it, screen or
+    /// no screen; its name is the app's to word.
     internal var onScreenFact: [ControllerFact] {
-        guard onScreenListed.state else { return [] }
         let switches = pads.switches.preferences(for: onScreenSlotId)
         let carried: [SlotSwitch] = onScreen.hasMotionSensor ? [.motion, .rumble] : [.rumble]
         return [ControllerFact(
@@ -50,6 +51,33 @@ package extension AppModel {
         ControllerCapabilities(hasMotion: onScreen.hasMotionSensor, hasTouchpad: true, hasRumble: true, hasBattery: true)
     }
 
+    /// The screens the phone can lend a pad bound to a satellite.
+    internal func phoneSurfaces(slotId: String, capabilities: ControllerCapabilities) -> [PlayScreen] {
+        guard let connectionId = network.hub.bindings[slotId], let conn = network.wifi.get(connectionId) else { return [] }
+        return lentScreens(
+            padHasTouchpad: capabilities.hasTouchpad,
+            sessionUp: sessionIsUp(network.hub.summary(connectionId)?.live),
+            typeOffersDs4: conn.typeOffersDs4(for: slotId),
+            hostMouseControl: conn.hostMouseControl
+        )
+    }
+
+    /// The screen the phone lends the slot right now, for its descriptor.
+    internal func phoneSurface(on slotId: String) -> PhoneSurface? {
+        guard slotId == playTarget else { return nil }
+        switch playSource.state {
+        case .touchpad: return .touchpad
+        case .mouse: return .mouse
+        case .gamepad, nil: return nil
+        }
+    }
+
+    /// Aim the phone's touchpad or mouse at a pad before its screen opens.
+    func aimPlay(at slotId: String) {
+        guard playSource.state == nil else { return }
+        playTarget = slotId
+    }
+
     func openPlay(_ screen: PlayScreen) {
         switch screen {
         case .gamepad: openGamepad()
@@ -70,12 +98,14 @@ package extension AppModel {
         show(.mouse)
     }
 
-    /// The screen closed: everything it held is released, and the loop heals
-    /// that release before it stops.
+    /// The screen closed: what it held is released and the aim returns to
+    /// the on-screen controller.
     func closePlay() {
         guard playSource.state != nil else { return }
         onScreen.stop()
         playSource.setState(nil)
+        playTarget = onScreenSlotId
+        pushSlotFlags()
     }
 
     func setPlayRumble(_ on: Bool) {
@@ -93,12 +123,9 @@ package extension AppModel {
         syncPlayMotion()
     }
 
-    /// Stop gamepad: the screen closes, the on-screen controller lets its
-    /// PC go and leaves the controllers, so nothing routes it any more.
+    /// Stop gamepad: the screen closes and the binding stays.
     func stopOnScreenGamepad() {
         closePlay()
-        list(onScreen: false)
-        unbind(slotId: onScreenSlotId)
     }
 
     func onScreenPad(_ event: OnScreenPadEvent) {
@@ -109,23 +136,19 @@ package extension AppModel {
         onScreen.touch(event)
     }
 
-    /// Setup bound the on-screen controller: it joins the controllers with
-    /// the emulation and the Motion switch the walk picked.
+    /// Setup bound the on-screen controller: it takes the emulation and the
+    /// Motion switch the walk picked.
     internal func adoptOnScreen(_ draft: SetupDraft) {
         guard draft.input == .onScreen else { return }
-        list(onScreen: true)
         pads.types.setType(draft.emulateAs, for: onScreenSlotId)
         setControllerFeature(slotId: onScreenSlotId, .motion, enabled: draft.motion)
     }
 
-    /// The on-screen controller joins or leaves the controllers; its battery
-    /// cadence runs while it is listed.
-    private func list(onScreen listed: Bool) {
-        onScreenListed.setState(listed)
-        switch listed {
-        case true: onScreenBattery.start(onScreenSlotId)
-        case false: onScreenBattery.stop(onScreenSlotId)
-        }
+    /// The slot the phone's touches serve, as the play screens word it.
+    private var playTargetFact: PlayTarget {
+        guard playTarget != onScreenSlotId else { return .onScreen }
+        let name = pads.slots.first { $0.id == playTarget }?.name ?? playTarget
+        return .pad(id: playTarget, name: name)
     }
 
     private var onScreenEmulateAs: EmulatedPad {
@@ -138,17 +161,19 @@ package extension AppModel {
         return .available
     }
 
-    /// A screen opens on the on-screen controller; moving from another
-    /// screen releases what that one held first.
+    /// A screen opens on the on-screen controller, or on the pad the phone
+    /// is aimed at; a screen it replaces releases what it held first.
     private func show(_ screen: PlayScreen) {
         let previous = playSource.state
         guard previous != screen else { return }
         if previous != nil { onScreen.stop() }
-        list(onScreen: true)
+        if screen == .gamepad { playTarget = onScreenSlotId }
+        onScreen.aimTouch(at: pads.source.processor.feed(for: playTarget))
         onScreen.useAnalogTriggers(hasAnalogTriggers(onScreenEmulateAs))
         playSource.setState(screen)
         onScreen.start()
         syncPlayMotion()
+        pushSlotFlags()
     }
 
     /// The phone's motion runs while the gamepad is on screen, its Motion

@@ -6,8 +6,9 @@ import Foundation
 import Observation
 
 /// The Connections tab's facts and intents: the paired and found PCs from
-/// the pool, a scan, a connect, a graceful disconnect, a Forget that
-/// self-unpairs, and a PC added by its address.
+/// the pool, each with where it stands and why the person's last attempt
+/// on it failed, a scan, a connect, a reconnect, a graceful disconnect, a
+/// Forget that self-unpairs, and a PC added by its address.
 package extension AppModel {
 
     /// The pool's signals reach the model: an event is kept for the pages and
@@ -32,7 +33,8 @@ package extension AppModel {
     }
 
     /// What the last scan heard that is not paired, then the PCs typed by
-    /// their address that the pool holds: each wants a PIN.
+    /// their address that the pool holds: each wants a PIN, or is being
+    /// reached for.
     internal var foundFacts: [ConnectionFact] {
         let remembered = Set(network.wifi.remembered().map(\.id))
         let heard = network.wifi.discoveredServers
@@ -40,9 +42,33 @@ package extension AppModel {
         let typed = network.wifi.connections.values.map(\.server)
             .filter { $0.source == .manual && !heardIds.contains($0.id) }
             .sorted { $0.id < $1.id }
-        return (heard + typed).filter { !remembered.contains($0.id) }.map { server in
-            ConnectionFact(id: server.id, name: server.name, address: server.ip, kind: .satellite, state: .needsPairing)
+        return (heard + typed).filter { !remembered.contains($0.id) }.map(foundFact)
+    }
+
+    private func foundFact(_ server: DiscoveredServer) -> ConnectionFact {
+        let live = poolLive(server.id)
+        return ConnectionFact(
+            id: server.id,
+            name: server.name,
+            address: server.ip,
+            kind: .satellite,
+            state: foundState(live),
+            notice: attemptNotice(attemptNotices.state[server.id], live: live)
+        )
+    }
+
+    /// A found PC is being reached for while the pool reaches it, else it
+    /// waits for a PIN.
+    private func foundState(_ live: LinkState) -> ConnectionState {
+        switch live {
+        case .connecting: .connecting
+        case .connected, .unstable, .stale, .saved, .ready: .needsPairing
         }
+    }
+
+    /// Where the pool's entry for a PC stands; one it never reached for rests.
+    private func poolLive(_ id: String) -> LinkState {
+        network.hub.summary(id)?.live ?? .saved
     }
 
     private func pairedFact(_ row: ConnectionSummary) -> ConnectionFact {
@@ -53,6 +79,7 @@ package extension AppModel {
             address: row.address,
             kind: row.kind,
             state: connectionState(row),
+            notice: attemptNotice(attemptNotices.state[row.id], live: row.live),
             boundControllerIds: row.boundSlotIds,
             satelliteVersion: probe.flatMap(satelliteVersion),
             protocolVersion: sessionProtocolVersion(row),
@@ -68,10 +95,74 @@ package extension AppModel {
 
     private func connectionState(_ row: ConnectionSummary) -> ConnectionState {
         switch row.live {
-        case .connected, .unstable: .online(latencyMs: wholeMilliseconds(row.latencyMs), controllers: row.boundSlotIds.count)
+        case .connected: .online(latencyMs: wholeMilliseconds(row.latencyMs), controllers: row.boundSlotIds.count)
+        case .unstable: .unsteady(latencyMs: wholeMilliseconds(row.latencyMs), controllers: row.boundSlotIds.count)
+        case .connecting: .connecting
         case .stale: .needsPairing
-        case .saved, .ready, .connecting: .offline(lastSeen: network.wifi.store.lastSeen(row.id))
+        case .saved, .ready: .offline(lastSeen: network.wifi.store.lastSeen(row.id))
         }
+    }
+
+    /// The PC typed by its address: whether the pool reaches for it now, and
+    /// what the attempt left.
+    internal var addedByAddressFact: AddedByAddressFact? {
+        guard let server = addedByAddress else { return nil }
+        let live = poolLive(server.id)
+        return AddedByAddressFact(
+            id: server.id,
+            reaching: live == .connecting,
+            failure: attemptNotice(attemptNotices.state[server.id], live: live)
+        )
+    }
+
+    // MARK: - What an attempt leaves
+
+    internal func recordNotice(_ failure: ConnectionFailure, for id: String) {
+        attemptNotices.updateState { $0.merging([id: failure]) { _, latest in latest } }
+    }
+
+    internal func clearNotice(_ id: String) {
+        attemptNotices.updateState { $0.filter { $0.key != id } }
+    }
+
+    /// A PC whose session is up with its acks flowing has nothing left to
+    /// word; one that opened and hears nothing back keeps its word.
+    internal func clearNoticesOfLiveRows() {
+        for conn in network.wifi.connections.values where conn.hasLiveSession && conn.latencySamples > 0 {
+            clearNotice(conn.id)
+        }
+    }
+
+    /// The address sheet appearing: the last attempt's failure is not this one's.
+    internal func clearAddedByAddressNotice() {
+        guard let id = addedByAddress?.id else { return }
+        clearNotice(id)
+    }
+
+    private func startReaching(_ id: String) {
+        reaching.updateState { $0.union([id]) }
+    }
+
+    private func stopReaching(_ id: String) {
+        reaching.updateState { $0.subtracting([id]) }
+    }
+
+    /// The links are followed as they settle: Observation says a connection's
+    /// state or its first acks moved; the PCs reached for keep the ones still
+    /// linking, and a PC whose acks flow drops its notice.
+    internal func followReaching() {
+        withObservationTracking {
+            _ = network.wifi.connections.values.map { ($0.state, $0.latencySamples) }
+        } onChange: { [weak self] in
+            Task { @MainActor [weak self] in self?.linksMoved() }
+        }
+    }
+
+    private func linksMoved() {
+        let pool = network.wifi.connections
+        reaching.updateState { ids in ids.filter { pool[$0]?.state == .linking } }
+        clearNoticesOfLiveRows()
+        followReaching()
     }
 
     // MARK: - Intents
@@ -110,20 +201,36 @@ package extension AppModel {
     }
 
     /// Connect a paired or found satellite at its freshest known address; a
-    /// satellite with no key answers with its pairing card.
+    /// satellite with no key answers with its pairing card. The attempt is
+    /// the person's: its row reads connecting, the last attempt's failure
+    /// goes, and a failure of this one is kept for the row.
     func connect(_ id: String) {
         guard let server = network.wifi.knownServer(id) else { return }
+        clearNotice(id)
+        dismissFailedApply(on: id)
+        startReaching(id)
         network.wifi.connect(to: server)
     }
 
-    /// Close the session the graceful way; the row and the key stay.
+    /// A row's Reconnect: a session that stopped answering closes and opens
+    /// again; one that is down is reached for.
+    func reconnect(_ id: String) {
+        if network.hub.summary(id)?.live == .unstable { network.wifi.disconnect(id: id) }
+        connect(id)
+    }
+
+    /// Close the session the graceful way, or stop reaching for the PC; the
+    /// row and the key stay.
     func disconnect(_ id: String) {
+        stopReaching(id)
         network.wifi.disconnect(id: id)
     }
 
     /// The satellite is told this iPhone unpaired itself, then every pad
     /// bound there lets go and the row, the key and the pin go.
     func forget(_ id: String) {
+        stopReaching(id)
+        clearNotice(id)
         network.hub.forgetBindings(of: id)
         network.wifi.forget(id: id)
         refreshRouting()
@@ -136,17 +243,66 @@ package extension AppModel {
     @discardableResult
     func addByAddress(_ text: String) -> Bool {
         guard let server = DiscoveredServer.manual(from: text) else { return false }
-        lastConnectionEvent = nil
+        clearNotice(server.id)
         addedByAddress = server
+        startReaching(server.id)
         network.wifi.connect(to: server)
         return true
     }
 
+    /// A satellite that wants a PIN opens its card; a failed attempt is kept
+    /// for the PC's rows when it is theirs to word, and ends a bind waiting
+    /// on that PC's link; a scan's failure and a pairing's are already told
+    /// by the page and the card.
     private func connectionEvent(_ event: ConnectionEvent) {
-        lastConnectionEvent = event
-        guard case let .pairingRequired(server) = event else { return }
-        beginPairing(server)
+        switch event {
+        case let .pairingRequired(server): beginPairing(server)
+        case let .failure(serverId, failure, attempt): attemptFailed(serverId, failure, attempt)
+        case .scanFailed, .pairingFailed: break
+        }
     }
+
+    private func attemptFailed(_ id: String, _ failure: ConnectionFailure, _ attempt: AttemptKind) {
+        if isRowNotice(failure, attempt: attempt) { recordNotice(failure, for: id) }
+        guard endsAReach(failure), applyWatch?.connectionId == id else { return }
+        advanceApply(.linkFailed)
+    }
+}
+
+/// Whether a failure is the PC's rows to word: the person's own attempt
+/// says why it failed, but for a controller the PC refused (the apply's
+/// word on the pad's row) and a scan's failure (the page's); a silent
+/// attempt's only when it says what the person must do, never that the PC
+/// was merely off.
+func isRowNotice(_ failure: ConnectionFailure, attempt: AttemptKind) -> Bool {
+    switch attempt {
+    case .own: isTheRowsOwnWord(failure)
+    case .silent: needsThePerson(failure)
+    }
+}
+
+private func isTheRowsOwnWord(_ failure: ConnectionFailure) -> Bool {
+    switch failure {
+    case .controllerNotApplied, .noServersFound, .localNetworkDenied: false
+    case .identityChanged, .protocolMismatch, .dishUpdateRequired, .satelliteUpdateRequired, .approvalDeclined,
+         .approvalTimedOut, .repairNeeded, .unreachable, .noSharedKey, .sessionRefused, .badSessionMaterial,
+         .sessionLinkFailed, .pairingRejected, .dataPathBlocked, .sessionReplaced: true
+    }
+}
+
+/// A failure no retry fixes, which the person must act on.
+func needsThePerson(_ failure: ConnectionFailure) -> Bool {
+    switch failure {
+    case .dataPathBlocked, .sessionReplaced, .identityChanged, .protocolMismatch, .dishUpdateRequired,
+         .satelliteUpdateRequired, .repairNeeded, .sessionRefused, .badSessionMaterial, .sessionLinkFailed: true
+    case .unreachable, .noSharedKey, .approvalDeclined, .approvalTimedOut, .pairingRejected, .controllerNotApplied,
+         .noServersFound, .localNetworkDenied: false
+    }
+}
+
+/// A controller the PC refused is the slot's business, not the link's.
+func endsAReach(_ failure: ConnectionFailure) -> Bool {
+    failure != .controllerNotApplied
 }
 
 /// A latency figure in whole milliseconds; zero until measured.

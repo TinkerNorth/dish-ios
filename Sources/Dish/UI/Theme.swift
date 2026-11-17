@@ -32,6 +32,9 @@ enum DishTheme {
     static let successFill = Color(dark: 0x22C55E, light: 0x1B873F, alpha: 0.16)
     /// A FAST chip's ground under its `primary` word, and a glyph tile's.
     static let primaryFill = Color(dark: 0x4FE3FF, light: 0x0E7C97, alpha: 0.14)
+    /// The tile behind the Lightning note's bolt, and an ADAPTER chip's ground
+    /// under its `warning` word.
+    static let warningFill = Color(dark: 0xF59E0B, light: 0xB7791F, alpha: 0.16)
     /// The low-power dim: true black in either appearance, so an OLED panel is off.
     static let dimBackground = Color(dark: 0x000000, light: 0x000000)
     /// The dim's words, a grey low enough not to light the panel.
@@ -54,6 +57,25 @@ enum DishTheme {
     static let padThumb = Color(dark: 0x283160, light: 0x283160)
     /// The glow around a held control and the pointer's trail on the mouse.
     static let padGlow = Color(dark: 0x4FE3FF, light: 0x4FE3FF, alpha: 0.28)
+    /// The wash laid over a control's surface while the finger is down: the
+    /// surface's own ink at Material's pressed state layer.
+    static let pressWash = Color(dark: 0xE6ECFF, light: 0x0C1430, alpha: 0.12)
+}
+
+/// How a control moves under the finger.
+enum DishMotion {
+    /// The wash and the shrink come in this time.
+    static let pressIn: Animation = .easeOut(duration: 0.1)
+    /// They go in this time once the finger lifts, long enough for a tap to show.
+    static let pressOut: Animation = .easeOut(duration: 0.25)
+    /// How much a control that stands on its own shrinks while pressed.
+    static let pressScale: CGFloat = 0.97
+}
+
+/// The one opacity a state sets.
+enum DishOpacity {
+    /// A disabled control's content, Material's 38%.
+    static let disabled = 0.38
 }
 
 /// The SF Symbols the setup chrome draws on its own; a row's glyph comes
@@ -87,6 +109,10 @@ enum DishSymbol {
 enum DishImage {
     /// The app mark, version B: the dish tilted 28 degrees.
     static let mark = Image("DishMark", bundle: .module)
+    /// Apple's Lightning to USB Camera Adapter, drawn as a template in the
+    /// accent: the Lightning plug, the body with its USB port and its power
+    /// port, and the controller's USB plug coming in.
+    static let adapter = Image("LightningAdapter", bundle: .module)
 }
 
 /// The type scale, every name a Dynamic Type style so the words grow with
@@ -138,7 +164,7 @@ enum DishSize {
     static let rowGlyphCorner: CGFloat = 10
     /// The glyph inside the tile.
     static let rowGlyphSymbol: CGFloat = 20
-    /// The session accessory's round Dim and Play buttons.
+    /// The session accessory's round Dim button.
     static let sessionButton: CGFloat = 44
     /// The glyph inside a session accessory button.
     static let sessionButtonSymbol: CGFloat = 16
@@ -150,8 +176,12 @@ enum DishSize {
     static let featureSymbol: CGFloat = 32
     /// The check or dash column of a review carry row.
     static let carryMark: CGFloat = 16
-    /// The phone and PC tiles over the Local Network primer.
+    /// The phone and PC tiles over the Local Network primer, and the phone and
+    /// controller tiles over the adapter sheet.
     static let primerTile: CGFloat = 64
+    /// The adapter drawn between the phone and the controller on the Wired on
+    /// this iPhone sheet.
+    static let adapterArt: CGFloat = 48
     /// The tracking of a section eyebrow.
     static let eyebrowTracking: CGFloat = 1.4
     /// The corner of a licence text's block on the licenses page.
@@ -195,6 +225,10 @@ enum DishSize {
     static let clientPinTracking: CGFloat = 4
     /// The corner of a card inside a sheet: the pair sheet's request.
     static let cardCorner: CGFloat = 16
+    /// The corner of a tile on a row's action strip, and the glyph's height,
+    /// which holds the words of every tile on one line.
+    static let actionTileCorner: CGFloat = 12
+    static let actionTileSymbol: CGFloat = 28
     /// The gamepad on an iPad on its side: a stick's base and thumb, a face
     /// button, a d-pad arm and a trigger rail.
     static let padStickRegular: CGFloat = 200

@@ -15,10 +15,6 @@ extension L10n {
         catalog.text("Wired, Bluetooth, or on-screen.")
     }
 
-    var noControllersInvitation: String {
-        catalog.text("Bind a pad or the on-screen gamepad to your PC to start playing.")
-    }
-
     var connectionLost: String {
         catalog.text("Connection lost")
     }

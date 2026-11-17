@@ -249,6 +249,20 @@ final class NavigationMachineTests: XCTestCase {
         XCTAssertEqual(step.effects, [])
     }
 
+    /// The Lightning note's sheet, from the Controllers tab or from setup's
+    /// Input step: nothing begins with it, nothing is cancelled with it, and
+    /// the model's card closing leaves it be.
+    func testTheAdapterSheetOpensAndClosesWithNothingToBeginOrCancel() {
+        let opened = after(.openSheet(.lightningAdapter))
+        XCTAssertEqual(opened.state.sheet, .lightningAdapter)
+        XCTAssertEqual(opened.effects, [])
+        XCTAssertEqual(after(.openSheet(.lightningAdapter), .closeSheet).effects, [])
+        let overSetup = after(.openSetup(.addController), .openSheet(.lightningAdapter))
+        XCTAssertEqual(overSetup.state.sheet, .lightningAdapter)
+        XCTAssertEqual(overSetup.effects, [.startSetup(.addController)])
+        XCTAssertEqual(after(.openSheet(.lightningAdapter), .pairingChanged(serverId: nil)).state.sheet, .lightningAdapter)
+    }
+
     func testASheetOpensOverTheSetupCoverButNotOverPlayOrTheDim() {
         let overSetup = after(.openSetup(.firstRun), .openSheet(.pair(serverId: "den")))
         XCTAssertEqual(overSetup.state.sheet, .pair(serverId: "den"))

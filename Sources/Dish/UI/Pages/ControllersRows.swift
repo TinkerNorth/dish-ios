@@ -3,52 +3,53 @@
 
 import SwiftUI
 
-/// One controller: its glyph, name, destination line and battery. A row
-/// with a page opens it, pushed with a chevron from a stack, selected beside
-/// a split's list; a pad Dish cannot read has none. The on-screen
-/// controller also has Open, which raises its gamepad. A long press and a
-/// swipe offer the row's actions.
+/// One controller: its glyph, name, destination line and battery, and under
+/// them the strip of what it offers, as Android's card carries its buttons.
+/// A row with a page opens the controller's settings, pushed with a chevron
+/// from a stack, selected beside a split's list; a pad Dish cannot read has
+/// none. A long press and a swipe offer the same actions.
 struct ControllerRow: View {
     let state: ControllerRowState
     var layout = TabLayout.stack
+    /// The page a split's detail shows, which marks its row.
+    var selection: Page?
     let open: @MainActor (Page) -> Void
-    let act: @MainActor (ControllerRowAction) -> Void
+    let act: @MainActor (ControllerAction) -> Void
 
     var body: some View {
-        switch rowOpening(state.page, layout: layout) {
+        switch rowOpening(state.page, layout: layout, selection: selection) {
         case let .push(page):
-            line {
-                Button {
-                    open(page)
-                } label: {
-                    ControllerRowContent(state: state, disclosure: true)
-                }
-                .buttonStyle(.borderless)
+            RowButton {
+                open(page)
+            } label: {
+                ControllerRowContent(state: state, disclosure: true)
+            } below: {
+                strip
             }
-        case let .select(page):
-            line { ControllerRowContent(state: state, disclosure: false) }
-                .tag(page)
+            .modifier(rowActions)
+        case let .select(page, selected):
+            VStack(alignment: .leading, spacing: DishSpace.s4) {
+                ControllerRowContent(state: state, disclosure: false)
+                strip
+            }
+            .modifier(rowActions)
+            .tag(page)
+            .selectedRow(selected)
         case .inert:
-            line { ControllerRowContent(state: state, disclosure: false) }
+            ControllerRowContent(state: state, disclosure: false)
+                .modifier(rowActions)
         }
     }
 
-    /// The row's content, then the on-screen controller's Open.
-    private func line(@ViewBuilder _ content: () -> some View) -> some View {
-        HStack(spacing: DishSpace.s6) {
-            content()
-            if let title = state.open {
-                Button(title, action: play)
-                    .buttonStyle(.borderedProminent)
-                    .buttonBorderShape(.capsule)
-                    .font(DishFont.headline)
-            }
+    /// What the controller offers, as tiles on the row's dim surface.
+    @ViewBuilder private var strip: some View {
+        if let strip = state.strip {
+            ActionStrip(entries: strip, fill: DishTheme.surfaceDim, perform: act)
         }
-        .modifier(RowActions(state: state.actions, perform: act))
     }
 
-    private func play() {
-        act(.open)
+    private var rowActions: RowActions<ControllerAction> {
+        RowActions(state: state.actions, perform: act)
     }
 }
 
@@ -63,7 +64,7 @@ private struct ControllerRowContent: View {
             VStack(alignment: .leading, spacing: DishSpace.s1) {
                 Text(state.name).font(DishFont.body).foregroundStyle(DishTheme.onSurface)
                 HStack(spacing: DishSpace.s3) {
-                    StatusDot(color: state.dot)
+                    StatusMarkView(mark: state.mark)
                     ControllerDestinationLine(line: state.destination)
                 }
             }
@@ -98,19 +99,6 @@ private struct ControllerDestinationLine: View {
     }
 }
 
-/// The empty state's one line above the Add button.
-struct ControllersInvitation: View {
-    let text: String
-
-    var body: some View {
-        Text(text)
-            .font(DishFont.body)
-            .foregroundStyle(DishTheme.muted)
-            .multilineTextAlignment(.center)
-            .frame(maxWidth: .infinity)
-    }
-}
-
 /// Add a controller: a full-width capsule on the dim surface, the accent
 /// label with a plus, the hint under it, and TipKit's hint beside it.
 struct AddControllerButton: View {
@@ -128,9 +116,8 @@ struct AddControllerButton: View {
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, DishSpace.s8)
                     .background(Capsule().fill(DishTheme.surfaceDim))
-                    .contentShape(Capsule())
             }
-            .buttonStyle(.plain)
+            .buttonStyle(.capsule)
             .hint(tipKitHint)
             Text(hint).font(DishFont.detail).foregroundStyle(DishTheme.muted)
         }

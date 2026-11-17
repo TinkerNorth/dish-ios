@@ -32,8 +32,4 @@ extension L10n {
     var dim: String {
         catalog.text("Dim")
     }
-
-    var play: String {
-        catalog.text("Play")
-    }
 }

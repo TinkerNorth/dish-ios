@@ -35,8 +35,8 @@ extension L10n {
         catalog.text("This iPhone has no motion sensors")
     }
 
-    var open: String {
-        catalog.text("Open")
+    var openGamepad: String {
+        catalog.text("Open gamepad")
     }
 
     // MARK: - The mouse

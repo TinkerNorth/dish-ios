@@ -19,9 +19,11 @@ private struct PlayModel {
     init(
         _ test: XCTestCase,
         sensor: FakeMotionSensor = FakeMotionSensor(),
+        pads: [ControllerSlot] = [],
         deviceBattery: any DeviceBattery = InertDeviceBattery()
     ) throws {
         self.sensor = sensor
+        source.slots = pads
         model = try AppModel(
             defaults: TestDefaults.fresh(test),
             localNetwork: RecordedLocalNetworkAccess(),
@@ -44,15 +46,18 @@ private struct PlayModel {
 }
 
 /// The play intents: the screens open and close on the on-screen
-/// controller's slot, the pause menu's switches are that slot's own, and
-/// Stop gamepad takes it off the controllers.
+/// controller's slot, or lend the phone's touchpad and mouse to a pad the
+/// phone is aimed at; the pause menu's switches are the on-screen slot's
+/// own; and Stop gamepad closes the screen and nothing more, the on-screen
+/// controller being always listed.
 @MainActor
 final class AppModelPlayTests: XCTestCase {
 
-    func testNoScreenAndNoOnScreenControllerUntilOneOpens() throws {
+    func testTheOnScreenControllerIsListedBeforeAnyScreenOpens() throws {
         let played = try PlayModel(self)
         XCTAssertNil(played.play)
-        XCTAssertNil(played.onScreenController)
+        let controller = try XCTUnwrap(played.onScreenController, "always one of the controllers, as Android's Virtual Controller is")
+        XCTAssertNil(controller.destination)
     }
 
     func testOpeningTheGamepadShowsItAndListsTheOnScreenController() throws {
@@ -190,14 +195,53 @@ final class AppModelPlayTests: XCTestCase {
         XCTAssertEqual(played.recorder.reports.last?.report.rt, 128)
     }
 
-    func testStopGamepadClosesTheScreenAndTakesTheControllerOffTheList() throws {
+    func testStopGamepadClosesTheScreenAndKeepsTheControllerListed() throws {
         let played = try PlayModel(self)
         played.model.openGamepad()
         played.model.onScreenPad(.press(.faceA))
         played.model.stopOnScreenGamepad()
         XCTAssertNil(played.play)
-        XCTAssertNil(played.onScreenController)
+        XCTAssertNotNil(played.onScreenController, "the screen goes, the controller stays")
         XCTAssertEqual(played.recorder.reports.last?.report, .released)
+    }
+
+    /// Aimed at a pad, the mouse and the touchpad go through that pad's
+    /// slot: its feed carries the touches, its flags declare the screen, and
+    /// the pause menu keeps to the two screens; closing returns the aim.
+    func testAimedAtAPadTheMouseGoesThroughItsSlot() throws {
+        let xbox = ControllerSlot(
+            id: "xbox",
+            name: "Xbox Wireless Controller",
+            capabilities: ControllerCapabilities(hasRumble: true),
+            family: .xbox
+        )
+        let played = try PlayModel(self, pads: [xbox])
+        played.model.aimPlay(at: "xbox")
+        played.model.openMouse()
+        XCTAssertEqual(played.play?.target, .pad(id: "xbox", name: "Xbox Wireless Controller"))
+        XCTAssertEqual(played.model.forwardingFlags(slotId: "xbox").phoneSurface, .mouse)
+        XCTAssertNil(played.model.forwardingFlags(slotId: onScreenSlotId).phoneSurface)
+        played.model.onScreenTouch(.finger(.first, x: 0.5, y: 0.5))
+        XCTAssertEqual(played.recorder.touches.last?.id, "xbox")
+        played.model.openTouchpad()
+        XCTAssertEqual(
+            played.model.forwardingFlags(slotId: "xbox").phoneSurface,
+            .touchpad,
+            "the pause menu moves within the pad's screens"
+        )
+        played.model.closePlay()
+        XCTAssertNil(played.model.forwardingFlags(slotId: "xbox").phoneSurface)
+        XCTAssertEqual(played.recorder.touches.last?.id, "xbox", "the release heals where the touches went")
+        played.model.openGamepad()
+        XCTAssertEqual(played.play?.target, .onScreen, "the gamepad is the on-screen controller's own")
+    }
+
+    /// A screen already up keeps its aim; a new aim waits for the next one.
+    func testAnAimWhileAScreenIsUpWaits() throws {
+        let played = try PlayModel(self)
+        played.model.openMouse()
+        played.model.aimPlay(at: "pad")
+        XCTAssertEqual(played.play?.target, .onScreen)
     }
 
     func testSetupBindingTheOnScreenGamepadListsItWithTheWalksPicks() throws {
@@ -214,14 +258,15 @@ final class AppModelPlayTests: XCTestCase {
         XCTAssertEqual(controller.features.first { $0.feature == .motion }?.enabled, false)
     }
 
-    func testSetupBindingAPadLeavesTheOnScreenControllerOff() throws {
+    func testSetupBindingAPadLeavesTheOnScreenControllerUnbound() throws {
         let played = try PlayModel(self)
         played.model.startSetup(.input)
         played.model.pickSetupInput(.wired)
         played.model.answerLocalNetwork(allowed: true)
         played.model.pickSetupDestination(.byAddress)
         played.model.bindSetup()
-        XCTAssertNil(played.onScreenController)
+        let controller = try XCTUnwrap(played.onScreenController, "always listed")
+        XCTAssertNil(controller.destination, "the walk bound the pad, not the on-screen controller")
     }
 
     func testTheOnScreenSlotsRumbleIsGatedByItsSwitchOnTheReturnPath() throws {
@@ -265,14 +310,12 @@ final class AppModelPlayTests: XCTestCase {
         XCTAssertNil(played.onScreenController?.batteryPercent, "its card has no battery of its own")
     }
 
-    func testTheOnScreenBatteryRunsWhileTheControllerIsListedAndStopsWithIt() throws {
+    func testTheOnScreenBatteryRunsFromLaunchSinceTheControllerIsAlwaysListed() throws {
         let played = try PlayModel(self, deviceBattery: FakeDeviceBattery(deviceReading))
-        XCTAssertFalse(played.batteryTicker.running, "an unlisted controller has no cadence")
+        XCTAssertTrue(played.batteryTicker.running, "the on-screen controller is listed from the first launch")
         played.model.openGamepad()
-        played.model.closePlay()
-        XCTAssertTrue(played.batteryTicker.running, "a listed controller stays bound after the screen closes")
         played.model.stopOnScreenGamepad()
-        XCTAssertFalse(played.batteryTicker.running)
+        XCTAssertTrue(played.batteryTicker.running, "Stop gamepad closes the screen and keeps the controller")
     }
 
     func testAnIphoneWithNoBatterySendsTheOnScreenHostNothing() throws {

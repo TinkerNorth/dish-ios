@@ -37,6 +37,19 @@ final class HintMappersTests: XCTestCase {
         ))
     }
 
+    /// On a Lightning iPhone the wired road runs through the adapter, and
+    /// the same hint, under the same name, says so.
+    func testOnALightningIPhoneAddAControllersHintNamesTheAdapter() {
+        let lightning = hintState(.addController, port: .lightning)
+        XCTAssertEqual(
+            lightning.message,
+            "Apps can’t pair Bluetooth devices, so Dish leaves that to iOS. "
+                + "Pair it in Settings › Bluetooth first, or plug it in through Apple’s camera adapter."
+        )
+        XCTAssertEqual(lightning.id, hintState(.addController).id, "TipKit keeps one hint whatever the port")
+        XCTAssertEqual(lightning.title, hintState(.addController).title)
+    }
+
     /// Play hides every way out but the pause menu, so its hint shows even
     /// on a day another hint has.
     func testThePauseButtonsHintIsTheWayOutAndShowsOnABusyDay() {

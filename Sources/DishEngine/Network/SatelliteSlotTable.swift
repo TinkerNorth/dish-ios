@@ -33,6 +33,8 @@ struct SatelliteSlotTable: Equatable {
     var connectionFlags = ForwardingFlags()
     /// Each bound pad's switches, the global ones folded with its own.
     var slotFlags: [String: ForwardingFlags] = [:]
+    /// The satellite's word on mouse control, from its probe.
+    var hostMouseControl = false
 
     /// The bound slots in index order.
     var boundSlotIds: [String] {
@@ -140,8 +142,23 @@ struct SatelliteSlotTable: Equatable {
         descriptor.ctrlIdx = slot.controllerIndex
         descriptor.type = UInt8(truncatingIfNeeded: slot.controllerType)
         descriptor.caps = descriptorCaps(slot.capabilities, flags)
-        descriptor.touchpadMode = descriptorTouchpadMode(slot.capabilities, flags, typeOffersDs4: slot.typeOffersDs4)
+        descriptor.touchpadMode = descriptorTouchpadMode(
+            slot.capabilities,
+            flags,
+            typeOffersDs4: slot.typeOffersDs4,
+            hostMouseControl: hostMouseControl
+        )
         return descriptor
+    }
+
+    /// Whether any slot asks the host for the mouse.
+    var wantsMouseControl: Bool {
+        descriptors.contains { $0.touchpadMode == .mouse }
+    }
+
+    /// The catalog's word on the slot's type; a slot not bound offers it.
+    func typeOffersDs4(for slotId: String) -> Bool {
+        slots[slotId]?.typeOffersDs4 ?? true
     }
 
     /// The whole desired controller set for a session PUT, in index order;

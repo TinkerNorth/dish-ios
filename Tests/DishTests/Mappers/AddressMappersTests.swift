@@ -8,13 +8,12 @@ import XCTest
 /// The Add a PC by address sheet, and the words for every connection failure.
 final class AddressMappersTests: XCTestCase {
 
-    private func sheet(
-        draft: String = "",
-        rejected: Bool = false,
-        connecting: Bool = false,
-        lastEvent: ConnectionEvent? = nil
-    ) -> AddByAddressSheetState {
-        addByAddressSheetState(draft: draft, rejected: rejected, connecting: connecting, lastEvent: lastEvent)
+    private func sheet(draft: String = "", rejected: Bool = false, added: AddedByAddressFact? = nil) -> AddByAddressSheetState {
+        addByAddressSheetState(draft: draft, rejected: rejected, added: added)
+    }
+
+    private func added(reaching: Bool, failure: ConnectionFailure? = nil) -> AddedByAddressFact {
+        AddedByAddressFact(id: "wifi:192.168.1.50:9876", reaching: reaching, failure: failure)
     }
 
     func testTheSheetAsksForAnAddressAndNamesTheDefaultPort() {
@@ -43,23 +42,26 @@ final class AddressMappersTests: XCTestCase {
     }
 
     func testWhileConnectingTheSheetSpinsAndTheButtonWaits() {
-        let state = sheet(draft: "192.168.1.50", connecting: true)
+        let state = sheet(draft: "192.168.1.50", added: added(reaching: true))
         XCTAssertTrue(state.connecting)
         XCTAssertFalse(state.connectEnabled)
         XCTAssertNil(state.error)
     }
 
     func testAFailureOfTheAttemptIsWordedAndStopsTheSpinner() {
-        let state = sheet(draft: " 192.168.1.50 ", connecting: true, lastEvent: .failure(.unreachable(detail: "timed out")))
+        let state = sheet(draft: " 192.168.1.50 ", added: added(reaching: false, failure: .unreachable(detail: "timed out")))
         XCTAssertEqual(state.error, "Couldn’t reach 192.168.1.50. Make sure it’s on and on your network.")
         XCTAssertFalse(state.connecting)
         XCTAssertTrue(state.connectEnabled)
     }
 
-    func testAPairingEventIsNotAnError() {
-        let server = DiscoveredServer(ip: "192.168.1.50")
-        XCTAssertNil(sheet(draft: "192.168.1.50", connecting: true, lastEvent: .pairingRequired(server)).error)
-        XCTAssertNil(sheet(lastEvent: .pairingFailed(serverId: "x", failure: .approvalDeclined)).error, "the pair sheet words its own")
+    /// A PC that answered and rests, its pairing the pair sheet's business,
+    /// leaves the sheet quiet.
+    func testAPCThatAnsweredLeavesTheSheetQuiet() {
+        let state = sheet(draft: "192.168.1.50", added: added(reaching: false))
+        XCTAssertNil(state.error)
+        XCTAssertFalse(state.connecting)
+        XCTAssertTrue(state.connectEnabled)
     }
 
     func testEveryFailureHasItsWords() {
@@ -80,7 +82,12 @@ final class AddressMappersTests: XCTestCase {
             (.controllerNotApplied, "The PC refused the controller."),
             (.noServersFound, "No PCs found yet."),
             (.localNetworkDenied, "Dish can’t see your network"),
-            (.pairingRejected(detail: nil), "That PIN wasn’t accepted. Check the code on 192.168.1.50 and try again.")
+            (.pairingRejected(detail: nil), "That PIN wasn’t accepted. Check the code on 192.168.1.50 and try again."),
+            (
+                .dataPathBlocked,
+                "No data gets through to 192.168.1.50. The network may block traffic between devices, or the PC’s firewall does."
+            ),
+            (.sessionReplaced, "Another device took over 192.168.1.50. Connect to take it back.")
         ]
         for (failure, text) in expected {
             XCTAssertEqual(connectionFailureText(failure, name: name), text)

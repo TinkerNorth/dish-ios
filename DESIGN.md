@@ -38,6 +38,7 @@ default"; `Tests/PARITY.md` lists the difference).
 | `DishTheme.surfaceDim` | `0x131A3A` | `0xE7ECF6` | The glyph tile behind a row's symbol (`--tn-deep`) |
 | `DishTheme.primary` | `0x4FE3FF` | `0x0E7C97` | The accent (`--tn-signal`) |
 | `DishTheme.primaryDark` | `0x2C93AD` | `0x0A5E73` | Pressed and disabled accent (`--tn-signal-dim`) |
+| `DishTheme.pressWash` | ink @ 12 % | ink @ 12 % | The wash over a control's own surface while the finger is down: `onSurface` at Material's pressed state layer |
 | `DishTheme.onPrimary` | `0x060818` | `0xFFFFFF` | Text and glyphs on the accent |
 | `DishTheme.onSurface` | `0xE6ECFF` | `0x0C1430` | Body text (`--body-color`) |
 | `DishTheme.muted` | `0x93A0C8` | `0x5A6680` | Secondary text and resting dots (`--muted`) |
@@ -58,7 +59,8 @@ Fills derived from the palette, named so no view multiplies an alpha itself
 |---|---|---|---|
 | `DishTheme.errorDim` | error @ 16 % | error @ 16 % | The tile behind a warning glyph: the session accessory's stopped PC |
 | `DishTheme.successFill` | success @ 16 % | success @ 16 % | A BEST or FASTEST chip's ground under its `success` word |
-| `DishTheme.primaryFill` | accent @ 14 % | accent @ 14 % | A FAST chip's ground under its `primary` word |
+| `DishTheme.primaryFill` | accent @ 14 % | accent @ 14 % | A FAST chip's ground under its `primary` word, and the row a split's detail shows |
+| `DishTheme.warningFill` | warning @ 16 % | warning @ 16 % | The tile behind the Lightning note's bolt, and an ADAPTER chip's ground under its `warning` word |
 
 The brand glyphs use the brand book's colour, not the accent:
 
@@ -124,13 +126,14 @@ Points. Every size a kit component sets is one of these names.
 | `DishSize.rowGlyph` | 40 | The glyph tile at the head of a row |
 | `DishSize.rowGlyphCorner` | 10 | The tile's corner |
 | `DishSize.rowGlyphSymbol` | 20 | The glyph inside the tile |
-| `DishSize.sessionButton` | 44 | The session accessory's round Dim and Play buttons |
+| `DishSize.sessionButton` | 44 | The session accessory's round Dim button |
 | `DishSize.sessionButtonSymbol` | 16 | The glyph inside a session accessory button |
 | `DishSize.statusDot` | 8 | The small coloured status dot |
 | `DishSize.welcomeMark` | 112 | The brand mark on the welcome |
 | `DishSize.featureSymbol` | 32 | A welcome feature's symbol column |
 | `DishSize.carryMark` | 16 | The check or dash column of a review carry row |
-| `DishSize.primerTile` | 64 | The phone and PC tiles over the Local Network primer |
+| `DishSize.primerTile` | 64 | The phone and PC tiles over the Local Network primer, and the phone and controller tiles over the Wired on this iPhone sheet |
+| `DishSize.adapterArt` | 48 | The adapter drawn between the phone and the controller on the Wired on this iPhone sheet |
 | `DishSize.eyebrowTracking` | 1.4 | The tracking of a section eyebrow |
 | `DishSize.codeCorner` | 10 | The corner of a licence text's block on the licenses page |
 | `DishSize.padStick` | 128 | A stick's base on the on-screen gamepad, on a phone and an upright iPad |
@@ -154,6 +157,8 @@ Points. Every size a kit component sets is one of these names.
 | `DishSize.pinCellCorner` | 12 | A PIN cell's corner |
 | `DishSize.clientPinTracking` | 4 | The tracking of this iPhone's code on the pair sheet |
 | `DishSize.cardCorner` | 16 | The corner of a card inside a sheet: the pair sheet's request |
+| `DishSize.actionTileCorner` | 12 | The corner of a tile on a row's action strip |
+| `DishSize.actionTileSymbol` | 28 | The glyph's height on an action tile, which holds every tile's words on one line |
 | `DishSize.padStickRegular` | 200 | A stick's base on an iPad on its side |
 | `DishSize.padStickThumbRegular` | 92 | A stick's thumb on an iPad on its side |
 | `DishSize.padFaceRegular` | 76 | A face button on an iPad on its side |
@@ -189,6 +194,52 @@ click zones are half a stick tall.
 | `DishSpace.s12` | 24 |
 | `DishSpace.page` | 16, a page's inset from the screen's edges |
 
+## Interaction states (`DishMotion`, `DishOpacity`)
+
+Every control answers the finger, as Android's do through Material's state
+layers (`selectableItemBackground`'s ripple on a row, a button's
+`rippleColor`, the `FocusRings` theme, the disabled alpha). A control here
+has these states:
+
+| State | What shows | Where it comes from |
+|---|---|---|
+| Rest | The control as its component draws it | |
+| Pressed | `DishTheme.pressWash` over the control's own surface, in `DishMotion.pressIn`; a control that stands on its own also shrinks to `DishMotion.pressScale`; a row's whole cell washes and keeps its place | the kit: `PressStyle` as `.tile`, `.capsule` and `.round`; `RowButton` for a row |
+| Released | The wash and the shrink go in `DishMotion.pressOut`, slow enough for a tap to show | the same |
+| Hovered, by an iPad's pointer | The system highlight | `hoverEffect(.highlight)` in both |
+| Focused, from a keyboard | The system focus ring | iOS, around any focusable control |
+| Disabled | The control's content at `DishOpacity.disabled` | both read `isEnabled` |
+| Selected, beside a split's detail | `DishTheme.primaryFill` as the row's own background, under any wash | `selectedRow(_:)` on a split list's rows, from `rowOpening`'s `select(_:selected:)` |
+
+A system style (`.bordered`, `.borderedProminent`, `.glassProminent`, a
+toolbar's, a tab's, a menu's, a swipe's, a dialog's, a disclosure's, a
+toggle's, a picker's) draws its own states and is left alone. iOS draws no
+highlight of its own over a list row that carries the surface colour, so a
+row that opens a page or a link is never a `NavigationLink`, a `Link` or a
+bare `Button`: it is a `RowButton`. `.plain` and `.borderless`, which show nothing
+over content that carries its own colour, are used nowhere under
+`Sources/Dish` (`InteractionFeedbackTests`). The play screens' held controls
+(a face button, a stick, a rail) answer with their own held state,
+`DishSize.padHeldStroke` and `DishTheme.padGlow`.
+
+| Token | Value | Role |
+|---|---|---|
+| `DishMotion.pressIn` | ease out, 0.1 s | The wash and the shrink come in this time |
+| `DishMotion.pressOut` | ease out, 0.25 s | They go in this time once the finger lifts, long enough for a tap to show |
+| `DishMotion.pressScale` | 0.97 | How much a control that stands on its own shrinks while pressed |
+| `DishOpacity.disabled` | 0.38 | A disabled control's content, Material's 38% |
+
+| Control | Style |
+|---|---|
+| An action tile on a controller's row | `.tile` |
+| Add a controller | `.capsule` |
+| The session accessory's Dim | `.round` |
+| A row that opens a page or a link: a controller's (its strip under it), a PC's (Pair or Connect beside it), Moonlight hosts, the Lightning note, Settings' links and its Website, Source code and Privacy policy, Help's links, setup's ways in, PCs, Add my PC by address and Get Satellite, Dead zones | `RowButton` |
+| A text row that acts: Find a PC, Unbind, Re-pair, Connect, Disconnect, Reconnect, Cancel and Forget This PC on a PC's page, Walk me through setup, Restore purchases and a tip, Reset to defaults, Add a Moonlight host, Connect on the address sheet | `RowButton`, its words in `DishTheme.primary`, or `DishTheme.error` for one that destroys |
+| Connect, Pair, Reconnect, Try again, New code, Cancel on a card; a Moonlight host's actions | `.bordered` |
+| Reconnect on the accessory, Use on setup's pad rows, Done on the pair sheet, Open Settings | `.borderedProminent` |
+| Setup's Continue and Bind | `.glassProminent` |
+
 ## Symbols (`DishSymbol`)
 
 SF Symbol names the setup chrome draws itself; a row's glyph comes from its
@@ -218,6 +269,7 @@ custom glyph is drawn (`Tests/PARITY.md`).
 | Token | Asset | Role |
 |---|---|---|
 | `DishImage.mark` | `DishMark` in `Sources/Dish/Resources/Media.xcassets` | The app mark, version B: the dish tilted 28 degrees, shown on the welcome. Rendered by `scripts/render-icon.sh` from `Resources/Dish.svg`, the fleet's SVG byte for byte, as 1x, 2x and 3x PNGs, since the asset catalog drops the SVG mask that cuts the gear ring. |
+| `DishImage.adapter` | `LightningAdapter` in `Sources/Dish/Resources/Media.xcassets` | Apple's Lightning to USB Camera Adapter as a template SVG, tinted in the accent on the Wired on this iPhone sheet: the Lightning plug on its cable, the body with its USB port and its power port, and the controller's USB plug coming in. |
 
 ## Components
 
@@ -228,13 +280,26 @@ Also in `Theme.swift`:
 - `StatusDot(color:)`, the 8 pt dot beside a row's second line.
 
 The kit lives in `Sources/Dish/UI/Kit` and follows the kit rules in
-[docs/UI_CONTRACT.md](docs/UI_CONTRACT.md): `Chip` (BEST, FASTEST, FAST),
-`RowGlyph` (the rounded tile at the head of a row), `SessionBar` (the
+[docs/UI_CONTRACT.md](docs/UI_CONTRACT.md): `Chip` (BEST, FASTEST, FAST,
+ADAPTER), `RowGlyph` (the rounded tile at the head of a row),
+`AdapterNoteRow` (the Lightning note: the bolt on its warning tile, the port
+named, why a plain cable will not do, and the way to its sheet),
+`IllustrationTile` (a symbol on its tile with an eyebrow under it, over the
+Local Network primer and the adapter sheet), `SessionBar` (the
 session accessory), `PinCells` (a PIN's digits in a row of cells, the
 caret's cell outlined in the focus colour), `RowActions` (a row's long-press
 menu and swipes; a destructive swipe wears `DishTheme.error`, any other
-`DishTheme.primary`), `ForgetDialog` (Forget This PC's question) and
-`HintTip` (a hint as TipKit's own popover, which iOS draws).
+`DishTheme.primary`), `StatusMarkView` (a `StatusMark` beside a line: the
+dot of a state, or the smallest spinner of something under way), `ActionStrip`
+(the tiles under a controller's row, each an action's glyph over its word,
+as Android's card carries its buttons; an entry with choices opens them as
+a menu), `ForgetDialog` (Forget This PC's
+question) and
+`HintTip` (a hint as TipKit's own popover, which iOS draws), and
+`ButtonStyles` (`PressStyle` as `.tile`, `.capsule` and `.round`, and
+`RowButton`, a list row that opens a page, with a companion beside or under
+it, and `selectedRow(_:)`, the tint of the row a split's detail shows; the
+states above).
 
 Words are not design values but follow the same rule: a view reads them from
 `L10n` ([Sources/Dish/L10n](Sources/Dish/L10n)), never from a literal, and the

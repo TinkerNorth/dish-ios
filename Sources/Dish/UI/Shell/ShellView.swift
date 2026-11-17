@@ -15,7 +15,7 @@ struct ShellView: View {
 
     var body: some View {
         TabView(selection: navigation.tab) {
-            ForEach(tabItems(facts: model.shellFacts)) { item in
+            ForEach(tabItems(session: model.sessionFacts.session, paired: model.connectionsFacts.paired)) { item in
                 SwiftUI.Tab(item.title, systemImage: item.symbol, value: item.tab) {
                     TabStack(tab: item.tab)
                 }
@@ -23,19 +23,28 @@ struct ShellView: View {
             }
         }
         .tabViewStyle(.sidebarAdaptable)
-        .modifier(SessionAccessory(state: sessionBarState(model.shellFacts.session), dim: dim, play: play, reconnect: model.reconnect))
+        .modifier(SessionAccessory(
+            state: sessionBarState(model.sessionFacts.session, lowPower: model.sessionFacts.lowPower),
+            dim: dim,
+            reconnect: model.reconnect
+        ))
         .tabBarMinimizeBehavior(.onScrollDown)
         .sheet(item: navigation.tabsSheet) { ShellSheet(sheet: $0) }
         .fullScreenCover(item: navigation.cover) { ShellCover(cover: $0) }
         .onChange(of: pairingSheetId(model.openPairing)) { _, serverId in pairingChanged(serverId) }
+        .onChange(of: model.sessionFacts.lowPower.due) { _, due in lowPowerMoved(due) }
+        .onChange(of: dimAllowed(navigation.state), initial: true) { _, allowed in model.setDimAllowed(allowed) }
     }
 
     private func dim() {
         navigation.send(.dim)
     }
 
-    private func play() {
-        navigation.send(.openPlay(.gamepad))
+    /// The countdown ended: the dim rises and the model hears it.
+    private func lowPowerMoved(_ due: Bool) {
+        guard due else { return }
+        navigation.send(.dim)
+        model.lowPowerHandled()
     }
 
     private func pairingChanged(_ serverId: String?) {
@@ -88,9 +97,14 @@ private struct TabDetail: View {
     var body: some View {
         let opened = navigation.state.opened(in: tab)
         NavigationStack(path: navigation.detailPath(of: tab)) {
-            TabDetailRoot(state: tabDetailState(tab, opened: opened, facts: model.shellFacts))
-                .id(opened)
-                .navigationDestination(for: Page.self) { PageView(page: $0) }
+            TabDetailRoot(state: tabDetailState(
+                tab,
+                opened: opened,
+                controllers: model.controllersFacts.controllers,
+                paired: model.connectionsFacts.paired
+            ))
+            .id(opened)
+            .navigationDestination(for: Page.self) { PageView(page: $0) }
         }
     }
 }
@@ -135,17 +149,16 @@ private struct PageView: View {
 
 /// The accessory, attached only while there is a session to show: iOS 26.0
 /// has no `isEnabled:` form, and an empty accessory still draws its glass.
-/// Play opens the on-screen gamepad; Reconnect brings a stopped PC back.
+/// Reconnect brings a stopped PC back.
 private struct SessionAccessory: ViewModifier {
     let state: SessionBarState?
     let dim: () -> Void
-    let play: () -> Void
     let reconnect: () -> Void
 
     func body(content: Content) -> some View {
         if let state {
             content.tabViewBottomAccessory {
-                SessionBar(state: state, dim: dim, play: play, reconnect: reconnect, dimHint: hintState(.dim))
+                SessionBar(state: state, dim: dim, reconnect: reconnect, dimHint: hintState(.dim))
             }
         } else {
             content

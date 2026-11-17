@@ -66,7 +66,7 @@ func diagnosticsPageState(
     )
     let pads = DiagnosticsCardsState(
         title: words.controllers,
-        cards: cards(facts.diagnostics.pads.map { padCard($0, words: words) }, empty: words.noControllersConnected)
+        cards: cards(facts.diagnostics.pads.map { padCard($0, port: facts.port, words: words) }, empty: words.noControllersConnected)
     )
     let locks = facts.diagnostics.locks.map { DiagnosticsSectionState(title: words.lockStatistics, lines: lockLines($0, words: words)) }
     let events = eventsState(facts.diagnosticsEvents, locale: locale, timeZone: timeZone, words: words)

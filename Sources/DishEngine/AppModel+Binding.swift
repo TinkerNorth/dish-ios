@@ -60,13 +60,13 @@ package extension AppModel {
         follow(path, slotId: slotId, connectionId: connectionId)
     }
 
-    /// A pad iOS lists, or the on-screen gamepad while it is one of the
-    /// controllers; nothing else can be bound.
+    /// A pad iOS lists, or the on-screen gamepad, which is always one of
+    /// the controllers; nothing else can be bound.
     private func bindablePad(_ slotId: String) -> BindablePad? {
         if let slot = pads.slots.first(where: { $0.id == slotId }) {
             return BindablePad(capabilities: slot.capabilities, family: slot.family.emulatedPad)
         }
-        guard slotId == onScreenSlotId, onScreenListed.state else { return nil }
+        guard slotId == onScreenSlotId else { return nil }
         return BindablePad(capabilities: onScreenCapabilities, family: InputKind.onScreen.defaultEmulation)
     }
 
@@ -111,7 +111,8 @@ package extension AppModel {
     /// unbound.
     internal func destination(slotId: String) -> DestinationFact? {
         guard let row = network.hub.boundConnection(slotId: slotId) else { return nil }
-        return DestinationFact(name: row.name, health: linkHealth(row.live))
+        let updating = network.wifi.get(row.id)?.isRegisteringController ?? false
+        return DestinationFact(id: row.id, name: row.name, health: linkHealth(row.live), updating: updating)
     }
 
     // MARK: - Routes
@@ -161,7 +162,8 @@ package extension AppModel {
         snapshot.bySatellitePad[pad] = BoundSlotRoute(slotId: slotId, flags: flags)
     }
 
-    private func pushSlotFlags() {
+    /// Each satellite's descriptors take the pads' switches.
+    internal func pushSlotFlags() {
         for conn in network.wifi.connections.values {
             let flags = Dictionary(uniqueKeysWithValues: conn.boundSlotIds.map { ($0, forwardingFlags(slotId: $0)) })
             conn.setSlotFlags(flags)
@@ -187,23 +189,34 @@ package extension AppModel {
     }
 
     /// The slots a binding may hold: the pads iOS lists, and the on-screen
-    /// gamepad while it is one of the controllers.
+    /// gamepad, which is always one of the controllers.
     internal var presentSlotIds: Set<String> {
-        let attached = Set(pads.slots.map(\.id))
-        return onScreenListed.state ? attached.union([onScreenSlotId]) : attached
+        Set(pads.slots.map(\.id)).union([onScreenSlotId])
     }
 
     // MARK: - Following the satellite
 
     internal func clientChanged() {
+        clearNoticesOfLiveRows()
         refreshRouting()
         guard let watch = applyWatch, sessionIsUp(network.hub.summary(watch.connectionId)?.live) else { return }
         advanceApply(.putSent)
     }
 
+    /// The host carries the pad: the run that waited on it is done, and a
+    /// run that had failed on it is moot, so its word goes.
     internal func slotConfirmed(connectionId: String, slotId: String) {
+        let target = ApplyTarget(slotId: slotId, connectionId: connectionId)
+        if applyTarget == target, applyEndedFailed(bindingProgress) { advanceApply(.dismissed) }
         guard let watch = applyWatch, watch.slotId == slotId, watch.connectionId == connectionId else { return }
         advanceApply(.hostConfirmed)
+    }
+
+    /// The person reached for the PC again: a run that had failed on it is
+    /// moot, so its word goes and the rows read the link instead.
+    internal func dismissFailedApply(on connectionId: String) {
+        guard applyTarget?.connectionId == connectionId, applyEndedFailed(bindingProgress) else { return }
+        advanceApply(.dismissed)
     }
 
     internal func slotRefused(_ slotId: String) {
@@ -240,6 +253,15 @@ package extension AppModel {
     }
 }
 
+/// Whether a run ended in failure, the one word a later success or reach
+/// makes moot.
+func applyEndedFailed(_ progress: ApplyProgress) -> Bool {
+    switch progress {
+    case .failed: true
+    case .idle, .running, .done: false
+    }
+}
+
 /// A session is up while it is live or faltering.
 func sessionIsUp(_ live: LinkState?) -> Bool {
     switch live {
@@ -250,11 +272,11 @@ func sessionIsUp(_ live: LinkState?) -> Bool {
 
 /// How the PC a controller is bound to is answering: a PC whose acks falter
 /// has stopped responding, so its rows read lost while the accessory offers
-/// Reconnect (D4); a PC being reached for is unsteady.
+/// Reconnect (D4); a PC being reached for says so.
 func linkHealth(_ live: LinkState) -> LinkHealth {
     switch live {
     case .connected: .online
-    case .connecting: .unsteady
+    case .connecting: .connecting
     case .unstable, .stale, .saved, .ready: .lost
     }
 }

@@ -27,7 +27,35 @@ final class ShellMappersTests: XCTestCase {
     func testTheBadgeIsOnlyForAPCThatStoppedResponding() {
         XCTAssertNil(connectionsBadge(session: nil))
         XCTAssertNil(connectionsBadge(session: FactsFixture.streaming()))
+        XCTAssertNil(connectionsBadge(session: FactsFixture.reconnecting), "a PC coming back needs nothing yet")
         XCTAssertEqual(connectionsBadge(session: FactsFixture.stopped), 1)
+    }
+
+    /// The badge also counts each paired PC that needs the person: a key
+    /// the PC revoked, or an attempt that failed.
+    func testTheBadgeCountsThePairedPCsThatNeedThePerson() {
+        let revoked = ConnectionFact(id: "den", name: "Den PC", address: "192.168.1.41", kind: .satellite, state: .needsPairing)
+        let failed = ConnectionFact(
+            id: "office",
+            name: "Office PC",
+            address: "192.168.1.40",
+            kind: .satellite,
+            state: .offline(lastSeen: nil),
+            notice: .unreachable(detail: "")
+        )
+        let fine = ConnectionFact(
+            id: "lr",
+            name: "Living Room PC",
+            address: "192.168.1.24",
+            kind: .satellite,
+            state: .online(latencyMs: 4, controllers: 1)
+        )
+        XCTAssertEqual(connectionsBadge(session: nil, paired: [revoked, failed, fine]), 2)
+        XCTAssertEqual(connectionsBadge(session: FactsFixture.stopped, paired: [revoked]), 2)
+        XCTAssertNil(connectionsBadge(session: nil, paired: [fine]))
+        XCTAssertTrue(needsAttention(revoked))
+        XCTAssertTrue(needsAttention(failed))
+        XCTAssertFalse(needsAttention(fine))
     }
 
     func testThereIsNoSessionBarWhileNothingStreams() {
@@ -37,15 +65,82 @@ final class ShellMappersTests: XCTestCase {
     func testAStreamingSessionNamesItsPCPadsAndLatency() {
         XCTAssertEqual(
             sessionBarState(FactsFixture.streaming()),
-            .streaming(pcName: "Living Room PC", line: "Streaming · 3 pads · 4 ms", shortLine: "3 pads · 4 ms", dim: "Dim", play: "Play")
+            .streaming(pcName: "Living Room PC", line: "Streaming · 3 pads · 4 ms", shortLine: "3 pads · 4 ms", dim: "Dim")
         )
     }
 
     func testASessionWithNoLatencyYetLeavesItOut() {
         XCTAssertEqual(
             sessionBarState(FactsFixture.streaming(pads: 2, latencyMs: nil)),
-            .streaming(pcName: "Living Room PC", line: "Streaming · 2 pads", shortLine: "2 pads", dim: "Dim", play: "Play")
+            .streaming(pcName: "Living Room PC", line: "Streaming · 2 pads", shortLine: "2 pads", dim: "Dim")
         )
+    }
+
+    /// The last seconds of the low-power countdown take the streaming line,
+    /// on the full bar and the minimized one alike.
+    func testTheLowPowerCountdownTakesTheStreamingLine() {
+        let counting = LowPowerFact(countdown: 3, due: false)
+        XCTAssertEqual(
+            sessionBarState(FactsFixture.streaming(), lowPower: counting),
+            .streaming(pcName: "Living Room PC", line: "Low power in 3 s", shortLine: "Low power in 3 s", dim: "Dim")
+        )
+        XCTAssertEqual(
+            sessionBarState(FactsFixture.stopped, lowPower: counting),
+            sessionBarState(FactsFixture.stopped),
+            "a problem speaks first"
+        )
+    }
+
+    /// While the PC the person reached for comes back, the accessory shows
+    /// it with the spinner's line and no button.
+    func testAPCBeingBroughtBackShowsAsReconnecting() {
+        XCTAssertEqual(sessionBarState(FactsFixture.reconnecting), .reconnecting(pcName: "Living Room PC", line: "Connecting…"))
+        let counting = LowPowerFact(countdown: 3, due: false)
+        XCTAssertEqual(sessionBarState(FactsFixture.reconnecting, lowPower: counting), sessionBarState(FactsFixture.reconnecting))
+    }
+
+    /// A bound PC's failure takes the accessory's problem shape, worded for
+    /// the PC, with Reconnect.
+    func testABoundPCsFailureIsWordedOnTheAccessoryWithReconnect() {
+        let failed = SessionFact(id: "lr", pcName: "Living Room PC", pads: 2, latencyMs: nil, phase: .failed(.dataPathBlocked))
+        XCTAssertEqual(
+            sessionBarState(failed),
+            .problem(
+                pcName: "Living Room PC",
+                line: "No data gets through to Living Room PC. The network may block traffic between devices, or the PC’s firewall does.",
+                reconnect: "Reconnect"
+            )
+        )
+        let taken = SessionFact(id: "lr", pcName: "Living Room PC", pads: 1, latencyMs: nil, phase: .failed(.sessionReplaced))
+        XCTAssertEqual(
+            sessionBarState(taken),
+            .problem(
+                pcName: "Living Room PC",
+                line: "Another device took over Living Room PC. Connect to take it back.",
+                reconnect: "Reconnect"
+            )
+        )
+    }
+
+    /// A PC counts once on the badge, whether it is the session's or a
+    /// paired row's; a session with no row of its own counts apart.
+    func testTheBadgeCountsAPCOnce() {
+        let faltering = ConnectionFact(
+            id: "lr",
+            name: "Living Room PC",
+            address: "192.168.1.24",
+            kind: .satellite,
+            state: .unsteady(latencyMs: 40, controllers: 2)
+        )
+        let stopped = SessionFact(id: "lr", pcName: "Living Room PC", pads: 2, latencyMs: 40, phase: .stoppedResponding)
+        XCTAssertEqual(connectionsBadge(session: stopped, paired: [faltering]), 1)
+        XCTAssertEqual(
+            connectionsBadge(session: FactsFixture.stopped, paired: [faltering]),
+            2,
+            "a session with no row of its own counts apart"
+        )
+        let failed = SessionFact(id: "lr", pcName: "Living Room PC", pads: 2, latencyMs: nil, phase: .failed(.sessionReplaced))
+        XCTAssertEqual(connectionsBadge(session: failed, paired: []), 1)
     }
 
     func testAPCThatStoppedRespondingOffersReconnect() {
@@ -60,6 +155,13 @@ final class ShellMappersTests: XCTestCase {
         XCTAssertFalse(idleTimerDisabled(facts: FactsFixture.shell()), "nothing streams")
         XCTAssertTrue(idleTimerDisabled(facts: FactsFixture.shell(session: FactsFixture.streaming())))
         XCTAssertTrue(idleTimerDisabled(facts: FactsFixture.shell(session: FactsFixture.stopped)), "Reconnect is still on screen")
+        XCTAssertFalse(idleTimerDisabled(facts: FactsFixture.shell(session: FactsFixture.reconnecting)), "nothing streams yet")
+        XCTAssertFalse(
+            idleTimerDisabled(facts: FactsFixture.shell(session: FactsFixture.streaming(pads: 0))),
+            "a bare connection holds nothing; the phone locks like any other app"
+        )
+        let failed = SessionFact(pcName: "Living Room PC", pads: 1, latencyMs: nil, phase: .failed(.dataPathBlocked))
+        XCTAssertFalse(idleTimerDisabled(facts: FactsFixture.shell(session: failed)), "nothing streams")
         XCTAssertFalse(idleTimerDisabled(facts: FactsFixture.shell(session: FactsFixture.streaming(), preferences: off)))
     }
 
@@ -119,7 +221,7 @@ final class ShellSplitMappersTests: XCTestCase {
 
     func testARowPushesFromAStackAndIsSelectedBesideASplitsList() {
         XCTAssertEqual(rowOpening(.controller(id: "pad"), layout: .stack), .push(.controller(id: "pad")))
-        XCTAssertEqual(rowOpening(.pcDetail(id: "den"), layout: .split), .select(.pcDetail(id: "den")))
+        XCTAssertEqual(rowOpening(.pcDetail(id: "den"), layout: .split), .select(.pcDetail(id: "den"), selected: false))
     }
 
     func testOnlyASplitsListSelectsThePageBesideIt() {
@@ -131,6 +233,14 @@ final class ShellSplitMappersTests: XCTestCase {
     func testARowWithNoPageOpensNothingInEitherLayout() {
         XCTAssertEqual(rowOpening(nil, layout: .stack), .inert)
         XCTAssertEqual(rowOpening(nil, layout: .split), .inert)
+    }
+
+    /// A split's row is marked while its page is the one the detail shows.
+    func testASplitRowIsMarkedWhileItsPageIsOpen() {
+        let den = Page.pcDetail(id: "den")
+        XCTAssertEqual(rowOpening(den, layout: .split, selection: den), .select(den, selected: true))
+        XCTAssertEqual(rowOpening(den, layout: .split, selection: .pcDetail(id: "attic")), .select(den, selected: false))
+        XCTAssertEqual(rowOpening(den, layout: .stack, selection: den), .push(den), "a stack pushes; nothing stays marked")
     }
 
     func testTheDetailIsThePageTheListOpened() {

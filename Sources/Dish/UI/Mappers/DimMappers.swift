@@ -31,11 +31,16 @@ struct DimCoverState: Equatable {
     let footnote: String
 }
 
+/// The whole, for a test or a preview that holds one.
 func dimCoverState(facts: ShellFacts, words: L10n = .app) -> DimCoverState {
+    dimCoverState(session: facts.session, controllers: facts.controllers, now: facts.now, words: words)
+}
+
+func dimCoverState(session: SessionFact?, controllers: [ControllerFact], now: Date, words: L10n = .app) -> DimCoverState {
     DimCoverState(
         eyebrow: words.lowPower,
-        clock: dimClock(facts.now),
-        card: dimCard(facts, words: words),
+        clock: dimClock(now),
+        card: dimCard(session, controllers: controllers, words: words),
         wake: words.tapToWake,
         footnote: words.dimFootnote
     )
@@ -47,14 +52,16 @@ func dimClock(_ now: Date) -> String {
 }
 
 /// The card carries the accessory's own line, so the two never disagree.
-private func dimCard(_ facts: ShellFacts, words: L10n) -> DimCardState? {
-    guard let bar = sessionBarState(facts.session, words: words) else { return nil }
-    let pads = facts.controllers.compactMap { dimPadRow($0, words: words) }
+private func dimCard(_ session: SessionFact?, controllers: [ControllerFact], words: L10n) -> DimCardState? {
+    guard let bar = sessionBarState(session, words: words) else { return nil }
+    let pads = controllers.compactMap { dimPadRow($0, words: words) }
     switch bar {
-    case let .streaming(pcName, line, _, _, _):
+    case let .streaming(pcName, line, _, _):
         return DimCardState(pcName: pcName, line: line, dot: DishTheme.success, lineColor: DishTheme.dimText, pads: pads)
     case let .problem(pcName, line, _):
         return DimCardState(pcName: pcName, line: line, dot: DishTheme.error, lineColor: DishTheme.error, pads: pads)
+    case let .reconnecting(pcName, line):
+        return DimCardState(pcName: pcName, line: line, dot: DishTheme.warning, lineColor: DishTheme.dimText, pads: pads)
     }
 }
 

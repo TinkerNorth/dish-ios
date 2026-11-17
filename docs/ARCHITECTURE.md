@@ -115,9 +115,14 @@ equal value and persists before it republishes.
 The kernel's other four primitives (`Composer`, `Controller`, `Repository`,
 `AsyncState`) are not ported; each has a row in
 [`../Tests/PARITY.md`](../Tests/PARITY.md), and the wave that needs it ports it
-with its tests. Until then a derived value is a computed property
-(`AppModel.shellFacts`, which Observation tracks through the stores it reads)
-and a request does not exist.
+with its tests. Until then a derived value is a computed property: the
+model's fact slices (`controllersFacts`, `connectionsFacts`, `sessionFacts`
+and the rest, `AppModel+Facts.swift`), each reading the stores it needs so
+Observation tracks a page through those alone, with `shellFacts` the whole
+for the pages that read across them; and a request is no type of its own:
+what an intent waits on is a case of its subject's state
+(`ConnectionState.connecting`, `ApplyProgress.running`), and why it failed a
+fact beside it (`ConnectionFact.notice`).
 
 Two more conventions are classes written per feature. A **coordinator** owns
 imperative, cross-cutting commands over several sources and re-exposes a
@@ -200,13 +205,24 @@ passes down the two values only UIKit can give (`settingsURL`, from
 hands the model the clipboard and the device's battery (which each pad's
 battery is weighed against, `routeBattery` in `DishCore`),
 drives `preferredColorScheme` from the appearance fact and sets the idle timer
-from `idleTimerDisabled(facts:)`. It reads the device's idiom once
+from `idleTimerDisabled(session:preferences:)`, held only while a session is
+up with a pad bound and Keep screen on is set, so a bare connection lets the
+phone lock like any other app. It reads the device's idiom once
 (`deviceIdiom(_:)`), for the orientation lock: an iPhone stands upright but
 for play, an iPad follows the device on every screen. The same fact tells the
 engine which device it is (`deviceKind(_:)` into `AppModel`'s `deviceKind`), so
 a device with no name of its own introduces itself to the satellite as "iPhone"
 or "iPad" (`wireDeviceName`); the words that name the device (about nineteen
-catalog keys) are device variations in the String Catalog, which the OS picks. It puts `WindowReader`
+catalog keys) are device variations in the String Catalog, which the OS picks.
+It reads the hardware's model identifier once too (`unameMachine()`, or the
+simulator's `SIMULATOR_MODEL_IDENTIFIER`, through `hardwareModel(machine:simulated:)`
+in `Scene/DeviceModel.swift`), which the engine's `devicePort(modelIdentifier:)`
+turns into `AppModel`'s `devicePort`: iOS names no port to an app, and the
+Lightning note hangs on it. It installs a `TouchWatcher` on every window and
+keeps a `ScreenDimmer` (`Scene/LowPowerScreen.swift`), the two UIKit seams
+behind the low-power dim: each touch restarts the model's countdown
+(`touched()`), the dim cover's rise drops the screen's brightness to 0.01, and
+its fall, or the background, gives back what the screen had. It puts `WindowReader`
 (`Scene/WindowReader.swift`) at the window's root, the one reader of the
 window's size classes and shape, which hands them down as `windowFacts`; the
 iPad's layouts (the split tabs, the setup cover's column, the gamepad's
@@ -218,18 +234,30 @@ reading no size class or idiom of its own (V13).
 
 What `AppModel` publishes today:
 
-- `shellFacts`, a computed `ShellFacts` the mappers word: `controllers` and
-  `attachedPads` from the bridge (each controller's `destination` from its
-  binding), `paired`, `found` and `scanning` from the hub and the manager,
-  `session` from the live satellite carrying the most pads (its latency off
-  the heartbeat window, `.stoppedResponding` while its acks falter),
-  `localNetwork` from the last scan, `preferences` (the stores' state), `now`
-  (the clock) and `setup` (the walk, nil while the cover is down), `deadzones`
-  (each tuned pad's) and `forwarding` (the global switches, `FeatureSettings`);
-  `found` also lists a PC typed by its address that the pool holds and that is
-  not paired. Beside it,
-  for the pages the next wave draws: `openPairing` (the card),
-  `bindingProgress` (the apply) and `lastConnectionEvent` (a failure to word).
+- the facts, in slices (`AppModel+Facts.swift`), each computed from the
+  stores it needs and no other: `controllersFacts` (`controllers` and
+  `attachedPads` from the bridge, each controller's `destination` from its
+  binding with how its PC answers (`LinkHealth`: online, connecting, lost) and
+  whether the PC is applying the pad's settings (`updating`, the connection's
+  slot sync); `apply`, the bind in flight; `deadzones`, each tuned pad's;
+  `port`, the device's as the scene read it), `connectionsFacts` (`paired` and
+  `found` from the hub and the manager, each PC at every step of its link
+  (`ConnectionState`: online, unsteady while its acks falter, connecting,
+  offline, needsPairing) and with `notice`, why the person's last attempt on
+  it failed, kept in the root's `attemptNotices` source until the next attempt
+  or until the PC is up; `scanning`; `localNetwork` from the last scan; `now`,
+  the clock; `addedByAddress`, the PC typed by its address with whether the
+  pool reaches for it now and what the attempt left), `sessionFacts` (`session`
+  from the live satellite carrying the most pads, its latency off the
+  heartbeat window, `.stoppedResponding` while its acks falter, and
+  `.reconnecting` while no session is up and the person's own reach for a PC
+  with pads bound is under way, the root's `reaching` source, pruned by
+  Observation as links settle so a silent retry never shows; `lowPower`, the
+  countdown, armed only while a session streams with a pad bound, never
+  while one is being brought back, stopped responding or failed), `preferencesFacts`, `forwardingFacts`, `supportFacts`,
+  `playFacts`, `setup` and `diagnosticsFacts`; and `shellFacts`, the whole,
+  which Diagnostics alone reads. Beside them: `openPairing` (the card) and
+  `bindingProgress` (the apply).
   For the Moonlight hosts page, `moonlightFacts`: the hub's rows for the
   hosts, the scan, the pairings in flight, each session's phase, the apps a
   probe listed, the pick per host, the PIN a host waits for and its last word.
@@ -240,7 +268,7 @@ What `AppModel` publishes today:
   `setKeepScreenOn`, `setDimAfter`, `setAppearance`), `AppModel+Pages.swift`
   (`pageAppeared`, `pageDisappeared`), `AppModel+Controllers.swift` (the
   switches, the pick, the dead zones), `AppModel+Connections.swift`
-  (`startScan`, `refreshConnections`, `connect`, `disconnect`, `forget`, `addByAddress`),
+  (`startScan`, `refreshConnections`, `connect`, `reconnect(_:)`, `disconnect`, `forget`, `addByAddress`),
   `AppModel+Pairing.swift` (`beginPairing(serverId:)`, `submitPin`, `newCode`,
   `cancelPairing`), `AppModel+Binding.swift` (`bind(slotId:to:)`,
   `unbind(slotId:)`, `dismissApply`), `AppModel+Session.swift`
@@ -278,12 +306,13 @@ What `AppModel` publishes today:
 5. **Distinct-until-changed everywhere.** Every state value is `Equatable`,
    and `StateSource` drops an equal write.
 6. **Commands flow the other way, explicitly.** The UI calls an intent on
-   `AppModel`; the resulting state flows back out as a fact in `shellFacts`,
-   which a page's mapper turns into its view state. A view holds no engine
+   `AppModel`; the resulting state flows back out as a fact in the slice the
+   page reads (`controllersFacts`, `connectionsFacts`, `sessionFacts`, ...),
+   which the page's mapper turns into its view state. A view holds no engine
    object: the scene hands its pages `AppModel` and `NavigationStore` and
-   nothing else, and a page reaches everything through `ShellFacts`.
-   `ViewPurityTests` enforces it, rule by rule
-   ([UI_CONTRACT.md](UI_CONTRACT.md), "View purity").
+   nothing else, and a page reaches everything through its slices; Diagnostics
+   alone reads the whole (`shellFacts`). `ViewPurityTests` enforces it, rule by
+   rule ([UI_CONTRACT.md](UI_CONTRACT.md), "View purity").
 7. **The engine vends data, the app vends words.** A fact is an enum or a
    number (`LinkHealth`, `ConnectionState.offline(lastSeen:)`, `DimDelay`);
    `L10n` is the one place a key becomes a word, and the String Catalog is the
@@ -308,6 +337,19 @@ What `AppModel` publishes today:
     (`AppModel+Pages.swift`), which starts and stops what the page needs; today
     the Connections page runs the clock so an offline PC's "last seen" words
     stay current, and the view does nothing else there.
+11. **Every intent that waits or can fail reports through a fact.** What is
+    under way is a case of its subject's state (`ConnectionState.connecting`,
+    `SessionPhase.reconnecting`, `ApplyProgress.running`,
+    `DestinationFact.updating`, `PairingAttempt.phase`, `TipMoment.buying`),
+    and why it failed is a fact beside the subject (`ConnectionFact.notice`,
+    `ApplyProgress.failed`, `AddedByAddressFact.failure`), keyed by the
+    subject and cleared by the next attempt or by the state that supersedes
+    it, never a global last event. Every attempt's failure is told, the
+    pool's silent ones included, marked by whose it was (`AttemptKind`); the
+    model words the person's own and, of the silent, those that need the
+    person (`needsThePerson`), never that the PC was merely off. A view keeps no loading flag of its own for
+    something the engine knows, and the mapper words every case
+    ([UI_CONTRACT.md](UI_CONTRACT.md), "Feedback"; `FeedbackTests`).
 
 ## Navigation
 

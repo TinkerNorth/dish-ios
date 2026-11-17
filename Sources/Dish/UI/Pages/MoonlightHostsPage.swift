@@ -176,9 +176,10 @@ private struct AddHostSection: View {
                 .autocorrectionDisabled()
                 .submitLabel(.go)
                 .onSubmit(add)
-            Button(state.add, action: add)
-                .font(DishFont.body)
-                .disabled(!state.canAdd)
+            RowButton(action: add) {
+                Text(state.add).font(DishFont.body).foregroundStyle(DishTheme.primary)
+            }
+            .disabled(!state.canAdd)
         } header: {
             SectionEyebrow(title: state.heading, color: DishTheme.muted)
         } footer: {

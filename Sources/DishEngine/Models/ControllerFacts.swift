@@ -14,18 +14,26 @@ package enum ControllerLink: Equatable {
 /// How well the PC a controller is bound to is answering.
 package enum LinkHealth: Equatable {
     case online
-    case unsteady
+    /// Being reached for right now.
+    case connecting
     case lost
 }
 
 /// The PC a controller sends to, and how it is answering.
 package struct DestinationFact: Equatable {
+    /// The PC's connection id, which Reconnect reaches for; empty in a
+    /// preview that names none.
+    package let id: String
     package let name: String
     package let health: LinkHealth
+    /// Whether the PC is applying the controller's settings right now.
+    package let updating: Bool
 
-    package init(name: String, health: LinkHealth) {
+    package init(id: String = "", name: String, health: LinkHealth, updating: Bool = false) {
+        self.id = id
         self.name = name
         self.health = health
+        self.updating = updating
     }
 }
 
@@ -99,6 +107,10 @@ package struct ControllerFact: Equatable, Identifiable {
     package let motion: MotionFact
     /// Nil unless the controller is bound to a Moonlight host.
     package let hostEmulation: HostEmulationFact?
+    /// The screens the phone can lend the pad: its touchpad or its mouse
+    /// sent through the pad's slot. Empty for a pad with a touchpad of its
+    /// own, and for the on-screen controller, whose screens are its own.
+    package let surfaces: [PlayScreen]
     /// A Steam Controller's trackpads, in place of the Touchpad switch; nil
     /// for every other controller.
     package let trackpads: TrackpadsFact?
@@ -115,6 +127,7 @@ package struct ControllerFact: Equatable, Identifiable {
         supported: Bool = true,
         motion: MotionFact = MotionFact(carries: false, status: nil),
         hostEmulation: HostEmulationFact? = nil,
+        surfaces: [PlayScreen] = [],
         trackpads: TrackpadsFact? = nil
     ) {
         self.id = id
@@ -128,6 +141,7 @@ package struct ControllerFact: Equatable, Identifiable {
         self.supported = supported
         self.motion = motion
         self.hostEmulation = hostEmulation
+        self.surfaces = surfaces
         self.trackpads = trackpads
     }
 }

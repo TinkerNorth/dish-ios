@@ -5,8 +5,10 @@ import DishEngine
 import SwiftUI
 
 /// The Controllers tab (A2): the pads iOS sees, then Add a controller on its
-/// own under the list. A row opens the controller's page: pushed on a
-/// phone, beside the list on an iPad.
+/// own under the list, and on a Lightning iPhone with nothing listed the
+/// note that a wired pad needs the adapter, which opens its sheet. A row
+/// opens the controller's page: pushed on a phone, beside the list on an
+/// iPad.
 struct ControllersPage: View {
     @Environment(AppModel.self) private var model
     @Environment(NavigationStore.self) private var navigation
@@ -16,16 +18,23 @@ struct ControllersPage: View {
         let layout = tabLayout(.controllers, width: window.width)
         ControllersPageBody(
             state: controllersPageState(
-                controllers: model.shellFacts.controllers,
-                apply: model.shellFacts.apply,
-                paired: model.shellFacts.paired
+                controllers: model.controllersFacts.controllers,
+                apply: model.controllersFacts.apply,
+                paired: model.connectionsFacts.paired,
+                port: model.controllersFacts.port
             ),
             layout: layout,
             selection: listSelection(navigation.listSelection(of: .controllers), layout: layout),
             add: addController,
             open: open,
-            act: act
+            act: act,
+            more: whatYouNeed
         )
+    }
+
+    /// The Lightning note's way to its sheet.
+    private func whatYouNeed() {
+        navigation.send(.openSheet(.lightningAdapter))
     }
 
     /// A row's page, or the heart's: alone on the tab.
@@ -33,14 +42,10 @@ struct ControllersPage: View {
         navigation.send(.show(page, in: .controllers))
     }
 
-    /// A row's Open, menu and swipes: the gamepad, or the binding through
-    /// the same intents the controller's page calls.
-    private func act(_ action: ControllerRowAction) {
-        switch action {
-        case .open: navigation.send(.openPlay(.gamepad))
-        case let .bind(slotId, connectionId): model.bind(slotId: slotId, to: connectionId)
-        case let .unbind(slotId): model.unbind(slotId: slotId)
-        }
+    /// A row's menu and swipes: the controller's actions, through the
+    /// dispatch its page shares.
+    private func act(_ action: ControllerAction) {
+        ControllerActionRouter(model: model, navigation: navigation).perform(action)
     }
 
     private func addController() {
@@ -55,23 +60,31 @@ struct ControllersPageBody: View {
     var layout = TabLayout.stack
     /// The page beside the list; nil while the list is a stack's.
     var selection: Binding<Page?>?
+
+    /// The page the split's detail shows, which marks its row.
+    private var shown: Page? {
+        selection?.wrappedValue
+    }
+
     let add: () -> Void
     let open: @MainActor (Page) -> Void
-    let act: @MainActor (ControllerRowAction) -> Void
+    let act: @MainActor (ControllerAction) -> Void
+    /// The Lightning note's way to its sheet.
+    var more: @MainActor () -> Void = {}
 
     var body: some View {
         List(selection: selection) {
-            switch state.content {
-            case let .list(rows):
+            Section {
+                ForEach(state.rows) { row in
+                    ControllerRow(state: row, layout: layout, selection: shown, open: open, act: act)
+                }
+            }
+            .listRowBackground(DishTheme.surface)
+            if let adapter = state.adapter {
                 Section {
-                    ForEach(rows) { ControllerRow(state: $0, layout: layout, open: open, act: act) }
+                    AdapterNoteRow(state: adapter, more: more)
                 }
                 .listRowBackground(DishTheme.surface)
-            case let .empty(invitation):
-                Section {
-                    ControllersInvitation(text: invitation)
-                }
-                .listRowBackground(EmptyView())
             }
             Section {
                 AddControllerButton(title: state.addTitle, hint: state.addHint, tipKitHint: state.hints.add, action: add)
@@ -118,7 +131,7 @@ struct ControllersPageBody: View {
             name: "On-screen gamepad",
             link: .onScreen,
             batteryPercent: nil,
-            destination: DestinationFact(name: "Office PC", health: .unsteady)
+            destination: DestinationFact(name: "Office PC", health: .connecting)
         )
     ]
     NavigationStack {
@@ -129,5 +142,11 @@ struct ControllersPageBody: View {
 #Preview("Empty") {
     NavigationStack {
         ControllersPageBody(state: controllersPageState(controllers: []), add: {}, open: { _ in }, act: { _ in })
+    }
+}
+
+#Preview("Empty, Lightning iPhone") {
+    NavigationStack {
+        ControllersPageBody(state: controllersPageState(controllers: [], port: .lightning), add: {}, open: { _ in }, act: { _ in })
     }
 }

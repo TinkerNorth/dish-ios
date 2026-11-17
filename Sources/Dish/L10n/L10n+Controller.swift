@@ -20,6 +20,11 @@ extension L10n {
         catalog.text("This controller isn’t connected to your iPhone.")
     }
 
+    /// The PC is applying the controller's settings.
+    var updating: String {
+        catalog.text("Updating…")
+    }
+
     var nintendo: String {
         catalog.text("Nintendo")
     }
@@ -135,6 +140,10 @@ extension L10n {
 
     var pairAPCToBind: String {
         catalog.text("Pair a PC on the Connections tab to bind this controller.")
+    }
+
+    var connectAPCToBind: String {
+        catalog.text("Connect a PC on the Connections tab to bind this controller.")
     }
 
     var applyingBinding: String {

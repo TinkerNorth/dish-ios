@@ -91,12 +91,17 @@ final class AppModelPagesTests: XCTestCase {
         XCTAssertEqual((clocked.model.localNetwork as? RecordedLocalNetworkAccess)?.scans, 2)
     }
 
-    /// The address sheet words only what happens to its own attempt.
-    func testTheAddressSheetAppearingClearsTheLastConnectionEvent() throws {
+    /// The address sheet words only what happens to its own attempt: the
+    /// last attempt's failure on the typed PC goes as the sheet appears.
+    func testTheAddressSheetAppearingClearsTheLastAttemptsNotice() throws {
         let clocked = try ClockedModel(self)
-        clocked.model.lastConnectionEvent = .failure(.noServersFound)
+        XCTAssertTrue(clocked.model.addByAddress("192.0.2.1"))
+        let id = try XCTUnwrap(clocked.model.connectionsFacts.addedByAddress?.id)
+        clocked.model.recordNotice(.unreachable(detail: "timed out"), for: id)
+        clocked.model.disconnect(id)
+        XCTAssertNotNil(clocked.model.connectionsFacts.addedByAddress?.failure, "a resting PC carries its last failure")
         clocked.model.pageAppeared(.addByAddress)
-        XCTAssertNil(clocked.model.lastConnectionEvent)
+        XCTAssertNil(clocked.model.connectionsFacts.addedByAddress?.failure)
         XCTAssertEqual((clocked.model.localNetwork as? RecordedLocalNetworkAccess)?.scans, 0, "the sheet runs no scan")
     }
 

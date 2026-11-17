@@ -20,7 +20,108 @@ lockstep across the repos share a version number.
 
 ## [Unreleased]
 
-Nothing yet.
+### Added
+
+- **The on-screen controller is always listed.** As Android's Virtual
+  Controller is: one of the controllers from the first launch, bound and
+  unbound from its row and its page like any pad, its binding kept across
+  restarts; Open raises its gamepad once a PC is bound to it, and Stop
+  gamepad closes the screen and keeps the binding.
+- **The low-power countdown.** Settings › Dim screen after now does what it
+  says: while a session streams and the tabs are on screen, the seconds
+  without a touch on the phone count up to the delay, the last five on the
+  session accessory as "Low power in 5 s", and the dim rises on its own.
+  A touch anywhere restarts the count; controller input never does, as on
+  Android. The dim also drops the screen's brightness to its floor and
+  gives it back on wake. The accessory's Dim still dims at once.
+- **Find a PC and Reconnect.** A controller with no PC paired offers Find a
+  PC, straight to the Connections tab, instead of an empty Bind to; a pad
+  whose PC is lost offers Reconnect ahead of Unbind on its row and page.
+- **The touchpad and the mouse per controller.** A pad with no touchpad of
+  its own, bound to a satellite that grants mouse control, offers Open
+  touchpad and Open mouse on its row and under its status card: the phone's
+  surface is sent through that pad's own slot, which asks the host for the
+  mouse while the screen is open. The on-screen controller's own mouse
+  screen asks the same way, so it moves the PC's pointer.
+- **The Lightning note.** An iPhone or iPad with a Lightning port cannot
+  host a controller over a plain cable, so on one the Controllers tab (while
+  nothing is listed), setup's Input step and Add a controller's hint say that
+  a wired pad needs Apple's Lightning to USB Camera Adapter; the wired row
+  wears an ADAPTER chip in place of BEST, Help & FAQ gains "My wired
+  controller doesn't show up", an attached pad's link reads Lightning rather
+  than USB-C, and the note opens a Wired on this iPhone sheet that draws the
+  adapter between the phone and the controller, lists the three steps and
+  links Apple's page. iOS names no port to an app, so the scene reads the
+  hardware's model identifier once and the engine maps it; a device the
+  table does not know reads as USB-C and sees no note.
+
+### Changed
+
+- **Every step of a link shows.** A PC being reached for reads
+  "Connecting…" with a spinner on its row and page, with Cancel; one that
+  stopped responding reads so in the error colour with Reconnect, on the
+  row, the page and the accessory alike; a pad bound to a PC being reached
+  for says so on its row, its page and the play pill.
+- **A failed attempt is worded where it happened.** Why an attempt you made
+  on a PC failed stays on its row and page, in the error colour, until the
+  next attempt or until the PC is up, with Connect or Pair to try again; a
+  silent retry says nothing. The address sheet's spinner and error are the
+  engine's facts about the typed PC.
+- **The accessory shows a PC coming back.** Your own reach for a PC that
+  carries pads shows on every tab with a spinner until it is up; the
+  Connections badge counts every PC that needs you, a key revoked or an
+  attempt failed included.
+- **Updating while the PC applies a pad.** A switch flipped or Emulate as
+  picked on a bound pad shows "Updating…" on the pad's page and its edit
+  page while the PC takes it.
+- **The facts come in slices.** Each page reads the slice it maps, so it
+  re-renders for that alone; Diagnostics alone reads the whole.
+- **A controller's row carries its actions; its page is its settings.**
+  A Controllers row draws what the controller offers under its line, as
+  Android's card does (Open gamepad, Open touchpad, Open mouse, Reconnect,
+  Bind to, Find a PC); its long-press menu and swipes offer the same. A tap
+  opens the controller's settings: BINDING, Emulate as, Functions, Dead
+  zones, Telemetry and Unbind at the foot.
+- **A blocked data path and a taken session are named.** A session that
+  opens but never hears an ack back, the silence a hotspot that keeps
+  devices apart or a firewall leaves, says so on the PC's row, its page
+  and the accessory, with Reconnect; so does a session another device took
+  over. A silent retry that fails because the PC is off still says nothing.
+- **A bind fails as soon as its reach does**, instead of waiting out its
+  budget.
+- **A pad can be sent to another PC from its page.** The destination row
+  opens the PCs whose link is up, the current one checked. Bind to, on the
+  page, the row and the long press alike, offers only those; with none up it
+  is Find a PC, and the footer says what to do on the Connections tab.
+- **Every control answers the finger.** A pressed tile, capsule or round
+  button washes over its own surface and shrinks a little; a pressed row
+  washes its whole cell; the wash leaves slowly enough for a tap to show; a
+  pointer highlights a control on an iPad and a disabled one fades:
+  Material's state layers, as one kit style and one kit row. On an iPad,
+  the row a split's detail shows is tinted. Nothing uses the silent plain
+  or borderless styles, a NavigationLink or a Link any more, and setup's
+  cards sit on the surface colour like every other list.
+- **The screen stays awake only for a pad.** Keep screen on holds the
+  phone awake only while a session streams with a pad bound; a bare
+  connection lets it lock like any other app.
+- **Low power waits for a pad.** The countdown arms only while a session
+  streams with a pad bound, never for a bare connection, one being brought
+  back, or one that stopped responding.
+- **The session accessory keeps Dim and loses Play.** The on-screen
+  controller is a controller with its own Open now, so the accessory no
+  longer opens its gamepad.
+- **The play screens rise and fall without the cover's slide.** The slide
+  fought the window's turn to landscape and back; now the turn is the one
+  motion.
+
+### Fixed
+
+- **The scene builds its objects once.** SwiftUI calls the scene's
+  initializer again on its own (at launch and on a scene phase change) and
+  keeps only the first build's state; each extra call used to build a whole
+  model, which reached for the remembered PCs, and a navigation store, then
+  threw them away. The scene now holds its root in `OnFirstUse`, which makes
+  it the first time the kept build reads it, so a process makes one.
 
 ## [1.0.0] - 2026-11-15
 

@@ -17,6 +17,8 @@ final class SatelliteModelFixture {
     let keyStore = InMemoryKeyStore()
     let network: NetworkStack
     let model: AppModel
+    /// The low-power countdown's ticks, in the test's hands.
+    let lowPowerTicker = ManualTicker()
     private(set) var events: [ConnectionEvent] = []
 
     /// The pad most tests bind: a DualSense with every feature.
@@ -57,7 +59,8 @@ final class SatelliteModelFixture {
             network: network,
             tips: RecordedTipStore(shelf: .success([])),
             motionSensor: FakeMotionSensor(),
-            resendTicker: ManualTicker()
+            resendTicker: ManualTicker(),
+            lowPowerTicker: lowPowerTicker
         )
     }
 

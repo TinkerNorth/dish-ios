@@ -138,10 +138,6 @@ extension L10n {
         catalog.text("Connected")
     }
 
-    var usbC: String {
-        catalog.text("USB-C")
-    }
-
     var setupBluetooth: String {
         catalog.text("Bluetooth")
     }

@@ -3,14 +3,14 @@
 
 import SwiftUI
 
-/// The session accessory: the PC, how the link is doing, Dim and Play, or
-/// Reconnect once the PC stops responding. While the tab bar is minimized
-/// the accessory is inline and carries the short line alone. A nil action
-/// leaves its button out; TipKit's hint, when given, points at Dim.
+/// The session accessory: the PC, how the link is doing and Dim, Reconnect
+/// once the PC stops responding, or the spinner while the PC is being
+/// brought back. While the tab bar is minimized the accessory is inline and
+/// carries the short line alone. A nil Reconnect leaves its button out;
+/// TipKit's hint, when given, points at Dim.
 struct SessionBar: View {
     let state: SessionBarState
     let dim: () -> Void
-    let play: (() -> Void)?
     let reconnect: (() -> Void)?
     var dimHint: HintState?
 
@@ -25,22 +25,13 @@ struct SessionBar: View {
 
     @ViewBuilder private var expanded: some View {
         switch state {
-        case let .streaming(pcName, line, _, dimTitle, playTitle):
+        case let .streaming(pcName, line, _, dimTitle):
             HStack(spacing: DishSpace.s6) {
                 RowGlyph(symbol: satelliteSymbol)
                 SessionBarTitles(pcName: pcName, line: line, lineFont: DishFont.monoDetail, lineColor: DishTheme.muted)
                 Spacer(minLength: DishSpace.s4)
                 SessionRoundButton(title: dimTitle, symbol: "moon.fill", tint: DishTheme.onSurface, fill: DishTheme.surfaceDim, action: dim)
                     .hint(dimHint)
-                if let play {
-                    SessionRoundButton(
-                        title: playTitle,
-                        symbol: "play.fill",
-                        tint: DishTheme.onPrimary,
-                        fill: DishTheme.primary,
-                        action: play
-                    )
-                }
             }
             .padding(.horizontal, DishSpace.s4)
         case let .problem(pcName, line, reconnectTitle):
@@ -54,23 +45,38 @@ struct SessionBar: View {
                     }
                     .buttonStyle(.borderedProminent)
                     .buttonBorderShape(.capsule)
+                    .fixedSize()
                 }
+            }
+            .padding(.horizontal, DishSpace.s4)
+        case let .reconnecting(pcName, line):
+            HStack(spacing: DishSpace.s6) {
+                RowGlyph(symbol: satelliteSymbol)
+                SessionBarTitles(pcName: pcName, line: line, lineFont: DishFont.detail, lineColor: DishTheme.muted)
+                Spacer(minLength: DishSpace.s4)
+                ProgressView()
             }
             .padding(.horizontal, DishSpace.s4)
         }
     }
 }
 
-/// The inline accessory: the short line, or the warning alone.
+/// The inline accessory: the short line, the warning alone, or the
+/// spinner beside its line.
 private struct SessionBarInline: View {
     let state: SessionBarState
 
     var body: some View {
         switch state {
-        case let .streaming(_, _, shortLine, _, _):
+        case let .streaming(_, _, shortLine, _):
             Text(shortLine).font(DishFont.monoDetail).foregroundStyle(DishTheme.onSurface)
         case let .problem(_, line, _):
             Text(line).font(DishFont.detail).foregroundStyle(DishTheme.error)
+        case let .reconnecting(_, line):
+            HStack(spacing: DishSpace.s3) {
+                ProgressView().controlSize(.mini)
+                Text(line).font(DishFont.detail).foregroundStyle(DishTheme.muted)
+            }
         }
     }
 }
@@ -109,7 +115,7 @@ private struct SessionRoundButton: View {
                 .frame(width: DishSize.sessionButton, height: DishSize.sessionButton)
                 .background(Circle().fill(fill))
         }
-        .buttonStyle(.plain)
+        .buttonStyle(.round)
         .accessibilityLabel(Text(title))
     }
 }
@@ -125,7 +131,7 @@ private struct SessionBarPreview: View {
             }
         }
         .tabViewBottomAccessory {
-            SessionBar(state: state, dim: {}, play: {}, reconnect: {})
+            SessionBar(state: state, dim: {}, reconnect: {})
         }
     }
 }
@@ -137,8 +143,7 @@ private let previewWords = L10n.app
         pcName: "Living Room PC",
         line: [previewWords.streaming, previewWords.padCount(3), previewWords.latency(4)].joined(separator: lineSeparator),
         shortLine: [previewWords.padCount(3), previewWords.latency(4)].joined(separator: lineSeparator),
-        dim: previewWords.dim,
-        play: previewWords.play
+        dim: previewWords.dim
     ))
 }
 

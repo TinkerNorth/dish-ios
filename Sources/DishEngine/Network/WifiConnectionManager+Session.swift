@@ -75,7 +75,8 @@ extension WifiConnectionManager {
             server: server,
             pairingKey: pairingKey,
             controllers: descriptors,
-            protocolVersion: conn.offeredProtocolVersion
+            protocolVersion: conn.offeredProtocolVersion,
+            mouseControl: conn.wantsMouseControl
         )
         switch Self.classifyOpen(resp) {
         case .unauthorized:
@@ -85,18 +86,21 @@ extension WifiConnectionManager {
                 await openSession(conn: conn, server: server, intent: intent)
             }
         case .refused:
-            failRefusedOpen(conn, server: server, id: id, intent: intent, detail: resp.error)
+            failRefusedOpen(conn, server: server, id: id, intent: intent, response: resp)
         case let .granted(grant):
             let opened = OpenedSession(grant: grant, response: resp, sent: descriptors)
             await adoptGrant(opened, conn: conn, server: server, pairingKey: pairingKey, intent: intent)
         }
     }
 
+    /// `mouseControl` asks the host feature for the slots that want the
+    /// mouse; the grant comes back in the response.
     private func putSession(
         server: DiscoveredServer,
         pairingKey: Data,
         controllers: [ControllerDescriptor],
-        protocolVersion: Int
+        protocolVersion: Int,
+        mouseControl: Bool
     ) async -> SessionResponse {
         let proof = SessionCrypto.hmacProofHex(pairingKey: pairingKey, deviceId: deviceId)
         return await http.putSession(
@@ -106,7 +110,8 @@ extension WifiConnectionManager {
             deviceName: deviceName(),
             hmacProof: proof,
             controllers: controllers,
-            protocolVersion: protocolVersion
+            protocolVersion: protocolVersion,
+            mouseControl: mouseControl
         )
     }
 
@@ -140,7 +145,7 @@ extension WifiConnectionManager {
         case .retryLower:
             return true
         case let .failed(failure):
-            emitFailureIfUserInitiated(intent, failure)
+            emitFailure(conn.id, intent, failure)
             return false
         }
     }
@@ -161,20 +166,24 @@ extension WifiConnectionManager {
         if intent != .userInitiated {
             markStale(id)
         }
-        emitFailureIfUserInitiated(intent, .noSharedKey)
+        emitFailure(id, intent, .noSharedKey)
     }
 
-    /// Down, moved or malformed. A TOFU mismatch aborted the handshake before
-    /// any bytes flowed and is an identity problem no retry can outrun; a
-    /// plain failure on a silent attempt re-enters the backoff curve.
-    private func failRefusedOpen(_ conn: WifiConnection, server: DiscoveredServer, id: String, intent: ConnectIntent, detail: String?) {
+    /// Down, moved, refused or malformed. A TOFU mismatch aborted the
+    /// handshake before any bytes flowed and is an identity problem no retry
+    /// can outrun; any other failure on a silent attempt re-enters the
+    /// backoff curve.
+    private func failRefusedOpen(
+        _ conn: WifiConnection,
+        server: DiscoveredServer,
+        id: String,
+        intent: ConnectIntent,
+        response: SessionResponse
+    ) {
         conn.markDisconnected()
         let identityChanged = pinMismatches.consume(server.ip)
-        if identityChanged {
-            emitFailureIfUserInitiated(intent, .identityChanged)
-        } else if intent == .userInitiated {
-            emit(.failure(.sessionRefused(detail: detail)))
-        } else {
+        emitFailure(id, intent, refusedOpenFailure(identityChanged: identityChanged, reachable: response.reachable, detail: response.error))
+        if intent != .userInitiated, !identityChanged {
             scheduleRetry(id)
         }
     }
@@ -201,7 +210,7 @@ extension WifiConnectionManager {
               let udpPort = UInt16(exactly: server.udpPort) else
         {
             conn.markDisconnected()
-            emitFailureIfUserInitiated(intent, .badSessionMaterial)
+            emitFailure(id, intent, .badSessionMaterial)
             return
         }
         // The SETTLED version, never the offer: a pre-versioning satellite
@@ -217,9 +226,8 @@ extension WifiConnectionManager {
         )
         guard aimed else {
             conn.markDisconnected()
-            if intent == .userInitiated {
-                emit(.failure(.sessionLinkFailed))
-            } else {
+            emitFailure(id, intent, .sessionLinkFailed)
+            if intent != .userInitiated {
                 scheduleRetry(id)
             }
             return
@@ -231,6 +239,7 @@ extension WifiConnectionManager {
         clearStale(id)
         clearRetry(id)
         recordSlotOutcomes(response, sent: opened.sent, conn: conn)
+        conn.mouseControlGranted = response.mouseControl.granted
         await fetchCatalog(id: id, server: server)
         await fetchCapabilities(id: id, server: server)
         conn.markConnected(client: client, connectionId: grant.connectionId, epoch: response.epoch, hooks: makeHooks(id: id))
@@ -256,7 +265,7 @@ extension WifiConnectionManager {
             recordMotionStatus(applied, connectionId: conn.id, slotId: slotId)
             onSlotApplied?(conn.id, slotId)
         } else {
-            reportSlotNotApplied(slotId)
+            reportSlotNotApplied(slotId, on: conn.id)
         }
     }
 
@@ -298,8 +307,8 @@ extension WifiConnectionManager {
         await fetchCatalog(id: id, server: server)
     }
 
-    func reportSlotNotApplied(_ slotId: String) {
-        emit(.failure(.controllerNotApplied))
+    func reportSlotNotApplied(_ slotId: String, on id: String) {
+        emit(.failure(serverId: id, .controllerNotApplied, attempt: .own))
         onSlotRegistrationFailed?(slotId)
     }
 
@@ -329,9 +338,11 @@ extension WifiConnectionManager {
         await cacheCapabilities(http.getCapabilities(ip: server.ip, port: server.httpPort), for: id)
     }
 
+    /// The probe's word on mouse control reaches the slots.
     func cacheCapabilities(_ probe: ServerCapabilitiesDTO, for id: String) {
         guard probe.reachable else { return }
         capabilities[id] = probe
+        get(id)?.setHostMouseControl(probe.host.mouseControl.supported && probe.host.mouseControl.available)
     }
 
     // MARK: - Proactive re-key
@@ -350,7 +361,8 @@ extension WifiConnectionManager {
             server: server,
             pairingKey: pairingKey,
             controllers: descriptors,
-            protocolVersion: conn.offeredProtocolVersion
+            protocolVersion: conn.offeredProtocolVersion,
+            mouseControl: conn.wantsMouseControl
         )
         if resp.unauthorized || resp.verdict == .unauthorized {
             handleTerminalAuth(id, loud: false)
@@ -373,6 +385,7 @@ extension WifiConnectionManager {
               case let .granted(grant) = Self.classifyOpen(resp),
               let material = Self.sessionMaterial(tokenHex: grant.tokenHex, saltHex: grant.saltHex, pairingKey: pairingKey),
               let udpPort = UInt16(exactly: server.udpPort) else { return }
+        conn.mouseControlGranted = resp.mouseControl.granted
         let negotiated = settleAccepted(echoedVersion: resp.protocolVersion)
         client.setConnectionParams(
             host: server.ip,
@@ -384,4 +397,12 @@ extension WifiConnectionManager {
         conn.adoptProtocol(negotiated)
         conn.setLastAppliedEpoch(resp.epoch)
     }
+}
+
+/// What a PUT that did not grant means: an identity that changed, a PC
+/// that gave no HTTPS answer at all, or one that answered and refused.
+func refusedOpenFailure(identityChanged: Bool, reachable: Bool, detail: String?) -> ConnectionFailure {
+    if identityChanged { return .identityChanged }
+    guard reachable else { return .unreachable(detail: detail ?? "") }
+    return .sessionRefused(detail: detail)
 }

@@ -13,4 +13,5 @@ enum RowActionSymbol {
     static let pair = "key"
     static let repair = "arrow.triangle.2.circlepath"
     static let forget = "trash"
+    static let cancel = "xmark"
 }

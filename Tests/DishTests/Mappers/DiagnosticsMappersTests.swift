@@ -204,7 +204,7 @@ final class DiagnosticsMappersTests: XCTestCase {
     }
 
     func testABoundPadWithoutADescriptorIsNotDeclaredYet() {
-        let bound = controller(destination: DestinationFact(name: "Den PC", health: .unsteady))
+        let bound = controller(destination: DestinationFact(name: "Den PC", health: .connecting))
         XCTAssertEqual(bindingLines(pad(bound)), [
             FactLine(key: "Binding", value: "Den PC · Satellite"),
             FactLine(key: "On the wire", value: "Not declared to the host yet")
@@ -215,7 +215,7 @@ final class DiagnosticsMappersTests: XCTestCase {
         XCTAssertEqual(healthText(controller(supported: false)), "Not supported")
         XCTAssertEqual(healthText(controller()), "Not bound")
         XCTAssertEqual(healthText(controller(destination: DestinationFact(name: "Den PC", health: .online))), "Online")
-        XCTAssertEqual(healthText(controller(destination: DestinationFact(name: "Den PC", health: .unsteady))), "Unsteady")
+        XCTAssertEqual(healthText(controller(destination: DestinationFact(name: "Den PC", health: .connecting))), "Connecting…")
         XCTAssertEqual(healthText(controller(destination: DestinationFact(name: "Den PC", health: .lost))), "Connection lost")
         let onScreen = ControllerFact(id: onScreenSlotId, name: "", link: .onScreen, batteryPercent: nil, destination: nil)
         XCTAssertEqual(padCard(pad(onScreen)).title, "On-screen gamepad")

@@ -73,7 +73,7 @@ extension WifiConnectionManager {
         refreshRemembered()
         rehomeIdleConnections(to: merged)
         if trigger == .user, let failure = scan.failure {
-            emit(.failure(failure))
+            emit(.scanFailed(failure))
         }
     }
 

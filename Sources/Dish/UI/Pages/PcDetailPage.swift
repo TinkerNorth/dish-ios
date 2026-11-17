@@ -24,13 +24,18 @@ struct PcDetailPage: View {
     @Environment(NavigationStore.self) private var navigation
 
     var body: some View {
-        PcDetailPageBody(state: pcDetailPageState(facts: model.shellFacts, id: id), actions: PcActions(act: act, forget: forget))
+        PcDetailPageBody(
+            state: pcDetailPageState(connections: model.connectionsFacts, controllers: model.controllersFacts.controllers, id: id),
+            actions: PcActions(act: act, forget: forget)
+        )
     }
 
     private func act(_ action: PcAction) {
         switch action {
         case .repair: navigation.send(.openSheet(.pair(serverId: id)))
         case .connect: model.connect(id)
+        case .reconnect: model.reconnect(id)
+        case .cancel: model.disconnect(id)
         case .disconnect: model.disconnect(id)
         }
     }
@@ -104,11 +109,14 @@ private struct PcSections: View {
         }
         Section {
             ForEach(state.actions) { action in
-                Button(action.title) { actions.act(action.action) }
-                    .foregroundStyle(DishTheme.primary)
+                RowButton { actions.act(action.action) } label: {
+                    Text(action.title).font(DishFont.body).foregroundStyle(DishTheme.primary)
+                }
             }
-            Button(state.forget.button, role: .destructive, action: askForget)
-                .modifier(ForgetDialog(state: state.forget, isPresented: $forgetAsked, forget: actions.forget))
+            RowButton(action: askForget) {
+                Text(state.forget.button).font(DishFont.body).foregroundStyle(DishTheme.error)
+            }
+            .modifier(ForgetDialog(state: state.forget, isPresented: $forgetAsked, forget: actions.forget))
         }
         .listRowBackground(DishTheme.surface)
     }
@@ -128,8 +136,8 @@ private struct PcStatusCard: View {
             RowGlyph(symbol: state.symbol)
             VStack(alignment: .leading, spacing: DishSpace.s1) {
                 HStack(spacing: DishSpace.s3) {
-                    StatusDot(color: state.dot)
-                    Text(state.line).font(DishFont.headline).foregroundStyle(DishTheme.onSurface)
+                    StatusMarkView(mark: state.mark)
+                    Text(state.line).font(DishFont.headline).foregroundStyle(state.lineColor)
                 }
                 Text(state.detail).font(DishFont.monoDetail).foregroundStyle(DishTheme.muted)
             }

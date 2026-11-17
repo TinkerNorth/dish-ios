@@ -76,4 +76,21 @@ final class HelpMappersTests: XCTestCase {
         XCTAssertEqual(state.links.map(\.title), ["Privacy policy", "View source on GitHub"])
         XCTAssertEqual(state.links.map(\.url), [DishLinks.privacy, DishLinks.source])
     }
+
+    /// A Lightning iPhone has one more question, right after the pad that
+    /// does not show up: the wired one, which needs the adapter.
+    func testALightningIPhoneAsksAboutTheWiredPadThatNeverShowsUp() throws {
+        let lightning = helpPageState(port: .lightning)
+        XCTAssertEqual(lightning.sections.map(\.entries.count), [4, 3, 7, 3])
+        let questions = lightning.sections.flatMap(\.entries).map(\.question)
+        let missing = try XCTUnwrap(questions.firstIndex(of: "My controller doesn’t show up."))
+        XCTAssertEqual(questions[missing + 1], "My wired controller doesn’t show up.")
+        let answer = try XCTUnwrap(lightning.sections.flatMap(\.entries).first { $0.question == questions[missing + 1] }).answer
+        XCTAssertEqual(
+            answer,
+            "This iPhone has a Lightning port. A Lightning cable alone can’t carry a controller’s input. "
+                + "Plug it in through the adapter, or pair it over Bluetooth."
+        )
+        XCTAssertFalse(entries.map(\.question).contains("My wired controller doesn’t show up."), "a USB-C iPhone is not asked")
+    }
 }

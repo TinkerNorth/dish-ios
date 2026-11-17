@@ -31,9 +31,9 @@ struct SettingsPage: View {
     var body: some View {
         SettingsPageBody(
             state: settingsPageState(
-                preferences: model.shellFacts.preferences,
-                forwarding: model.shellFacts.forwarding,
-                steamBluetooth: model.shellFacts.steamBluetooth,
+                preferences: model.preferencesFacts,
+                forwarding: model.forwardingFacts,
+                steamBluetooth: model.steamBluetoothFacts,
                 appVersion: appVersion
             ),
             actions: SettingsActions(

@@ -37,12 +37,17 @@ extension WifiConnectionManager {
 
     // MARK: - Death and close
 
-    /// Heartbeat death is silent: the row parks on the "Unsteady" window and
-    /// the retry rides the backoff curve.
+    /// Heartbeat death parks the row on the "Unsteady" window and the retry
+    /// rides the backoff curve. A session that never heard one ack is a data
+    /// path the network blocks, which the rows name.
     func handleDead(_ id: String) {
         guard let conn = connections[id] else { return }
+        let neverAnswered = conn.latencySamples == 0
         store.markSeen(id, at: now())
         conn.parkStaleAwaitingRetry()
+        if neverAnswered {
+            emit(.failure(serverId: id, .dataPathBlocked, attempt: .silent))
+        }
         scheduleRetry(id)
     }
 
@@ -57,6 +62,7 @@ extension WifiConnectionManager {
         case .stayDown:
             conn.markDisconnected()
             suppressRetry(id)
+            emit(.failure(serverId: id, .sessionReplaced, attempt: .silent))
         case .backoffRetry:
             conn.parkStaleAwaitingRetry()
             scheduleRetry(id)
@@ -105,6 +111,7 @@ extension WifiConnectionManager {
         let benignDrift = appliedMatchesDesired(desired: conn.desiredSlots(), applied: applied)
         if benignDrift {
             conn.setLastAppliedEpoch(view.epoch)
+            if view.mouseControl.granted != conn.wantsMouseControl { await rekeySession(conn) }
             return
         }
         conn.markDisconnected()

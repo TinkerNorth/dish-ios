@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 // Copyright (C) 2026 Dish contributors.
 
+import DishEngine
 import Foundation
 
 /// Help & FAQ, the desktops' HelpScreen on an iPhone: a way into setup, the
@@ -33,12 +34,14 @@ struct HelpEntryState: Equatable, Identifiable {
     }
 }
 
-func helpPageState(words: L10n = .app) -> HelpPageState {
+/// `port` is the one this device hosts a wired pad through: a Lightning
+/// iPhone has one more question, the wired pad that never shows up.
+func helpPageState(port: DevicePort = .usbC, words: L10n = .app) -> HelpPageState {
     HelpPageState(
         title: pageTitle(.help, words: words),
         subline: words.helpSubline,
         walkThrough: words.walkMeThroughSetup,
-        sections: [concepts(words), bestPerformance(words), troubleshooting(words), aboutDish(words)],
+        sections: [concepts(words), bestPerformance(words), troubleshooting(port, words), aboutDish(words)],
         linksTitle: words.linksSection,
         links: [
             PageLink(title: words.privacyPolicy, url: DishLinks.privacy),
@@ -64,15 +67,26 @@ private func bestPerformance(_ words: L10n) -> HelpSectionState {
     ])
 }
 
-private func troubleshooting(_ words: L10n) -> HelpSectionState {
-    HelpSectionState(title: words.troubleshootingSection, entries: [
+private func troubleshooting(_ port: DevicePort, _ words: L10n) -> HelpSectionState {
+    let before = [
         HelpEntryState(question: words.cantFindSatellites, answer: words.cantFindSatellitesAnswer),
         HelpEntryState(question: words.cantSeeMyNetwork, answer: words.cantSeeMyNetworkAnswer),
-        HelpEntryState(question: words.controllerDoesntShowUp, answer: words.controllerDoesntShowUpAnswer),
+        HelpEntryState(question: words.controllerDoesntShowUp, answer: words.controllerDoesntShowUpAnswer)
+    ]
+    let after = [
         HelpEntryState(question: words.pinKeepsGettingRejected, answer: words.pinRejectedAnswer),
         HelpEntryState(question: words.keepsDisconnecting, answer: words.keepsDisconnectingAnswer),
         HelpEntryState(question: words.motionIsntWorking, answer: words.motionIsntWorkingAnswer)
-    ])
+    ]
+    return HelpSectionState(title: words.troubleshootingSection, entries: before + wiredOnLightning(port, words) + after)
+}
+
+/// The wired pad that never shows up, right after the pad that does not.
+private func wiredOnLightning(_ port: DevicePort, _ words: L10n) -> [HelpEntryState] {
+    switch port {
+    case .usbC: []
+    case .lightning: [HelpEntryState(question: words.wiredControllerDoesntShowUp, answer: words.wiredControllerDoesntShowUpAnswer)]
+    }
 }
 
 private func aboutDish(_ words: L10n) -> HelpSectionState {

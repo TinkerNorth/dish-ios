@@ -32,7 +32,7 @@ struct PairSheet: View {
             state: pairSheetState(
                 pairing: model.openPairing,
                 serverId: serverId,
-                deviceName: model.shellFacts.preferences.deviceName,
+                deviceName: model.preferencesFacts.deviceName,
                 typed: typed
             ),
             typed: $typed,

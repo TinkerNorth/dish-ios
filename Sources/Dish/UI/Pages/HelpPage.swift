@@ -1,16 +1,18 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 // Copyright (C) 2026 Dish contributors.
 
+import DishEngine
 import SwiftUI
 
 /// Help & FAQ, pushed from Settings › Setup & help: the way into setup,
 /// the questions folded under their sections, and the links.
 struct HelpPage: View {
+    @Environment(AppModel.self) private var model
     @Environment(NavigationStore.self) private var navigation
     @Environment(\.openURL) private var openURL
 
     var body: some View {
-        HelpPageBody(state: helpPageState(), walkThrough: walkThrough, open: open)
+        HelpPageBody(state: helpPageState(port: model.controllersFacts.port), walkThrough: walkThrough, open: open)
     }
 
     private func walkThrough() {
@@ -32,7 +34,9 @@ struct HelpPageBody: View {
     var body: some View {
         List {
             Section {
-                Button(state.walkThrough, action: walkThrough)
+                RowButton(action: walkThrough) {
+                    Text(state.walkThrough).font(DishFont.body).foregroundStyle(DishTheme.primary)
+                }
             } footer: {
                 SettingsFooter(text: state.subline)
             }
@@ -47,7 +51,7 @@ struct HelpPageBody: View {
             }
             Section {
                 ForEach(state.links) { link in
-                    Button { open(link.url) } label: { ExternalLinkRow(title: link.title) }
+                    RowButton { open(link.url) } label: { ExternalLinkRow(title: link.title) }
                 }
             } header: {
                 SectionEyebrow(title: state.linksTitle, color: DishTheme.muted)
@@ -84,5 +88,11 @@ private struct HelpEntryView: View {
 #Preview("Help & FAQ") {
     NavigationStack {
         HelpPageBody(state: helpPageState(), walkThrough: {}, open: { _ in })
+    }
+}
+
+#Preview("Help & FAQ, Lightning iPhone") {
+    NavigationStack {
+        HelpPageBody(state: helpPageState(port: .lightning), walkThrough: {}, open: { _ in })
     }
 }

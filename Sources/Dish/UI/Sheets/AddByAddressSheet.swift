@@ -7,18 +7,17 @@ import SwiftUI
 /// Add a PC by address, from the Connections toolbar and the setup cover:
 /// one field for the host or host:port, the default port named under it,
 /// and Connect, which reaches for the PC and then pairs. The draft and
-/// whether it was refused are the sheet's own; the attempt's failure is the
-/// model's word.
+/// whether it was refused are the sheet's own; whether the PC is being
+/// reached for and why the attempt failed are the model's facts.
 struct AddByAddressSheet: View {
     @Environment(AppModel.self) private var model
     @Environment(NavigationStore.self) private var navigation
     @State private var draft = ""
     @State private var rejected = false
-    @State private var connecting = false
 
     var body: some View {
         AddByAddressSheetBody(
-            state: addByAddressSheetState(draft: draft, rejected: rejected, connecting: connecting, lastEvent: model.lastConnectionEvent),
+            state: addByAddressSheetState(draft: draft, rejected: rejected, added: model.connectionsFacts.addedByAddress),
             draft: $draft,
             connect: connect,
             cancel: cancel
@@ -30,7 +29,6 @@ struct AddByAddressSheet: View {
     private func connect() {
         let accepted = model.addByAddress(draft)
         rejected = !accepted
-        connecting = accepted
     }
 
     private func cancel() {
@@ -64,12 +62,12 @@ struct AddByAddressSheetBody: View {
                 }
                 .listRowBackground(DishTheme.surface)
                 Section {
-                    Button(action: connect) {
+                    RowButton(action: connect) {
                         HStack(spacing: DishSpace.s4) {
                             if state.connecting {
                                 ProgressView().controlSize(.small)
                             }
-                            Text(state.connect).font(DishFont.headline)
+                            Text(state.connect).font(DishFont.headline).foregroundStyle(DishTheme.primary)
                         }
                         .frame(maxWidth: .infinity)
                     }
@@ -109,7 +107,7 @@ private struct AddressNotes: View {
 #Preview("Empty") {
     @Previewable @State var draft = ""
     AddByAddressSheetBody(
-        state: addByAddressSheetState(draft: draft, rejected: false, connecting: false, lastEvent: nil),
+        state: addByAddressSheetState(draft: draft, rejected: false, added: nil),
         draft: $draft,
         connect: {},
         cancel: {}
@@ -119,7 +117,7 @@ private struct AddressNotes: View {
 #Preview("Refused") {
     @Previewable @State var draft = "den.local"
     AddByAddressSheetBody(
-        state: addByAddressSheetState(draft: draft, rejected: true, connecting: false, lastEvent: nil),
+        state: addByAddressSheetState(draft: draft, rejected: true, added: nil),
         draft: $draft,
         connect: {},
         cancel: {}
