@@ -570,6 +570,7 @@ state. The desktops' C1 to C8, adapted:
 | K6 | **Every state a component can be in is reachable from a mapper test.** A state no test builds is not shipped. |
 | K7 | **Tokens only.** A kit component sets no raw spacing, padding, corner, frame or glyph size: each is a `DishSize` or `DishSpace` token (`ThemeTokenTests.testAKitComponentSetsNoRawSize`, which rejects a digit after `spacing`, `cornerRadius`, `width`, `height`, `size`, `minLength`, `minWidth`, `minHeight`, `lineWidth` or `.padding(`). |
 | K8 | **A glyph is never recoloured by state inside the component.** `RowGlyph` takes its tint and fill as values from the mapper's state; state colour lives in the dot and the chip. |
+| K9 | **Every control answers the finger.** A control that stands on its own takes a kit button style (`.tile`, `.capsule`, `.round`: the pressed wash, the shrink, the hover, the disabled fade of DESIGN.md's "Interaction states"), a list row that opens a page or a link, or acts, is a `RowButton` (the whole cell washes, since iOS draws no highlight of its own over a row on the surface colour; `NavigationLink` and `Link` are used nowhere), a split list's rows take `selectedRow(_:)` so the one the detail shows is tinted, and anything else takes a system style that draws its own states; `.plain` and `.borderless` are used nowhere under `Sources/Dish`, and a kit file that draws a `Button` names its style (`InteractionFeedbackTests`). |
 
 Today's kit: `Chip` (BEST, FASTEST, FAST; a tone is `success` or `primary`),
 `RowGlyph` (the rounded tile at the head of a row), `SessionBar` (the
@@ -578,7 +579,9 @@ PIN's digits in a row of cells, the caret's cell in the focus colour; the
 field over it owns the typing), `RowActions` (a row's long-press menu and
 swipes over its `RowActionsState`), `ForgetDialog` (Forget This PC's
 question, asked by the PC's page and a Connections row), `HintTip` with
-`.hint(_:)` (a hint as TipKit's popover), and the play screens' controls:
+`.hint(_:)` (a hint as TipKit's popover), `ButtonStyles` (`PressStyle` as
+`.tile`, `.capsule` and `.round`, and `RowButton`, a list row that opens a
+page with a companion beside or under it), and the play screens' controls:
 `FaceButton`, `RoundPadButton`, `ShoulderButton`, `HoldPanel`,
 `PadStickControl`, `TriggerRail`, `DirectionPad`, `MovePad`, `ScrollStrip`,
 `TwoFingerSurface` and `PlayPill`, each reporting its own finger in its own

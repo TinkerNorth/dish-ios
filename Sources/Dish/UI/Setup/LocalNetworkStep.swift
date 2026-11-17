@@ -26,6 +26,7 @@ struct LocalNetworkStep: View {
                     .accessibilityElement(children: .combine)
                 }
             }
+            .listRowBackground(DishTheme.surface)
         }
         .listStyle(.insetGrouped)
         .safeAreaInset(edge: .bottom) {

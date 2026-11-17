@@ -54,8 +54,10 @@ struct DeadZonesPageBody: View {
                 Section {
                     DeadZoneSlider(state: card.stick, change: actions.setStick)
                     DeadZoneSlider(state: card.trigger, change: actions.setTrigger)
-                    Button(card.reset, action: actions.reset)
-                        .accessibilityLabel(card.resetHint)
+                    RowButton(action: actions.reset) {
+                        Text(card.reset).font(DishFont.body).foregroundStyle(DishTheme.primary)
+                    }
+                    .accessibilityLabel(card.resetHint)
                 } footer: {
                     Text(state.footnote).font(DishFont.detail).foregroundStyle(DishTheme.muted)
                 }

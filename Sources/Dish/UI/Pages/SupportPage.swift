@@ -57,8 +57,10 @@ struct SupportPageBody: View {
             .listRowBackground(DishTheme.surface)
             SupportNotice(notice: state.notice)
             Section {
-                Button(state.restoreTitle, action: actions.restore)
-                    .disabled(!state.restoreEnabled)
+                RowButton(action: actions.restore) {
+                    Text(state.restoreTitle).font(DishFont.body).foregroundStyle(DishTheme.primary)
+                }
+                .disabled(!state.restoreEnabled)
             } footer: {
                 SettingsFooter(text: state.footnote)
             }
@@ -112,7 +114,9 @@ private struct SupportShelf: View {
             ForEach(buttons) { TipRow(state: $0, tip: actions.tip) }
         case let .unavailable(message, retry):
             Text(message).font(DishFont.body).foregroundStyle(DishTheme.muted)
-            Button(retry, action: actions.retry)
+            RowButton(action: actions.retry) {
+                Text(retry).font(DishFont.body).foregroundStyle(DishTheme.primary)
+            }
         }
     }
 }
@@ -123,7 +127,7 @@ private struct TipRow: View {
     let tip: @MainActor (TipTier) -> Void
 
     var body: some View {
-        Button { tip(state.tier) } label: {
+        RowButton { tip(state.tier) } label: {
             HStack {
                 Text(state.title).font(DishFont.body).foregroundStyle(DishTheme.onSurface)
                 Spacer()
@@ -133,7 +137,6 @@ private struct TipRow: View {
                     Text(state.price).font(DishFont.headline).foregroundStyle(DishTheme.primary)
                 }
             }
-            .contentShape(Rectangle())
         }
         .disabled(!state.enabled)
     }

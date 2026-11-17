@@ -34,7 +34,9 @@ struct HelpPageBody: View {
     var body: some View {
         List {
             Section {
-                Button(state.walkThrough, action: walkThrough)
+                RowButton(action: walkThrough) {
+                    Text(state.walkThrough).font(DishFont.body).foregroundStyle(DishTheme.primary)
+                }
             } footer: {
                 SettingsFooter(text: state.subline)
             }
@@ -49,7 +51,7 @@ struct HelpPageBody: View {
             }
             Section {
                 ForEach(state.links) { link in
-                    Button { open(link.url) } label: { ExternalLinkRow(title: link.title) }
+                    RowButton { open(link.url) } label: { ExternalLinkRow(title: link.title) }
                 }
             } header: {
                 SectionEyebrow(title: state.linksTitle, color: DishTheme.muted)

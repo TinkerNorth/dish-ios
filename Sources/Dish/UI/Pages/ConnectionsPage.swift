@@ -126,13 +126,21 @@ private struct ConnectionsList: View {
     let state: ConnectionsListState
     let layout: TabLayout
     let selection: Binding<Page?>?
+
+    /// The page the split's detail shows, which marks its row.
+    private var shown: Page? {
+        selection?.wrappedValue
+    }
+
     let actions: ConnectionsActions
 
     var body: some View {
         List(selection: selection) {
             if let paired = state.paired {
                 Section {
-                    ForEach(paired.rows) { ConnectionRow(state: $0, layout: layout, open: actions.open, act: actions.act) }
+                    ForEach(paired.rows) { row in
+                        ConnectionRow(state: row, layout: layout, selection: shown, open: actions.open, act: actions.act)
+                    }
                 } header: {
                     SectionEyebrow(title: paired.title, color: DishTheme.muted)
                 }
@@ -140,14 +148,22 @@ private struct ConnectionsList: View {
             }
             if let found = state.found {
                 Section {
-                    ForEach(found.rows) { ConnectionRow(state: $0, layout: layout, open: actions.open, act: actions.act) }
+                    ForEach(found.rows) { row in
+                        ConnectionRow(state: row, layout: layout, selection: shown, open: actions.open, act: actions.act)
+                    }
                 } header: {
                     FoundHeader(state: found)
                 }
                 .listRowBackground(DishTheme.surface)
             }
             Section {
-                MoonlightHostsRow(title: state.moonlightTitle, hint: state.moonlightHint)
+                MoonlightHostsRow(
+                    title: state.moonlightTitle,
+                    hint: state.moonlightHint,
+                    layout: layout,
+                    selection: shown,
+                    open: actions.open
+                )
             } footer: {
                 Text(state.footnote).font(DishFont.detail).foregroundStyle(DishTheme.muted)
             }

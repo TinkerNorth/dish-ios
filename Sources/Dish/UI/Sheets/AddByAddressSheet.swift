@@ -62,12 +62,12 @@ struct AddByAddressSheetBody: View {
                 }
                 .listRowBackground(DishTheme.surface)
                 Section {
-                    Button(action: connect) {
+                    RowButton(action: connect) {
                         HStack(spacing: DishSpace.s4) {
                             if state.connecting {
                                 ProgressView().controlSize(.small)
                             }
-                            Text(state.connect).font(DishFont.headline)
+                            Text(state.connect).font(DishFont.headline).foregroundStyle(DishTheme.primary)
                         }
                         .frame(maxWidth: .infinity)
                     }

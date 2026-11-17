@@ -221,7 +221,7 @@ final class ShellSplitMappersTests: XCTestCase {
 
     func testARowPushesFromAStackAndIsSelectedBesideASplitsList() {
         XCTAssertEqual(rowOpening(.controller(id: "pad"), layout: .stack), .push(.controller(id: "pad")))
-        XCTAssertEqual(rowOpening(.pcDetail(id: "den"), layout: .split), .select(.pcDetail(id: "den")))
+        XCTAssertEqual(rowOpening(.pcDetail(id: "den"), layout: .split), .select(.pcDetail(id: "den"), selected: false))
     }
 
     func testOnlyASplitsListSelectsThePageBesideIt() {
@@ -233,6 +233,14 @@ final class ShellSplitMappersTests: XCTestCase {
     func testARowWithNoPageOpensNothingInEitherLayout() {
         XCTAssertEqual(rowOpening(nil, layout: .stack), .inert)
         XCTAssertEqual(rowOpening(nil, layout: .split), .inert)
+    }
+
+    /// A split's row is marked while its page is the one the detail shows.
+    func testASplitRowIsMarkedWhileItsPageIsOpen() {
+        let den = Page.pcDetail(id: "den")
+        XCTAssertEqual(rowOpening(den, layout: .split, selection: den), .select(den, selected: true))
+        XCTAssertEqual(rowOpening(den, layout: .split, selection: .pcDetail(id: "attic")), .select(den, selected: false))
+        XCTAssertEqual(rowOpening(den, layout: .stack, selection: den), .push(den), "a stack pushes; nothing stays marked")
     }
 
     func testTheDetailIsThePageTheListOpened() {

@@ -340,6 +340,7 @@ Dish clients follow, so a fact ported between clients keeps its shape.
 | `LocalizationTests` | the catalog and the funnel agree, in every language, with placeholders intact; no view holds an English literal |
 | `AppIntentsLocalizationTests` | the App Intents' words and the App Shortcuts' phrases are keys of the app target's two catalogs, every key is used, in every language, with placeholders intact |
 | `ThemeTokenTests` | no raw colour, font size or kit size; `DESIGN.md` lists every token; every token outside the shared palette is drawn |
+| `InteractionFeedbackTests` | every control answers the finger: `.plain`, `.borderless`, `NavigationLink` and `Link` nowhere under `Sources/Dish`, and a kit file that draws a `Button` names its style |
 | `ViewPurityTests` | rules V1 to V13 of [`docs/UI_CONTRACT.md`](docs/UI_CONTRACT.md) |
 | `DeviceFamilyTests` | the app targets the iPhone and the iPad; the Info.plist turns an iPad all four ways and an iPhone upright or on its side; CI and `ci-local.sh` run the UI tests on the same iPad |
 | `NavigationCoverageTests` | every tab, page and cover is worded, built, tested and drawn |

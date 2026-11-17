@@ -57,6 +57,25 @@ enum DishTheme {
     static let padThumb = Color(dark: 0x283160, light: 0x283160)
     /// The glow around a held control and the pointer's trail on the mouse.
     static let padGlow = Color(dark: 0x4FE3FF, light: 0x4FE3FF, alpha: 0.28)
+    /// The wash laid over a control's surface while the finger is down: the
+    /// surface's own ink at Material's pressed state layer.
+    static let pressWash = Color(dark: 0xE6ECFF, light: 0x0C1430, alpha: 0.12)
+}
+
+/// How a control moves under the finger.
+enum DishMotion {
+    /// The wash and the shrink come in this time.
+    static let pressIn: Animation = .easeOut(duration: 0.1)
+    /// They go in this time once the finger lifts, long enough for a tap to show.
+    static let pressOut: Animation = .easeOut(duration: 0.25)
+    /// How much a control that stands on its own shrinks while pressed.
+    static let pressScale: CGFloat = 0.97
+}
+
+/// The one opacity a state sets.
+enum DishOpacity {
+    /// A disabled control's content, Material's 38%.
+    static let disabled = 0.38
 }
 
 /// The SF Symbols the setup chrome draws on its own; a row's glyph comes

@@ -109,11 +109,14 @@ private struct PcSections: View {
         }
         Section {
             ForEach(state.actions) { action in
-                Button(action.title) { actions.act(action.action) }
-                    .foregroundStyle(DishTheme.primary)
+                RowButton { actions.act(action.action) } label: {
+                    Text(action.title).font(DishFont.body).foregroundStyle(DishTheme.primary)
+                }
             }
-            Button(state.forget.button, role: .destructive, action: askForget)
-                .modifier(ForgetDialog(state: state.forget, isPresented: $forgetAsked, forget: actions.forget))
+            RowButton(action: askForget) {
+                Text(state.forget.button).font(DishFont.body).foregroundStyle(DishTheme.error)
+            }
+            .modifier(ForgetDialog(state: state.forget, isPresented: $forgetAsked, forget: actions.forget))
         }
         .listRowBackground(DishTheme.surface)
     }

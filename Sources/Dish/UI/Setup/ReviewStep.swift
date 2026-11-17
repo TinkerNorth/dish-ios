@@ -20,6 +20,7 @@ struct ReviewStep: View {
             Section {
                 ReviewLinkCard(pad: state.pad, pc: state.pc)
             }
+            .listRowBackground(DishTheme.surface)
             Section {
                 Picker(state.emulateTitle, selection: emulateAs) {
                     ForEach(state.emulateOptions) { option in
@@ -33,6 +34,7 @@ struct ReviewStep: View {
                 Text(state.footnote)
                     .font(DishFont.detail)
             }
+            .listRowBackground(DishTheme.surface)
             Section {
                 HStack(alignment: .top, spacing: DishSpace.s8) {
                     CarryColumnView(column: state.sends)
@@ -41,6 +43,7 @@ struct ReviewStep: View {
             } header: {
                 SectionEyebrow(title: state.carriesTitle, color: DishTheme.muted)
             }
+            .listRowBackground(DishTheme.surface)
         }
         .listStyle(.insetGrouped)
         .safeAreaInset(edge: .bottom) {

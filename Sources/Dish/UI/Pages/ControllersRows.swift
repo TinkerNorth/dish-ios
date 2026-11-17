@@ -11,29 +11,30 @@ import SwiftUI
 struct ControllerRow: View {
     let state: ControllerRowState
     var layout = TabLayout.stack
+    /// The page a split's detail shows, which marks its row.
+    var selection: Page?
     let open: @MainActor (Page) -> Void
     let act: @MainActor (ControllerAction) -> Void
 
     var body: some View {
-        switch rowOpening(state.page, layout: layout) {
+        switch rowOpening(state.page, layout: layout, selection: selection) {
         case let .push(page):
-            VStack(alignment: .leading, spacing: DishSpace.s4) {
-                Button {
-                    open(page)
-                } label: {
-                    ControllerRowContent(state: state, disclosure: true)
-                }
-                .buttonStyle(.borderless)
+            RowButton {
+                open(page)
+            } label: {
+                ControllerRowContent(state: state, disclosure: true)
+            } below: {
                 strip
             }
             .modifier(rowActions)
-        case let .select(page):
+        case let .select(page, selected):
             VStack(alignment: .leading, spacing: DishSpace.s4) {
                 ControllerRowContent(state: state, disclosure: false)
                 strip
             }
             .modifier(rowActions)
             .tag(page)
+            .selectedRow(selected)
         case .inert:
             ControllerRowContent(state: state, disclosure: false)
                 .modifier(rowActions)
@@ -115,9 +116,8 @@ struct AddControllerButton: View {
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, DishSpace.s8)
                     .background(Capsule().fill(DishTheme.surfaceDim))
-                    .contentShape(Capsule())
             }
-            .buttonStyle(.plain)
+            .buttonStyle(.capsule)
             .hint(tipKitHint)
             Text(hint).font(DishFont.detail).foregroundStyle(DishTheme.muted)
         }

@@ -115,7 +115,7 @@ private struct SessionRoundButton: View {
                 .frame(width: DishSize.sessionButton, height: DishSize.sessionButton)
                 .background(Circle().fill(fill))
         }
-        .buttonStyle(.plain)
+        .buttonStyle(.round)
         .accessibilityLabel(Text(title))
     }
 }

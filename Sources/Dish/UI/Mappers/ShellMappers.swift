@@ -191,17 +191,19 @@ func listSelection(_ selection: Binding<Page?>, layout: TabLayout) -> Binding<Pa
 enum RowOpening: Equatable {
     /// A stack's row pushes its page, with a chevron.
     case push(Page)
-    /// A split list's row is selected, and its page shows beside the list.
-    case select(Page)
+    /// A split list's row is selected, and its page shows beside the list;
+    /// `selected` while it is the one open.
+    case select(Page, selected: Bool)
     /// A row with no page opens nothing.
     case inert
 }
 
-func rowOpening(_ page: Page?, layout: TabLayout) -> RowOpening {
+/// `selection` is the page a split's detail shows, which marks its row.
+func rowOpening(_ page: Page?, layout: TabLayout, selection: Page? = nil) -> RowOpening {
     guard let page else { return .inert }
     switch layout {
     case .stack: return .push(page)
-    case .split: return .select(page)
+    case .split: return .select(page, selected: selection == page)
     }
 }
 

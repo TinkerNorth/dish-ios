@@ -60,6 +60,12 @@ struct ControllersPageBody: View {
     var layout = TabLayout.stack
     /// The page beside the list; nil while the list is a stack's.
     var selection: Binding<Page?>?
+
+    /// The page the split's detail shows, which marks its row.
+    private var shown: Page? {
+        selection?.wrappedValue
+    }
+
     let add: () -> Void
     let open: @MainActor (Page) -> Void
     let act: @MainActor (ControllerAction) -> Void
@@ -69,7 +75,9 @@ struct ControllersPageBody: View {
     var body: some View {
         List(selection: selection) {
             Section {
-                ForEach(state.rows) { ControllerRow(state: $0, layout: layout, open: open, act: act) }
+                ForEach(state.rows) { row in
+                    ControllerRow(state: row, layout: layout, selection: shown, open: open, act: act)
+                }
             }
             .listRowBackground(DishTheme.surface)
             if let adapter = state.adapter {

@@ -22,7 +22,7 @@ struct ActionStrip<Action: Hashable & Sendable>: View {
                     } label: {
                         ActionTile(title: item.title, symbol: item.symbol, fill: fill)
                     }
-                    .buttonStyle(.plain)
+                    .buttonStyle(.tile)
                 case let .submenu(title, symbol, items):
                     Menu {
                         ForEach(items) { item in
@@ -35,7 +35,7 @@ struct ActionStrip<Action: Hashable & Sendable>: View {
                     } label: {
                         ActionTile(title: title, symbol: symbol, fill: fill)
                     }
-                    .buttonStyle(.plain)
+                    .buttonStyle(.tile)
                 }
             }
         }
@@ -58,7 +58,6 @@ private struct ActionTile: View {
         .padding(.vertical, DishSpace.s6)
         .padding(.horizontal, DishSpace.s2)
         .background(RoundedRectangle(cornerRadius: DishSize.actionTileCorner).fill(fill))
-        .contentShape(RoundedRectangle(cornerRadius: DishSize.actionTileCorner))
     }
 }
 

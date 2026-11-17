@@ -11,7 +11,7 @@ struct DeviceSection: View {
 
     var body: some View {
         Section {
-            Button(action: edit) {
+            RowButton(action: edit) {
                 SettingsLinkRow(title: state.nameTitle, value: state.name)
             }
         } header: {
@@ -85,19 +85,19 @@ struct SetupHelpSection: View {
 
     var body: some View {
         Section {
-            Button(action: actions.openGuide) {
+            RowButton(action: actions.openGuide) {
                 HStack(spacing: DishSpace.s6) {
                     RowGlyph(symbol: state.guideSymbol)
                     SettingsLinkRow(title: state.guide, value: nil)
                 }
             }
-            Button(action: actions.openHelp) {
+            RowButton(action: actions.openHelp) {
                 HStack(spacing: DishSpace.s6) {
                     RowGlyph(symbol: state.helpSymbol)
                     SettingsLinkRow(title: state.help, value: nil)
                 }
             }
-            Button(action: actions.openDiagnostics) {
+            RowButton(action: actions.openDiagnostics) {
                 HStack(spacing: DishSpace.s6) {
                     RowGlyph(symbol: state.diagnosticsSymbol)
                     SettingsLinkRow(title: state.diagnostics, value: nil)
@@ -137,7 +137,7 @@ struct AboutSection: View {
 
     var body: some View {
         Section {
-            Button(action: actions.openSupport) {
+            RowButton(action: actions.openSupport) {
                 HStack(spacing: DishSpace.s6) {
                     RowGlyph(symbol: state.supportSymbol, tint: DishTheme.pulse)
                     SettingsLinkRow(title: state.support, value: state.supportValue)
@@ -146,9 +146,9 @@ struct AboutSection: View {
             LabeledContent(state.versionTitle, value: state.version)
                 .foregroundStyle(DishTheme.onSurface)
             ForEach(state.links) { link in
-                Button { actions.open(link.url) } label: { ExternalLinkRow(title: link.title) }
+                RowButton { actions.open(link.url) } label: { ExternalLinkRow(title: link.title) }
             }
-            Button(action: actions.openLicenses) {
+            RowButton(action: actions.openLicenses) {
                 SettingsLinkRow(title: state.licenses, value: nil)
             }
         } header: {

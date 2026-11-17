@@ -11,7 +11,7 @@ struct AdapterNoteRow: View {
     let more: () -> Void
 
     var body: some View {
-        Button(action: more) {
+        RowButton(action: more) {
             HStack(alignment: .top, spacing: DishSpace.s6) {
                 RowGlyph(symbol: state.symbol, tint: DishTheme.warning, fill: DishTheme.warningFill)
                 VStack(alignment: .leading, spacing: DishSpace.s1) {

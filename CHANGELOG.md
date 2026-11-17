@@ -102,6 +102,14 @@ miss. `Tests/PARITY.md` lists everything not built.
   opens the PCs whose link is up, the current one checked. Bind to, on the
   page, the row and the long press alike, offers only those; with none up it
   is Find a PC, and the footer says what to do on the Connections tab.
+- **Every control answers the finger.** A pressed tile, capsule or round
+  button washes over its own surface and shrinks a little; a pressed row
+  washes its whole cell; the wash leaves slowly enough for a tap to show; a
+  pointer highlights a control on an iPad and a disabled one fades:
+  Material's state layers, as one kit style and one kit row. On an iPad,
+  the row a split's detail shows is tinted. Nothing uses the silent plain
+  or borderless styles, a NavigationLink or a Link any more, and setup's
+  cards sit on the surface colour like every other list.
 - **The screen stays awake only for a pad.** Keep screen on holds the
   phone awake only while a session streams with a pad bound; a bare
   connection lets it lock like any other app.

@@ -83,8 +83,9 @@ struct ControllerBindingSection: View {
                 destination
             }
             .foregroundStyle(DishTheme.onSurface)
-            Button(title, systemImage: RowActionSymbol.pair, action: findPC)
-                .foregroundStyle(DishTheme.primary)
+            RowButton(action: findPC) {
+                Label(title, systemImage: RowActionSymbol.pair).font(DishFont.body).foregroundStyle(DishTheme.primary)
+            }
         }
     }
 
@@ -161,7 +162,9 @@ struct ControllerUnbindSection: View {
 
     var body: some View {
         Section {
-            Button(item.title, role: .destructive) { perform(item.action) }
+            RowButton { perform(item.action) } label: {
+                Text(item.title).font(DishFont.body).foregroundStyle(DishTheme.error)
+            }
         }
         .listRowBackground(DishTheme.surface)
     }
@@ -263,13 +266,12 @@ struct ControllerDeadZonesSection: View {
 
     var body: some View {
         Section {
-            Button(action: open) {
+            RowButton(action: open) {
                 HStack(spacing: DishSpace.s4) {
                     Text(title).foregroundStyle(DishTheme.onSurface)
                     Spacer()
                     Image(systemName: DishSymbol.disclosure).font(DishFont.detail).foregroundStyle(DishTheme.muted)
                 }
-                .contentShape(Rectangle())
             }
         }
         .listRowBackground(DishTheme.surface)

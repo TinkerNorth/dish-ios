@@ -26,22 +26,24 @@ struct PickPCStep: View {
             } header: {
                 SatelliteHeader(section: state.satellite)
             }
+            .listRowBackground(DishTheme.surface)
             Section {
                 MoonlightRow(section: state.moonlight)
                 ForEach(state.moonlight.hosts) { host in
                     SetupPCRowView(row: host, pick: model.pickSetupDestination, pair: openPair)
                 }
-                Button(action: addByAddress) {
-                    Label(state.byAddress, systemImage: DishSymbol.add)
+                RowButton(action: addByAddress) {
+                    Label(state.byAddress, systemImage: DishSymbol.add).font(DishFont.body).foregroundStyle(DishTheme.primary)
                 }
-                Button(action: openSatellite) {
-                    Label(state.getSatellite.title, systemImage: DishSymbol.external)
+                RowButton(action: openSatellite) {
+                    Label(state.getSatellite.title, systemImage: DishSymbol.external).font(DishFont.body).foregroundStyle(DishTheme.primary)
                 }
             } footer: {
                 Text(state.footnote)
                     .font(DishFont.detail)
             }
             .tint(DishTheme.primary)
+            .listRowBackground(DishTheme.surface)
         }
         .listStyle(.insetGrouped)
     }
@@ -132,7 +134,7 @@ private struct SetupPCRowView: View {
     let pair: (String) -> Void
 
     var body: some View {
-        Button(action: choose) {
+        RowButton(action: choose) {
             HStack(spacing: DishSpace.s6) {
                 SetupGlyphTile(symbol: row.symbol)
                 VStack(alignment: .leading, spacing: DishSpace.s1) {

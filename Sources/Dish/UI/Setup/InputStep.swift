@@ -26,6 +26,7 @@ struct InputStep: View {
                 } header: {
                     SectionEyebrow(title: found.title, color: DishTheme.primary)
                 }
+                .listRowBackground(DishTheme.surface)
             }
             Section {
                 ForEach(state.choices) { choice in
@@ -37,10 +38,12 @@ struct InputStep: View {
                 Text(state.footnote)
                     .font(DishFont.detail)
             }
+            .listRowBackground(DishTheme.surface)
             if let adapter = state.adapter {
                 Section {
                     AdapterNoteRow(state: adapter, more: whatYouNeed)
                 }
+                .listRowBackground(DishTheme.surface)
             }
         }
         .listStyle(.insetGrouped)
@@ -76,7 +79,7 @@ private struct SetupChoiceRowView: View {
     let pick: (InputKind) -> Void
 
     var body: some View {
-        Button(action: choose) {
+        RowButton(action: choose) {
             HStack(spacing: DishSpace.s6) {
                 SetupGlyphTile(symbol: row.symbol)
                 VStack(alignment: .leading, spacing: DishSpace.s1) {
