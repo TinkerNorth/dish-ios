@@ -8,7 +8,7 @@ import SwiftUI
 /// what will. The whole row opens it.
 struct AdapterNoteRow: View {
     let state: AdapterNoteState
-    let more: () -> Void
+    let more: @MainActor () -> Void
 
     var body: some View {
         RowButton(action: more) {
