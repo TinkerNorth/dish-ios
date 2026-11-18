@@ -187,7 +187,10 @@ the `Cover` case and `NavigationCoverageTests` requires a
   finger to move on a device and lost a second finger's lift), so several
   fingers hold several controls and a button stays held until its last
   finger lifts; the touchpad's two slots come from the same fingers
-  (`slotFingers`). The way out of every screen is the back button beside
+  (`slotFingers`). L3 and R3 are smaller sticks of their own beside each
+  stick, as Android's skin has them: a finger on one presses the stick's
+  button and tilts the stick (`clickStickEvents`), and its lift lets go of
+  both. The way out of every screen is the back button beside
   the PC pill (`PlayBackButton`, C3), which closes the screen and keeps the
   on-screen controller's binding; the gamepad's switches live on the
   controller's page, and the on-screen controller's other screens open

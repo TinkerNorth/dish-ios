@@ -8,8 +8,10 @@ import SwiftUI
 /// C2, the on-screen gamepad: the rails down both sides, the shoulders,
 /// the way out and the PC along the top, the left stick and L3 over the
 /// d-pad, the centre's touchpad when the emulated pad carries one over its
-/// View, Guide and Menu, and the faces over R3 and the right stick. Each
-/// control holds its own finger, at the measures the window has room for.
+/// View, Guide and Menu, and the faces over R3 and the right stick. L3 and
+/// R3 are smaller sticks of their own, as Android's skin has them: a finger
+/// on one presses the button and tilts the stick. Each control holds its
+/// own finger, at the measures the window has room for.
 struct GamepadCover: View {
     let state: PlayCoverState
     let actions: PlayActions
@@ -49,8 +51,10 @@ struct GamepadCover: View {
     private var leftHand: some View {
         VStack(alignment: .leading, spacing: 0) {
             HStack(alignment: .center, spacing: DishSpace.s6) {
-                PadStickControl(base: metrics.stick, thumb: metrics.stickThumb) { actions.pad(stickMove(.left, $0)) }
-                RoundPadButton(face: .label(labels.leftThumb)) { hold(.leftThumb, $0) }
+                PadStickControl(base: metrics.stick, thumb: metrics.stickThumb, label: nil) { actions.pad(stickMove(.left, $0)) }
+                PadStickControl(base: metrics.clickStick, thumb: metrics.clickStickThumb, label: labels.leftThumb) {
+                    clickStick(.left, $0)
+                }
             }
             Spacer(minLength: 0)
             DirectionPad(key: metrics.dpadKey) { actions.pad(dpadMove($0)) }
@@ -80,8 +84,10 @@ struct GamepadCover: View {
             FaceDiamond(state: labels, size: metrics.face, hold: hold)
             Spacer(minLength: 0)
             HStack(alignment: .center, spacing: DishSpace.s6) {
-                RoundPadButton(face: .label(labels.rightThumb)) { hold(.rightThumb, $0) }
-                PadStickControl(base: metrics.stick, thumb: metrics.stickThumb) { actions.pad(stickMove(.right, $0)) }
+                PadStickControl(base: metrics.clickStick, thumb: metrics.clickStickThumb, label: labels.rightThumb) {
+                    clickStick(.right, $0)
+                }
+                PadStickControl(base: metrics.stick, thumb: metrics.stickThumb, label: nil) { actions.pad(stickMove(.right, $0)) }
             }
             .padding(.trailing, metrics.face)
         }
@@ -89,6 +95,13 @@ struct GamepadCover: View {
 
     private func hold(_ button: WireButton, _ held: Bool) {
         actions.pad(padHold(button, held: held))
+    }
+
+    /// One press on L3 or R3 clicks and tilts; its lift lets go of both.
+    private func clickStick(_ stick: PadStick, _ offset: CGVector?) {
+        for event in clickStickEvents(stick, offset) {
+            actions.pad(event)
+        }
     }
 }
 

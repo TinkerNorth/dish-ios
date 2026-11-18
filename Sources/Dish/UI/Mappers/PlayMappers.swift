@@ -62,11 +62,14 @@ struct TouchpadCoverState: Equatable {
     let hint: String
 }
 
-/// The gamepad's measures: a stick's base and thumb, a face button, a d-pad
-/// arm, a trigger rail and the touchpad.
+/// The gamepad's measures: a stick's base and thumb, the click stick's
+/// beside it (L3, R3), a face button, a d-pad arm, a trigger rail and the
+/// touchpad.
 struct PadMetrics: Equatable {
     let stick: CGFloat
     let stickThumb: CGFloat
+    let clickStick: CGFloat
+    let clickStickThumb: CGFloat
     let face: CGFloat
     let dpadKey: CGFloat
     let rail: CGFloat
@@ -81,6 +84,8 @@ struct PadMetrics: Equatable {
     static let compact = PadMetrics(
         stick: DishSize.padStick,
         stickThumb: DishSize.padStickThumb,
+        clickStick: DishSize.padClickStick,
+        clickStickThumb: DishSize.padClickStickThumb,
         face: DishSize.padFace,
         dpadKey: DishSize.padDpadKey,
         rail: DishSize.padRail,
@@ -91,6 +96,8 @@ struct PadMetrics: Equatable {
     static let regular = PadMetrics(
         stick: DishSize.padStickRegular,
         stickThumb: DishSize.padStickThumbRegular,
+        clickStick: DishSize.padClickStickRegular,
+        clickStickThumb: DishSize.padClickStickThumbRegular,
         face: DishSize.padFaceRegular,
         dpadKey: DishSize.padDpadKeyRegular,
         rail: DishSize.padRailRegular,
@@ -315,6 +322,22 @@ func padHold(_ button: WireButton, held: Bool) -> OnScreenPadEvent {
 func stickMove(_ stick: PadStick, _ offset: CGVector?) -> OnScreenPadEvent {
     guard let offset else { return .stickReleased(stick) }
     return .stick(stick, x: Float(offset.dx), y: Float(offset.dy))
+}
+
+/// L3's or R3's finger: the stick's button pressed as the stick tilts with
+/// it, as one press on a real stick does both; its lift lets go of both.
+func clickStickEvents(_ stick: PadStick, _ offset: CGVector?) -> [OnScreenPadEvent] {
+    let button = thumbButton(stick)
+    guard let offset else { return [.stickReleased(stick), .release(button)] }
+    return [.press(button), stickMove(stick, offset)]
+}
+
+/// The stick's own button: L3 or R3.
+func thumbButton(_ stick: PadStick) -> WireButton {
+    switch stick {
+    case .left: .leftThumb
+    case .right: .rightThumb
+    }
 }
 
 /// A rail's finger, 0 at its top and 1 at its bottom, or its lift.
