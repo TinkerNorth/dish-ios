@@ -5,8 +5,9 @@ import DishCore
 import DishEngine
 import SwiftUI
 
-/// The touchpad: a plain surface for one or two fingers, and its two click
-/// zones under it, as Android's touchpad screen has them.
+/// The touchpad, its glyph at the top: a plain surface for one or two
+/// fingers, and its two click zones under it, as Android's touchpad screen
+/// has them.
 struct TouchpadCover: View {
     let state: PlayCoverState
     let actions: PlayActions
@@ -18,7 +19,7 @@ struct TouchpadCover: View {
     var body: some View {
         VStack(spacing: DishSpace.s8) {
             PlayTopBar(state: state, actions: actions) {
-                SectionEyebrow(title: words.eyebrow, color: DishTheme.primary)
+                PlayEyebrow(symbol: words.symbol, title: words.eyebrow)
             } trailing: {
                 EmptyView()
             }

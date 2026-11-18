@@ -57,6 +57,22 @@ lockstep across the repos share a version number.
 
 ### Changed
 
+- **The play screens' way out is a back button.** The pause menu and its
+  button are gone; a back chevron beside the PC pill closes the gamepad,
+  the touchpad or the mouse and keeps the on-screen controller's binding,
+  as Android's overlays leave. Motion, Rumble and Emulate as live on the
+  controller's page, and the on-screen controller's other screens open from
+  its row and its page: Open mouse once the satellite grants mouse control
+  on a session that is up. The hint on the pause button goes with it.
+- **The gamepad carries its touchpad.** Emulating a DualShock 4, a
+  DualSense or a DualSense Edge, the gamepad draws the pad's touchpad at
+  its top centre, where the real ones carry it: one or two fingers stream
+  as the pad's, and a tap on it (still, within 0.2 s) clicks it for a
+  hundred milliseconds, as Android's skin does. An Xbox or Switch Pro pad
+  has none.
+- **The mouse and the touchpad wear their glyphs.** A mouse beside Mouse on
+  the mouse screen and in Open mouse, the touchpad's beside Touchpad, as
+  Android's overlays and card actions show them.
 - **Every step of a link shows.** A PC being reached for reads
   "Connecting…" with a spinner on its row and page, with Cancel; one that
   stopped responding reads so in the error colour with Reconnect, on the

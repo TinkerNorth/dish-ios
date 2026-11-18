@@ -5,8 +5,7 @@ import SwiftUI
 import TipKit
 
 /// TipKit's tip over a hint's state: its words and its glyph. TipKit keeps,
-/// under the hint's name, whether it was shown, closed or put to rest; an
-/// urgent hint shows even on a day another one has.
+/// under the hint's name, whether it was shown, closed or put to rest.
 struct HintTip: Tip {
     let state: HintState
 
@@ -24,10 +23,6 @@ struct HintTip: Tip {
 
     var image: Image? {
         Image(systemName: state.symbol)
-    }
-
-    var options: [any TipOption] {
-        Tips.IgnoresDisplayFrequency(state.urgent)
     }
 }
 

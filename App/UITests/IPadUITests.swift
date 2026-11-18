@@ -38,11 +38,11 @@ final class IPadUITests: XCTestCase {
         let open = app.buttons["Open gamepad"].firstMatch
         XCTAssertTrue(open.waitForExistence(timeout: ShellUI.patience), "the gamepad opens from its row once a PC is bound to it")
         open.tap()
-        let pause = app.buttons["Pause"].firstMatch
-        XCTAssertTrue(pause.waitForExistence(timeout: ShellUI.patience))
+        let back = app.buttons["Back"].firstMatch
+        XCTAssertTrue(back.waitForExistence(timeout: ShellUI.patience))
         XCTAssertTrue(ShellUI.window(of: app, turns: .landscape), "the play cover opens on the iPad's side")
         XCUIDevice.shared.orientation = .portrait
         XCTAssertTrue(ShellUI.window(of: app, turns: .portrait), "iPadOS turns the window with the device")
-        XCTAssertGreaterThan(pause.frame.minY, app.windows.firstMatch.frame.midY, "upright, the gamepad stands along the bottom")
+        XCTAssertGreaterThan(back.frame.minY, app.windows.firstMatch.frame.midY, "upright, the gamepad stands along the bottom")
     }
 }

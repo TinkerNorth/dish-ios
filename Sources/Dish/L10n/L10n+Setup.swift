@@ -27,7 +27,8 @@ extension L10n {
         catalog.text("Skip")
     }
 
-    var setupBack: String {
+    /// Setup's step back, and the play screens' way out.
+    var back: String {
         catalog.text("Back")
     }
 

@@ -156,7 +156,7 @@ final class NavigationMachineTests: XCTestCase {
         XCTAssertEqual(step.effects, [.startSetup(.guide)])
     }
 
-    func testThePauseMenuMovesFromOneScreenToAnotherUnderOneCover() {
+    func testAPlayScreenReplacingAnotherKeepsTheOneCover() {
         let step = after(.openPlay(.gamepad), .openPlay(.mouse))
         XCTAssertEqual(step.state.cover, .play(.mouse))
         XCTAssertEqual(step.effects, [.startPlay(.gamepad), .startPlay(.mouse)], "a screen replacing a screen ends nothing")

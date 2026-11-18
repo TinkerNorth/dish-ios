@@ -5,15 +5,7 @@ import Foundation
 
 extension L10n {
 
-    // MARK: - The play screens and the pause menu
-
-    var pause: String {
-        catalog.text("Pause")
-    }
-
-    var resume: String {
-        catalog.text("Resume")
-    }
+    // MARK: - The play screens
 
     var gamepad: String {
         catalog.text("Gamepad")
@@ -21,18 +13,6 @@ extension L10n {
 
     var mouse: String {
         catalog.text("Mouse")
-    }
-
-    var stopGamepad: String {
-        catalog.text("Stop gamepad")
-    }
-
-    var motionNeedsDualSense: String {
-        catalog.text("Needs DualSense emulation")
-    }
-
-    var motionNeedsSensors: String {
-        catalog.text("This iPhone has no motion sensors")
     }
 
     var openGamepad: String {

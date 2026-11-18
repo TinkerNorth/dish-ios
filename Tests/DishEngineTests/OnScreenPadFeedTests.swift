@@ -70,6 +70,31 @@ final class OnScreenPadFeedTests: XCTestCase {
         XCTAssertEqual(recorded.reports.last?.lx, 655)
     }
 
+    /// A tap on the gamepad's touchpad clicks it: pressed at once, let go by
+    /// the loop two ticks on, and the pad's click is the touch frame's button.
+    func testATouchpadTapClicksForTwoTicks() {
+        let recorded = RecordedPad()
+        recorded.pad.start()
+        recorded.pad.tapTouchpad()
+        XCTAssertEqual(recorded.touches.map(\.buttonPressed), [true])
+        recorded.tick(1)
+        XCTAssertEqual(recorded.touches.last?.buttonPressed, true, "still held after one tick")
+        recorded.tick(1)
+        XCTAssertEqual(recorded.touches.last?.buttonPressed, false)
+        XCTAssertEqual(touchpadClickPulseTicks, 2)
+    }
+
+    func testClosingMidClickLetsGoAndForgetsThePulse() {
+        let recorded = RecordedPad()
+        recorded.pad.start()
+        recorded.pad.tapTouchpad()
+        recorded.pad.stop()
+        XCTAssertEqual(recorded.touches.last?.buttonPressed, false)
+        let sent = recorded.touches.count
+        recorded.tick(4)
+        XCTAssertFalse(recorded.touches.dropFirst(sent).contains { $0.buttonPressed }, "nothing clicks after the screen closed")
+    }
+
     func testTheLoopResendsAChangeOnThreeTicksThenIdlesToAKeepalive() {
         let recorded = RecordedPad()
         recorded.pad.start()

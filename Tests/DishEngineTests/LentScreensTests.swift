@@ -26,4 +26,12 @@ final class LentScreensTests: XCTestCase {
     func testASessionThatIsDownLendsNothing() {
         XCTAssertEqual(lentScreens(padHasTouchpad: false, sessionUp: false, typeOffersDs4: true, hostMouseControl: true), [])
     }
+
+    /// The on-screen controller's touchpad is on its gamepad, so besides the
+    /// gamepad it opens the mouse alone, once the host grants it.
+    func testTheOnScreenControllerOpensTheMouseOnceTheHostGrantsIt() {
+        XCTAssertEqual(onScreenSurfaces(sessionUp: true, hostMouseControl: true), [.mouse])
+        XCTAssertEqual(onScreenSurfaces(sessionUp: true, hostMouseControl: false), [])
+        XCTAssertEqual(onScreenSurfaces(sessionUp: false, hostMouseControl: true), [])
+    }
 }

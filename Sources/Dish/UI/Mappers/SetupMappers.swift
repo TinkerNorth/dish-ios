@@ -186,7 +186,7 @@ func setupChromeState(_ walk: SetupState, words: L10n = .app) -> SetupChromeStat
         title: onWelcome ? nil : words.setUpDish,
         subtitle: setupSubtitle(walk.step, words: words),
         showsBack: walk.canGoBack,
-        back: words.setupBack,
+        back: words.back,
         skip: words.setupSkip
     )
 }

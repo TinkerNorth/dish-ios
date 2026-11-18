@@ -5,9 +5,9 @@ import DishCore
 import DishEngine
 import SwiftUI
 
-/// C4, the mouse: Left, the Scroll strip and Right down the left, the move
-/// pad filling the rest. The pad reports touches and clicks; the pointer's
-/// shape on the wire is the sender's business.
+/// C4, the mouse, its glyph at the top: Left, the Scroll strip and Right
+/// down the left, the move pad filling the rest. The pad reports touches
+/// and clicks; the pointer's shape on the wire is the sender's business.
 struct MouseCover: View {
     let state: PlayCoverState
     let actions: PlayActions
@@ -19,7 +19,7 @@ struct MouseCover: View {
     var body: some View {
         VStack(spacing: DishSpace.s8) {
             PlayTopBar(state: state, actions: actions) {
-                SectionEyebrow(title: words.eyebrow, color: DishTheme.primary)
+                PlayEyebrow(symbol: words.symbol, title: words.eyebrow)
             } trailing: {
                 EmptyView()
             }

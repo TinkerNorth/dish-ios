@@ -6,10 +6,10 @@ import DishEngine
 import SwiftUI
 
 /// C2, the on-screen gamepad: the rails down both sides, the shoulders,
-/// the PC and the pause button along the top, the left stick and L3 over
-/// the d-pad, the centre's View, Guide and Menu, and the faces over R3 and
-/// the right stick. Each control holds its own finger, at the measures the
-/// window has room for.
+/// the way out and the PC along the top, the left stick and L3 over the
+/// d-pad, the centre's touchpad when the emulated pad carries one over its
+/// View, Guide and Menu, and the faces over R3 and the right stick. Each
+/// control holds its own finger, at the measures the window has room for.
 struct GamepadCover: View {
     let state: PlayCoverState
     let actions: PlayActions
@@ -58,8 +58,13 @@ struct GamepadCover: View {
         }
     }
 
+    /// The touchpad sits at the top centre, where a DualShock and a DualSense
+    /// carry theirs; View, Guide and Menu keep the middle.
     private var centre: some View {
-        VStack {
+        VStack(spacing: DishSpace.s6) {
+            if state.trackpad {
+                Trackpad(size: metrics.trackpad, onFinger: { actions.touch(fingerMove($0, $1)) }, onTap: { actions.tap() })
+            }
             Spacer()
             HStack(spacing: DishSpace.s6) {
                 RoundPadButton(face: .symbol(PlaySymbol.view)) { hold(.back, $0) }
@@ -124,8 +129,8 @@ private struct FaceDiamond: View {
     }
 }
 
-/// Along the top of every play screen: what sits at its edges, the PC the
-/// screen sends to, and the pause menu.
+/// Along the top of every play screen: what sits at its edges, the way out
+/// and the PC the screen sends to.
 struct PlayTopBar<Leading: View, Trailing: View>: View {
     let state: PlayCoverState
     let actions: PlayActions
@@ -136,11 +141,11 @@ struct PlayTopBar<Leading: View, Trailing: View>: View {
         HStack(spacing: DishSpace.s6) {
             leading()
             Spacer(minLength: DishSpace.s4)
+            PlayBackButton(title: state.back, action: actions.stop)
             if let pill = state.pill {
                 PlayPill(state: pill, symbol: satelliteSymbol)
                     .fixedSize()
             }
-            PauseMenu(state: state.pause, actions: actions)
             Spacer(minLength: DishSpace.s4)
             trailing()
         }
@@ -148,7 +153,7 @@ struct PlayTopBar<Leading: View, Trailing: View>: View {
 }
 
 #Preview("Gamepad", traits: .landscapeLeft) {
-    let facts = FactsPreview.playing(.gamepad)
+    let facts = FactsPreview.playing(.gamepad, emulateAs: .dualSense)
     GamepadCover(state: playCoverState(facts: facts, screen: .gamepad, window: PreviewWindow.phoneOnItsSide), actions: .preview)
         .background(DishTheme.background)
         .environment(\.colorScheme, .dark)

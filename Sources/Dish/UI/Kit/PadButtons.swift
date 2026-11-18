@@ -12,7 +12,7 @@ private struct HoldTracking<Hit: Shape>: ViewModifier {
     @State private var held = false
 
     func body(content: Content) -> some View {
-        content.onFingers(shape) { fingers, _ in hold(holding(fingers)) }
+        content.onFingers(shape) { hold(holding($0.fingers)) }
     }
 
     private func hold(_ isHeld: Bool) {

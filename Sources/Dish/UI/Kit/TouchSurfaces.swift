@@ -38,9 +38,7 @@ struct MovePad: View {
                     .position(touch)
             }
         }
-        .onFingers(RoundedRectangle(cornerRadius: DishSize.mouseCorner)) { fingers, size in
-            follow(leadFinger(fingers)?.location, in: size)
-        }
+        .onFingers(RoundedRectangle(cornerRadius: DishSize.mouseCorner)) { follow(leadFinger($0.fingers)?.location, in: $0.size) }
     }
 
     /// The lead finger's place across the pad, once per change.
@@ -67,7 +65,7 @@ struct ScrollStrip: View {
             .fill(last == nil ? DishTheme.surfaceDim : DishTheme.primaryFill)
             .overlay(RoundedRectangle(cornerRadius: DishSize.mouseCorner).stroke(DishTheme.outline, lineWidth: DishSize.padStroke))
             .overlay(label)
-            .onFingers(RoundedRectangle(cornerRadius: DishSize.mouseCorner)) { fingers, _ in follow(leadFinger(fingers)) }
+            .onFingers(RoundedRectangle(cornerRadius: DishSize.mouseCorner)) { follow(leadFinger($0.fingers)) }
     }
 
     private var label: some View {
@@ -103,21 +101,59 @@ struct TwoFingerSurface: View {
             RoundedRectangle(cornerRadius: DishSize.mouseCorner).stroke(DishTheme.outline, lineWidth: DishSize.padStroke)
             Text(hint).font(DishFont.detail).foregroundStyle(DishTheme.muted)
         }
-        .onFingers(RoundedRectangle(cornerRadius: DishSize.mouseCorner)) { fingers, size in follow(fingers, in: size) }
+        .onFingers(RoundedRectangle(cornerRadius: DishSize.mouseCorner)) { follow($0) }
     }
 
-    /// The slots over the fingers: a finger keeps its slot, a new one takes
-    /// a free slot or is left out while both are held. Lifts go first, so a
-    /// slot that came free is taken in the same change.
-    private func follow(_ fingers: [Finger], in size: CGSize) {
-        let step = slotFingers(slotted, over: fingers, slots: touchpadSlots)
+    private func follow(_ change: FingerChange) {
+        let step = slotFingers(slotted, over: change.fingers, slots: touchpadSlots)
         slotted = step.slotted
-        for slot in step.freed {
-            onFinger(slot, nil)
+        report(step, in: change.size, to: onFinger)
+    }
+}
+
+/// The gamepad's touchpad, a DualShock's or a DualSense's: up to two fingers
+/// in their slots, each under a ring, and a tap on it for its click.
+struct Trackpad: View {
+    let size: CGSize
+    let onFinger: (Int, CGPoint?) -> Void
+    let onTap: () -> Void
+
+    @State private var slotted: [SlotFinger] = []
+
+    var body: some View {
+        ZStack {
+            RoundedRectangle(cornerRadius: DishSize.padCorner).fill(DishTheme.surface)
+            RoundedRectangle(cornerRadius: DishSize.padCorner).stroke(DishTheme.outline, lineWidth: DishSize.padStroke)
+            ForEach(slotted, id: \.id) { finger in
+                Circle()
+                    .stroke(DishTheme.primary, lineWidth: DishSize.padHeldStroke)
+                    .background(Circle().fill(DishTheme.padGlow))
+                    .frame(width: DishSize.pointerRing, height: DishSize.pointerRing)
+                    .position(finger.location)
+            }
         }
-        for finger in step.moved {
-            onFinger(finger.slot, across(finger.location, in: size))
+        .frame(width: size.width, height: size.height)
+        .onFingers(RoundedRectangle(cornerRadius: DishSize.padCorner)) { follow($0) }
+    }
+
+    private func follow(_ change: FingerChange) {
+        let step = slotFingers(slotted, over: change.fingers, slots: touchpadSlots)
+        slotted = step.slotted
+        report(step, in: change.size, to: onFinger)
+        for lift in change.lifts where isTap(lift, slop: DishSize.trackpadTapSlop, window: DishMotion.trackpadTapWindow) {
+            onTap()
         }
+    }
+}
+
+/// A slot step reported, the freed slots first so one that came free is
+/// taken in the same change.
+private func report(_ step: SlotStep, in size: CGSize, to onFinger: (Int, CGPoint?) -> Void) {
+    for slot in step.freed {
+        onFinger(slot, nil)
+    }
+    for finger in step.moved {
+        onFinger(finger.slot, across(finger.location, in: size))
     }
 }
 

@@ -70,6 +70,9 @@ enum DishMotion {
     static let pressOut: Animation = .easeOut(duration: 0.25)
     /// How much a control that stands on its own shrinks while pressed.
     static let pressScale: CGFloat = 0.97
+    /// A finger that lifts off the gamepad's touchpad within this time, having
+    /// stayed put, tapped it: a click.
+    static let trackpadTapWindow: TimeInterval = 0.2
 }
 
 /// The one opacity a state sets.
@@ -191,8 +194,14 @@ enum DishSize {
     static let padStickThumb: CGFloat = 60
     /// A face button.
     static let padFace: CGFloat = 52
-    /// L3, R3, the pause button and the centre buttons.
+    /// L3, R3, the back button and the centre buttons.
     static let padRound: CGFloat = 44
+    /// The gamepad's touchpad when the emulated pad carries one, two wide by
+    /// one high as a DualShock's and a DualSense's are.
+    static let padTrackpadWidth: CGFloat = 200
+    static let padTrackpadHeight: CGFloat = 100
+    /// How far a finger may drift on the gamepad's touchpad and still tap it.
+    static let trackpadTapSlop: CGFloat = 12
     /// One arm of the d-pad.
     static let padDpadKey: CGFloat = 44
     /// The d-pad's and a mouse button's corners.
@@ -236,6 +245,8 @@ enum DishSize {
     static let padFaceRegular: CGFloat = 76
     static let padDpadKeyRegular: CGFloat = 64
     static let padRailRegular: CGFloat = 64
+    static let padTrackpadWidthRegular: CGFloat = 300
+    static let padTrackpadHeightRegular: CGFloat = 150
     /// The band along the bottom the gamepad stands in on an upright iPad.
     static let padUprightHeight: CGFloat = 440
     /// The readable column setup stands in on a regular width.

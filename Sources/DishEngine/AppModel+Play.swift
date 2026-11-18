@@ -40,8 +40,19 @@ package extension AppModel {
             emulateAs: onScreenEmulateAs,
             features: carried.map { ControllerFeatureFact(feature: $0, enabled: switches.isOn($0)) },
             motion: motionFact(slotId: onScreenSlotId),
-            hostEmulation: network.hub.hostEmulation(slotId: onScreenSlotId)
+            hostEmulation: network.hub.hostEmulation(slotId: onScreenSlotId),
+            surfaces: onScreenPhoneSurfaces
         )]
+    }
+
+    /// The mouse, once the on-screen controller's satellite grants it on a
+    /// session that is up.
+    private var onScreenPhoneSurfaces: [PlayScreen] {
+        guard let connectionId = network.hub.bindings[onScreenSlotId], let conn = network.wifi.get(connectionId) else { return [] }
+        return onScreenSurfaces(
+            sessionUp: sessionIsUp(network.hub.summary(connectionId)?.live),
+            hostMouseControl: conn.hostMouseControl
+        )
     }
 
     /// What the on-screen gamepad claims on a satellite: the phone's motion
@@ -130,6 +141,11 @@ package extension AppModel {
 
     func onScreenPad(_ event: OnScreenPadEvent) {
         onScreen.apply(event)
+    }
+
+    /// A tap on the gamepad's touchpad: a click, let go by the loop.
+    func tapOnScreenTouchpad() {
+        onScreen.tapTouchpad()
     }
 
     func onScreenTouch(_ event: TouchSurfaceEvent) {
