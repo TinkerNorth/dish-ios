@@ -9047,40 +9047,6 @@
         }
       }
     },
-    "Leave through the pause menu" : {
-      "localizations" : {
-        "bs" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Izađite kroz meni pauze"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Verlasse das Spiel über das Pausenmenü"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Sal desde el menú de pausa"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Quittez par le menu pause"
-          }
-        },
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Saia pelo menu de pausa"
-          }
-        }
-      }
-    },
     "Leaving Dish stops forwarding, because iOS suspends it." : {
       "localizations" : {
         "bs" : {
@@ -10618,40 +10584,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Nome no seu PC"
-          }
-        }
-      }
-    },
-    "Needs DualSense emulation" : {
-      "localizations" : {
-        "bs" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Zahtijeva DualSense emulaciju"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Braucht DualSense-Emulation"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Requiere emulación DualSense"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Nécessite l’émulation DualSense"
-          }
-        },
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Exige emulação de DualSense"
           }
         }
       }
@@ -12821,40 +12753,6 @@
         }
       }
     },
-    "Pause" : {
-      "localizations" : {
-        "bs" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Pauza"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Pause"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Pausa"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Pause"
-          }
-        },
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Pausar"
-          }
-        }
-      }
-    },
     "Pick a PC" : {
       "localizations" : {
         "bs" : {
@@ -14334,40 +14232,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Restaurar compras"
-          }
-        }
-      }
-    },
-    "Resume" : {
-      "localizations" : {
-        "bs" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Nastavi"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Fortsetzen"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Reanudar"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Reprendre"
-          }
-        },
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Continuar"
           }
         }
       }
@@ -15874,74 +15738,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Zona morta do analógico"
-          }
-        }
-      }
-    },
-    "Stop gamepad" : {
-      "localizations" : {
-        "bs" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Zaustavi gamepad"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Gamepad beenden"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Detener el mando"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Arrêter la manette"
-          }
-        },
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Parar o controle"
-          }
-        }
-      }
-    },
-    "Stop gamepad in this menu takes you back to Dish." : {
-      "localizations" : {
-        "bs" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Zaustavi gamepad u ovom meniju vraća vas u Dish."
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Gamepad beenden in diesem Menü bringt dich zurück zu Dish."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Detener el mando, en este menú, te devuelve a Dish."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Arrêter la manette, dans ce menu, vous ramène à Dish."
-          }
-        },
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Parar o controle, neste menu, leva você de volta ao Dish."
           }
         }
       }
@@ -17539,118 +17335,6 @@
                 "stringUnit" : {
                   "state" : "translated",
                   "value" : "Este iPhone tem uma porta Lightning."
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "This iPhone has no motion sensors" : {
-      "localizations" : {
-        "bs" : {
-          "variations" : {
-            "device" : {
-              "ipad" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "Ovaj iPad nema senzore pokreta"
-                }
-              },
-              "other" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "Ovaj iPhone nema senzore pokreta"
-                }
-              }
-            }
-          }
-        },
-        "de" : {
-          "variations" : {
-            "device" : {
-              "ipad" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "Dieses iPad hat keine Bewegungssensoren"
-                }
-              },
-              "other" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "Dieses iPhone hat keine Bewegungssensoren"
-                }
-              }
-            }
-          }
-        },
-        "en" : {
-          "variations" : {
-            "device" : {
-              "ipad" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "This iPad has no motion sensors"
-                }
-              },
-              "other" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "This iPhone has no motion sensors"
-                }
-              }
-            }
-          }
-        },
-        "es" : {
-          "variations" : {
-            "device" : {
-              "ipad" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "Este iPad no tiene sensores de movimiento"
-                }
-              },
-              "other" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "Este iPhone no tiene sensores de movimiento"
-                }
-              }
-            }
-          }
-        },
-        "fr" : {
-          "variations" : {
-            "device" : {
-              "ipad" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "Cet iPad n’a pas de capteurs de mouvement"
-                }
-              },
-              "other" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "Cet iPhone n’a pas de capteurs de mouvement"
-                }
-              }
-            }
-          }
-        },
-        "pt-BR" : {
-          "variations" : {
-            "device" : {
-              "ipad" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "Este iPad não tem sensores de movimento"
-                }
-              },
-              "other" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "Este iPhone não tem sensores de movimento"
                 }
               }
             }

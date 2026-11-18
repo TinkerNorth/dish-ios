@@ -7,9 +7,9 @@ import SwiftUI
 import XCTest
 @testable import Dish
 
-/// The play screens (C2, C3, C4) and the touchpad: the PC pill, every
-/// state of the pause menu, the gamepad's labels for each emulated pad,
-/// and the words of the mouse and the touchpad.
+/// The play screens (C2, C3, C4) and the touchpad: the PC pill, the way
+/// out, the gamepad's labels and touchpad for each emulated pad, and the
+/// words and glyphs of the mouse and the touchpad.
 final class PlayMappersTests: XCTestCase {
 
     private func cover(
@@ -19,10 +19,6 @@ final class PlayMappersTests: XCTestCase {
         window: WindowFacts = WindowFixture.phoneOnItsSide
     ) -> PlayCoverState {
         playCoverState(facts: FactsFixture.shell(session: session, play: play), screen: screen, window: window)
-    }
-
-    private func switches(_ play: PlayFacts) throws -> PauseSwitchesState {
-        try XCTUnwrap(cover(play).pause.switches)
     }
 
     // MARK: - The pill
@@ -85,71 +81,35 @@ final class PlayMappersTests: XCTestCase {
         XCTAssertEqual(cover(FactsFixture.play(destination: online)).pill?.detail, "Online", "a PC up with no session word yet")
     }
 
-    // MARK: - The pause menu
+    // MARK: - The way out, the glyphs and the touchpad
 
-    func testThePauseMenuResumesAndStops() {
-        let pause = cover().pause
-        XCTAssertEqual(pause.title, "Pause")
-        XCTAssertEqual(pause.resume, "Resume")
-        XCTAssertEqual(pause.stop, "Stop gamepad")
+    func testTheWayOutIsABackButtonOnEveryScreen() {
+        for screen in PlayScreen.allCases {
+            XCTAssertEqual(cover(screen: screen).back, "Back", "\(screen)")
+        }
     }
 
-    func testThePauseMenuOffersTheOtherTwoScreens() {
-        XCTAssertEqual(cover(screen: .gamepad).pause.screens.map(\.title), ["Touchpad", "Mouse"])
-        XCTAssertEqual(cover(screen: .touchpad).pause.screens.map(\.title), ["Gamepad", "Mouse"])
-        XCTAssertEqual(cover(screen: .mouse).pause.screens.map(\.screen), [.gamepad, .touchpad])
-        XCTAssertEqual(cover(screen: .mouse).pause.screens.map(\.symbol), ["gamecontroller", "rectangle.and.hand.point.up.left"])
+    func testTheMouseAndTheTouchpadWearTheirGlyphs() {
+        XCTAssertEqual(cover(screen: .mouse).mouse.symbol, "computermouse")
+        XCTAssertEqual(cover(screen: .touchpad).touchpad.symbol, "rectangle.and.hand.point.up.left")
+        XCTAssertEqual(playScreenSymbol(.mouse), cover().mouse.symbol, "the row's Open mouse wears the same glyph")
+        XCTAssertEqual(playScreenSymbol(.touchpad), cover().touchpad.symbol)
     }
 
-    /// A pad the phone lends its screens to has a gamepad of its own, so
-    /// the pause menu moves only between the touchpad and the mouse.
-    func testAPadsPauseMenuMovesBetweenTheTouchpadAndTheMouseAlone() {
-        let pad = FactsFixture.play(screen: .mouse, target: .pad(id: "pad", name: "Xbox Wireless Controller"))
-        XCTAssertEqual(cover(pad, screen: .mouse).pause.screens.map(\.screen), [.touchpad])
-        XCTAssertEqual(cover(pad, screen: .touchpad).pause.screens.map(\.screen), [.mouse])
+    /// A DualShock 4, a DualSense and an Edge carry a touchpad, so their
+    /// gamepad draws one; an Xbox pad and a Switch Pro have none.
+    func testTheGamepadCarriesTheTouchpadOfThePadItEmulates() {
+        XCTAssertTrue(cover(FactsFixture.play(emulateAs: .dualSense)).trackpad)
+        XCTAssertTrue(cover(FactsFixture.play(emulateAs: .dualShock4)).trackpad)
+        XCTAssertTrue(cover(FactsFixture.play(emulateAs: .dualSenseEdge)).trackpad)
+        XCTAssertFalse(cover(FactsFixture.play(emulateAs: .xboxWireless)).trackpad)
+        XCTAssertFalse(cover(FactsFixture.play(emulateAs: .switchPro)).trackpad)
+        XCTAssertFalse(cover(nil).trackpad, "no play facts yet: the default Xbox pad")
     }
 
-    func testOnlyTheGamepadHasSwitches() {
-        XCTAssertNotNil(cover(screen: .gamepad).pause.switches)
-        XCTAssertNil(cover(screen: .touchpad).pause.switches)
-        XCTAssertNil(cover(screen: .mouse).pause.switches)
-        XCTAssertNil(cover(nil).pause.switches, "no play facts yet, nothing to switch")
-    }
-
-    func testAnXboxPadDisablesMotionWithTheReason() throws {
-        let motion = try switches(FactsFixture.play(emulateAs: .xboxWireless, motion: true, motionAvailability: .padHasNone)).motion
-        XCTAssertEqual(motion.title, "Motion")
-        XCTAssertFalse(motion.enabled)
-        XCTAssertFalse(motion.isOn, "an unavailable switch reads off")
-        XCTAssertEqual(motion.reason, "Needs DualSense emulation")
-    }
-
-    func testAPhoneWithoutSensorsDisablesMotionWithItsReason() throws {
-        let motion = try switches(FactsFixture.play(emulateAs: .dualSense, motionAvailability: .phoneHasNone)).motion
-        XCTAssertFalse(motion.enabled)
-        XCTAssertEqual(motion.reason, "This iPhone has no motion sensors")
-    }
-
-    func testAMotionPadOffersTheSwitchAsItStands() throws {
-        let on = try switches(FactsFixture.play(emulateAs: .dualSense, motion: true, motionAvailability: .available)).motion
-        XCTAssertTrue(on.enabled)
-        XCTAssertTrue(on.isOn)
-        XCTAssertNil(on.reason)
-        let off = try switches(FactsFixture.play(emulateAs: .dualSense, motion: false, motionAvailability: .available)).motion
-        XCTAssertFalse(off.isOn)
-    }
-
-    func testRumbleIsAToggleThatReadsItsSwitch() throws {
-        let on = try switches(FactsFixture.play(rumble: true)).rumble
-        XCTAssertEqual(on, PauseToggleState(title: "Rumble", symbol: PlaySymbol.rumble, isOn: true, enabled: true, reason: nil))
-        XCTAssertFalse(try switches(FactsFixture.play(rumble: false)).rumble.isOn)
-    }
-
-    func testEmulateAsOffersEveryPadAndSelectsThePick() throws {
-        let state = try switches(FactsFixture.play(emulateAs: .switchPro))
-        XCTAssertEqual(state.emulateTitle, "Emulate as")
-        XCTAssertEqual(state.emulateAs, .switchPro)
-        XCTAssertEqual(state.emulateOptions.map(\.name), ["DualSense", "DualShock 4", "Xbox Wireless", "Switch Pro", "DualSense Edge"])
+    func testTheTouchpadIsTwiceAsWideAsItIsHighAtEitherMeasure() {
+        XCTAssertEqual(PadMetrics.compact.trackpad, CGSize(width: 200, height: 100))
+        XCTAssertEqual(PadMetrics.regular.trackpad, CGSize(width: 300, height: 150))
     }
 
     // MARK: - The gamepad
@@ -191,13 +151,28 @@ final class PlayMappersTests: XCTestCase {
         let mouse = cover(screen: .mouse).mouse
         XCTAssertEqual(
             mouse,
-            MouseCoverState(eyebrow: "Mouse", left: "Left", scroll: "Scroll", right: "Right", hint: "Drag to move the pointer")
+            MouseCoverState(
+                symbol: "computermouse",
+                eyebrow: "Mouse",
+                left: "Left",
+                scroll: "Scroll",
+                right: "Right",
+                hint: "Drag to move the pointer"
+            )
         )
     }
 
     func testTheTouchpadWordsItsClickZonesAndItsHint() {
         let touchpad = cover(screen: .touchpad).touchpad
-        XCTAssertEqual(touchpad, TouchpadCoverState(eyebrow: "Touchpad", click: "Click", hint: "Use one or two fingers"))
+        XCTAssertEqual(
+            touchpad,
+            TouchpadCoverState(
+                symbol: "rectangle.and.hand.point.up.left",
+                eyebrow: "Touchpad",
+                click: "Click",
+                hint: "Use one or two fingers"
+            )
+        )
     }
 
     func testTheCoverCarriesTheScreenItShows() {
@@ -215,7 +190,8 @@ final class PlayMappersTests: XCTestCase {
             stickThumb: DishSize.padStickThumb,
             face: DishSize.padFace,
             dpadKey: DishSize.padDpadKey,
-            rail: DishSize.padRail
+            rail: DishSize.padRail,
+            trackpad: CGSize(width: DishSize.padTrackpadWidth, height: DishSize.padTrackpadHeight)
         )
         XCTAssertEqual(PadMetrics.compact, phone)
     }
@@ -227,7 +203,8 @@ final class PlayMappersTests: XCTestCase {
             stickThumb: DishSize.padStickThumbRegular,
             face: DishSize.padFaceRegular,
             dpadKey: DishSize.padDpadKeyRegular,
-            rail: DishSize.padRailRegular
+            rail: DishSize.padRailRegular,
+            trackpad: CGSize(width: DishSize.padTrackpadWidthRegular, height: DishSize.padTrackpadHeightRegular)
         )
         XCTAssertEqual(PadMetrics.regular, iPad)
         XCTAssertGreaterThan(iPad.stick, DishSize.padStick)

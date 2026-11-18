@@ -26,7 +26,7 @@ struct PadStickControl: View {
                 .offset(thumbOffset)
         }
         .frame(width: base, height: base)
-        .onFingers(Circle()) { fingers, _ in follow(leadFinger(fingers)?.location) }
+        .onFingers(Circle()) { follow(leadFinger($0.fingers)?.location) }
     }
 
     private var radius: CGFloat {
@@ -78,7 +78,7 @@ struct TriggerRail: View {
                 }
             }
             .clipShape(Capsule())
-            .onFingers(Capsule()) { fingers, size in pull(leadFinger(fingers)?.location, height: size.height) }
+            .onFingers(Capsule()) { pull(leadFinger($0.fingers)?.location, height: $0.size.height) }
         }
         .frame(width: breadth)
     }
@@ -130,7 +130,7 @@ struct DirectionPad: View {
             }
         }
         .frame(width: side, height: side)
-        .onFingers(Rectangle()) { fingers, _ in follow(leadFinger(fingers)?.location) }
+        .onFingers(Rectangle()) { follow(leadFinger($0.fingers)?.location) }
     }
 
     private var side: CGFloat {

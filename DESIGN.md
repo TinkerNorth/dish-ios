@@ -139,8 +139,11 @@ Points. Every size a kit component sets is one of these names.
 | `DishSize.padStick` | 128 | A stick's base on the on-screen gamepad, on a phone and an upright iPad |
 | `DishSize.padStickThumb` | 60 | A stick's thumb, on a phone and an upright iPad |
 | `DishSize.padFace` | 52 | A face button, on a phone and an upright iPad |
-| `DishSize.padRound` | 44 | L3, R3, the pause button, the centre buttons and the play pill's height |
+| `DishSize.padRound` | 44 | L3, R3, the back button, the centre buttons and the play pill's height |
 | `DishSize.padDpadKey` | 44 | One arm of the d-pad, on a phone and an upright iPad |
+| `DishSize.padTrackpadWidth` | 200 | The gamepad's touchpad when the emulated pad carries one, on a phone and an upright iPad |
+| `DishSize.padTrackpadHeight` | 100 | Its height, half its width as a DualShock's and a DualSense's are |
+| `DishSize.trackpadTapSlop` | 12 | How far a finger may drift on the gamepad's touchpad and still tap it |
 | `DishSize.padCorner` | 12 | A d-pad arm's corner |
 | `DishSize.dpadDiagonal` | 0.3 | The minor axis's share of the major one before the d-pad lights a diagonal, the reducer's `dpadDiagonalThreshold` |
 | `DishSize.padRail` | 44 | A trigger rail's width, on a phone and an upright iPad |
@@ -164,6 +167,8 @@ Points. Every size a kit component sets is one of these names.
 | `DishSize.padFaceRegular` | 76 | A face button on an iPad on its side |
 | `DishSize.padDpadKeyRegular` | 64 | One arm of the d-pad on an iPad on its side |
 | `DishSize.padRailRegular` | 64 | A trigger rail's width on an iPad on its side |
+| `DishSize.padTrackpadWidthRegular` | 300 | The gamepad's touchpad on an iPad on its side |
+| `DishSize.padTrackpadHeightRegular` | 150 | Its height there |
 | `DishSize.padUprightHeight` | 440 | The band along the bottom the gamepad stands in when an iPad is held upright |
 | `DishSize.setupColumn` | 600 | The readable column the setup cover stands in on a regular width (an iPad) |
 
@@ -227,6 +232,7 @@ over content that carries its own colour, are used nowhere under
 | `DishMotion.pressIn` | ease out, 0.1 s | The wash and the shrink come in this time |
 | `DishMotion.pressOut` | ease out, 0.25 s | They go in this time once the finger lifts, long enough for a tap to show |
 | `DishMotion.pressScale` | 0.97 | How much a control that stands on its own shrinks while pressed |
+| `DishMotion.trackpadTapWindow` | 0.2 s | A finger that lifts off the gamepad's touchpad within this, having stayed put, tapped it: a click |
 | `DishOpacity.disabled` | 0.38 | A disabled control's content, Material's 38% |
 
 | Control | Style |

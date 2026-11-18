@@ -57,7 +57,7 @@ private enum RowItems {
     static let mouse = RowActionItem(
         action: ControllerAction.openSurface(slotId: "pad", screen: .mouse),
         title: "Open mouse",
-        symbol: "cursorarrow",
+        symbol: "computermouse",
         destructive: false
     )
     static let unbind = RowActionItem(
@@ -116,6 +116,25 @@ final class ControllersMappersTests: XCTestCase {
     func testTheRowsStripOffersWhatItsMenuDoesButUnbind() {
         let onScreen = controllerRow(ControllerFixture.pad(name: "", link: .onScreen, battery: nil))
         XCTAssertEqual(onScreen.strip, [.item(RowItems.openGamepad)])
+        let onScreenWithMouse = ControllerFact(
+            id: "on-screen",
+            name: "",
+            link: .onScreen,
+            batteryPercent: nil,
+            destination: DestinationFact(id: "lr", name: "Living Room PC", health: .online),
+            surfaces: [.mouse]
+        )
+        let openMouse = RowActionItem(
+            action: ControllerAction.openSurface(slotId: "on-screen", screen: .mouse),
+            title: "Open mouse",
+            symbol: "computermouse",
+            destructive: false
+        )
+        XCTAssertEqual(
+            controllerRow(onScreenWithMouse).strip,
+            [.item(RowItems.openGamepad), .item(openMouse)],
+            "its touchpad is its gamepad's"
+        )
         let lent = ControllerFact(
             id: "pad",
             name: "Xbox Wireless Controller",

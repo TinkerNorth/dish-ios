@@ -14,50 +14,6 @@ struct PlayPillState: Equatable {
     let detailColor: Color
 }
 
-/// A play screen the pause menu moves to.
-struct PauseScreenItem: Equatable, Identifiable {
-    let screen: PlayScreen
-    let title: String
-    let symbol: String
-
-    var id: PlayScreen {
-        screen
-    }
-}
-
-/// One switch of the pause menu: on or off, and when it cannot be on, why.
-struct PauseToggleState: Equatable {
-    let title: String
-    let symbol: String
-    let isOn: Bool
-    let enabled: Bool
-    /// Nil while the switch can be flipped.
-    let reason: String?
-}
-
-/// The gamepad's switches: Motion, Rumble and Emulate as.
-struct PauseSwitchesState: Equatable {
-    let motion: PauseToggleState
-    let rumble: PauseToggleState
-    let emulateTitle: String
-    let emulateSymbol: String
-    let emulateAs: EmulatedPad
-    let emulateOptions: [EmulateOption]
-}
-
-/// C3, the pause menu: Resume, the other screens, the gamepad's switches,
-/// and Stop gamepad, the one way out.
-struct PauseMenuState: Equatable {
-    let title: String
-    let resume: String
-    let screens: [PauseScreenItem]
-    /// Nil on the touchpad and the mouse, which have none.
-    let switches: PauseSwitchesState?
-    let stop: String
-    /// TipKit's hint on the pause button: Stop gamepad is the way out.
-    let hint: HintState
-}
-
 /// What a face button shows: a letter, or a PlayStation glyph.
 enum FaceGlyph: Equatable {
     case letter(String)
@@ -86,8 +42,10 @@ struct GamepadCoverState: Equatable {
     let rightThumb: String
 }
 
-/// C4: Left, the Scroll strip, Right, and the move pad's hint.
+/// C4: its glyph and eyebrow, Left, the Scroll strip, Right, and the move
+/// pad's hint.
 struct MouseCoverState: Equatable {
+    let symbol: String
     let eyebrow: String
     let left: String
     let scroll: String
@@ -95,21 +53,24 @@ struct MouseCoverState: Equatable {
     let hint: String
 }
 
-/// The touchpad: a plain surface and its two click zones.
+/// The touchpad: its glyph and eyebrow, a plain surface and its two click
+/// zones.
 struct TouchpadCoverState: Equatable {
+    let symbol: String
     let eyebrow: String
     let click: String
     let hint: String
 }
 
 /// The gamepad's measures: a stick's base and thumb, a face button, a d-pad
-/// arm and a trigger rail.
+/// arm, a trigger rail and the touchpad.
 struct PadMetrics: Equatable {
     let stick: CGFloat
     let stickThumb: CGFloat
     let face: CGFloat
     let dpadKey: CGFloat
     let rail: CGFloat
+    let trackpad: CGSize
 
     /// The touchpad's two click zones: half a stick tall.
     var clickZone: CGFloat {
@@ -122,7 +83,8 @@ struct PadMetrics: Equatable {
         stickThumb: DishSize.padStickThumb,
         face: DishSize.padFace,
         dpadKey: DishSize.padDpadKey,
-        rail: DishSize.padRail
+        rail: DishSize.padRail,
+        trackpad: CGSize(width: DishSize.padTrackpadWidth, height: DishSize.padTrackpadHeight)
     )
 
     /// An iPad's on its side, which has the room both ways.
@@ -131,7 +93,8 @@ struct PadMetrics: Equatable {
         stickThumb: DishSize.padStickThumbRegular,
         face: DishSize.padFaceRegular,
         dpadKey: DishSize.padDpadKeyRegular,
-        rail: DishSize.padRailRegular
+        rail: DishSize.padRailRegular,
+        trackpad: CGSize(width: DishSize.padTrackpadWidthRegular, height: DishSize.padTrackpadHeightRegular)
     )
 }
 
@@ -167,7 +130,10 @@ struct PlayCoverState: Equatable {
     let screen: PlayScreen
     /// Nil while no session is up.
     let pill: PlayPillState?
-    let pause: PauseMenuState
+    /// The way out, named for VoiceOver.
+    let back: String
+    /// The gamepad carries the emulated pad's touchpad.
+    let trackpad: Bool
     let gamepad: GamepadCoverState
     let mouse: MouseCoverState
     let touchpad: TouchpadCoverState
@@ -175,14 +141,11 @@ struct PlayCoverState: Equatable {
     let pad: PadLayout
 }
 
-/// The SF Symbols the pause menu and the gamepad's centre draw.
+/// The SF Symbols the play screens, their rows and the gamepad's centre draw.
 enum PlaySymbol {
-    static let pause = "pause.fill"
-    static let resume = "play.fill"
-    static let motion = "gyroscope"
-    static let rumble = "iphone.radiowaves.left.and.right"
     static let emulate = "chevron.up.chevron.down"
-    static let stop = "stop.fill"
+    static let touchpad = "rectangle.and.hand.point.up.left"
+    static let mouse = "computermouse"
     static let view = "rectangle.on.rectangle"
     static let guide = "gamecontroller"
     static let menu = "line.3.horizontal"
@@ -206,16 +169,23 @@ func playCoverState(
     return PlayCoverState(
         screen: screen,
         pill: playPill(session, destination: play?.destination, words: words),
-        pause: pauseMenuState(play: play, screen: screen, words: words),
+        back: words.back,
+        trackpad: emulateAs.hasTouchpad,
         gamepad: gamepadCoverState(emulateAs),
         mouse: MouseCoverState(
+            symbol: PlaySymbol.mouse,
             eyebrow: words.mouse,
             left: words.mouseLeft,
             scroll: words.scroll,
             right: words.mouseRight,
             hint: words.mouseHint
         ),
-        touchpad: TouchpadCoverState(eyebrow: words.carriesTouchpad, click: words.click, hint: words.touchpadHint),
+        touchpad: TouchpadCoverState(
+            symbol: PlaySymbol.touchpad,
+            eyebrow: words.carriesTouchpad,
+            click: words.click,
+            hint: words.touchpadHint
+        ),
         pad: padLayout(window)
     )
 }
@@ -267,26 +237,6 @@ private func destinationPill(_ destination: DestinationFact?, words: L10n) -> Pl
     }
 }
 
-func pauseMenuState(play: PlayFacts?, screen: PlayScreen, words: L10n = .app) -> PauseMenuState {
-    PauseMenuState(
-        title: words.pause,
-        resume: words.resume,
-        screens: pauseScreens(play: play, screen: screen, words: words),
-        switches: pauseSwitches(play: play, screen: screen, words: words),
-        stop: words.stopGamepad,
-        hint: hintState(.stopGamepad, words: words)
-    )
-}
-
-/// The other screens; a pad the phone lends them to has a gamepad of its own.
-private func pauseScreens(play: PlayFacts?, screen: PlayScreen, words: L10n) -> [PauseScreenItem] {
-    let offered: [PlayScreen] = switch play?.target {
-    case .pad: [.touchpad, .mouse]
-    case .onScreen, nil: PlayScreen.allCases
-    }
-    return offered.filter { $0 != screen }.map { pauseScreenItem($0, words: words) }
-}
-
 func playScreenTitle(_ screen: PlayScreen, words: L10n = .app) -> String {
     switch screen {
     case .gamepad: words.gamepad
@@ -298,47 +248,8 @@ func playScreenTitle(_ screen: PlayScreen, words: L10n = .app) -> String {
 func playScreenSymbol(_ screen: PlayScreen) -> String {
     switch screen {
     case .gamepad: "gamecontroller"
-    case .touchpad: "rectangle.and.hand.point.up.left"
-    case .mouse: "cursorarrow"
-    }
-}
-
-private func pauseScreenItem(_ screen: PlayScreen, words: L10n) -> PauseScreenItem {
-    PauseScreenItem(screen: screen, title: playScreenTitle(screen, words: words), symbol: playScreenSymbol(screen))
-}
-
-/// The gamepad alone carries Motion, Rumble and Emulate as.
-private func pauseSwitches(play: PlayFacts?, screen: PlayScreen, words: L10n) -> PauseSwitchesState? {
-    guard screen == .gamepad, let play else { return nil }
-    return PauseSwitchesState(
-        motion: motionToggle(play, words: words),
-        rumble: PauseToggleState(title: words.carriesRumble, symbol: PlaySymbol.rumble, isOn: play.rumble, enabled: true, reason: nil),
-        emulateTitle: words.setupEmulateAs,
-        emulateSymbol: PlaySymbol.emulate,
-        emulateAs: play.emulateAs,
-        emulateOptions: EmulatedPad.allCases.map { EmulateOption(pad: $0, name: emulatedPadName($0, words: words)) }
-    )
-}
-
-/// Motion is disabled with its reason while the emulated pad or the phone
-/// has none, and reads off then whatever the switch holds.
-private func motionToggle(_ play: PlayFacts, words: L10n) -> PauseToggleState {
-    let reason = motionReason(play.motionAvailability, words: words)
-    let available = reason == nil
-    return PauseToggleState(
-        title: words.setupMotion,
-        symbol: PlaySymbol.motion,
-        isOn: available && play.motion,
-        enabled: available,
-        reason: reason
-    )
-}
-
-func motionReason(_ availability: PlayMotion, words: L10n = .app) -> String? {
-    switch availability {
-    case .available: nil
-    case .padHasNone: words.motionNeedsDualSense
-    case .phoneHasNone: words.motionNeedsSensors
+    case .touchpad: PlaySymbol.touchpad
+    case .mouse: PlaySymbol.mouse
     }
 }
 

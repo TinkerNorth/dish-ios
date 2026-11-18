@@ -9,7 +9,7 @@ import SwiftUI
 /// controller, on its side on an iPhone (the scene turns the window) and
 /// the way an iPad is held, dark, with the status bar and the system's
 /// overlays hidden and its edge gestures held back so a swipe never leaves
-/// a game. The way out is the pause menu.
+/// a game. The way out is the back button.
 struct PlayCover: View {
     let screen: PlayScreen
 
@@ -32,15 +32,12 @@ struct PlayCover: View {
         PlayActions(
             pad: { model.onScreenPad($0) },
             touch: { model.onScreenTouch($0) },
-            open: { navigation.send(.openPlay($0)) },
-            setRumble: { model.setPlayRumble($0) },
-            setMotion: { model.setPlayMotion($0) },
-            setEmulateAs: { model.setPlayEmulateAs($0) },
+            tap: model.tapOnScreenTouchpad,
             stop: stop
         )
     }
 
-    /// Stop gamepad closes the cover and takes the controller off the list.
+    /// The back button closes the cover and keeps the controller listed.
     private func stop() {
         navigation.send(.closePlay)
         model.stopOnScreenGamepad()
@@ -74,7 +71,7 @@ struct PlayCoverBody: View {
     }
 }
 
-#Preview("Pause menu", traits: .landscapeLeft) {
+#Preview("Gamepad with the touchpad", traits: .landscapeLeft) {
     let facts = FactsPreview.playing(.gamepad, emulateAs: .dualSense)
     PlayCoverBody(state: playCoverState(facts: facts, screen: .gamepad, window: PreviewWindow.phoneOnItsSide), actions: .preview)
         .environment(\.colorScheme, .dark)

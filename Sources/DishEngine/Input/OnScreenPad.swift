@@ -8,6 +8,10 @@ import Foundation
 /// this id, as it does a pad iOS sees.
 package let onScreenSlotId = "on-screen"
 
+/// How many ticks of the loop the gamepad's touchpad stays clicked after a
+/// tap on it: two, a hundred milliseconds.
+package let touchpadClickPulseTicks = 2
+
 /// Whether the emulated pad's triggers are analog: a Switch Pro's are not,
 /// so a rail is a full press there.
 package func hasAnalogTriggers(_ pad: EmulatedPad) -> Bool {
@@ -44,6 +48,8 @@ package final class OnScreenPad {
     private var running = false
     /// Ticks left to heal the release once the screen closed.
     private var drainTicks = 0
+    /// Ticks left before a tapped touchpad lets go of its click.
+    private var clickTicks = 0
     private var side = LandscapeSide.topLeft
     package private(set) var motionRunning = false
 
@@ -82,6 +88,7 @@ package final class OnScreenPad {
         running = false
         motion(false)
         releaseEverything()
+        clickTicks = 0
         drainTicks = ResendPacer.edgeBurstResends
     }
 
@@ -96,6 +103,13 @@ package final class OnScreenPad {
         surface = step.state
         if resentTouch == nil { resentTouch = .idle }
         touchFeed.publishTouchpad(step.sample)
+    }
+
+    /// A tap on the gamepad's touchpad: its click, pressed now and let go
+    /// by the loop `touchpadClickPulseTicks` ticks on.
+    package func tapTouchpad() {
+        touch(.leftButton(held: true))
+        clickTicks = touchpadClickPulseTicks
     }
 
     package func useAnalogTriggers(_ analog: Bool) {
@@ -121,6 +135,7 @@ package final class OnScreenPad {
 
     private func tick() {
         let nowNs = now()
+        endClickPulse()
         resendPad(nowNs: nowNs)
         resendTouch(nowNs: nowNs)
         guard !running else { return }
@@ -129,6 +144,13 @@ package final class OnScreenPad {
         ticker.stop()
         resentReport = nil
         resentTouch = nil
+    }
+
+    /// The tapped touchpad lets go of its click when its ticks run out.
+    private func endClickPulse() {
+        guard clickTicks > 0 else { return }
+        clickTicks -= 1
+        if clickTicks == 0 { touch(.leftButton(held: false)) }
     }
 
     private func resendPad(nowNs: UInt64) {

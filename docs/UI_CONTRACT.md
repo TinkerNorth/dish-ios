@@ -160,8 +160,8 @@ is the live satellite carrying the most pads (`AppModel+Session.swift`).
 ### The covers
 
 All three are `fullScreenCover(item: navigation.cover)`, one presentation per
-kind (`CoverIdentity`), so the pause menu moving between play screens keeps
-its cover up; `ShellCover` switches on
+kind (`CoverIdentity`), so a play screen replacing another (an App Intent's,
+say) keeps its cover up; `ShellCover` switches on
 the `Cover` case and `NavigationCoverageTests` requires a
 `<Name>Cover.swift` for each.
 
@@ -174,8 +174,8 @@ the `Cover` case and `NavigationCoverageTests` requires a
   replacing another ends it. It rises and falls without the cover's own
   slide (`playCoverMoves(from:to:)`, which the store applies in a
   transaction with animations disabled), so the window's turn to landscape
-  and back is the one motion; the pause menu moving between screens keeps
-  the cover up. On an iPhone the scene locks the window to
+  and back is the one motion; a play screen replacing another keeps the
+  cover up. On an iPhone the scene locks the window to
   landscape while it is up (`screenOrientation(for:idiom:)`, the
   `OrientationLock` app delegate) and to portrait otherwise; an iPad's
   window follows the device ("On an iPad"). It is dark, hides the status bar and the
@@ -187,13 +187,14 @@ the `Cover` case and `NavigationCoverageTests` requires a
   finger to move on a device and lost a second finger's lift), so several
   fingers hold several controls and a button stays held until its last
   finger lifts; the touchpad's two slots come from the same fingers
-  (`slotFingers`). The pause menu is a native
-  `Menu`: Resume, the other two screens (the touchpad and the mouse alone
-  when the screen serves a pad, whose gamepad is its own), on the gamepad
-  Motion (disabled with its reason), Rumble and Emulate as, and the
-  destructive Stop gamepad, which TipKit's urgent hint on the pause button
-  names until it is used; Stop gamepad closes the screen and keeps the
-  on-screen controller's binding. A screen serves the slot the phone was
+  (`slotFingers`). The way out of every screen is the back button beside
+  the PC pill (`PlayBackButton`, C3), which closes the screen and keeps the
+  on-screen controller's binding; the gamepad's switches live on the
+  controller's page, and the on-screen controller's other screens open
+  from its row and its page (Open mouse once the host grants it; its
+  touchpad is on the gamepad, as a DualShock's and a DualSense's are, with
+  a tap for its click). The mouse and the touchpad wear their glyphs
+  beside their names. A screen serves the slot the phone was
   aimed at before it opened (`aimPlay(at:)`, from a pad's Open touchpad or
   Open mouse): its touches go through that pad's slot, whose descriptor
   asks for the screen while it is open, and the pill reads "Connection
@@ -497,7 +498,6 @@ imports TipKit.
 |---|---|---|---|
 | `supportDish` | The heart on the Controllers toolbar | Once a controller is listed | Support Dish pushed |
 | `addController` | Add a controller | Always | Add a controller opened, or a walk that bound a controller |
-| `stopGamepad` | The pause button | On play, even on a day another hint showed (urgent) | Stop gamepad |
 | `dim` | The session accessory's Dim | While a session streams | The dim risen |
 
 The scene turns TipKit on (`TipKitTips.configure`, at most one hint a day;
@@ -588,7 +588,8 @@ question, asked by the PC's page and a Connections row), `HintTip` with
 page with a companion beside or under it), and the play screens' controls:
 `FaceButton`, `RoundPadButton`, `ShoulderButton`, `HoldPanel`,
 `PadStickControl`, `TriggerRail`, `DirectionPad`, `MovePad`, `ScrollStrip`,
-`TwoFingerSurface` and `PlayPill`, each reading its fingers from
+`TwoFingerSurface`, `Trackpad` (the gamepad's own touchpad: two slots and a
+tap, `isTap`, for its click) and `PlayPill`, each reading its fingers from
 `onFingers(_:_:)` (`Fingers.swift`, the kit's touch surface: UIKit's own touch
 delivery in the control's shape, a ledger of the fingers in landing order and
 the pure rules over it, `leadFinger`, `holding`, `scrollStep` and

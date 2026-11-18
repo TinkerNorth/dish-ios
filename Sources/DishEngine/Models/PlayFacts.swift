@@ -36,6 +36,13 @@ package func lentScreens(padHasTouchpad: Bool, sessionUp: Bool, typeOffersDs4: B
     return phoneSourced ? offered.filter(\.open).map(\.screen) : []
 }
 
+/// The screens the on-screen controller opens besides its gamepad: the
+/// mouse when the host grants it on a session that is up. Its touchpad is
+/// on the gamepad itself, as a DualShock's or a DualSense's is.
+package func onScreenSurfaces(sessionUp: Bool, hostMouseControl: Bool) -> [PlayScreen] {
+    sessionUp && hostMouseControl ? [.mouse] : []
+}
+
 /// The play screen on display, the slot it serves, its PC, and the
 /// on-screen controller's switches.
 package struct PlayFacts: Equatable {

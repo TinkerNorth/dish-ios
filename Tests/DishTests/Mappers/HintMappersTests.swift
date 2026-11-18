@@ -21,8 +21,7 @@ final class HintMappersTests: XCTestCase {
             id: "dish.hint.support-dish",
             title: "Support Dish",
             message: "Dish is free and open source. Every feature stays free, tip or not.",
-            symbol: "heart.fill",
-            urgent: false
+            symbol: "heart.fill"
         ))
     }
 
@@ -32,8 +31,7 @@ final class HintMappersTests: XCTestCase {
             id: "dish.hint.add-a-controller",
             title: "Bring the controller you own",
             message: "Apps can’t pair Bluetooth devices, so Dish leaves that to iOS. Pair it in Settings › Bluetooth first, or plug it in.",
-            symbol: "gamecontroller",
-            urgent: false
+            symbol: "gamecontroller"
         ))
     }
 
@@ -50,36 +48,19 @@ final class HintMappersTests: XCTestCase {
         XCTAssertEqual(lightning.title, hintState(.addController).title)
     }
 
-    /// Play hides every way out but the pause menu, so its hint shows even
-    /// on a day another hint has.
-    func testThePauseButtonsHintIsTheWayOutAndShowsOnABusyDay() {
-        XCTAssertEqual(hintState(.stopGamepad), HintState(
-            id: "dish.hint.stop-gamepad",
-            title: "Leave through the pause menu",
-            message: "Stop gamepad in this menu takes you back to Dish.",
-            symbol: "stop.fill",
-            urgent: true
-        ))
-    }
-
     func testTheDimsHintSaysStreamingGoesOn() {
         XCTAssertEqual(hintState(.dim), HintState(
             id: "dish.hint.dim",
             title: "Dim the screen while you play",
             message: "Streaming continues while dimmed. "
                 + "Tap the dimmed screen to wake it, and set the delay in Settings › Dim screen after.",
-            symbol: "moon.fill",
-            urgent: false
+            symbol: "moon.fill"
         ))
     }
 
     func testEveryHintHasANameOfItsOwn() {
         let names = Set(Hint.allCases.map { hintState($0).id })
         XCTAssertEqual(names.count, Hint.allCases.count)
-    }
-
-    func testThePauseMenuCarriesTheWayOutsHint() {
-        XCTAssertEqual(pauseMenuState(play: nil, screen: .mouse).hint, hintState(.stopGamepad))
     }
 
     // MARK: - What puts a hint to rest
@@ -101,11 +82,11 @@ final class HintMappersTests: XCTestCase {
         XCTAssertNil(learned(.openSetup(.guide)))
     }
 
-    func testStoppingTheGamepadPutsTheWayOutsHintToRest() {
+    /// The back button is its own explanation, so leaving play teaches nothing.
+    func testLeavingPlayPutsNoHintToRest() {
         let playing = reduceNavigation(NavigationState(), .openPlay(.gamepad)).state
-        XCTAssertEqual(learned(.closePlay, from: playing), .stopGamepad)
-        XCTAssertNil(learned(.closePlay), "nothing was playing")
-        XCTAssertNil(learned(.coverDismissed, from: playing), "the system closed it, not the person")
+        XCTAssertNil(learned(.closePlay, from: playing))
+        XCTAssertNil(learned(.coverDismissed, from: playing))
     }
 
     func testDimmingPutsItsHintToRestOnlyWhenTheDimRose() {

@@ -23,15 +23,6 @@ extension L10n {
         )
     }
 
-    /// The pause button's: the way out of play.
-    var leaveThroughThePauseMenu: String {
-        catalog.text("Leave through the pause menu")
-    }
-
-    var stopGamepadTakesYouBack: String {
-        catalog.text("Stop gamepad in this menu takes you back to Dish.")
-    }
-
     /// The session accessory's Dim.
     var dimTheScreenWhileYouPlay: String {
         catalog.text("Dim the screen while you play")
