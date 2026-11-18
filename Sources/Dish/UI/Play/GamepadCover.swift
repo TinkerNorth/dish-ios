@@ -96,21 +96,27 @@ private struct FaceDiamond: View {
     var body: some View {
         Grid(horizontalSpacing: 0, verticalSpacing: -DishSpace.s4) {
             GridRow {
-                Color.clear.gridCellUnsizedAxes([.horizontal, .vertical])
+                corner
                 face(state.top)
-                Color.clear.gridCellUnsizedAxes([.horizontal, .vertical])
+                corner
             }
             GridRow {
                 face(state.left)
-                Color.clear.frame(width: size, height: size)
+                Color.clear.frame(width: size, height: size).allowsHitTesting(false)
                 face(state.right)
             }
             GridRow {
-                Color.clear.gridCellUnsizedAxes([.horizontal, .vertical])
+                corner
                 face(state.bottom)
-                Color.clear.gridCellUnsizedAxes([.horizontal, .vertical])
+                corner
             }
         }
+    }
+
+    /// A cell that holds its place and takes no finger: the rows overlap by
+    /// the diamond's tightening, and a face keeps its whole circle.
+    private var corner: some View {
+        Color.clear.gridCellUnsizedAxes([.horizontal, .vertical]).allowsHitTesting(false)
     }
 
     private func face(_ button: FaceButtonState) -> some View {

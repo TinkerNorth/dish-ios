@@ -12,7 +12,7 @@ struct PadStickControl: View {
     let thumb: CGFloat
     let onMove: (CGVector?) -> Void
 
-    @GestureState private var touch: CGPoint?
+    @State private var touch: CGPoint?
 
     var body: some View {
         ZStack {
@@ -26,13 +26,18 @@ struct PadStickControl: View {
                 .offset(thumbOffset)
         }
         .frame(width: base, height: base)
-        .contentShape(Circle())
-        .gesture(DragGesture(minimumDistance: 0).updating($touch) { value, state, _ in state = value.location })
-        .onChange(of: touch) { onMove(offset(of: $1)) }
+        .onFingers(Circle()) { fingers, _ in follow(leadFinger(fingers)?.location) }
     }
 
     private var radius: CGFloat {
         base / 2
+    }
+
+    /// The lead finger's place, once per change.
+    private func follow(_ location: CGPoint?) {
+        guard location != touch else { return }
+        touch = location
+        onMove(offset(of: location))
     }
 
     private func offset(of location: CGPoint?) -> CGVector? {
@@ -57,7 +62,7 @@ struct TriggerRail: View {
     let breadth: CGFloat
     let onPull: (Double?) -> Void
 
-    @GestureState private var touch: CGPoint?
+    @State private var touch: CGPoint?
 
     var body: some View {
         GeometryReader { geometry in
@@ -73,15 +78,20 @@ struct TriggerRail: View {
                 }
             }
             .clipShape(Capsule())
-            .contentShape(Capsule())
-            .gesture(DragGesture(minimumDistance: 0).updating($touch) { value, state, _ in state = value.location })
-            .onChange(of: touch) { onPull(railY($1, height: geometry.size.height)) }
+            .onFingers(Capsule()) { fingers, size in pull(leadFinger(fingers)?.location, height: size.height) }
         }
         .frame(width: breadth)
     }
 
     private func railY(_ location: CGPoint?, height: CGFloat) -> Double? {
         location.map { Double($0.y / max(height, 1)) }
+    }
+
+    /// The lead finger's place down the rail, once per change.
+    private func pull(_ location: CGPoint?, height: CGFloat) {
+        guard location != touch else { return }
+        touch = location
+        onPull(railY(location, height: height))
     }
 
     /// How much of the rail reads pulled: up to the finger, clamped.
@@ -99,7 +109,7 @@ struct DirectionPad: View {
     let key: CGFloat
     let onMove: (CGVector?) -> Void
 
-    @GestureState private var touch: CGPoint?
+    @State private var touch: CGPoint?
 
     var body: some View {
         Grid(horizontalSpacing: 0, verticalSpacing: 0) {
@@ -120,13 +130,18 @@ struct DirectionPad: View {
             }
         }
         .frame(width: side, height: side)
-        .contentShape(Rectangle())
-        .gesture(DragGesture(minimumDistance: 0).updating($touch) { value, state, _ in state = value.location })
-        .onChange(of: touch) { onMove(offset(of: $1)) }
+        .onFingers(Rectangle()) { fingers, _ in follow(leadFinger(fingers)?.location) }
     }
 
     private var side: CGFloat {
         key * 3
+    }
+
+    /// The lead finger's place, once per change.
+    private func follow(_ location: CGPoint?) {
+        guard location != touch else { return }
+        touch = location
+        onMove(offset(of: location))
     }
 
     private func arm(_ symbol: String, lit: Bool) -> some View {

@@ -116,6 +116,19 @@ lockstep across the repos share a version number.
 
 ### Fixed
 
+- **A play control reads the finger the moment it lands.** The gamepad's
+  faces, shoulders, L3, R3, View, Guide and Menu, its sticks, rails and
+  d-pad, the mouse's buttons, strip and pad and the touchpad's surface and
+  click zones take their touches from a view of UIKit's own over each
+  control (`Fingers.swift`), not from a `DragGesture`, which on a device
+  waited for the finger to move before a button answered and, with another
+  finger on the stick, kept a tapped A pressed until the next touch on it
+  lifted. A button stays held until its last
+  finger lifts, a stick or a rail follows the first finger that landed and
+  the next once it lifts, the touchpad's two slots come from the same
+  fingers, the scroll strip no longer sends a sample for a finger that only
+  landed, and the face diamond's place-holding cells no longer take a strip
+  off the bottom of Y, X and B.
 - **The scene builds its objects once.** SwiftUI calls the scene's
   initializer again on its own (at launch and on a scene phase change) and
   keeps only the first build's state; each extra call used to build a whole

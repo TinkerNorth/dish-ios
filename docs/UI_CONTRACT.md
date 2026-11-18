@@ -181,9 +181,13 @@ the `Cover` case and `NavigationCoverageTests` requires a
   window follows the device ("On an iPad"). It is dark, hides the status bar and the
   system's overlays and defers the system's edge gestures. The gamepad, the
   touchpad and the mouse are drawn from `playCoverState`; each control is a
-  kit component tracking its own finger (`PadButtons`, `PadSticks`,
-  `TouchSurfaces`), so several fingers hold several controls; the touchpad's
-  two fingers come from `SpatialEventGesture`. The pause menu is a native
+  kit component over the kit's finger surface (`Fingers.swift`: a view of
+  UIKit's own in the control's shape, which reports a finger the moment it
+  lands and every finger at once, where a SwiftUI gesture waited for the
+  finger to move on a device and lost a second finger's lift), so several
+  fingers hold several controls and a button stays held until its last
+  finger lifts; the touchpad's two slots come from the same fingers
+  (`slotFingers`). The pause menu is a native
   `Menu`: Resume, the other two screens (the touchpad and the mouse alone
   when the screen serves a pad, whose gamepad is its own), on the gamepad
   Motion (disabled with its reason), Rumble and Emulate as, and the
@@ -570,7 +574,7 @@ state. The desktops' C1 to C8, adapted:
 | K6 | **Every state a component can be in is reachable from a mapper test.** A state no test builds is not shipped. |
 | K7 | **Tokens only.** A kit component sets no raw spacing, padding, corner, frame or glyph size: each is a `DishSize` or `DishSpace` token (`ThemeTokenTests.testAKitComponentSetsNoRawSize`, which rejects a digit after `spacing`, `cornerRadius`, `width`, `height`, `size`, `minLength`, `minWidth`, `minHeight`, `lineWidth` or `.padding(`). |
 | K8 | **A glyph is never recoloured by state inside the component.** `RowGlyph` takes its tint and fill as values from the mapper's state; state colour lives in the dot and the chip. |
-| K9 | **Every control answers the finger.** A control that stands on its own takes a kit button style (`.tile`, `.capsule`, `.round`: the pressed wash, the shrink, the hover, the disabled fade of DESIGN.md's "Interaction states"), a list row that opens a page or a link, or acts, is a `RowButton` (the whole cell washes, since iOS draws no highlight of its own over a row on the surface colour; `NavigationLink` and `Link` are used nowhere), a split list's rows take `selectedRow(_:)` so the one the detail shows is tinted, and anything else takes a system style that draws its own states; `.plain` and `.borderless` are used nowhere under `Sources/Dish`, and a kit file that draws a `Button` names its style (`InteractionFeedbackTests`). |
+| K9 | **Every control answers the finger.** A control that stands on its own takes a kit button style (`.tile`, `.capsule`, `.round`: the pressed wash, the shrink, the hover, the disabled fade of DESIGN.md's "Interaction states"), a list row that opens a page or a link, or acts, is a `RowButton` (the whole cell washes, since iOS draws no highlight of its own over a row on the surface colour; `NavigationLink` and `Link` are used nowhere), a split list's rows take `selectedRow(_:)` so the one the detail shows is tinted, and anything else takes a system style that draws its own states; `.plain` and `.borderless` are used nowhere under `Sources/Dish`, a kit file that draws a `Button` names its style, and a control that tracks a finger reads it from `onFingers(_:_:)`, the kit's touch surface, so `DragGesture` and `SpatialEventGesture` are used nowhere under `Sources/Dish` (`InteractionFeedbackTests`). |
 
 Today's kit: `Chip` (BEST, FASTEST, FAST; a tone is `success` or `primary`),
 `RowGlyph` (the rounded tile at the head of a row), `SessionBar` (the
@@ -584,8 +588,12 @@ question, asked by the PC's page and a Connections row), `HintTip` with
 page with a companion beside or under it), and the play screens' controls:
 `FaceButton`, `RoundPadButton`, `ShoulderButton`, `HoldPanel`,
 `PadStickControl`, `TriggerRail`, `DirectionPad`, `MovePad`, `ScrollStrip`,
-`TwoFingerSurface` and `PlayPill`, each reporting its own finger in its own
-units (a held flag, an offset in radii, a position across the surface) for
+`TwoFingerSurface` and `PlayPill`, each reading its fingers from
+`onFingers(_:_:)` (`Fingers.swift`, the kit's touch surface: UIKit's own touch
+delivery in the control's shape, a ledger of the fingers in landing order and
+the pure rules over it, `leadFinger`, `holding`, `scrollStep` and
+`slotFingers`, tested in `FingersTests`) and reporting its own finger in its
+own units (a held flag, an offset in radii, a position across the surface) for
 the page to turn into the reducer's event. `PadStickControl`, `FaceButton`,
 `DirectionPad` and `TriggerRail` take their measures as values (a stick's
 base and thumb, a face's diameter, an arm's side, a rail's breadth), which
