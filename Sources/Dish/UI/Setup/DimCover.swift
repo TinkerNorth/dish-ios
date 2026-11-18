@@ -4,9 +4,31 @@
 import DishEngine
 import SwiftUI
 
+/// The dim over whatever is on screen: the tabs, a cover or a sheet each lay
+/// it over their own content, since a presented view sits above its
+/// presenter's layers.
+struct DimLayer: ViewModifier {
+    @Environment(NavigationStore.self) private var navigation
+
+    func body(content: Content) -> some View {
+        content.overlay {
+            if navigation.state.dimmed {
+                DimCover()
+            }
+        }
+    }
+}
+
+extension View {
+    /// The low-power dim over this presentation while it is up.
+    func dimLayer() -> some View {
+        modifier(DimLayer())
+    }
+}
+
 /// C5, the low-power dim: true black with the system's overlays hidden, so
 /// the panel draws almost nothing while a pad streams. The clock, the
-/// session card and the words; a tap anywhere wakes, and streaming goes on.
+/// session card and the words; a touch anywhere wakes, and streaming goes on.
 struct DimCover: View {
     @Environment(AppModel.self) private var model
     @Environment(NavigationStore.self) private var navigation

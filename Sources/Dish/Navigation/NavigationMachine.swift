@@ -47,10 +47,8 @@ enum SetupEntry: Hashable {
 /// A full-screen cover over the tabs.
 enum Cover: Hashable {
     case setup(SetupEntry)
-    /// A play screen, in landscape; the pause menu moves between them.
+    /// A play screen, in landscape.
     case play(PlayScreen)
-    /// The low-power dim while a pad is forwarded; a tap wakes it.
-    case dim
 }
 
 /// A sheet over the tabs or the setup cover.
@@ -65,7 +63,7 @@ enum Sheet: Hashable {
 }
 
 /// Who presents the sheet: the tabs while no cover is up, the setup cover
-/// while it is. Nobody over play or the dim.
+/// while it is. Nobody over play.
 enum SheetHost: Equatable {
     case tabs
     case setup
@@ -84,13 +82,14 @@ enum NavigationEvent: Equatable {
     case pathChanged(Tab, [Page])
     case openSetup(SetupEntry)
     case setupEnded(SetupEnding)
-    /// Open a play screen, or move to another from the pause menu.
+    /// Open a play screen, or replace one with another.
     case openPlay(PlayScreen)
-    /// The pause menu's way out.
+    /// The back button's way out.
     case closePlay
-    /// The session accessory's Dim.
+    /// The session accessory's Dim, or the low-power countdown ending: the
+    /// dim lies over whatever is on screen.
     case dim
-    /// A tap on the dimmed screen.
+    /// A touch on the dimmed screen.
     case wake
     /// The system lowered the cover (a swipe down, a scene change).
     case coverDismissed
@@ -128,6 +127,8 @@ struct NavigationState: Equatable {
     var paths: [Tab: [Page]] = [:]
     var cover: Cover?
     var sheet: Sheet?
+    /// The low-power dim, over whatever is on screen.
+    var dimmed = false
 
     func path(of tab: Tab) -> [Page] {
         paths[tab] ?? []
@@ -147,10 +148,10 @@ struct NavigationStep: Equatable {
 
 /// The shell's one navigation rule: each tab keeps its own stack, a tap on
 /// the tab on screen unwinds it, a page pushes onto it, a list's page
-/// stands alone on it, setup, play and the dim cover everything, a cover
-/// replacing another ends it, a sheet rises over the tabs or the setup
-/// cover and goes with them, and leaving setup by any road lands on
-/// Controllers.
+/// stands alone on it, setup and play cover everything, a cover replacing
+/// another ends it, a sheet rises over the tabs or the setup cover and goes
+/// with them, the dim lies over whatever is on screen, and leaving setup by
+/// any road lands on Controllers.
 func reduceNavigation(_ state: NavigationState, _ event: NavigationEvent) -> NavigationStep {
     switch event {
     case let .select(tab): selected(state, tab)
@@ -172,12 +173,12 @@ func reduceNavigation(_ state: NavigationState, _ event: NavigationEvent) -> Nav
     }
 }
 
-/// Who presents the sheet in this state; nobody over play or the dim.
+/// Who presents the sheet in this state; nobody over play.
 func sheetHost(_ state: NavigationState) -> SheetHost? {
     switch state.cover {
     case nil: .tabs
     case .setup: .setup
-    case .play, .dim: nil
+    case .play: nil
     }
 }
 
@@ -191,13 +192,14 @@ func playCoverMoves(from before: Cover?, to after: Cover?) -> Bool {
 private func isPlay(_ cover: Cover?) -> Bool {
     switch cover {
     case .play: true
-    case .setup, .dim, nil: false
+    case .setup, nil: false
     }
 }
 
-/// Whether the low-power dim could rise now: the bare tabs are on screen.
+/// Whether the low-power countdown may run: while the dim is not up. It
+/// rises over whatever is on screen, a cover or a sheet included.
 func dimAllowed(_ state: NavigationState) -> Bool {
-    state.cover == nil && state.sheet == nil
+    !state.dimmed
 }
 
 /// The sheet `host` presents: the one on screen while it is the host.
@@ -250,15 +252,15 @@ private func covered(_ state: NavigationState, _ cover: Cover) -> NavigationStep
     return NavigationStep(state: next, effects: lowered.effects)
 }
 
-/// Setup replaces whatever covered the tabs, the dim included, and the model
-/// starts its walk at the entry asked for.
+/// Setup replaces whatever covered the tabs, and the model starts its walk
+/// at the entry asked for.
 private func setupOpened(_ state: NavigationState, _ entry: SetupEntry) -> NavigationStep {
     let raised = covered(state, .setup(entry))
     return NavigationStep(state: raised.state, effects: raised.effects + ended(state.cover, by: .setup(entry)) + [.startSetup(entry)])
 }
 
 /// A play screen replaces whatever covered the tabs; from another play
-/// screen it is the pause menu moving on, under the same cover.
+/// screen it is one screen replacing another, under the same cover.
 private func playOpened(_ state: NavigationState, _ screen: PlayScreen) -> NavigationStep {
     let raised = covered(state, .play(screen))
     return NavigationStep(state: raised.state, effects: raised.effects + ended(state.cover, by: .play(screen)) + [.startPlay(screen)])
@@ -278,7 +280,7 @@ private func ended(_ cover: Cover?, by next: Cover) -> [NavigationEffect] {
     case (.setup, .setup), (.play, .play): []
     case (.setup, _): [.endSetup]
     case (.play, _): [.endPlay]
-    case (.dim, _), (nil, _): []
+    case (nil, _): []
     }
 }
 
@@ -295,33 +297,34 @@ private func setupLeft(_ state: NavigationState, _ ending: SetupEnding) -> Navig
     }
 }
 
-/// The dim rises only over the tabs: the accessory that asks for it is not
-/// on screen under a cover, a play screen included.
+/// The dim lies over whatever is on screen, a cover or a sheet included,
+/// and moves nothing under it.
 private func dimmed(_ state: NavigationState) -> NavigationStep {
-    guard state.cover == nil else { return NavigationStep(state: state, effects: []) }
-    return covered(state, .dim)
+    guard !state.dimmed else { return NavigationStep(state: state, effects: []) }
+    var next = state
+    next.dimmed = true
+    return NavigationStep(state: next, effects: [])
 }
 
 private func woken(_ state: NavigationState) -> NavigationStep {
-    guard state.cover == .dim else { return NavigationStep(state: state, effects: []) }
+    guard state.dimmed else { return NavigationStep(state: state, effects: []) }
     var next = state
-    next.cover = nil
+    next.dimmed = false
     return NavigationStep(state: next, effects: [])
 }
 
 /// A cover the system lowered ends what it showed: setup as a skip, play
-/// as a close, the dim as a wake.
+/// as a close.
 private func coverLowered(_ state: NavigationState) -> NavigationStep {
     switch state.cover {
     case .setup: setupLeft(state, .skipped)
-    case .dim: woken(state)
     case .play: playClosed(state)
     case nil: NavigationStep(state: state, effects: [])
     }
 }
 
-/// A sheet rises over the tabs or the setup cover, never over play or the
-/// dim; Pair begins the pairing in the model.
+/// A sheet rises over the tabs or the setup cover, never over play; Pair
+/// begins the pairing in the model.
 private func sheetOpened(_ state: NavigationState, _ sheet: Sheet) -> NavigationStep {
     guard sheetHost(state) != nil else { return NavigationStep(state: state, effects: []) }
     var next = state
@@ -374,21 +377,22 @@ private func pairSheetLowered(_ sheet: Sheet?) -> Sheet? {
 }
 
 /// An intent's Connect to PC: the model reaches for the PC, and while the
-/// tabs or the dim are on screen the PC's page shows alone on Connections,
-/// the dim waking and a sheet going. Under play or setup nothing moves.
+/// tabs are on screen the PC's page shows alone on Connections, the dim
+/// lifting and a sheet going. Under play or setup nothing moves.
 private func connectedTo(_ state: NavigationState, _ id: String) -> NavigationStep {
     let reach = NavigationEffect.connect(id: id)
     switch state.cover {
     case .setup, .play: return NavigationStep(state: state, effects: [reach])
-    case .dim, nil: return pcPageShown(state, id, then: reach)
+    case nil: return pcPageShown(state, id, then: reach)
     }
 }
 
-/// The PC's page alone on Connections, over whatever covered the tabs.
+/// The PC's page alone on Connections, the dim lifted and a sheet dropped.
 private func pcPageShown(_ state: NavigationState, _ id: String, then reach: NavigationEffect) -> NavigationStep {
     let lowered = sheetDropped(state)
     var next = lowered.state
     next.cover = nil
+    next.dimmed = false
     next.tab = .connections
     next.paths[.connections] = [.pcDetail(id: id)]
     return NavigationStep(state: next, effects: lowered.effects + [reach])

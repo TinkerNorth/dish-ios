@@ -17,21 +17,21 @@ final class NavigationRulesTests: XCTestCase {
     func testOnlyAPlayCoverRisingOrFallingMovesTheWindow() {
         XCTAssertTrue(playCoverMoves(from: nil, to: .play(.gamepad)))
         XCTAssertTrue(playCoverMoves(from: .play(.mouse), to: nil))
-        XCTAssertTrue(playCoverMoves(from: .dim, to: .play(.gamepad)))
-        XCTAssertFalse(playCoverMoves(from: .play(.gamepad), to: .play(.mouse)), "the pause menu moving between screens")
-        XCTAssertFalse(playCoverMoves(from: nil, to: .dim))
+        XCTAssertTrue(playCoverMoves(from: .setup(.guide), to: .play(.gamepad)))
+        XCTAssertFalse(playCoverMoves(from: .play(.gamepad), to: .play(.mouse)), "one play screen replacing another")
         XCTAssertFalse(playCoverMoves(from: nil, to: .setup(.guide)))
         XCTAssertFalse(playCoverMoves(from: .setup(.firstRun), to: nil))
     }
 
-    /// The low-power dim may rise only over the bare tabs: never under a
-    /// cover, nor over a sheet, whose pairing the dim would cancel.
-    func testTheDimMayRiseOnlyOverTheBareTabs() {
+    /// The low-power countdown may run on any screen, the play screens and
+    /// the sheets included, and rests only while the dim is up.
+    func testTheCountdownMayRunAnywhereButUnderTheDim() {
         XCTAssertTrue(dimAllowed(NavigationState()))
         XCTAssertTrue(dimAllowed(after(.select(.settings), .push(.help))))
-        XCTAssertFalse(dimAllowed(after(.openSheet(.addByAddress))))
-        XCTAssertFalse(dimAllowed(after(.openSetup(.guide))))
-        XCTAssertFalse(dimAllowed(after(.openPlay(.gamepad))))
+        XCTAssertTrue(dimAllowed(after(.openSheet(.addByAddress))))
+        XCTAssertTrue(dimAllowed(after(.openSetup(.guide))))
+        XCTAssertTrue(dimAllowed(after(.openPlay(.gamepad))))
         XCTAssertFalse(dimAllowed(after(.dim)))
+        XCTAssertTrue(dimAllowed(after(.dim, .wake)))
     }
 }

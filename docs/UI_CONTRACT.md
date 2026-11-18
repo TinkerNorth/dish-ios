@@ -35,15 +35,15 @@ environment value and send it events; a view holds no `NavigationPath` or
 | `show(Page, in: Tab)` | A tab's list opens one of its pages, alone on that tab's stack: on a phone the push from the list, on an iPad the page beside it, so a second row replaces the first rather than stacking on it. Controllers' rows and heart, and Connections' paired rows, send it. |
 | `pop` | The page on top leaves: Forget pops the PC's page before the PC goes. |
 | `pathChanged(Tab, [Page])` | A stack moved on its own (the back button, a swipe, a system pop): the state follows it. |
-| `openSheet(Sheet)` | Raise a sheet over the tabs or the setup cover; refused over play and the dim. `pair(serverId:)` also starts the pairing (effect `beginPairing(serverId:)`). |
+| `openSheet(Sheet)` | Raise a sheet over the tabs or the setup cover; refused over play. `pair(serverId:)` also starts the pairing (effect `beginPairing(serverId:)`). |
 | `closeSheet` | Lower the sheet: Cancel, the X, a swipe down. A pair sheet's pairing is cancelled with it (effect `cancelPairing(serverId:)`). |
 | `pairingChanged(serverId:)` | The model's pairing card opened on a satellite (a Pair, or a PC that asked for a PIN as it was connected to): the pair sheet shows it, in place of an address sheet. The card closed, paired or cancelled in the model: the pair sheet lowers with nothing left to cancel. |
-| `openSetup(SetupEntry)` | Raise the setup cover over whatever covered the tabs, the dim included, and start the walk (effect `startSetup(entry)`). |
+| `openSetup(SetupEntry)` | Raise the setup cover over whatever covered the tabs and start the walk (effect `startSetup(entry)`). |
 | `setupEnded(SetupEnding)` | Lower the setup cover, select Controllers and complete the welcome (effects `endSetup`, `markWelcomeComplete`). Both endings, `bound` and `skipped`, do the same. Ignored while no setup cover is up. |
-| `dim` | Raise the dim cover. Ignored while any cover is up: the accessory that asks for it is not on screen under a cover. The shell also sends it when the low-power countdown ends (`ShellFacts.lowPower.due`); `dimAllowed(_:)` says when the countdown may run at all: no cover and no sheet. |
-| `wake` | Lower the dim cover. Ignored unless the dim is up. |
-| `coverDismissed` | The system lowered the cover (a swipe down, a scene change). Setup ends as a skip, the dim as a wake. |
-| `connectTo(id:)` | Siri, Spotlight or Shortcuts' Connect to a PC (an App Intent, below): the model reaches for the PC (effect `connect(id:)`) and, while the tabs or the dim are on screen, the PC's page shows alone on Connections, the dim waking and a sheet going with its pairing. Under play or the setup walk nothing moves but the effect. |
+| `dim` | Lay the dim over whatever is on screen (`NavigationState.dimmed`): the tabs, a sheet, the setup walk or a play screen, none of which moves under it. Ignored while dimmed already. The accessory's Dim sends it, and the shell when the low-power countdown ends (`ShellFacts.lowPower.due`); `dimAllowed(_:)` says when the countdown may run: whenever the dim is not up. |
+| `wake` | Lift the dim. Ignored unless it is up. The scene's `TouchWatcher` sends it on any touch while dimmed, so a touch anywhere wakes. |
+| `coverDismissed` | The system lowered the cover (a swipe down, a scene change). Setup ends as a skip, play as a close. |
+| `connectTo(id:)` | Siri, Spotlight or Shortcuts' Connect to a PC (an App Intent, below): the model reaches for the PC (effect `connect(id:)`) and, while the tabs are on screen, the PC's page shows alone on Connections, the dim lifting and a sheet going with its pairing. Under play or the setup walk nothing moves but the effect. |
 
 The store also tells TipKit which hint the person no longer needs after
 each event (`learnedHint(_:from:to:)`, "Hints" below): Support Dish
@@ -118,7 +118,7 @@ What changes with them:
   phone's measures in a band `DishSize.padUprightHeight` tall along the
   bottom, where the hands hold the iPad (`padLayout(_:)`). The touchpad and
   the mouse fill the window either way.
-- **The sheets** are iPadOS's form sheets; the dim fills the screen.
+- **The sheets** are iPadOS's form sheets; the dim lies over whatever is on screen.
 
 ### The session accessory
 
@@ -202,23 +202,29 @@ the `Cover` case and `NavigationCoverageTests` requires a
   Open mouse): its touches go through that pad's slot, whose descriptor
   asks for the screen while it is open, and the pill reads "Connection
   lost" when that pad's PC is down (`PlayFacts.target`, `.destination`).
-  The dim is refused over play: its Dim lives on the accessory, and the
-  low-power countdown rests under any cover.
-- **Dim** (`DimCover.swift`): `DishTheme.dimBackground` (true black in either
-  appearance), `.statusBarHidden()`, `.persistentSystemOverlays(.hidden)`, the
-  words "low power" and "tap to wake" in the eyebrow style, and a tap anywhere
-  sends `.wake`. It is also an accessibility button with the same action. It
+  A play screen left alone dims like every other screen, its pill reading
+  "Low power in 5 s" first (`playPill(_:destination:lowPower:)`), and the
+  dim ends no play: what the screen holds goes on underneath.
+- **Dim** (`DimCover.swift`): not a cover but a layer (`DimLayer`,
+  `.dimLayer()`) that the tabs, each cover and each sheet lay over their
+  own content while `NavigationState.dimmed`, since a presented view sits
+  above its presenter's layers. `DishTheme.dimBackground` (true black in
+  either appearance), `.statusBarHidden()`, `.persistentSystemOverlays(.hidden)`,
+  the words "low power" and "tap to wake" in the eyebrow style, and a tap
+  anywhere sends `.wake`, as does the scene's `TouchWatcher` on any touch
+  while dimmed. It is also an accessibility button with the same action. It
   draws the clock from `ShellFacts.now` (the dim runs the clock while it is
   up) and, while a session is up, the session card: the accessory's own
   line and each bound pad's level (`dimCoverState`). It is raised by the
   accessory's Dim, and by the shell when the low-power countdown ends:
-  while a session streams and the tabs are on screen, the engine's
-  `LowPowerWatch` counts the seconds without a touch on the phone up to
-  Settings › Dim screen after (the scene's `TouchWatcher` on every window
-  reports each touch; controller input never counts), and the shell sends
-  `dim` when it is due and tells the model so. While the dim is up the
-  scene's `ScreenDimmer` holds the screen's brightness at 0.01 and gives
-  back what it found on wake and on the way to the background.
+  exactly while Dish holds the screen on (`screenHeld`: a session streaming
+  with an active binding and Keep screen on set), on whatever screen, the
+  engine's `LowPowerWatch` counts the seconds without a touch on the phone
+  up to Settings › Dim screen after (the `TouchWatcher` reports each touch;
+  controller input never counts), and the shell sends `dim` when it is due
+  and tells the model so. While the dim is up the scene's `ScreenDimmer`
+  holds the screen's brightness at 0.01 and gives back what it found on
+  wake and on the way to the background.
 
 ### The sheets
 
@@ -226,7 +232,7 @@ A sheet is `Sheet.pair(serverId:)`, `Sheet.addByAddress` or
 `Sheet.lightningAdapter`, held by the navigation state and drawn by `ShellSheet` (`Sources/Dish/UI/Sheets/`). Two
 hosts present it: the tabs, through `navigation.tabsSheet`, while no cover is
 up, and the setup cover, through `navigation.setupSheet`, while it is
-(`presentedSheet(_:by:)` says which; neither presents over play or the dim).
+(`presentedSheet(_:by:)` says which; neither presents over play).
 A swipe down sets the binding to nil, which is `closeSheet`. The views hold
 only what is theirs: the pair sheet the digits typed so far, the address
 sheet its draft and whether the model refused it.
@@ -283,8 +289,8 @@ sheet its draft and whether the model refused it.
 `appVersion` and `thirdPartyNotice` (the values only UIKit and the bundles can
 give, so no view reads UIKit or a bundle), sets `.preferredColorScheme` from
 `shellFacts.preferences.appearance` through `colorScheme(for:)`, and sets
-`UIApplication.shared.isIdleTimerDisabled` from `idleTimerDisabled(session:preferences:)` (held only while a session is up with a pad bound and Keep screen on is set)
-(a session is up and Keep screen on is set) in an `onChange`. It reads the
+`UIApplication.shared.isIdleTimerDisabled` from `idleTimerDisabled(session:preferences:)`, the engine's `screenHeld`: held only while a session streams with an active binding (a pad iOS lists, or the on-screen controller while its screen is up) and Keep screen on is set, so a PC that stopped answering, a bare connection or a binding whose pad is away lets the phone lock like any other app,
+in an `onChange`. It reads the
 device's idiom once, gives the `OrientationLock` its first answer for that
 device before UIKit asks (`follow(_:)`), turns the window as the cover
 changes, and puts `WindowReader` at the window's root, the one reader of the
@@ -436,7 +442,7 @@ state, health, phase and failure has words of its own.
 | unbinds a pad | the binding goes at once | the row and the page |
 | pairs | `PairingAttempt` (awaiting, submitting, rejected, expired) | the pair sheet |
 | adds a PC by address | `AddedByAddressFact` (`reaching`, `failure`); the found row reads `connecting` | the sheet's spinner and error line; the found row |
-| streams with a pad bound and leaves the phone alone | `LowPowerFact` (`lowPowerWanted`: a streaming session with a pad bound, never one being brought back, stopped responding, failed or carrying no pad), while the shell could raise the dim | "Low power in 5 s" on the accessory, then the dim cover |
+| streams with an active binding and leaves the phone alone | `LowPowerFact`, counted exactly while the screen is held (`screenHeld`: a streaming session with an active binding and Keep screen on, never one being brought back, stopped responding, failed, carrying no pad or a pad that is away) and the dim is not up | "Low power in 5 s" on the accessory or the play pill, then the dim |
 | scans or pulls | `ConnectionsFacts.scanning` | "Searching" in FOUND ON; the pull's spinner until the scan is adopted |
 | tips or restores | `SupportFacts.moment` | Support Dish |
 | works a Moonlight host | `MoonlightFacts` (pairings in flight, each session's phase, the last word) | the hosts page |

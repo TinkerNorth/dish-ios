@@ -29,6 +29,7 @@ struct SetupCover: View {
                     .toolbar { toolbar(cover.chrome) }
             }
             .sheet(item: navigation.setupSheet) { ShellSheet(sheet: $0) }
+            .dimLayer()
         }
     }
 

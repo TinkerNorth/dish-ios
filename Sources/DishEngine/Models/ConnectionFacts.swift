@@ -111,14 +111,19 @@ package struct SessionFact: Equatable {
     package let id: String
     package let pcName: String
     package let pads: Int
+    /// The bound pads that are present: a pad iOS lists, or the on-screen
+    /// controller while its screen is up. These hold the screen on.
+    package let active: Int
     /// Nil until the first round trip is measured, and while reconnecting.
     package let latencyMs: Int?
     package let phase: SessionPhase
 
-    package init(id: String = "", pcName: String, pads: Int, latencyMs: Int?, phase: SessionPhase) {
+    /// `active` is every bound pad unless said otherwise.
+    package init(id: String = "", pcName: String, pads: Int, active: Int? = nil, latencyMs: Int?, phase: SessionPhase) {
         self.id = id
         self.pcName = pcName
         self.pads = pads
+        self.active = active ?? pads
         self.latencyMs = latencyMs
         self.phase = phase
     }

@@ -4,8 +4,8 @@
 import Foundation
 import Observation
 
-/// The low-power countdown's intents and what arms it: a session that
-/// streams with a pad bound, while the shell could raise the dim.
+/// The low-power countdown's intents and what arms it: the screen held on
+/// (`screenHeld`), while the dim is not already up.
 package extension AppModel {
 
     /// A touch on the phone, anywhere.
@@ -24,11 +24,12 @@ package extension AppModel {
         lowPower.handled()
     }
 
-    /// Follows the session, the delay setting and the shell's leave.
+    /// Follows the session, the settings and the shell's leave.
     internal func observeLowPower() {
         withObservationTracking {
             _ = sessionFact
             _ = streaming.state.dimAfter
+            _ = streaming.state.keepScreenOn
             _ = dimAllowed.state
         } onChange: { [weak self] in
             Task { @MainActor [weak self] in self?.lowPowerInputsMoved() }
@@ -40,19 +41,9 @@ package extension AppModel {
         observeLowPower()
     }
 
+    /// The count runs exactly while Dish holds the screen on.
     private func syncLowPower() {
-        lowPower.arm(streaming.state.dimAfter, while: lowPowerWanted(sessionFact) && dimAllowed.state)
-    }
-}
-
-/// The screen saves power only while there is something to save it for: a
-/// session streaming with a pad bound. One being brought back, one that
-/// stopped responding or failed, and one carrying no pad leave the screen
-/// alone, so the person sees what is happening.
-func lowPowerWanted(_ session: SessionFact?) -> Bool {
-    guard let session else { return false }
-    switch session.phase {
-    case .streaming: return session.pads > 0
-    case .stoppedResponding, .reconnecting, .failed: return false
+        let held = screenHeld(session: sessionFact, keepScreenOn: streaming.state.keepScreenOn)
+        lowPower.arm(streaming.state.dimAfter, while: held && dimAllowed.state)
     }
 }

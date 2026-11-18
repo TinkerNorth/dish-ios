@@ -19,21 +19,39 @@ package extension AppModel {
                 id: row.id,
                 pcName: row.name,
                 pads: row.boundSlotIds.count,
+                active: activeBindings(row.boundSlotIds),
                 latencyMs: row.latencyMs.map(wholeMilliseconds),
                 phase: sessionPhase(row.live, notice: noticeOf(row))
             )
         }
         if let row = reconnectingConnection {
-            return SessionFact(id: row.id, pcName: row.name, pads: row.boundSlotIds.count, latencyMs: nil, phase: .reconnecting)
+            return SessionFact(
+                id: row.id,
+                pcName: row.name,
+                pads: row.boundSlotIds.count,
+                active: activeBindings(row.boundSlotIds),
+                latencyMs: nil,
+                phase: .reconnecting
+            )
         }
         guard let failed = failedLink else { return nil }
         return SessionFact(
             id: failed.row.id,
             pcName: failed.row.name,
             pads: failed.row.boundSlotIds.count,
+            active: activeBindings(failed.row.boundSlotIds),
             latencyMs: nil,
             phase: .failed(failed.failure)
         )
+    }
+
+    /// The bound slots whose controller is present: a pad iOS lists, or the
+    /// on-screen controller while one of its screens is up. A binding is
+    /// remembered while its pad is away; it holds nothing then.
+    private func activeBindings(_ boundSlotIds: [String]) -> Int {
+        let present = Set(pads.slots.map(\.id))
+        let onScreenActive = playSource.state != nil
+        return boundSlotIds.filter { present.contains($0) || ($0 == onScreenSlotId && onScreenActive) }.count
     }
 
     private func noticeOf(_ row: ConnectionSummary) -> ConnectionFailure? {

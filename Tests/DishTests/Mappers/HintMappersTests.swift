@@ -92,7 +92,9 @@ final class HintMappersTests: XCTestCase {
     func testDimmingPutsItsHintToRestOnlyWhenTheDimRose() {
         XCTAssertEqual(learned(.dim), .dim)
         let playing = reduceNavigation(NavigationState(), .openPlay(.gamepad)).state
-        XCTAssertNil(learned(.dim, from: playing), "the dim is refused over play")
+        XCTAssertEqual(learned(.dim, from: playing), .dim, "the dim lies over play too")
+        let dimmed = reduceNavigation(NavigationState(), .dim).state
+        XCTAssertNil(learned(.dim, from: dimmed), "dimmed already, nothing rose")
     }
 
     func testMovingAroundTeachesNothing() {

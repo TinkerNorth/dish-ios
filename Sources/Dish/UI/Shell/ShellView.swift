@@ -31,6 +31,7 @@ struct ShellView: View {
         .tabBarMinimizeBehavior(.onScrollDown)
         .sheet(item: navigation.tabsSheet) { ShellSheet(sheet: $0) }
         .fullScreenCover(item: navigation.cover) { ShellCover(cover: $0) }
+        .dimLayer()
         .onChange(of: pairingSheetId(model.openPairing)) { _, serverId in pairingChanged(serverId) }
         .onChange(of: model.sessionFacts.lowPower.due) { _, due in lowPowerMoved(due) }
         .onChange(of: dimAllowed(navigation.state), initial: true) { _, allowed in model.setDimAllowed(allowed) }
@@ -174,17 +175,15 @@ private struct ShellCover: View {
         switch cover {
         case .setup: SetupCover()
         case let .play(screen): PlayCover(screen: screen)
-        case .dim: DimCover()
         }
     }
 }
 
-/// One presentation per kind of cover: the pause menu moving from one play
-/// screen to another keeps the cover up and swaps what it draws.
+/// One presentation per kind of cover: a play screen replacing another
+/// keeps the cover up and swaps what it draws.
 enum CoverIdentity: Hashable {
     case setup(SetupEntry)
     case play
-    case dim
 }
 
 extension Cover: Identifiable {
@@ -192,7 +191,6 @@ extension Cover: Identifiable {
         switch self {
         case let .setup(entry): .setup(entry)
         case .play: .play
-        case .dim: .dim
         }
     }
 }

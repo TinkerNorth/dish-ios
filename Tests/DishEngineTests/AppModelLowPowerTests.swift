@@ -5,10 +5,11 @@ import DishCore
 import XCTest
 @testable import DishEngine
 
-/// The low-power countdown through the model: armed while a session streams
-/// with a pad bound and the shell allows the dim, at the delay Settings
-/// keeps, reset by a touch, and rested by Never, a cover, a session that
-/// falters or carries no pad, or the session ending.
+/// The low-power countdown through the model: armed exactly while the
+/// screen is held (a session streaming with an active binding and Keep
+/// screen on) and the dim is not up, at the delay Settings keeps, reset by
+/// a touch, and rested by Never, the dim, a session that falters, a pad that
+/// is unbound or away, Keep screen on turned off, or the session ending.
 @MainActor
 final class AppModelLowPowerTests: XCTestCase {
 
@@ -61,7 +62,7 @@ final class AppModelLowPowerTests: XCTestCase {
         model.setDimAllowed(true)
         XCTAssertTrue(ticker.running)
         model.setDimAllowed(false)
-        XCTAssertFalse(ticker.running, "under a cover or a sheet the dim cannot rise")
+        XCTAssertFalse(ticker.running, "while the dim is up there is nothing to count")
         model.setDimAllowed(true)
         XCTAssertTrue(ticker.running)
         model.setDimAfter(.never)
@@ -94,5 +95,36 @@ final class AppModelLowPowerTests: XCTestCase {
         conn.aliveTick()
         let rested = await fixture.waitUntil { !self.ticker.running }
         XCTAssertTrue(rested, "a PC that stopped responding is something to see, not to dim")
+    }
+
+    /// A binding is remembered while its pad is away; it holds nothing then.
+    func testAPadThatLeftRestsTheWatch() async {
+        let live = await fixture.connectPaired()
+        XCTAssertTrue(live)
+        model.bind(slotId: "pad", to: fixture.serverId)
+        model.setDimAllowed(true)
+        XCTAssertTrue(ticker.running)
+        fixture.source.slots = []
+        let rested = await fixture.waitUntil { !self.ticker.running }
+        XCTAssertTrue(rested, "the binding stays, the pad is away")
+        fixture.source.slots = [SatelliteModelFixture.pad]
+        let armed = await fixture.waitUntil { self.ticker.running }
+        XCTAssertTrue(armed, "the pad is back")
+    }
+
+    /// With Keep screen on off the phone locks on its own, so there is
+    /// nothing to count down to.
+    func testKeepScreenOnOffRestsTheWatch() async {
+        let live = await fixture.connectPaired()
+        XCTAssertTrue(live)
+        model.bind(slotId: "pad", to: fixture.serverId)
+        model.setDimAllowed(true)
+        XCTAssertTrue(ticker.running)
+        model.setKeepScreenOn(false)
+        let rested = await fixture.waitUntil { !self.ticker.running }
+        XCTAssertTrue(rested)
+        model.setKeepScreenOn(true)
+        let armed = await fixture.waitUntil { self.ticker.running }
+        XCTAssertTrue(armed)
     }
 }

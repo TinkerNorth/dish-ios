@@ -32,6 +32,6 @@ func screenOrientation(for cover: Cover?, idiom: DeviceIdiom) -> ScreenOrientati
 private func phoneOrientation(for cover: Cover?) -> ScreenOrientation {
     switch cover {
     case .play: .landscape
-    case .setup, .dim, nil: .portrait
+    case .setup, nil: .portrait
     }
 }

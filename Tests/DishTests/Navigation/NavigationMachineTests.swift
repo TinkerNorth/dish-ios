@@ -82,7 +82,7 @@ final class NavigationMachineTests: XCTestCase {
             XCTAssertEqual(step.state.cover, .setup(entry))
             XCTAssertEqual(step.effects, [.startSetup(entry)])
         }
-        XCTAssertEqual(after(.dim, .openSetup(.guide)).state.cover, .setup(.guide), "setup takes the dim's place")
+        XCTAssertEqual(after(.dim, .openSetup(.guide)).state.cover, .setup(.guide), "setup rises under the dim")
     }
 
     func testSkippingSetupLandsOnControllersAndCompletesTheWelcome() {
@@ -108,18 +108,30 @@ final class NavigationMachineTests: XCTestCase {
         XCTAssertEqual(reduceNavigation(dimmed, .setupEnded(.bound)).state, dimmed, "the dim is not setup")
     }
 
-    func testTheDimRisesOnlyOverTheTabs() {
-        XCTAssertEqual(after(.dim).state.cover, .dim)
-        XCTAssertEqual(after(.openSetup(.firstRun), .dim).state.cover, .setup(.firstRun), "setup stays")
-        XCTAssertEqual(after(.dim).effects, [])
+    /// The dim lies over whatever is on screen and moves nothing under it:
+    /// the tabs, a sheet, the setup walk and a play screen all stay.
+    func testTheDimLiesOverWhateverIsOnScreen() {
+        let overTabs = after(.dim)
+        XCTAssertEqual(overTabs.state, NavigationState(dimmed: true))
+        XCTAssertEqual(overTabs.effects, [])
+        let overSheet = after(.openSheet(.addByAddress), .dim).state
+        XCTAssertTrue(overSheet.dimmed)
+        XCTAssertEqual(overSheet.sheet, .addByAddress, "the sheet stays, its pairing with it")
+        let overSetup = after(.openSetup(.firstRun), .dim).state
+        XCTAssertTrue(overSetup.dimmed)
+        XCTAssertEqual(overSetup.cover, .setup(.firstRun), "setup stays")
+        XCTAssertEqual(after(.dim, .dim).state, overTabs.state, "dimmed already")
     }
 
-    func testWakingLowersTheDimAndNothingElse() {
+    func testWakingLiftsTheDimAndNothingElse() {
         let woken = after(.dim, .wake)
+        XCTAssertFalse(woken.state.dimmed)
         XCTAssertNil(woken.state.cover)
         XCTAssertEqual(woken.effects, [])
-        XCTAssertEqual(after(.openSetup(.guide), .wake).state.cover, .setup(.guide))
-        XCTAssertEqual(after(.wake).state, NavigationState())
+        let underSetup = after(.openSetup(.guide), .dim, .wake).state
+        XCTAssertFalse(underSetup.dimmed)
+        XCTAssertEqual(underSetup.cover, .setup(.guide))
+        XCTAssertEqual(after(.wake).state, NavigationState(), "nothing to lift")
     }
 
     func testADismissedCoverEndsWhatItShowed() {
@@ -127,9 +139,7 @@ final class NavigationMachineTests: XCTestCase {
         XCTAssertNil(skipped.state.cover)
         XCTAssertEqual(skipped.state.tab, .controllers)
         XCTAssertEqual(skipped.effects, [.startSetup(.firstRun), .endSetup, .markWelcomeComplete])
-        let woken = after(.dim, .coverDismissed)
-        XCTAssertNil(woken.state.cover)
-        XCTAssertEqual(woken.effects, [])
+        XCTAssertEqual(after(.dim, .coverDismissed).state, after(.dim).state, "the dim is no cover to lower")
         XCTAssertEqual(after(.coverDismissed).state, NavigationState(), "nothing to lower")
     }
 
@@ -170,16 +180,20 @@ final class NavigationMachineTests: XCTestCase {
         let playOverSetup = after(.openSetup(.firstRun), .openPlay(.touchpad))
         XCTAssertEqual(playOverSetup.state.cover, .play(.touchpad))
         XCTAssertEqual(playOverSetup.effects, [.startSetup(.firstRun), .endSetup, .startPlay(.touchpad)])
-        let playOverDim = after(.dim, .openPlay(.gamepad))
-        XCTAssertEqual(playOverDim.state.cover, .play(.gamepad))
-        XCTAssertEqual(playOverDim.effects, [.startPlay(.gamepad)], "the dim ends with nothing to end")
+        let playUnderDim = after(.dim, .openPlay(.gamepad))
+        XCTAssertEqual(playUnderDim.state.cover, .play(.gamepad))
+        XCTAssertTrue(playUnderDim.state.dimmed, "a cover rising under the dim waits for a touch")
+        XCTAssertEqual(playUnderDim.effects, [.startPlay(.gamepad)])
     }
 
-    /// The design puts Dim on the accessory, which no play screen shows.
-    func testTheDimIsRefusedOverPlay() {
+    /// The gamepad left alone dims like any screen, and the dim ends no play:
+    /// what the screen holds goes on underneath until a touch wakes it.
+    func testTheDimLiesOverPlayAndEndsNothing() {
         let step = after(.openPlay(.gamepad), .dim)
         XCTAssertEqual(step.state.cover, .play(.gamepad))
+        XCTAssertTrue(step.state.dimmed)
         XCTAssertEqual(step.effects, [.startPlay(.gamepad)])
+        XCTAssertEqual(after(.openPlay(.gamepad), .dim, .wake).state.cover, .play(.gamepad), "waking lands back on the gamepad")
     }
 
     func testADismissedPlayCoverClosesPlay() {
@@ -263,15 +277,17 @@ final class NavigationMachineTests: XCTestCase {
         XCTAssertEqual(after(.openSheet(.lightningAdapter), .pairingChanged(serverId: nil)).state.sheet, .lightningAdapter)
     }
 
-    func testASheetOpensOverTheSetupCoverButNotOverPlayOrTheDim() {
+    /// A pairing that arrives while the screen is dimmed still opens its
+    /// sheet, under the dim, for the touch that wakes to find.
+    func testASheetOpensOverTheSetupCoverAndUnderTheDimButNotOverPlay() {
         let overSetup = after(.openSetup(.firstRun), .openSheet(.pair(serverId: "den")))
         XCTAssertEqual(overSetup.state.sheet, .pair(serverId: "den"))
         XCTAssertEqual(overSetup.state.cover, .setup(.firstRun))
         XCTAssertEqual(overSetup.effects, [.startSetup(.firstRun), .beginPairing(serverId: "den")])
         XCTAssertNil(after(.openPlay(.gamepad), .openSheet(.addByAddress)).state.sheet)
-        let overDim = after(.dim, .openSheet(.pair(serverId: "den")))
-        XCTAssertNil(overDim.state.sheet)
-        XCTAssertEqual(overDim.effects, [], "a refused sheet begins nothing")
+        let underDim = after(.dim, .openSheet(.pair(serverId: "den")))
+        XCTAssertEqual(underDim.state.sheet, .pair(serverId: "den"))
+        XCTAssertTrue(underDim.state.dimmed, "the dim stays until a touch")
     }
 
     func testClosingThePairSheetCancelsThePairing() {

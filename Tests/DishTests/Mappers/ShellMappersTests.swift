@@ -150,15 +150,21 @@ final class ShellMappersTests: XCTestCase {
         )
     }
 
-    func testTheScreenStaysOnOnlyWhileStreamingWithKeepScreenOn() {
+    /// The scene follows the engine's `screenHeld`: streaming with an active
+    /// binding and Keep screen on, and at no other time.
+    func testTheScreenStaysOnOnlyWhileStreamingWithAnActiveBindingAndKeepScreenOn() {
         let off = PreferencesFacts(deviceName: "", keepScreenOn: false, dimAfter: .twentySeconds, appearance: .system)
         XCTAssertFalse(idleTimerDisabled(facts: FactsFixture.shell()), "nothing streams")
         XCTAssertTrue(idleTimerDisabled(facts: FactsFixture.shell(session: FactsFixture.streaming())))
-        XCTAssertTrue(idleTimerDisabled(facts: FactsFixture.shell(session: FactsFixture.stopped)), "Reconnect is still on screen")
+        XCTAssertFalse(idleTimerDisabled(facts: FactsFixture.shell(session: FactsFixture.stopped)), "a stopped PC lets the phone lock")
         XCTAssertFalse(idleTimerDisabled(facts: FactsFixture.shell(session: FactsFixture.reconnecting)), "nothing streams yet")
         XCTAssertFalse(
             idleTimerDisabled(facts: FactsFixture.shell(session: FactsFixture.streaming(pads: 0))),
             "a bare connection holds nothing; the phone locks like any other app"
+        )
+        XCTAssertFalse(
+            idleTimerDisabled(facts: FactsFixture.shell(session: FactsFixture.streaming(pads: 2, active: 0))),
+            "a binding whose pad is away holds nothing"
         )
         let failed = SessionFact(pcName: "Living Room PC", pads: 1, latencyMs: nil, phase: .failed(.dataPathBlocked))
         XCTAssertFalse(idleTimerDisabled(facts: FactsFixture.shell(session: failed)), "nothing streams")
