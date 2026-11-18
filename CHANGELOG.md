@@ -64,6 +64,11 @@ lockstep across the repos share a version number.
   controller's page, and the on-screen controller's other screens open from
   its row and its page: Open mouse once the satellite grants mouse control
   on a session that is up. The hint on the pause button goes with it.
+- **L3 and R3 are sticks of their own.** Beside each stick, a smaller
+  stick at seven tenths of its size, as Android's skin has them: a finger
+  landing on it presses the stick's button and its movement tilts the
+  stick, so one press clicks and aims at once, and lifting lets go of both.
+  They were round buttons.
 - **The gamepad carries its touchpad.** Emulating a DualShock 4, a
   DualSense or a DualSense Edge, the gamepad draws the pad's touchpad at
   its top centre, where the real ones carry it: one or two fingers stream

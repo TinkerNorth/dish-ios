@@ -192,9 +192,13 @@ enum DishSize {
     /// A stick's base on the on-screen gamepad, and its thumb.
     static let padStick: CGFloat = 128
     static let padStickThumb: CGFloat = 60
+    /// L3 and R3: a smaller stick beside each stick that presses the stick's
+    /// button as it tilts, seven tenths of the stick as Android's are.
+    static let padClickStick: CGFloat = 90
+    static let padClickStickThumb: CGFloat = 42
     /// A face button.
     static let padFace: CGFloat = 52
-    /// L3, R3, the back button and the centre buttons.
+    /// The back button and the centre buttons.
     static let padRound: CGFloat = 44
     /// The gamepad's touchpad when the emulated pad carries one, two wide by
     /// one high as a DualShock's and a DualSense's are.
@@ -242,6 +246,8 @@ enum DishSize {
     /// button, a d-pad arm and a trigger rail.
     static let padStickRegular: CGFloat = 200
     static let padStickThumbRegular: CGFloat = 92
+    static let padClickStickRegular: CGFloat = 140
+    static let padClickStickThumbRegular: CGFloat = 64
     static let padFaceRegular: CGFloat = 76
     static let padDpadKeyRegular: CGFloat = 64
     static let padRailRegular: CGFloat = 64

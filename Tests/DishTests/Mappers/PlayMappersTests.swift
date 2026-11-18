@@ -107,6 +107,17 @@ final class PlayMappersTests: XCTestCase {
         XCTAssertFalse(cover(nil).trackpad, "no play facts yet: the default Xbox pad")
     }
 
+    /// L3 and R3 are sticks of their own beside each stick, seven tenths of
+    /// it, as Android's are.
+    func testTheClickSticksAreSevenTenthsOfTheSticks() {
+        XCTAssertEqual(PadMetrics.compact.clickStick, 90)
+        XCTAssertEqual(PadMetrics.compact.clickStickThumb, 42)
+        XCTAssertEqual(PadMetrics.regular.clickStick, 140)
+        XCTAssertEqual(PadMetrics.regular.clickStickThumb, 64)
+        XCTAssertEqual(PadMetrics.compact.clickStick / PadMetrics.compact.stick, 0.7, accuracy: 0.01)
+        XCTAssertEqual(PadMetrics.regular.clickStick / PadMetrics.regular.stick, 0.7, accuracy: 0.01)
+    }
+
     func testTheTouchpadIsTwiceAsWideAsItIsHighAtEitherMeasure() {
         XCTAssertEqual(PadMetrics.compact.trackpad, CGSize(width: 200, height: 100))
         XCTAssertEqual(PadMetrics.regular.trackpad, CGSize(width: 300, height: 150))
@@ -188,6 +199,8 @@ final class PlayMappersTests: XCTestCase {
         let phone = PadMetrics(
             stick: DishSize.padStick,
             stickThumb: DishSize.padStickThumb,
+            clickStick: DishSize.padClickStick,
+            clickStickThumb: DishSize.padClickStickThumb,
             face: DishSize.padFace,
             dpadKey: DishSize.padDpadKey,
             rail: DishSize.padRail,
@@ -201,6 +214,8 @@ final class PlayMappersTests: XCTestCase {
         let iPad = PadMetrics(
             stick: DishSize.padStickRegular,
             stickThumb: DishSize.padStickThumbRegular,
+            clickStick: DishSize.padClickStickRegular,
+            clickStickThumb: DishSize.padClickStickThumbRegular,
             face: DishSize.padFaceRegular,
             dpadKey: DishSize.padDpadKeyRegular,
             rail: DishSize.padRailRegular,
@@ -251,6 +266,17 @@ final class PlayEventMappersTests: XCTestCase {
     func testTheDpadReportsItsOffsetAndItsLift() {
         XCTAssertEqual(dpadMove(CGVector(dx: 1, dy: 0)), .dpad(x: 1, y: 0))
         XCTAssertEqual(dpadMove(nil), .dpadReleased)
+    }
+
+    /// One finger on L3 or R3 presses the button and tilts the stick, as a
+    /// press on a real stick does both; its lift lets go of both.
+    func testAClickStickPressesItsButtonAsItTilts() {
+        XCTAssertEqual(clickStickEvents(.left, CGVector(dx: 0.5, dy: -1)), [.press(.leftThumb), .stick(.left, x: 0.5, y: -1)])
+        XCTAssertEqual(clickStickEvents(.right, CGVector(dx: 0, dy: 0)), [.press(.rightThumb), .stick(.right, x: 0, y: 0)])
+        XCTAssertEqual(clickStickEvents(.left, nil), [.stickReleased(.left), .release(.leftThumb)])
+        XCTAssertEqual(clickStickEvents(.right, nil), [.stickReleased(.right), .release(.rightThumb)])
+        XCTAssertEqual(thumbButton(.left), .leftThumb)
+        XCTAssertEqual(thumbButton(.right), .rightThumb)
     }
 
     func testAFingerKeepsItsSlotAndLifts() {

@@ -138,8 +138,10 @@ Points. Every size a kit component sets is one of these names.
 | `DishSize.codeCorner` | 10 | The corner of a licence text's block on the licenses page |
 | `DishSize.padStick` | 128 | A stick's base on the on-screen gamepad, on a phone and an upright iPad |
 | `DishSize.padStickThumb` | 60 | A stick's thumb, on a phone and an upright iPad |
+| `DishSize.padClickStick` | 90 | L3 or R3: the smaller stick beside each stick that presses the stick's button as it tilts, seven tenths of the stick as Android's |
+| `DishSize.padClickStickThumb` | 42 | The click stick's thumb, with its name on it |
 | `DishSize.padFace` | 52 | A face button, on a phone and an upright iPad |
-| `DishSize.padRound` | 44 | L3, R3, the back button, the centre buttons and the play pill's height |
+| `DishSize.padRound` | 44 | The back button, the centre buttons and the play pill's height |
 | `DishSize.padDpadKey` | 44 | One arm of the d-pad, on a phone and an upright iPad |
 | `DishSize.padTrackpadWidth` | 200 | The gamepad's touchpad when the emulated pad carries one, on a phone and an upright iPad |
 | `DishSize.padTrackpadHeight` | 100 | Its height, half its width as a DualShock's and a DualSense's are |
@@ -164,6 +166,8 @@ Points. Every size a kit component sets is one of these names.
 | `DishSize.actionTileSymbol` | 28 | The glyph's height on an action tile, which holds every tile's words on one line |
 | `DishSize.padStickRegular` | 200 | A stick's base on an iPad on its side |
 | `DishSize.padStickThumbRegular` | 92 | A stick's thumb on an iPad on its side |
+| `DishSize.padClickStickRegular` | 140 | The click stick on an iPad on its side |
+| `DishSize.padClickStickThumbRegular` | 64 | Its thumb there |
 | `DishSize.padFaceRegular` | 76 | A face button on an iPad on its side |
 | `DishSize.padDpadKeyRegular` | 64 | One arm of the d-pad on an iPad on its side |
 | `DishSize.padRailRegular` | 64 | A trigger rail's width on an iPad on its side |
@@ -173,8 +177,9 @@ Points. Every size a kit component sets is one of these names.
 | `DishSize.setupColumn` | 600 | The readable column the setup cover stands in on a regular width (an iPad) |
 
 The gamepad's measures come in two sets, the phone's (`padStick`,
-`padStickThumb`, `padFace`, `padDpadKey`, `padRail`) and an iPad's on its
-side (the same names with `Regular`). `padLayout` in `PlayMappers.swift`
+`padStickThumb`, `padClickStick`, `padClickStickThumb`, `padFace`,
+`padDpadKey`, `padRail`, `padTrackpadWidth`, `padTrackpadHeight`) and an
+iPad's on its side (the same names with `Regular`). `padLayout` in `PlayMappers.swift`
 picks one from the window the scene reads (`WindowFacts`): the iPad's where
 both size classes are regular and the window is on its side; the phone's
 everywhere else, an iPhone Pro Max on its side included, which is regular

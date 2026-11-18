@@ -3,13 +3,15 @@
 
 import SwiftUI
 
-/// A stick: a round base and a thumb that follows the finger to the rim.
-/// It reports the finger's offset from its centre in radii, y down, and nil
+/// A stick: a round base and a thumb that follows the finger to the rim,
+/// with L3's or R3's name on the thumb when it is the click stick. It
+/// reports the finger's offset from its centre in radii, y down, and nil
 /// when the finger lifts; the reducer clamps it. The page hands it the
 /// base's and the thumb's diameters, the phone's or an iPad's.
 struct PadStickControl: View {
     let base: CGFloat
     let thumb: CGFloat
+    let label: String?
     let onMove: (CGVector?) -> Void
 
     @State private var touch: CGPoint?
@@ -21,12 +23,19 @@ struct PadStickControl: View {
             Circle()
                 .fill(DishTheme.padThumb)
                 .overlay(Circle().stroke(touch == nil ? DishTheme.outline : DishTheme.primary, lineWidth: DishSize.padHeldStroke))
+                .overlay(thumbLabel)
                 .shadow(color: touch == nil ? Color.clear : DishTheme.padGlow, radius: DishSize.padGlow)
                 .frame(width: thumb, height: thumb)
                 .offset(thumbOffset)
         }
         .frame(width: base, height: base)
         .onFingers(Circle()) { follow(leadFinger($0.fingers)?.location) }
+    }
+
+    @ViewBuilder private var thumbLabel: some View {
+        if let label {
+            Text(label).font(DishFont.padSmall).foregroundStyle(touch == nil ? DishTheme.muted : DishTheme.primary)
+        }
     }
 
     private var radius: CGFloat {
