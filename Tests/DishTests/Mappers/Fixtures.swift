@@ -53,8 +53,8 @@ enum FactsFixture {
         )
     }
 
-    static func streaming(pads: Int = 3, latencyMs: Int? = 4) -> SessionFact {
-        SessionFact(pcName: "Living Room PC", pads: pads, latencyMs: latencyMs, phase: .streaming)
+    static func streaming(pads: Int = 3, active: Int? = nil, latencyMs: Int? = 4) -> SessionFact {
+        SessionFact(pcName: "Living Room PC", pads: pads, active: active, latencyMs: latencyMs, phase: .streaming)
     }
 
     static func play(

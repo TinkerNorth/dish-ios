@@ -19,9 +19,16 @@ struct PlayCover: View {
 
     var body: some View {
         PlayCoverBody(
-            state: playCoverState(play: model.playFacts, session: model.sessionFacts.session, screen: screen, window: window),
+            state: playCoverState(
+                play: model.playFacts,
+                session: model.sessionFacts.session,
+                lowPower: model.sessionFacts.lowPower,
+                screen: screen,
+                window: window
+            ),
             actions: actions
         )
+        .dimLayer()
         .statusBarHidden()
         .persistentSystemOverlays(.hidden)
         .defersSystemGestures(on: .all)

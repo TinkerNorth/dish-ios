@@ -137,6 +137,19 @@ lockstep across the repos share a version number.
 
 ### Fixed
 
+- **The screen stays on only for an active binding.** Dish holds the
+  screen on exactly while a session streams with a binding that is active,
+  a pad iOS lists or the on-screen controller while its screen is up, and
+  Keep screen on is set (`screenHeld`). A PC that stopped answering, a bare
+  connection, a session being brought back and a binding whose pad is away
+  let the phone lock like any other app; before, a stopped PC and a
+  remembered binding kept it awake.
+- **The low-power countdown runs wherever the screen is held.** As on
+  Android, the count to Settings › Dim screen after runs on every screen
+  while the screen is held, the play screens, the setup walk and the sheets
+  included; the gamepad's pill reads "Low power in 5 s" as the accessory
+  does, and the dim lies over the screen instead of replacing it, so a
+  dimmed gamepad goes on streaming and a touch anywhere lands back on it.
 - **A play control reads the finger the moment it lands.** The gamepad's
   faces, shoulders, L3, R3, View, Guide and Menu, its sticks, rails and
   d-pad, the mouse's buttons, strip and pad and the touchpad's surface and

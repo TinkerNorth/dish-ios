@@ -45,6 +45,15 @@ final class PlayMappersTests: XCTestCase {
         XCTAssertNil(cover().pill)
     }
 
+    /// The gamepad left alone counts down like the tabs do: the pill's detail
+    /// takes the last seconds, and the latency comes back once a touch lands.
+    func testThePillCountsDownToLowPower() {
+        let counting = LowPowerFact(countdown: 5, due: false)
+        XCTAssertEqual(playPill(FactsFixture.streaming(), lowPower: counting)?.detail, "Low power in 5 s")
+        XCTAssertEqual(playPill(FactsFixture.streaming(), lowPower: .idle)?.detail, "4 ms")
+        XCTAssertEqual(playPill(FactsFixture.stopped, lowPower: counting)?.detail, "Stopped responding", "nothing counts there")
+    }
+
     /// A served slot bound to a PC with no session up reads lost, so the
     /// screen never goes quiet without a word.
     func testAServedSlotWhosePCIsDownReadsLost() {

@@ -168,6 +168,7 @@ func playCoverState(facts: ShellFacts, screen: PlayScreen, window: WindowFacts, 
 func playCoverState(
     play: PlayFacts?,
     session: SessionFact?,
+    lowPower: LowPowerFact = .idle,
     screen: PlayScreen,
     window: WindowFacts,
     words: L10n = .app
@@ -175,7 +176,7 @@ func playCoverState(
     let emulateAs = play?.emulateAs ?? InputKind.onScreen.defaultEmulation
     return PlayCoverState(
         screen: screen,
-        pill: playPill(session, destination: play?.destination, words: words),
+        pill: playPill(session, destination: play?.destination, lowPower: lowPower, words: words),
         back: words.back,
         trackpad: emulateAs.hasTouchpad,
         gamepad: gamepadCoverState(emulateAs),
@@ -197,14 +198,21 @@ func playCoverState(
     )
 }
 
-/// "Living Room PC" and its latency; a PC that stopped answering or is
-/// being reached for says so. `destination` is the served slot's PC, which
-/// speaks while no session is up.
-func playPill(_ session: SessionFact?, destination: DestinationFact? = nil, words: L10n = .app) -> PlayPillState? {
+/// "Living Room PC" and its latency, or the low-power countdown's last
+/// seconds; a PC that stopped answering or is being reached for says so.
+/// `destination` is the served slot's PC, which speaks while no session is
+/// up.
+func playPill(
+    _ session: SessionFact?,
+    destination: DestinationFact? = nil,
+    lowPower: LowPowerFact = .idle,
+    words: L10n = .app
+) -> PlayPillState? {
     guard let session else { return destinationPill(destination, words: words) }
     switch session.phase {
     case .streaming:
-        let detail = session.latencyMs.map(words.latency) ?? words.streaming
+        let latency = session.latencyMs.map(words.latency) ?? words.streaming
+        let detail = lowPower.countdown.map(words.lowPowerIn) ?? latency
         return PlayPillState(pcName: session.pcName, detail: detail, mark: .dot(DishTheme.success), detailColor: DishTheme.success)
     case .stoppedResponding:
         return PlayPillState(

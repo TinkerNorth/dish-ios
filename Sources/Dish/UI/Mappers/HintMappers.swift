@@ -71,7 +71,7 @@ func learnedHint(_ event: NavigationEvent, from before: NavigationState, to afte
     case .push(.support), .show(.support, _): return .supportDish
     case .openSetup(.addController): return .addController
     case .setupEnded(.bound): return coverMoved ? .addController : nil
-    case .dim: return coverMoved ? .dim : nil
+    case .dim: return after.dimmed && !before.dimmed ? .dim : nil
     case .select, .push, .show, .pop, .pathChanged, .openSetup, .setupEnded, .openPlay, .closePlay, .wake, .coverDismissed,
          .openSheet, .closeSheet, .pairingChanged, .connectTo:
         return nil

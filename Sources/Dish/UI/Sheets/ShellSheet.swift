@@ -9,6 +9,10 @@ struct ShellSheet: View {
     let sheet: Sheet
 
     var body: some View {
+        content.dimLayer()
+    }
+
+    @ViewBuilder private var content: some View {
         switch sheet {
         case let .pair(serverId): PairSheet(serverId: serverId)
         case .addByAddress: AddByAddressSheet()

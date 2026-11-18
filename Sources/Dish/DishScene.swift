@@ -71,7 +71,7 @@ public struct DishScene: Scene {
                     holdScreenOn($1)
                 }
                 .onChange(of: screenOrientation(for: navigation.state.cover, idiom: idiom), initial: true) { turn(to: $1) }
-                .onChange(of: navigation.state.cover == .dim) { _, dimmed in dim(dimmed) }
+                .onChange(of: navigation.state.dimmed) { _, dimmed in dim(dimmed) }
                 .onChange(of: scenePhase) { scenePhaseChanged($1) }
         }
     }
@@ -86,7 +86,7 @@ public struct DishScene: Scene {
         case .active:
             model.enteredForeground()
             watchTouches()
-            dim(navigation.state.cover == .dim)
+            dim(navigation.state.dimmed)
         case .inactive: break
         @unknown default: break
         }
@@ -101,12 +101,14 @@ public struct DishScene: Scene {
         root.value.dimmer.apply(dimmed, to: screen)
     }
 
-    /// A watcher on every window, once.
+    /// A watcher on every window, once: a touch restarts the low-power count
+    /// and lifts the dim, wherever it lands.
     private func watchTouches() {
         let model = model
+        let navigation = navigation
         for window in windowScenes.flatMap(\.windows) where !(window.gestureRecognizers ?? []).contains(where: { $0 is TouchWatcher }) {
             let watcher = TouchWatcher(target: nil, action: nil)
-            watcher.onTouch = { model.touched() }
+            watcher.onTouch = { touched(model, navigation) }
             window.addGestureRecognizer(watcher)
         }
     }
@@ -168,6 +170,13 @@ private struct SceneRoot {
         self.navigation = navigation
         router = IntentRouter(send: { navigation.send($0) }, paired: { model.connectionsFacts.paired })
     }
+}
+
+/// A touch anywhere: the count starts over, and a dimmed screen wakes.
+@MainActor
+private func touched(_ model: AppModel, _ navigation: NavigationStore) {
+    model.touched()
+    if navigation.state.dimmed { navigation.send(.wake) }
 }
 
 /// The device the engine names itself for when the person gave it no name.

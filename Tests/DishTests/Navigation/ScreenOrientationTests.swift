@@ -11,14 +11,14 @@ import XCTest
 /// refuses an app that shares the screen a turn of its own.
 final class ScreenOrientationTests: XCTestCase {
 
-    private static let everyCover: [Cover?] = [nil, .setup(.firstRun), .setup(.addController), .setup(.guide), .dim]
+    private static let everyCover: [Cover?] = [nil, .setup(.firstRun), .setup(.addController), .setup(.guide)]
         + PlayScreen.allCases.map { .play($0) }
 
     func testOnAnIPhonePlayIsLandscapeAndEveryOtherScreenPortrait() {
         for screen in PlayScreen.allCases {
             XCTAssertEqual(screenOrientation(for: .play(screen), idiom: .phone), .landscape)
         }
-        for cover in [Cover.setup(.firstRun), .dim, nil] {
+        for cover in [Cover.setup(.firstRun), .setup(.guide), nil] {
             XCTAssertEqual(screenOrientation(for: cover, idiom: .phone), .portrait)
         }
     }

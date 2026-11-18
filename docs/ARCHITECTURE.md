@@ -369,13 +369,13 @@ leave guard and the window gone.
   page, the first page of the path is the one beside the list (the list's
   selection) and the rest is that column's own stack, so a second row
   replaces the first rather than stacking on it.
-- Setup and the dim are covers. Setup replaces whatever covered the tabs, the
-  dim included; the dim rises only over the tabs, because the accessory that
-  asks for it is not on screen under a cover.
+- Setup and play are covers; the dim is a flag over whatever is on screen
+  (`NavigationState.dimmed`), which each presentation lays over its own
+  content, so a play screen left alone dims without ending.
 - Leaving setup by any road, Skip, Bind or the system lowering the cover,
   lands on Controllers and completes the welcome, or it would rise again on the
   next launch. A cover the system lowers ends what it showed: setup as a skip,
-  the dim as a wake.
+  play as a close.
 - On a first run the store raises the setup cover before anything is drawn and
   starts the walk, so the tabs never flash.
 - An App Intent is a navigation event, posted through the `IntentRouter` the

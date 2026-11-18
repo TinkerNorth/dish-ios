@@ -253,21 +253,10 @@ func idleTimerDisabled(facts: ShellFacts) -> Bool {
 }
 
 /// iOS suspends Dish when the screen locks, so the idle timer is held off
-/// while a pad streams and the person asked to keep the screen on: a
-/// session up with a pad bound to it (one that stopped responding keeps
-/// Reconnect on screen); a bare connection, a session being brought back
-/// or failed, lets the phone lock like any other app.
+/// exactly while the engine says the screen is held (`screenHeld`): a
+/// session streaming with an active binding and Keep screen on set.
 func idleTimerDisabled(session: SessionFact?, preferences: PreferencesFacts) -> Bool {
-    guard let session else { return false }
-    let padStreams = sessionIsUp(session.phase) && session.pads > 0
-    return padStreams && preferences.keepScreenOn
-}
-
-private func sessionIsUp(_ phase: SessionPhase) -> Bool {
-    switch phase {
-    case .streaming, .stoppedResponding: true
-    case .reconnecting, .failed: false
-    }
+    screenHeld(session: session, keepScreenOn: preferences.keepScreenOn)
 }
 
 /// The scheme the Appearance setting forces; nil follows the system.

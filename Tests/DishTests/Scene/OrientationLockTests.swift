@@ -32,7 +32,7 @@ final class OrientationLockTests: XCTestCase {
         XCTAssertEqual(lock.mask, .all, "an iPad's play follows the device too")
         lock.follow(screenOrientation(for: .play(.gamepad), idiom: .phone))
         XCTAssertEqual(lock.mask, .landscape)
-        lock.follow(screenOrientation(for: .dim, idiom: .phone))
+        lock.follow(screenOrientation(for: nil, idiom: .phone))
         XCTAssertEqual(lock.mask, .portrait)
     }
 }
