@@ -38,9 +38,9 @@ final class InteractionFeedbackTests: XCTestCase {
     }
 
     /// A system surface that draws its own buttons: a menu, a swipe, a
-    /// dialog, or a control held under a gesture, which answers the finger
-    /// with its own held state.
-    private static let drawnBySystem = [".contextMenu", ".swipeActions", "confirmationDialog", "DragGesture", "onLongPressGesture"]
+    /// dialog, or a control held over the touch surface, which answers the
+    /// finger with its own held state.
+    private static let drawnBySystem = [".contextMenu", ".swipeActions", "confirmationDialog", ".onFingers(", "onLongPressGesture"]
 
     /// The kit's own tappable components each name their style, so a new one
     /// cannot ship silent by forgetting to.
@@ -51,6 +51,19 @@ final class InteractionFeedbackTests: XCTestCase {
             let styled = source.contains(".buttonStyle(")
             let systemDrawn = Self.drawnBySystem.contains { source.contains($0) }
             XCTAssertTrue(!drawsAButton || styled || systemDrawn, "\(file) draws a Button without naming how it answers the finger")
+        }
+    }
+
+    /// SwiftUI's finger-tracking gestures wait on arbitration before they
+    /// begin and can lose a second finger's lift.
+    private static let swiftUIFingerGestures = ["DragGesture(", "SpatialEventGesture("]
+
+    /// A control that tracks a finger reads it from the kit's touch surface,
+    /// which reports it the moment it lands.
+    func testAControlReadsItsFingersFromTheTouchSurface() throws {
+        for file in RepoFiles.swiftFiles(under: "Sources/Dish") {
+            let offenders = try RepoFiles.offendingLines(in: file) { line in Self.swiftUIFingerGestures.contains { line.contains($0) } }
+            XCTAssertEqual(offenders, [], "\(file): a control that tracks a finger takes onFingers(_:_:), the kit's touch surface")
         }
     }
 }

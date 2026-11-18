@@ -3,24 +3,30 @@
 
 import SwiftUI
 
-/// A finger held on a control: each control tracks its own finger, so
-/// several fingers hold several controls at once. The gesture state resets
-/// itself when the system cancels the touch, so a lost finger still lets go.
-private struct HoldTracking: ViewModifier {
-    @GestureState private var held = false
+/// A control held over the kit's touch surface in its shape, from the first
+/// finger's landing to the last one's lift.
+private struct HoldTracking<Hit: Shape>: ViewModifier {
+    let shape: Hit
     let onChange: (Bool) -> Void
 
+    @State private var held = false
+
     func body(content: Content) -> some View {
-        content
-            .gesture(DragGesture(minimumDistance: 0).updating($held) { _, state, _ in state = true })
-            .onChange(of: held) { onChange($1) }
+        content.onFingers(shape) { fingers, _ in hold(holding(fingers)) }
+    }
+
+    private func hold(_ isHeld: Bool) {
+        guard isHeld != held else { return }
+        held = isHeld
+        onChange(isHeld)
     }
 }
 
 extension View {
-    /// Reports the finger landing on this view (true) and lifting (false).
-    func onHold(_ onChange: @escaping (Bool) -> Void) -> some View {
-        modifier(HoldTracking(onChange: onChange))
+    /// Reports a finger landing on this view within `shape` (true) and the
+    /// last finger lifting (false).
+    func onHold(_ shape: some Shape, _ onChange: @escaping (Bool) -> Void) -> some View {
+        modifier(HoldTracking(shape: shape, onChange: onChange))
     }
 }
 
@@ -42,8 +48,7 @@ struct FaceButton: View {
             glyph.foregroundStyle(held ? DishTheme.onPrimary : state.tint)
         }
         .frame(width: size, height: size)
-        .contentShape(Circle())
-        .onHold(hold)
+        .onHold(Circle(), hold)
     }
 
     @ViewBuilder private var glyph: some View {
@@ -79,8 +84,7 @@ struct RoundPadButton: View {
             content.foregroundStyle(held ? DishTheme.primary : DishTheme.muted)
         }
         .frame(width: DishSize.padRound, height: DishSize.padRound)
-        .contentShape(Circle())
-        .onHold(hold)
+        .onHold(Circle(), hold)
     }
 
     @ViewBuilder private var content: some View {
@@ -110,8 +114,7 @@ struct ShoulderButton: View {
             .frame(width: DishSize.padShoulderWidth, height: DishSize.padShoulderHeight)
             .background(Capsule().fill(held ? DishTheme.primaryFill : DishTheme.surfaceDim))
             .overlay(Capsule().stroke(held ? DishTheme.primary : DishTheme.outline, lineWidth: DishSize.padStroke))
-            .contentShape(Capsule())
-            .onHold(hold)
+            .onHold(Capsule(), hold)
     }
 
     private func hold(_ isHeld: Bool) {
@@ -136,8 +139,7 @@ struct HoldPanel: View {
                 lineWidth: DishSize.padStroke
             ))
             .overlay(Text(title).font(DishFont.headline).foregroundStyle(DishTheme.onSurface))
-            .contentShape(RoundedRectangle(cornerRadius: DishSize.mouseCorner))
-            .onHold(hold)
+            .onHold(RoundedRectangle(cornerRadius: DishSize.mouseCorner), hold)
             .accessibilityElement(children: .combine)
             .accessibilityAddTraits(.isButton)
     }

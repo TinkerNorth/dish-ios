@@ -11,35 +11,43 @@ private func across(_ location: CGPoint, in size: CGSize) -> CGPoint {
     return CGPoint(x: location.x / width * 2 - 1, y: location.y / height * 2 - 1)
 }
 
+/// The touchpad's slots: the reducer's first and second finger.
+private let touchpadSlots = 2
+
 /// The mouse's move pad: one finger, a ring under it, and the hint at the
 /// bottom. It reports where the finger is across the pad, nil on release.
 struct MovePad: View {
     let hint: String
     let onMove: (CGPoint?) -> Void
 
-    @GestureState private var touch: CGPoint?
+    @State private var touch: CGPoint?
 
     var body: some View {
-        GeometryReader { geometry in
-            ZStack {
-                RoundedRectangle(cornerRadius: DishSize.mouseCorner).fill(DishTheme.surface)
-                RoundedRectangle(cornerRadius: DishSize.mouseCorner).stroke(DishTheme.outline, lineWidth: DishSize.padStroke)
-                VStack {
-                    Spacer()
-                    Text(hint).font(DishFont.detail).foregroundStyle(DishTheme.muted).padding(.bottom, DishSpace.s8)
-                }
-                if let touch {
-                    Circle()
-                        .stroke(DishTheme.primary, lineWidth: DishSize.padHeldStroke)
-                        .background(Circle().fill(DishTheme.padGlow))
-                        .frame(width: DishSize.pointerRing, height: DishSize.pointerRing)
-                        .position(touch)
-                }
+        ZStack {
+            RoundedRectangle(cornerRadius: DishSize.mouseCorner).fill(DishTheme.surface)
+            RoundedRectangle(cornerRadius: DishSize.mouseCorner).stroke(DishTheme.outline, lineWidth: DishSize.padStroke)
+            VStack {
+                Spacer()
+                Text(hint).font(DishFont.detail).foregroundStyle(DishTheme.muted).padding(.bottom, DishSpace.s8)
             }
-            .contentShape(RoundedRectangle(cornerRadius: DishSize.mouseCorner))
-            .gesture(DragGesture(minimumDistance: 0).updating($touch) { value, state, _ in state = value.location })
-            .onChange(of: touch) { onMove($1.map { across($0, in: geometry.size) }) }
+            if let touch {
+                Circle()
+                    .stroke(DishTheme.primary, lineWidth: DishSize.padHeldStroke)
+                    .background(Circle().fill(DishTheme.padGlow))
+                    .frame(width: DishSize.pointerRing, height: DishSize.pointerRing)
+                    .position(touch)
+            }
         }
+        .onFingers(RoundedRectangle(cornerRadius: DishSize.mouseCorner)) { fingers, size in
+            follow(leadFinger(fingers)?.location, in: size)
+        }
+    }
+
+    /// The lead finger's place across the pad, once per change.
+    private func follow(_ location: CGPoint?, in size: CGSize) {
+        guard location != touch else { return }
+        touch = location
+        onMove(location.map { across($0, in: size) })
     }
 }
 
@@ -52,16 +60,14 @@ struct ScrollStrip: View {
     let downSymbol: String
     let onScroll: (Double) -> Void
 
-    @GestureState private var travel: CGFloat?
+    @State private var last: Finger?
 
     var body: some View {
         RoundedRectangle(cornerRadius: DishSize.mouseCorner)
-            .fill(travel == nil ? DishTheme.surfaceDim : DishTheme.primaryFill)
+            .fill(last == nil ? DishTheme.surfaceDim : DishTheme.primaryFill)
             .overlay(RoundedRectangle(cornerRadius: DishSize.mouseCorner).stroke(DishTheme.outline, lineWidth: DishSize.padStroke))
             .overlay(label)
-            .contentShape(RoundedRectangle(cornerRadius: DishSize.mouseCorner))
-            .gesture(DragGesture(minimumDistance: 0).updating($travel) { value, state, _ in state = value.translation.height })
-            .onChange(of: travel) { moved(from: $0, to: $1) }
+            .onFingers(RoundedRectangle(cornerRadius: DishSize.mouseCorner)) { fingers, _ in follow(leadFinger(fingers)) }
     }
 
     private var label: some View {
@@ -74,10 +80,12 @@ struct ScrollStrip: View {
         .foregroundStyle(DishTheme.muted)
     }
 
-    /// A new finger starts from where it landed; a lifted one moved nothing.
-    private func moved(from old: CGFloat?, to new: CGFloat?) {
-        guard let new else { return }
-        onScroll(Double(new - (old ?? 0)))
+    /// The lead finger's travel since the last report; a finger that only
+    /// landed or lifted scrolled nothing.
+    private func follow(_ lead: Finger?) {
+        let step = scrollStep(from: last, to: lead)
+        last = lead
+        if step != 0 { onScroll(Double(step)) }
     }
 }
 
@@ -87,46 +95,29 @@ struct TwoFingerSurface: View {
     let hint: String
     let onFinger: (Int, CGPoint?) -> Void
 
-    @State private var slots: [SpatialEventCollection.Event.ID: Int] = [:]
+    @State private var slotted: [SlotFinger] = []
 
     var body: some View {
-        GeometryReader { geometry in
-            ZStack {
-                RoundedRectangle(cornerRadius: DishSize.mouseCorner).fill(DishTheme.surface)
-                RoundedRectangle(cornerRadius: DishSize.mouseCorner).stroke(DishTheme.outline, lineWidth: DishSize.padStroke)
-                Text(hint).font(DishFont.detail).foregroundStyle(DishTheme.muted)
-            }
-            .contentShape(RoundedRectangle(cornerRadius: DishSize.mouseCorner))
-            .gesture(
-                SpatialEventGesture()
-                    .onChanged { track($0, in: geometry.size) }
-                    .onEnded { track($0, in: geometry.size) }
-            )
+        ZStack {
+            RoundedRectangle(cornerRadius: DishSize.mouseCorner).fill(DishTheme.surface)
+            RoundedRectangle(cornerRadius: DishSize.mouseCorner).stroke(DishTheme.outline, lineWidth: DishSize.padStroke)
+            Text(hint).font(DishFont.detail).foregroundStyle(DishTheme.muted)
         }
+        .onFingers(RoundedRectangle(cornerRadius: DishSize.mouseCorner)) { fingers, size in follow(fingers, in: size) }
     }
 
-    private func track(_ events: SpatialEventCollection, in size: CGSize) {
-        for event in events {
-            switch event.phase {
-            case .active: moved(event, in: size)
-            case .ended, .cancelled: lifted(event.id)
-            @unknown default: lifted(event.id)
-            }
+    /// The slots over the fingers: a finger keeps its slot, a new one takes
+    /// a free slot or is left out while both are held. Lifts go first, so a
+    /// slot that came free is taken in the same change.
+    private func follow(_ fingers: [Finger], in size: CGSize) {
+        let step = slotFingers(slotted, over: fingers, slots: touchpadSlots)
+        slotted = step.slotted
+        for slot in step.freed {
+            onFinger(slot, nil)
         }
-    }
-
-    /// A finger keeps its slot; a new one takes a free slot, or is ignored
-    /// while both are held.
-    private func moved(_ event: SpatialEventCollection.Event, in size: CGSize) {
-        let taken = Set(slots.values)
-        guard let slot = slots[event.id] ?? [0, 1].first(where: { !taken.contains($0) }) else { return }
-        slots[event.id] = slot
-        onFinger(slot, across(event.location, in: size))
-    }
-
-    private func lifted(_ id: SpatialEventCollection.Event.ID) {
-        guard let slot = slots.removeValue(forKey: id) else { return }
-        onFinger(slot, nil)
+        for finger in step.moved {
+            onFinger(finger.slot, across(finger.location, in: size))
+        }
     }
 }
 

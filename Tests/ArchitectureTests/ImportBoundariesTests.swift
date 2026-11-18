@@ -49,10 +49,12 @@ final class ImportBoundariesTests: XCTestCase {
     /// The only files of the UI library that may import UIKit: the theme's
     /// dynamic colours, the scene, the app delegate the scene turns the
     /// window through (UIKit asks a delegate for the orientations it allows),
-    /// and the window's touch watcher and screen dimmer the scene installs.
+    /// the window's touch watcher and screen dimmer the scene installs, and
+    /// the kit's finger surface (UIKit hands a view its touches the moment
+    /// they land, several at once; a SwiftUI gesture waits on arbitration).
     private static let uikitFiles: Set = [
         "Sources/Dish/UI/Theme.swift", "Sources/Dish/DishScene.swift", "Sources/Dish/Scene/Orientation.swift",
-        "Sources/Dish/Scene/LowPowerScreen.swift"
+        "Sources/Dish/Scene/LowPowerScreen.swift", "Sources/Dish/UI/Kit/Fingers.swift"
     ]
     /// Where App Intents may be imported: the intents themselves (an intent
     /// is a navigation event), the scene that hands them their router, and
@@ -62,6 +64,9 @@ final class ImportBoundariesTests: XCTestCase {
     /// hint as TipKit's popover, and the scene's switch for TipKit itself.
     private static let tipKitFiles: Set = ["Sources/Dish/UI/Kit/HintTip.swift", "Sources/Dish/Scene/TipKitTips.swift"]
     private static let kit = "Sources/Dish/UI/Kit"
+    /// The one kit file over UIKit: the touch surface the play controls read
+    /// their fingers from.
+    private static let fingerSurface = "Sources/Dish/UI/Kit/Fingers.swift"
 
     func testEveryLayerHasSources() {
         for layer in Self.layers {
@@ -97,12 +102,12 @@ final class ImportBoundariesTests: XCTestCase {
         }
     }
 
-    /// UIKit is the escape hatch of the scene, its orientation delegate and
-    /// the theme's dynamic colours.
-    func testOnlyTheSceneAndTheThemeImportUIKit() throws {
+    /// UIKit is the escape hatch of the scene, its orientation delegate, the
+    /// theme's dynamic colours and the kit's finger surface.
+    func testOnlyTheSceneTheThemeAndTheFingerSurfaceImportUIKit() throws {
         for file in RepoFiles.swiftFiles(under: "Sources/Dish") where !Self.uikitFiles.contains(file) {
             let imports = try RepoFiles.imports(of: RepoFiles.read(file))
-            XCTAssertFalse(imports.contains("UIKit"), "\(file) imports UIKit; only the scene and the theme may")
+            XCTAssertFalse(imports.contains("UIKit"), "\(file) imports UIKit; only the scene, the theme and the finger surface may")
         }
     }
 
@@ -122,16 +127,19 @@ final class ImportBoundariesTests: XCTestCase {
     }
 
     /// A kit component takes values and closures, never the domain: it
-    /// imports only SwiftUI and Foundation (and TipKit, for the hint) and
-    /// observes no model, so it can be drawn from any page's state.
+    /// imports only SwiftUI and Foundation (and TipKit, for the hint; UIKit,
+    /// for the finger surface) and observes no model, so it can be drawn
+    /// from any page's state.
     func testAKitComponentReadsNoDomain() throws {
         let kit = RepoFiles.swiftFiles(under: Self.kit)
         XCTAssertFalse(kit.isEmpty, "the kit has components")
+        XCTAssertTrue(kit.contains(Self.fingerSurface), "the finger surface is a kit file")
         let modelEnvironment = try NSRegularExpression(pattern: #"@Environment\(\s*\w+\.self"#)
         for file in kit {
             let source = try RepoFiles.read(file)
             let imports = RepoFiles.imports(of: source)
-            XCTAssertEqual(imports.filter { !["Foundation", "SwiftUI", "TipKit"].contains($0) }, [], "\(file) reaches past values")
+            let allowed = ["Foundation", "SwiftUI", "TipKit"] + (file == Self.fingerSurface ? ["UIKit"] : [])
+            XCTAssertEqual(imports.filter { !allowed.contains($0) }, [], "\(file) reaches past values")
             let environment = modelEnvironment.firstMatch(in: source, range: NSRange(source.startIndex..., in: source))
             XCTAssertNil(environment, "\(file) reads a model from the environment")
             XCTAssertFalse(source.contains("@Bindable"), "\(file) binds to a model")
