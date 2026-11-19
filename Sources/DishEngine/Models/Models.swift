@@ -87,6 +87,15 @@ func namedPadFamily(productCategory: String, vendorName: String?) -> PadFamily {
 /// publishes it, or a Steam Controller read over Bluetooth. A pad without
 /// the extended profile is listed but not read: iOS has no HID access, so
 /// dish-mac's profile and USB Direct paths have no counterpart.
+/// How Dish reads a pad, and what the system said of it there.
+package enum PadSource: Hashable {
+    /// GameController's reading, with the product category it gives; it
+    /// names no USB or Bluetooth ids to an app.
+    case gameController(category: String)
+    /// Dish's own over CoreBluetooth, by the ids the pad shows there.
+    case bluetooth(vendorId: UInt16, productId: UInt16)
+}
+
 package struct ControllerSlot: Identifiable, Hashable {
     package let id: String
     package let name: String
@@ -100,6 +109,8 @@ package struct ControllerSlot: Identifiable, Hashable {
     /// A Steam Controller's trackpads, which its pick lands; none for every
     /// other pad.
     package var trackpads: SteamTrackpads
+    /// Nil for a slot no reader made (a test's, the on-screen controller's).
+    package var source: PadSource?
 
     package init(
         id: String,
@@ -109,7 +120,8 @@ package struct ControllerSlot: Identifiable, Hashable {
         battery: BatteryReading? = nil,
         family: PadFamily = .other,
         readable: Bool = true,
-        trackpads: SteamTrackpads = .none
+        trackpads: SteamTrackpads = .none,
+        source: PadSource? = nil
     ) {
         self.id = id
         self.name = name
@@ -119,5 +131,6 @@ package struct ControllerSlot: Identifiable, Hashable {
         self.family = family
         self.readable = readable
         self.trackpads = trackpads
+        self.source = source
     }
 }

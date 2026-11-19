@@ -3859,6 +3859,40 @@
         }
       }
     },
+    "Built-in version" : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ugrađena verzija"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Integrierte Version"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Versión integrada"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Version intégrée"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Versão integrada"
+          }
+        }
+      }
+    },
     "Buttons, sticks" : {
       "localizations" : {
         "bs" : {
@@ -3991,6 +4025,74 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Transmitindo"
+          }
+        }
+      }
+    },
+    "Check for controller updates automatically" : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Automatski provjeravaj ažuriranja kontrolera"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Automatisch nach Controller-Updates suchen"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Buscar actualizaciones de mandos automáticamente"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rechercher les mises à jour des manettes automatiquement"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Verificar atualizações de controles automaticamente"
+          }
+        }
+      }
+    },
+    "Check now" : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Provjeri sada"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Jetzt prüfen"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Comprobar ahora"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vérifier maintenant"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Verificar agora"
           }
         }
       }
@@ -4128,6 +4230,74 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Confira o vínculo e depois vincule."
+          }
+        }
+      }
+    },
+    "Checking…" : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Provjera…"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wird geprüft…"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Comprobando…"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vérification…"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Verificando…"
+          }
+        }
+      }
+    },
+    "Checks are off" : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Provjere su isključene"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prüfungen sind aus"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Las comprobaciones están desactivadas"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Les vérifications sont désactivées"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "As verificações estão desativadas"
           }
         }
       }
@@ -4684,6 +4854,40 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Controle"
+          }
+        }
+      }
+    },
+    "Controller database" : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Baza kontrolera"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Controller-Datenbank"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Base de datos de mandos"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Base de données des manettes"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Banco de dados de controles"
           }
         }
       }
@@ -5369,6 +5573,40 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "O Dish pede que %@ conecte este controle. Alguns hosts substituem a escolha."
+          }
+        }
+      }
+    },
+    "Dish asks dish.tinkernorth.com for a newer list of the controllers it knows." : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dish pita dish.tinkernorth.com za noviji spisak kontrolera koje poznaje."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dish fragt dish.tinkernorth.com nach einer neueren Liste der Controller, die es kennt."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dish pide a dish.tinkernorth.com una lista más reciente de los mandos que conoce."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dish demande à dish.tinkernorth.com une liste plus récente des manettes qu’il connaît."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O Dish pede a dish.tinkernorth.com uma lista mais recente dos controles que conhece."
           }
         }
       }
@@ -6576,6 +6814,40 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Cada um é configurado de um jeito um pouco diferente."
+          }
+        }
+      }
+    },
+    "Email diagnostics" : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pošalji dijagnostiku e-poštom"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Diagnose per E-Mail senden"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Enviar diagnóstico por correo"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Envoyer les diagnostics par e-mail"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Enviar diagnóstico por e-mail"
           }
         }
       }
@@ -8390,6 +8662,40 @@
         }
       }
     },
+    "Imported" : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uvezen"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Importiert"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Importado"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Importée"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Importado"
+          }
+        }
+      }
+    },
     "Input" : {
       "localizations" : {
         "bs" : {
@@ -8624,6 +8930,40 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ele vem sem garantia, na medida permitida por lei."
+          }
+        }
+      }
+    },
+    "It fetches data, never code, and sends nothing about you." : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Preuzima podatke, nikad kod, i ne šalje ništa o vama."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Es lädt Daten, nie Code, und sendet nichts über dich."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Descarga datos, nunca código, y no envía nada sobre ti."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Il télécharge des données, jamais du code, et n’envoie rien vous concernant."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ele baixa dados, nunca código, e não envia nada sobre você."
           }
         }
       }
@@ -8944,6 +9284,40 @@
         }
       }
     },
+    "Known issue" : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Poznat problem"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bekanntes Problem"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Problema conocido"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Problème connu"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Problema conhecido"
+          }
+        }
+      }
+    },
     "LINKS" : {
       "localizations" : {
         "bs" : {
@@ -9012,6 +9386,40 @@
         }
       }
     },
+    "Last check" : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Posljednja provjera"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Letzte Prüfung"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Última comprobación"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dernière vérification"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Última verificação"
+          }
+        }
+      }
+    },
     "Launching" : {
       "comment" : "Diagnostics, a Moonlight host's card: the session is being brought up.",
       "localizations" : {
@@ -9043,6 +9451,40 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Iniciando"
+          }
+        }
+      }
+    },
+    "Layout guessed" : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Raspored pretpostavljen"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Belegung geschätzt"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Distribución supuesta"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Disposition supposée"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Layout presumido"
           }
         }
       }
@@ -10520,6 +10962,40 @@
         }
       }
     },
+    "Name" : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Naziv"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Name"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nombre"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nom"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nome"
+          }
+        }
+      }
+    },
     "Name it so Satellite can tell your devices apart." : {
       "localizations" : {
         "bs" : {
@@ -11103,6 +11579,40 @@
         }
       }
     },
+    "No connection" : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nema veze"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Keine Verbindung"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sin conexión"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pas de connexion"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sem conexão"
+          }
+        }
+      }
+    },
     "No controllers connected" : {
       "localizations" : {
         "bs" : {
@@ -11341,6 +11851,40 @@
         }
       }
     },
+    "Not checked yet" : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Još nije provjereno"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Noch nicht geprüft"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aún sin comprobar"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pas encore vérifié"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ainda não verificado"
+          }
+        }
+      }
+    },
     "Not declared to the host yet" : {
       "localizations" : {
         "bs" : {
@@ -11371,6 +11915,40 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ainda não declarado ao host"
+          }
+        }
+      }
+    },
+    "Not in the controller database" : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nije u bazi kontrolera"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nicht in der Controller-Datenbank"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No está en la base de datos de mandos"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Absente de la base de données des manettes"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fora do banco de dados de controles"
           }
         }
       }
@@ -13499,6 +14077,40 @@
         }
       }
     },
+    "Problems reported" : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prijavljeni problemi"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Probleme gemeldet"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Problemas informados"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Problèmes signalés"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Problemas relatados"
+          }
+        }
+      }
+    },
     "Protocol" : {
       "localizations" : {
         "bs" : {
@@ -13953,6 +14565,40 @@
         }
       }
     },
+    "Record" : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zapis"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Eintrag"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Registro"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fiche"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Registro"
+          }
+        }
+      }
+    },
     "Remembered" : {
       "comment" : "Moonlight hosts: the trust chip of a paired host that is out of sight.",
       "localizations" : {
@@ -14130,6 +14776,40 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Proteção contra repetição"
+          }
+        }
+      }
+    },
+    "Reported by players" : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prijavili igrači"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Von Spielern gemeldet"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Informado por jugadores"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Signalée par des joueurs"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Relatado por jogadores"
           }
         }
       }
@@ -16629,6 +17309,74 @@
         }
       }
     },
+    "The download did not verify" : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Preuzimanje nije prošlo provjeru"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Der Download hat die Prüfung nicht bestanden"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La descarga no superó la verificación"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Le téléchargement n’a pas passé la vérification"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O download não passou na verificação"
+          }
+        }
+      }
+    },
+    "The file holds this page and its log, never pairing keys, fingerprints, IP addresses, Wi-Fi names or PC names." : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Datoteka sadrži ovu stranicu i njen zapisnik, nikad ključeve uparivanja, otiske, IP adrese, nazive Wi-Fi mreža ni nazive računara."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die Datei enthält diese Seite und ihr Protokoll, nie Kopplungsschlüssel, Fingerabdrücke, IP-Adressen, WLAN-Namen oder PC-Namen."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El archivo contiene esta página y su registro, nunca claves de emparejamiento, huellas, direcciones IP, nombres de redes Wi-Fi ni nombres de PC."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Le fichier contient cette page et son journal, jamais de clés d’appairage, d’empreintes, d’adresses IP, de noms de réseaux Wi-Fi ni de noms de PC."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O arquivo contém esta página e seu registro, nunca chaves de pareamento, impressões digitais, endereços IP, nomes de redes Wi-Fi nem nomes de PCs."
+          }
+        }
+      }
+    },
     "The host has a session but would not hand it back. Close the app on %@ and start a new one." : {
       "comment" : "Banner body; the argument is the host's name.",
       "localizations" : {
@@ -18171,6 +18919,74 @@
         }
       }
     },
+    "Up to date" : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ažurno"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aktuell"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Al día"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "À jour"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Em dia"
+          }
+        }
+      }
+    },
+    "Updated" : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ažurirano"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aktualisiert"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Actualizada"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mise à jour effectuée"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Atualizado"
+          }
+        }
+      }
+    },
     "Updating…" : {
       "localizations" : {
         "bs" : {
@@ -18308,6 +19124,74 @@
         }
       }
     },
+    "Verification" : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Provjera"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prüfstatus"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Verificación"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vérification"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Verificação"
+          }
+        }
+      }
+    },
+    "Verified" : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Provjeren"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Geprüft"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Verificado"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vérifiée"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Verificado"
+          }
+        }
+      }
+    },
     "Version" : {
       "comment" : "Settings row: the app version.",
       "localizations" : {
@@ -18339,6 +19223,74 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Versão"
+          }
+        }
+      }
+    },
+    "Version %lld, built in" : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Verzija %lld, ugrađena"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Version %lld, integriert"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Versión %lld, integrada"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Version %lld, intégrée"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Versão %lld, integrada"
+          }
+        }
+      }
+    },
+    "Version %lld, downloaded" : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Verzija %lld, preuzeta"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Version %lld, heruntergeladen"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Versión %lld, descargada"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Version %lld, téléchargée"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Versão %lld, baixada"
           }
         }
       }

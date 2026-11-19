@@ -47,7 +47,8 @@ final class AppModelSetupTests: XCTestCase {
             network: TestNetwork.stack(defaults: defaults, remembered: [TestNetwork.satellite("den")]),
             tips: RecordedTipStore(shelf: .success([])),
             motionSensor: FakeMotionSensor(),
-            resendTicker: ManualTicker()
+            resendTicker: ManualTicker(),
+            controllerDb: .offline(defaults: defaults)
         )
     }
 

@@ -46,7 +46,8 @@ final class AppModelBindingMemoryTests: XCTestCase {
             network: TestNetwork.stack(defaults: defaults, remembered: known),
             tips: RecordedTipStore(shelf: .success([])),
             motionSensor: FakeMotionSensor(),
-            resendTicker: ManualTicker()
+            resendTicker: ManualTicker(),
+            controllerDb: .offline(defaults: defaults)
         )
     }
 

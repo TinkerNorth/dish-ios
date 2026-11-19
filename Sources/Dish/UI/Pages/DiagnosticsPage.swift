@@ -14,7 +14,7 @@ struct DiagnosticsPage: View {
     @Environment(\.appVersion) private var appVersion
 
     var body: some View {
-        DiagnosticsPageBody(state: diagnosticsPageState(facts: model.shellFacts, appVersion: appVersion), copy: copy)
+        DiagnosticsPageBody(state: diagnosticsPageState(facts: model.shellFacts, appVersion: appVersion), copy: copy, email: email)
             .onAppear { model.pageAppeared(.diagnostics) }
             .onDisappear { model.pageDisappeared(.diagnostics) }
     }
@@ -22,13 +22,19 @@ struct DiagnosticsPage: View {
     private func copy(_ transcript: String) {
         model.copyToPasteboard(transcript)
     }
+
+    private func email(_ body: String) {
+        model.emailDiagnostics(body: body)
+    }
 }
 
 /// The page over its state, so a preview can draw every state. Copy and
-/// Share hand over the same transcript; Copy says so once it has.
+/// Share hand over the same transcript; Copy says so once it has. Email
+/// diagnostics hands the summary to the model, which attaches the bundle.
 struct DiagnosticsPageBody: View {
     let state: DiagnosticsPageState
     let copy: @MainActor (String) -> Void
+    let email: @MainActor (String) -> Void
 
     @State private var copied = false
 
@@ -40,6 +46,12 @@ struct DiagnosticsPageBody: View {
                 SectionEyebrow(title: state.app.title, color: DishTheme.muted)
             } footer: {
                 SettingsFooter(text: state.intro)
+            }
+            .listRowBackground(DishTheme.surface)
+            Section {
+                RowButton(action: emailSummary) {
+                    Text(state.email).font(DishFont.body).foregroundStyle(DishTheme.primary)
+                }
             }
             .listRowBackground(DishTheme.surface)
             DiagnosticsCardsSection(state: state.hosts)
@@ -67,6 +79,10 @@ struct DiagnosticsPageBody: View {
     private func copyTranscript() {
         copy(state.transcript)
         copied = true
+    }
+
+    private func emailSummary() {
+        email(state.mailBody)
     }
 }
 
@@ -221,14 +237,14 @@ private struct EmptyNote: View {
     ]
     let shell = previewFacts(localNetwork: .allowed, diagnostics: diagnostics, events: events)
     NavigationStack {
-        DiagnosticsPageBody(state: diagnosticsPageState(facts: shell, appVersion: "0.1.0"), copy: { _ in })
+        DiagnosticsPageBody(state: diagnosticsPageState(facts: shell, appVersion: "0.1.0"), copy: { _ in }, email: { _ in })
     }
 }
 
 #Preview("Nothing seen") {
     let shell = previewFacts(localNetwork: .unknown, diagnostics: DiagnosticsSnapshot(), events: [])
     NavigationStack {
-        DiagnosticsPageBody(state: diagnosticsPageState(facts: shell, appVersion: "0.1.0"), copy: { _ in })
+        DiagnosticsPageBody(state: diagnosticsPageState(facts: shell, appVersion: "0.1.0"), copy: { _ in }, email: { _ in })
     }
 }
 

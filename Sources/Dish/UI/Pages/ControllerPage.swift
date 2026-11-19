@@ -55,6 +55,7 @@ struct ControllerPage: View {
                 apply: model.controllersFacts.apply,
                 pads: model.diagnosticsFacts.snapshot.pads,
                 port: model.controllersFacts.port,
+                strings: model.controllerDbFacts.strings,
                 id: id
             ),
             actions: ControllerActions(
@@ -143,6 +144,9 @@ private struct ControllerPadSections: View {
         if let telemetry = state.telemetry {
             ControllerTelemetrySection(state: telemetry)
         }
+        if let record = state.record {
+            ControllerRecordSection(state: record)
+        }
         if let unbind = state.unbind {
             ControllerUnbindSection(item: unbind, perform: actions.act)
         }
@@ -208,10 +212,21 @@ private struct ControllerPadSections: View {
         batteryPercent: nil,
         destination: nil,
         features: [ControllerFeatureFact(feature: .motion, enabled: true), ControllerFeatureFact(feature: .rumble, enabled: true)],
-        trackpads: TrackpadsFact(choices: [.pad, .off], pick: .off)
+        trackpads: TrackpadsFact(choices: [.pad, .off], pick: .off),
+        source: .bluetooth(vendorId: 0x28DE, productId: 0x1303),
+        record: ControllerRecordFact(
+            id: "valve-steam-controller-2026-bluetooth",
+            verification: .verified,
+            issues: [ControllerIssue(id: "preview-issue", transport: .bluetooth)]
+        )
     )
+    let strings = ControllerStrings(tables: ["en": [
+        "controller.valve-steam-controller-2026-bluetooth.name": "Valve Steam Controller (2026, Bluetooth)",
+        "issue.preview-issue.title": "Input arrives late",
+        "issue.preview-issue.body": "Being investigated."
+    ]])
     NavigationStack {
-        ControllerPageBody(state: controllerPageState(controllers: [pad], id: "ble:pad"), actions: .preview)
+        ControllerPageBody(state: controllerPageState(controllers: [pad], strings: strings, id: "ble:pad"), actions: .preview)
     }
 }
 

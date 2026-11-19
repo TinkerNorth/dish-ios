@@ -1,6 +1,6 @@
 # Dish for iOS: Privacy Policy
 
-**Effective date:** 2026-11-14.
+**Effective date:** 2026-11-19.
 **Canonical copy:** this file, at
 [`https://github.com/TinkerNorth/dish-ios/blob/main/PRIVACY.md`](https://github.com/TinkerNorth/dish-ios/blob/main/PRIVACY.md).
 
@@ -14,24 +14,32 @@ do not read one as describing another.
 
 This policy describes the app as it is today: it finds a Satellite on your
 Wi-Fi, pairs with it and streams a controller's input to it, and it does the
-same with a Moonlight host (Sunshine, Apollo or Wolf) on your network.
-Section 2.2 says exactly what crosses your network; this file changes in the
-same commit as the code that makes it untrue.
+same with a Moonlight host (Sunshine, Apollo or Wolf) on your network. It also
+checks TinkerNorth's website for a newer list of the controllers it knows
+(section 2.4), and it can hand a diagnostics file to your own mail app when
+you ask it to (section 2.5). Section 2.2 says exactly what crosses your
+network; this file changes in the same commit as the code that makes it
+untrue.
 
 ---
 
 ## 1. Short version
 
 - Dish for iOS turns a game controller, or the iPhone's own screen, into a
-  wireless gamepad for a `satellite` server on your own network. TinkerNorth
-  does not operate a server for Dish at all.
-- **Everything the app sends stays on your local network**, between this
-  iPhone and the PC you paired, a Satellite or a Moonlight host (section 2.2). It has no account, no analytics
-  SDK, no telemetry, no advertising identifier, no usage reporting and no
-  crash reporting. It sends nothing to TinkerNorth or to anyone else. The one
-  exception is Apple's: Support Dish asks the App Store, through StoreKit, for
-  the price of its three tips, and a tip you choose is an App Store purchase
-  (section 2.3).
+  wireless gamepad for a `satellite` server on your own network. The one
+  server TinkerNorth operates that the app contacts is the website,
+  `dish.tinkernorth.com`, for the controller list (section 2.4).
+- **Your controller input stays on your local network**, between this
+  iPhone and the PC you paired, a Satellite or a Moonlight host (section 2.2).
+  The app has no account, no analytics SDK, no telemetry, no advertising
+  identifier, no usage reporting and no crash reporting. Three requests can
+  leave your network, none of them carrying anything about you: the
+  controller database check to `dish.tinkernorth.com`, which asks for a newer
+  list of controllers, on by default and switched off in Settings (section
+  2.4); Support Dish's question to the App Store, through StoreKit, for the
+  price of its three tips, where a tip you choose is an App Store purchase
+  (section 2.3); and a diagnostics email, which only you send, from your own
+  mail app (section 2.5).
 - It stores its preferences, the PCs you paired and a device id on your
   iPhone (section 2.1), each PC's pairing key and the app's Moonlight
   identity in the Keychain, and each PC's certificate fingerprint in a file
@@ -66,6 +74,9 @@ Preferences are stored with `UserDefaults` in the app's preferences domain
 | `feature_motion_enabled`, `feature_rumble_enabled`, `feature_touchpad_enabled`, `feature_lightbar_mode` | Settings › Forwarded features: three switches, on by default, and `followGame` or `off` (the desktops' keys) | Whether Dish sends motion and the touchpad to the PC and acts on rumble and the light bar, above each controller's own switches |
 | `deadzone:<controller id>` | A controller's stick and trigger dead zones as `{"s":…,"t":…}`, once you changed them (the desktops' shape) | The controller page's Dead zones; Reset to defaults erases it |
 | `steam_bluetooth_enabled` | Settings › Steam Controllers › Read over Bluetooth: a switch, off by default | Whether Dish uses Bluetooth at all; while it is off the app makes no Bluetooth request and iOS never asks |
+| `controller_db_check_enabled` | Settings › Controller database › Check for controller updates automatically: a switch, on by default (dish-mac's key) | Whether the app checks `dish.tinkernorth.com` for a newer controller list; while it is off the app sends that site nothing (section 2.4) |
+| `controller_db_last_check_utc_ms`, `controller_db_last_check_result` | When the last controller database check ran and how it ended (`upToDate`, `updated`, `offline`, `invalid` or `off`) | Settings' and Diagnostics' line under the switch, and the diagnostics file |
+| `controller_db_manifest_etag` | The `ETag` the website gave the last manifest it served | Sent back as `If-None-Match`, so an unchanged list costs one small answer; it names the file's version, not you |
 | `touchpad_mode_preferences` | Each Steam Controller's trackpad pick (`stick`, `ds4` or `off`), once you chose one (dish-mac's key and words) | What a Steam Controller's trackpads are on the controller page; a Steam Controller is known by the identifier iOS gives this app for it |
 
 Beside them, for the PCs you pair:
@@ -81,6 +92,7 @@ Beside them, for the PCs you pair:
 | `moonlight_host_list` | `UserDefaults` | Each Moonlight host you added or paired with: its name, address, HTTP and HTTPS ports, the id it answers with, the app and the controller type picked for it, and whether it accepted this iPhone | Pairing with and starting sessions on those hosts |
 | `moonlight_binding_list` | `UserDefaults` | Which controller is bound to which Moonlight host, and the type it is plugged in as | Forgetting a host's bindings with it |
 | `moonlight_uniqueid` | `UserDefaults` | A random sixteen-character id made on first use, not derived from the device | The name a Moonlight host files this iPhone under |
+| The controller database | `Application Support/Dish/controllers-v1/` in the app's container | The newest controller list the app downloaded, its strings in each language and the manifest that vouches for them; never written while the switch is off | Naming the Steam Controllers Dish reads over Bluetooth and the issues known for them; the copy built into the app is used until a newer one has been downloaded and checked |
 | The Moonlight identity | The Keychain, labelled "Dish Moonlight client key" and "Dish Moonlight client certificate", readable after the first unlock and never moved to another device | An RSA key and the self-signed certificate around it, made once | Presented to every Moonlight host on every connection: it is how a host recognises the iPhone it paired with |
 
 Forget This PC removes that PC's row, key, pin and last sighting, after
@@ -88,10 +100,9 @@ telling the PC to drop this iPhone. Forgetting a Moonlight host removes its
 record, its bindings and its pin, after closing the app a live session of
 yours started on it; the protocol has no way to unpair, so the host keeps its
 own record of this iPhone until you remove it there. The setup walk keeps your answers in
-memory while it is open. No database or log is written by the app.
-telling the PC to drop this iPhone. The setup walk keeps your answers in
 memory while it is open. No database or log is written by the app, beside
-TipKit's own store: Apple's TipKit framework keeps, in the app's container,
+the controller database it downloads (above), the diagnostics file it writes
+when you tap Email diagnostics (section 2.5), and TipKit's own store: Apple's TipKit framework keeps, in the app's container,
 which of the app's four hints were shown, closed or no longer needed, so a
 hint does not come back. It holds no name, address or controller.
 
@@ -112,9 +123,12 @@ Settings › Setup & help › Diagnostics shows what the app sees right now
 and binding, the Local Network status, the app and protocol versions) and a
 log of this run of Dish: a PC's name and address, a controller's name, each
 change of a link's state and each binding, at most 200 lines, kept in
-memory only and gone when the app quits. Copy puts that page's text on the
-pasteboard and Share hands it to the share sheet, each only when you tap
-it; the app sends it nowhere on its own.
+memory only and gone when the app quits. It also shows which controller
+database version is in force, where it came from and how the last check
+ended, and, for a Steam Controller read over Bluetooth, its record in that
+database. Copy puts that page's text on the pasteboard and Share hands it to
+the share sheet, each only when you tap it; Email diagnostics is described
+in section 2.5. The app sends none of it anywhere on its own.
 
 ### 2.2 Sent to your own LAN, not to TinkerNorth
 
@@ -169,8 +183,11 @@ nothing of it leaves that network:
 
 ### 2.3 Sent to TinkerNorth or a third party
 
-Nothing reaches TinkerNorth. There is no TinkerNorth server for this app to
-talk to, no update check (the App Store and TestFlight deliver updates) and no
+Two things can reach TinkerNorth, both described below: the controller
+database check, which asks TinkerNorth's website for a newer controller list
+and carries nothing about you (section 2.4), and a diagnostics email, which
+reaches us only if you send it from your own mail app (section 2.5). There is
+no app update check (the App Store and TestFlight deliver updates) and no
 crash reporter.
 
 Support Dish sells three optional tips as consumable in-app purchases. When
@@ -186,6 +203,70 @@ between you and that site. Today those links are Satellite's download page
 from the setup flow, Sunshine's project page from the Moonlight hosts page,
 Dish's page in the Settings app, and Settings › About's and Help & FAQ's links
 to the website, the source code and this policy.
+
+### 2.4 Controller database updates
+
+Dish ships with a list of the controllers it recognises: their USB and
+Bluetooth ids, how each one talks, and the known issues a controller's page
+and its Diagnostics card show. So that a newly supported controller does not
+wait for an app release, the app checks for a newer list. About ten seconds
+after launch, and then every six hours while it is in the foreground, it
+fetches a small manifest from `https://dish.tinkernorth.com/controllers/v1/`
+that names the newest version. Only when that version is newer than the one
+the app has does it fetch the rest: the controller list and its text in each
+language. These files are data, never code. The app checks each one's size
+and SHA-256 checksum against the manifest before using it, and keeps the copy
+it has when anything does not match.
+
+`dish.tinkernorth.com` is an Amazon S3 bucket behind Amazon CloudFront,
+operated for TinkerNorth by Amazon Web Services. The requests carry no
+identifier, no cookie and no query, and use the system's default
+`User-Agent`; the only header the app adds is `If-None-Match`, with the
+`ETag` the site gave the last manifest. What the host's access logs can see is
+what any web server sees: the IP address the request came from, and the
+time. We use those logs as we use the rest of the website's: for capacity
+planning and abuse detection only.
+
+*Check for controller updates automatically* in Settings, on by default,
+turns the check off. With it off, no request for the controller list leaves
+your device, *Check now* is not offered, and the app keeps using the copy it
+has. *Check now* runs one check when you tap it. The App Store and TestFlight
+builds both make this check. Earlier versions of this policy said the app
+talked to no TinkerNorth server at all; since 1.1.0 this check is the one
+exception.
+
+### 2.5 Diagnostics by email
+
+When something does not work, you can send us a diagnostics file from
+Settings › Setup & help › Diagnostics › Email diagnostics. Nothing happens
+unless you tap it. The app writes one file,
+`dish-diagnostics-dish-ios-<date>-<time>.json`, in its temporary folder, and
+opens a new message in your own mail app addressed to
+`support@tinkernorth.com`, with the Diagnostics page's summary in the body and
+the file attached; where no mail account is set up on this iPhone, it opens
+the share sheet with the file instead. Nothing is sent until you press Send,
+and you can read the file or remove it first. The message then travels like
+any email you send, through your own mail provider.
+
+The file holds:
+
+- The app's version and build.
+- Your device's model identifier (such as `iPhone18,1`) and iOS version.
+- Which controller database version the app uses, where it came from, and
+  when the last check ran and how it ended.
+- For each attached controller: its record in the controller database where
+  Dish reads the controller's ids itself (the Steam Controllers over
+  Bluetooth), its verification, how it is connected and how Dish reads it,
+  its name, and the product category GameController gives it.
+- The PCs you use, as "Host 1", "Host 2", with their kind (Satellite or
+  Moonlight), version where the host gave one, protocol and link state,
+  never their names or addresses.
+- The Diagnostics page's log of this run, with every PC named by its alias.
+
+It **never** holds pairing keys or secrets, certificate fingerprints, IP
+addresses, Wi-Fi names, the names of your paired PCs or devices, the device
+id or the Moonlight id, or anything from a microphone or a speaker. We use
+what you send only to look into the problem you wrote to us about.
 
 ---
 
@@ -208,6 +289,8 @@ Improvements; that is Apple's mechanism and policy, not the app's.
 | App Intents (Siri, Spotlight, the Shortcuts app) | Five actions (open the gamepad, the touchpad or the mouse, dim the screen, connect to a paired PC) that open the app; no permission is asked and nothing is donated (section 2.1). |
 | TipKit | Four hints about the app's own controls, remembered on the iPhone (section 2.1). |
 | Battery monitoring (`UIDevice`) | The iPhone's battery level and charging state, read while a controller is attached so a PC is told the lower of it and the controller's; no permission is asked and nothing is stored (section 2.1). |
+| The network, beyond your LAN | One HTTPS request to `dish.tinkernorth.com` ten seconds after launch and every six hours while Dish is in the foreground, and when you tap Check now, unless the switch is off (section 2.4). No permission is asked. |
+| The mail compose sheet (MessageUI) | Opened only when you tap Email diagnostics, addressed to support with the diagnostics file attached; the app cannot send it, only you can (section 2.5). No permission is asked. |
 | Bluetooth (Core Bluetooth), declared in `App/Info.plist` with the usage text "Dish reads the Steam Controllers you pair and sends their input straight to your PC." | Reading the Steam Controllers you paired in Settings › Bluetooth, which iOS keeps from games. Off until you turn on Settings › Steam Controllers › Read over Bluetooth, which is when iOS asks; the app neither scans for nor pairs with anything, and looks only among the devices iOS has already connected. If you refuse, the row says so and points to Settings. |
 
 The app asks for no other permission. It does not use the camera, the
@@ -222,6 +305,9 @@ Controller it reads over Bluetooth once you opt in.
 
 - **Change a preference** in Settings: the name, Keep screen on, Dim screen
   after, Appearance.
+- **Stop the controller database check** by turning Check for controller
+  updates automatically off in Settings › Controller database; the app then
+  sends `dish.tinkernorth.com` nothing and keeps the copy it has.
 - **Turn the Local Network permission off** in Settings › Privacy & Security ›
   Local Network (or from Dish's page in Settings); the Connections page then
   says it cannot see your network.
@@ -247,7 +333,12 @@ information from anyone, and no account exists.
 
 ## 7. International transfers
 
-None. Nothing the app sends leaves your local network.
+Your controller input never leaves your local network. The controller
+database check is answered by Amazon CloudFront, which may serve it from any
+country where it operates, including the United States; it carries nothing
+about you, and the host sees the IP address and the time (section 2.4). A
+diagnostics email you send travels through your own mail provider, under its
+terms (section 2.5).
 
 ## 8. Changes to this policy
 

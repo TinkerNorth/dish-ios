@@ -20,7 +20,43 @@ lockstep across the repos share a version number.
 
 ## [Unreleased]
 
+Nothing yet.
+
+## [1.1.0] - 2026-11-19
+
 ### Added
+
+- **The controller database.** Dish ships the fleet's controller database
+  (dbVersion 1, 272 records, served from
+  `https://dish.tinkernorth.com/controllers/v1/`) and checks the website
+  for a newer copy ten seconds after launch and every six hours while it is
+  in the foreground: the manifest with `If-None-Match`, then, only for a
+  newer version, the controller list and its strings in each language, each
+  file checked against the manifest's size and SHA-256 before it replaces
+  the cached copy whole. The requests carry no query and no identifier.
+  Settings › Controller database carries "Check for controller updates
+  automatically", on by default, and "Check now"; with the switch off no
+  request leaves the device and Check now is not offered.
+- **A Steam Controller's record on its page and its card.** A Steam
+  Controller read over Bluetooth shows, on its page and on its Diagnostics
+  card, the database's record: its name, its id, its verification as a
+  chip, and the known issues filed for Bluetooth on this device. A pad
+  GameController reads shows nothing from the database, since iOS names no
+  USB or Bluetooth ids to an app.
+- **The controller data in Diagnostics.** The App section gains the
+  version in force and where it came from (built in or downloaded), the
+  built-in version, and when the last check ran and how it ended.
+- **Email diagnostics.** Diagnostics gains Email diagnostics: Dish writes
+  `dish-diagnostics-dish-ios-<yyyyMMdd-HHmmss>.json` (the fleet's
+  `dish-diagnostics.v1` bundle: the app and its build, the device model and
+  iOS version, the controller data, each controller's record, path and what
+  GameController said of it, the hosts as "Host 1", "Host 2" with their
+  kind, version, protocol and link, and the flight recorder) and opens a
+  message to support@tinkernorth.com in your own mail app, with the page's
+  summary in the body and the file attached; where no mail account is set
+  up, the share sheet takes the file. Nothing is sent until you press Send.
+  The file never holds pairing keys, fingerprints, addresses, Wi-Fi names or
+  the names of your PCs.
 
 - **The on-screen controller is always listed.** As Android's Virtual
   Controller is: one of the controllers from the first launch, bound and
@@ -502,5 +538,6 @@ miss. `Tests/PARITY.md` lists everything not built.
   threw them away. The scene now holds its root in `OnFirstUse`, which makes
   it the first time the kept build reads it, so a process makes one.
 
-[Unreleased]: https://github.com/TinkerNorth/dish-ios/compare/1.0.0...main
+[Unreleased]: https://github.com/TinkerNorth/dish-ios/compare/1.1.0...main
+[1.1.0]: https://github.com/TinkerNorth/dish-ios/compare/1.0.0...1.1.0
 [1.0.0]: https://github.com/TinkerNorth/dish-ios/releases/tag/1.0.0

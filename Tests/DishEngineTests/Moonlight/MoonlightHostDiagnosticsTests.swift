@@ -35,7 +35,8 @@ final class MoonlightHostDiagnosticsTests: XCTestCase {
             tips: RecordedTipStore(shelf: .success([])),
             motionSensor: FakeMotionSensor(),
             resendTicker: ManualTicker(),
-            diagnostics: DiagnosticsSource(ticker: ManualTicker())
+            diagnostics: DiagnosticsSource(ticker: ManualTicker()),
+            controllerDb: .offline(defaults: defaults)
         )
         store = model.network.wifi.store
     }

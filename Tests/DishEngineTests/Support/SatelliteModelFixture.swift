@@ -60,7 +60,8 @@ final class SatelliteModelFixture {
             tips: RecordedTipStore(shelf: .success([])),
             motionSensor: FakeMotionSensor(),
             resendTicker: ManualTicker(),
-            lowPowerTicker: lowPowerTicker
+            lowPowerTicker: lowPowerTicker,
+            controllerDb: .offline(defaults: defaults)
         )
     }
 

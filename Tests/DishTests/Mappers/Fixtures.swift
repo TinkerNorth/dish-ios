@@ -30,7 +30,8 @@ enum FactsFixture {
         apply: ApplyFact? = nil,
         addedByAddress: AddedByAddressFact? = nil,
         port: DevicePort = .usbC,
-        lowPower: LowPowerFact = .idle
+        lowPower: LowPowerFact = .idle,
+        controllerDb: ControllerDbFacts = .none
     ) -> ShellFacts {
         ShellFacts(
             controllers: controllers,
@@ -49,7 +50,8 @@ enum FactsFixture {
             apply: apply,
             addedByAddress: addedByAddress,
             port: port,
-            lowPower: lowPower
+            lowPower: lowPower,
+            controllerDb: controllerDb
         )
     }
 

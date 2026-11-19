@@ -133,6 +133,7 @@ package struct ShellFacts: Equatable {
     package let lowPower: LowPowerFact
     /// Where Steam Controllers over Bluetooth stand.
     package let steamBluetooth: SteamBluetoothStatus
+    package let controllerDb: ControllerDbFacts
 
     package init(
         controllers: [ControllerFact],
@@ -155,7 +156,8 @@ package struct ShellFacts: Equatable {
         forwarding: ForwardingFlags = ForwardingFlags(),
         port: DevicePort = .usbC,
         lowPower: LowPowerFact = .idle,
-        steamBluetooth: SteamBluetoothStatus = .off
+        steamBluetooth: SteamBluetoothStatus = .off,
+        controllerDb: ControllerDbFacts = .none
     ) {
         self.controllers = controllers
         self.attachedPads = attachedPads
@@ -178,6 +180,7 @@ package struct ShellFacts: Equatable {
         self.steamBluetooth = steamBluetooth
         self.port = port
         self.lowPower = lowPower
+        self.controllerDb = controllerDb
     }
 
     /// The whole from its slices.
@@ -191,7 +194,8 @@ package struct ShellFacts: Equatable {
         play: PlayFacts?,
         diagnostics: DiagnosticsFacts,
         forwarding: ForwardingFlags,
-        steamBluetooth: SteamBluetoothStatus = .off
+        steamBluetooth: SteamBluetoothStatus = .off,
+        controllerDb: ControllerDbFacts = .none
     ) {
         self.init(
             controllers: controllers.controllers,
@@ -214,7 +218,8 @@ package struct ShellFacts: Equatable {
             forwarding: forwarding,
             port: controllers.port,
             lowPower: session.lowPower,
-            steamBluetooth: steamBluetooth
+            steamBluetooth: steamBluetooth,
+            controllerDb: controllerDb
         )
     }
 

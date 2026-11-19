@@ -69,17 +69,20 @@ package extension AppModel {
 
     /// The app is leaving the foreground: iOS will suspend it, so every
     /// session closes the graceful way; a Moonlight host keeps its app
-    /// running for the return to resume.
+    /// running for the return to resume; no controller check is armed.
     func enteredBackground() {
         network.wifi.closeSessionsForBackground()
         network.moonlight.stopSessionsForBackground()
+        controllerDb.pause()
     }
 
     /// Back in the foreground: the resting satellites are reached for now,
-    /// and the hosts the bindings ask for open again.
+    /// the hosts the bindings ask for open again, and the controller check
+    /// is armed for when it is due.
     func enteredForeground() {
         network.wifi.resumeInForeground()
         network.moonlight.retrySessions()
+        controllerDb.resume()
     }
 
     private var sessionConnection: ConnectionSummary? {

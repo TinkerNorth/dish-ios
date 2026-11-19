@@ -459,6 +459,31 @@ final class ControllerSectionsMappersTests: XCTestCase {
         XCTAssertNotNil(functions.trackpads)
     }
 
+    func testASteamControllersPageCarriesItsRecordFromTheDatabase() {
+        let pad = ControllerFact(
+            id: "ble:pad",
+            name: "Valve Steam Controller (2026, Bluetooth)",
+            link: .bluetooth,
+            batteryPercent: nil,
+            destination: nil,
+            source: .bluetooth(vendorId: 0x28DE, productId: 0x1303),
+            record: ControllerRecordFact(id: "valve-steam-controller-2026-bluetooth", verification: .verified)
+        )
+        let strings =
+            ControllerStrings(
+                tables: ["en": ["controller.valve-steam-controller-2026-bluetooth.name": "Valve Steam Controller (2026, Bluetooth)"]]
+            )
+        guard case let .pad(state) = controllerPageState(controllers: [pad], strings: strings, id: pad.id).content else {
+            return XCTFail("an attached pad has its page")
+        }
+        XCTAssertEqual(state.record, controllerRecordState(pad, strings: strings))
+        XCTAssertEqual(state.record?.chip?.text, "Verified")
+    }
+
+    func testAPadGameControllerReadsHasNoRecordSection() throws {
+        XCTAssertNil(try XCTUnwrap(PadFixture.page(PadFixture.dualSense())).record)
+    }
+
     func testTheOnScreenGamepadShowsItsTelemetryToo() throws {
         let onScreen = PadFixture.onScreen(bound: nil)
         let reading = PadFixture.reading(of: onScreen, rates: PadRates(reportHz: 60, motionHz: 0))

@@ -19,6 +19,8 @@ struct SettingsActions {
     let setForwarded: @MainActor (ForwardedFeature, Bool) -> Void
     let setLightBar: @MainActor (LightbarMode) -> Void
     let setSteamControllers: @MainActor (Bool) -> Void
+    let setControllerDbChecks: @MainActor (Bool) -> Void
+    let checkControllerDbNow: @MainActor () -> Void
 }
 
 /// The Settings tab (D5).
@@ -34,6 +36,7 @@ struct SettingsPage: View {
                 preferences: model.preferencesFacts,
                 forwarding: model.forwardingFacts,
                 steamBluetooth: model.steamBluetoothFacts,
+                controllerDb: model.controllerDbFacts.status,
                 appVersion: appVersion
             ),
             actions: SettingsActions(
@@ -49,7 +52,9 @@ struct SettingsPage: View {
                 setAppearance: model.setAppearance,
                 setForwarded: setForwarded,
                 setLightBar: model.setLightbarMode,
-                setSteamControllers: model.setSteamControllersOverBluetooth
+                setSteamControllers: model.setSteamControllersOverBluetooth,
+                setControllerDbChecks: model.setControllerDbChecks,
+                checkControllerDbNow: model.checkControllerDbNow
             )
         )
     }
@@ -91,6 +96,7 @@ struct SettingsPageBody: View {
             StreamingSection(state: state.streaming, actions: actions)
             ForwardedFeaturesSection(state: state.features, actions: actions)
             SteamControllersSection(state: state.steamControllers, set: actions.setSteamControllers)
+            ControllerDbSection(state: state.controllerDb, set: actions.setControllerDbChecks, checkNow: actions.checkControllerDbNow)
             SetupHelpSection(state: state.help, actions: actions)
             AppearanceSection(state: state.appearance, select: actions.setAppearance)
             AboutSection(state: state.about, actions: actions)
@@ -121,7 +127,9 @@ struct SettingsPageBody: View {
                 setAppearance: { _ in },
                 setForwarded: { _, _ in },
                 setLightBar: { _ in },
-                setSteamControllers: { _ in }
+                setSteamControllers: { _ in },
+                setControllerDbChecks: { _ in },
+                checkControllerDbNow: {}
             )
         )
     }

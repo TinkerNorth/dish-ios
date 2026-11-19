@@ -61,7 +61,8 @@ final class AppModelMoonlightTests: XCTestCase {
             motionSensor: FakeMotionSensor(),
             resendTicker: ManualTicker(),
             deviceBattery: FakeDeviceBattery(BatteryReading(level: 64, state: .discharging)),
-            batteryTicker: batteryTicker
+            batteryTicker: batteryTicker,
+            controllerDb: .offline(defaults: defaults)
         )
     }
 

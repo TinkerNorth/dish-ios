@@ -47,6 +47,10 @@ struct DiagnosticsPageState: Equatable {
     let copy: String
     let copied: String
     let transcript: String
+    /// Email diagnostics, and the mail's body: the summary, then what the
+    /// attachment holds and never holds.
+    let email: String
+    let mailBody: String
 }
 
 func diagnosticsPageState(
@@ -59,6 +63,7 @@ func diagnosticsPageState(
     let app = DiagnosticsSectionState(
         title: words.appName,
         lines: appLines(appVersion: appVersion, localNetwork: facts.localNetwork, words: words)
+            + controllerDbLines(facts.controllerDb.status, locale: locale, timeZone: timeZone, words: words)
     )
     let hosts = DiagnosticsCardsState(
         title: words.connections,
@@ -66,7 +71,10 @@ func diagnosticsPageState(
     )
     let pads = DiagnosticsCardsState(
         title: words.controllers,
-        cards: cards(facts.diagnostics.pads.map { padCard($0, port: facts.port, words: words) }, empty: words.noControllersConnected)
+        cards: cards(
+            facts.diagnostics.pads.map { padCard($0, port: facts.port, strings: facts.controllerDb.strings, words: words) },
+            empty: words.noControllersConnected
+        )
     )
     let locks = facts.diagnostics.locks.map { DiagnosticsSectionState(title: words.lockStatistics, lines: lockLines($0, words: words)) }
     let events = eventsState(facts.diagnosticsEvents, locale: locale, timeZone: timeZone, words: words)
@@ -82,7 +90,9 @@ func diagnosticsPageState(
         events: events,
         copy: words.copy,
         copied: words.copied,
-        transcript: transcript(blocks: blocks, log: log, events: events)
+        transcript: transcript(blocks: blocks, log: log, events: events),
+        email: words.emailDiagnostics,
+        mailBody: mailBody(app: app, pads: pads, words: words)
     )
 }
 
@@ -99,6 +109,30 @@ private func eventsState(_ events: [DiagnosticsEvent], locale: Locale, timeZone:
         content: lines.isEmpty ? .empty(words.noEventsYet) : .lines(lines),
         note: words.eventsNote
     )
+}
+
+// MARK: - The mail
+
+/// The app's section and each controller by its name and its record, then
+/// the one sentence. A controller's binding is left out of the body, since
+/// it names a PC.
+private func mailBody(app: DiagnosticsSectionState, pads: DiagnosticsCardsState, words: L10n) -> String {
+    let controllers = mailControllersText(pads, words: words)
+    return [sectionText(app), controllers, words.diagnosticsAttachmentNote].joined(separator: "\n\n")
+}
+
+private func mailControllersText(_ section: DiagnosticsCardsState, words: L10n) -> String {
+    switch section.cards {
+    case let .empty(note): [section.title, note].joined(separator: "\n")
+    case let .cards(cards): ([section.title] + cards.map { mailCardText($0, words: words) }).joined(separator: "\n")
+    }
+}
+
+/// The card's title and its record's lines alone.
+private func mailCardText(_ card: DiagnosticsCardState, words: L10n) -> String {
+    let recordKeys: Set = [words.recordName, words.record, words.verification]
+    let lines = card.lines.filter { recordKeys.contains($0.key) }
+    return ([card.title] + lines.map(lineText)).joined(separator: "\n")
 }
 
 // MARK: - The transcript

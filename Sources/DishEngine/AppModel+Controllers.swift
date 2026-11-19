@@ -175,7 +175,9 @@ package extension AppModel {
             motion: motionFact(slotId: slot.id),
             hostEmulation: network.hub.hostEmulation(slotId: slot.id),
             surfaces: phoneSurfaces(slotId: slot.id, capabilities: slot.capabilities),
-            trackpads: trackpadsFact(slot)
+            trackpads: trackpadsFact(slot),
+            source: slot.source,
+            record: controllerRecordFact(slot.source)
         )
     }
 

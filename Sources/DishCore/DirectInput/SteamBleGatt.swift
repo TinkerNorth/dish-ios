@@ -56,6 +56,9 @@ package struct SteamBleModel: Equatable {
 }
 
 package enum SteamBleModels {
+    /// Valve's vendor id, which both pads show over Bluetooth LE.
+    package static let vendorId: UInt16 = 0x28DE
+
     package static let original = SteamBleModel(
         productId: 0x1106,
         name: "Valve Steam Controller (Bluetooth)",

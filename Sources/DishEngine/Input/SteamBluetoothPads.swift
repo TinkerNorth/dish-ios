@@ -103,6 +103,7 @@ func steamSlot(_ pad: UUID, _ model: SteamBleModel) -> ControllerSlot {
         link: .bluetooth,
         capabilities: ControllerCapabilities(hasMotion: true, hasTouchpad: true, hasRumble: model.plan.rumbles, hasExtendedButtons: true),
         family: .other,
-        trackpads: model.trackpads
+        trackpads: model.trackpads,
+        source: .bluetooth(vendorId: SteamBleModels.vendorId, productId: model.productId)
     )
 }

@@ -31,7 +31,8 @@ private struct DiagnosedModel {
             motionSensor: FakeMotionSensor(),
             resendTicker: ManualTicker(),
             diagnostics: DiagnosticsSource(ticker: ticker, clockUs: uptime.readMicroseconds),
-            pasteboard: pasteboard
+            pasteboard: pasteboard,
+            controllerDb: .offline(defaults: defaults)
         )
     }
 

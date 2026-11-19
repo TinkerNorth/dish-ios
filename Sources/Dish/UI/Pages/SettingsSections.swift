@@ -101,6 +101,35 @@ struct SteamControllersSection: View {
     }
 }
 
+/// CONTROLLER DATABASE › Check for controller updates automatically, with
+/// the set in force and the last check under it, and Check now.
+struct ControllerDbSection: View {
+    let state: ControllerDbSectionState
+    let set: @MainActor (Bool) -> Void
+    let checkNow: @MainActor () -> Void
+
+    var body: some View {
+        Section {
+            Toggle(isOn: Binding(get: { state.isOn }, set: { set($0) })) {
+                VStack(alignment: .leading, spacing: DishSpace.s1) {
+                    Text(state.toggleTitle)
+                    Text(state.line).font(DishFont.detail).foregroundStyle(DishTheme.muted)
+                }
+            }
+            RowButton(action: checkNow) {
+                Text(state.checkNow).font(DishFont.body).foregroundStyle(DishTheme.primary)
+            }
+            .disabled(!state.canCheckNow)
+        } header: {
+            SectionEyebrow(title: state.title, color: DishTheme.muted)
+        } footer: {
+            SettingsFooter(text: state.footer)
+        }
+        .foregroundStyle(DishTheme.onSurface)
+        .listRowBackground(DishTheme.surface)
+    }
+}
+
 /// SETUP & HELP › Setup guide, Help & FAQ, Diagnostics.
 struct SetupHelpSection: View {
     let state: SetupHelpSectionState
