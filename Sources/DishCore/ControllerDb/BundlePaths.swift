@@ -167,11 +167,54 @@ package struct BundleCount: Equatable, Encodable {
     }
 }
 
+/// The last write the app made to a pad itself, in the shape the other
+/// clients' `lastWrite` has, plus the bytes as hex. Only the Steam pads'
+/// GATT writes have one: a GameController pad is written by the framework,
+/// and the app never sees the bytes.
+package struct BundleWrite: Equatable, Encodable {
+    /// `gattWrite`: a characteristic write with response.
+    package let route: String
+    /// The report's id as two hex digits.
+    package let reportId: String
+    /// The value as the app handed it to the radio (the report past its id), lower-case hex.
+    package let bytes: String
+    /// Nil until the radio's write callback has answered.
+    package let ok: Bool?
+    /// The callback's error as `domain:code`; nil on success and while pending.
+    package let err: String?
+    package let atMs: Int64
+
+    package init(reportId: UInt8, bytes: [UInt8], ok: Bool?, err: String?, atMs: Int64) {
+        route = "gattWrite"
+        self.reportId = hexEncodeLower([reportId])
+        self.bytes = hexEncodeLower(bytes)
+        self.ok = ok
+        self.err = err
+        self.atMs = atMs
+    }
+
+    private enum CodingKeys: String, CodingKey {
+        case route, reportId, bytes, ok, err, atMs
+    }
+
+    package func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(route, forKey: .route)
+        try container.encode(reportId, forKey: .reportId)
+        try container.encode(bytes, forKey: .bytes)
+        try container.encode(ok, forKey: .ok)
+        try container.encode(err, forKey: .err)
+        try container.encode(atMs, forKey: .atMs)
+    }
+}
+
 /// What came out, per lane. iOS carries no trigger rumble, mic LED,
 /// speaker or haptics audio lane, so those are null.
 package struct BundleOutput: Equatable, Encodable {
     package let rumble: BundleLane<BundleRumble>
     package let rumbleTarget: BundleRumbleTarget
+    /// Nil for a path whose writes the app never sees.
+    package let rumbleWrite: BundleWrite?
     package let lightbar: BundleLane<BundleColour>
     package let playerLeds: BundleLane<BundlePlayer>
     package let triggerEffects: BundleCount
@@ -179,12 +222,14 @@ package struct BundleOutput: Equatable, Encodable {
     package init(
         rumble: BundleLane<BundleRumble>,
         rumbleTarget: BundleRumbleTarget,
+        rumbleWrite: BundleWrite? = nil,
         lightbar: BundleLane<BundleColour>,
         playerLeds: BundleLane<BundlePlayer>,
         triggerEffects: BundleCount
     ) {
         self.rumble = rumble
         self.rumbleTarget = rumbleTarget
+        self.rumbleWrite = rumbleWrite
         self.lightbar = lightbar
         self.playerLeds = playerLeds
         self.triggerEffects = triggerEffects
@@ -204,7 +249,7 @@ package struct BundleOutput: Equatable, Encodable {
         try lane.encode(rumble.count, forKey: .count)
         try lane.encode(rumbleTarget.rawValue, forKey: .target)
         try lane.encode(rumble.last, forKey: .last)
-        try lane.encodeNil(forKey: .lastWrite)
+        try lane.encode(rumbleWrite, forKey: .lastWrite)
         try container.encodeNil(forKey: .triggerRumble)
         try container.encode(lightbar, forKey: .lightbar)
         try container.encode(playerLeds, forKey: .playerLeds)

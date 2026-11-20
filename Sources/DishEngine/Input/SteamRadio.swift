@@ -28,6 +28,10 @@ package protocol SteamRadioEvents: AnyObject, Sendable {
     func lost(_ pad: UUID)
     func servicesFound(_ pad: UUID, valve: Bool)
     func characteristicsFound(_ pad: UUID, _ characteristics: [String])
+    /// A write the radio was given was answered, in the order they were
+    /// given (every write is with response): nil `error` is a success, else
+    /// the error as `domain:code`.
+    func wrote(_ pad: UUID, error: String?)
     /// A value of the input characteristic the pad was subscribed to.
     func received(_ value: Data, from pad: UUID)
 }

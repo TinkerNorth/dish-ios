@@ -75,7 +75,7 @@ extension AppModel {
         diagnostics.refresh()
         let hosts = diagnostics.state.hosts
         let replies = await snapshotReplies(hosts.filter(isAsked).map(\.id))
-        let facts = DiagnosticsBundleFacts(
+        let facts = await DiagnosticsBundleFacts(
             createdAtMs: wallClockMilliseconds(),
             identity: identity,
             controllerDb: controllerDb.status,
@@ -84,7 +84,7 @@ extension AppModel {
             events: diagnosticsLog.state,
             report: bundleReport(draft),
             conditions: deviceConditionsReading,
-            paths: padPathReadings,
+            paths: padPathReadings(),
             hostReadings: keyed(hosts.map { ($0.id, hostReading($0, reply: replies[$0.id])) })
         )
         return writeReport(facts)
@@ -129,20 +129,22 @@ extension AppModel {
     }
 
     /// Each controller's frames, rate, last state and feedback lanes.
-    private var padPathReadings: [String: PadPathReading] {
+    private func padPathReadings() async -> [String: PadPathReading] {
         let rates = keyed(diagnostics.state.pads.map { ($0.id, $0.rates.reportHz) })
-        return keyed(controllerFacts.map { ($0.id, padPathReading($0.id, rateHz: rates[$0.id])) })
+        let writes = await pads.steam.links.rumbleWrites()
+        return keyed(controllerFacts.map { ($0.id, padPathReading($0.id, rateHz: rates[$0.id], write: writes[$0.id])) })
     }
 
     /// The rate is the Diagnostics source's last reading; nil for a pad it
     /// never sampled.
-    private func padPathReading(_ slotId: String, rateHz: Int?) -> PadPathReading {
+    private func padPathReading(_ slotId: String, rateHz: Int?, write: BundleWrite?) -> PadPathReading {
         let latest = pads.source.processor.latestInput(slotId)
         return PadPathReading(
             frames: latest?.reports ?? 0,
             rateHz: rateHz,
             last: latest?.filtered,
-            output: pads.source.feedback.output(for: slotId) ?? .none
+            output: pads.source.feedback.output(for: slotId) ?? .none,
+            rumbleWrite: write
         )
     }
 

@@ -176,6 +176,71 @@ final class SteamBluetoothPadsTests: XCTestCase {
         XCTAssertEqual(radio.writes(to: Self.rumble, of: pad), [level, level, level, still], "the stop goes out once")
     }
 
+    /// Read on the links' queue, as the report's hop reads it; the claim
+    /// spins the main run loop, so these tests are not async.
+    private func rumbleWrites(_ rig: SteamRig) -> [String: BundleWrite] {
+        rig.queue.sync { rig.pads.links.assumeIsolated { $0.rumbleWrites() } }
+    }
+
+    private func lastRumbleWrite(_ rig: SteamRig, _ slot: String) throws -> BundleWrite {
+        try XCTUnwrap(rumbleWrites(rig)[slot])
+    }
+
+    func testTheLastRumbleWriteIsKeptWithItsBytesItsResultAndItsTime() throws {
+        let rig = SteamRig()
+        let radio = try rig.started()
+        claimTriton(rig, on: radio)
+        radio.answerWrites(of: pad)
+        let slot = steamSlotId(pad)
+        let none = rumbleWrites(rig)
+        XCTAssertNil(none[slot], "nothing was written yet")
+        let before = wallClockMilliseconds()
+        rig.source.feedback.pad(for: slot).post(rumbleStrong: 0x8000, weak: 0x4000, durationMs: 500)
+        rig.drain()
+        let pending = try lastRumbleWrite(rig, slot)
+        XCTAssertEqual(
+            pending.bytes,
+            tritonRumbleReport(left: 0x8000, right: 0x4000).dropFirst().map { String(format: "%02x", $0) }.joined()
+        )
+        XCTAssertEqual(pending.reportId, "80")
+        XCTAssertNil(pending.ok, "the radio has not answered")
+        XCTAssertGreaterThanOrEqual(pending.atMs, before)
+        radio.answerWrites(of: pad)
+        let done = try lastRumbleWrite(rig, slot)
+        XCTAssertEqual(done.ok, true)
+        XCTAssertNil(done.err)
+        XCTAssertEqual(done.atMs, pending.atMs, "the time is the write's")
+    }
+
+    func testAFailedRumbleWriteKeepsTheCallbacksError() throws {
+        let rig = SteamRig()
+        let radio = try rig.started()
+        claimTriton(rig, on: radio)
+        radio.answerWrites(of: pad)
+        let slot = steamSlotId(pad)
+        rig.source.feedback.pad(for: slot).post(rumbleStrong: 1, weak: 1, durationMs: 500)
+        rig.drain()
+        radio.answerWrites(of: pad, error: "CBATTErrorDomain:3")
+        let failed = try lastRumbleWrite(rig, slot)
+        XCTAssertEqual(failed.ok, false)
+        XCTAssertEqual(failed.err, "CBATTErrorDomain:3")
+    }
+
+    func testAnotherWritesAnswerIsNotTheRumblesResult() throws {
+        let rig = SteamRig()
+        let radio = try rig.started()
+        claimTriton(rig, on: radio)
+        rig.source.feedback.pad(for: steamSlotId(pad)).post(rumbleStrong: 1, weak: 1, durationMs: 500)
+        rig.drain()
+        let total = radio.writeCount(of: pad)
+        radio.answerWrites(of: pad, upTo: total - 1, error: "CBATTErrorDomain:3") // the claim's writes, in order
+        let held = try lastRumbleWrite(rig, steamSlotId(pad))
+        XCTAssertNil(held.ok, "the rumble's own answer is still to come")
+        radio.answerWrites(of: pad)
+        let answered = try lastRumbleWrite(rig, steamSlotId(pad))
+        XCTAssertEqual(answered.ok, true)
+    }
+
     func testThe2026PadsTrackpadsAreTheTouchpadOncePickedSo() throws {
         let rig = SteamRig()
         let radio = try rig.started()

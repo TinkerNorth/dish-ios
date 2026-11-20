@@ -186,6 +186,34 @@ final class DiagnosticsBundleSectionsTests: XCTestCase {
         XCTAssertEqual((output["triggerEffects"] as? [String: Any])?["count"] as? Int, 0)
     }
 
+    func testASteamPadsRumbleWriteIsCarriedWithItsBytesItsResultAndItsTime() throws {
+        let write = BundleWrite(reportId: 0x80, bytes: [0x00, 0xFF, 0x0A], ok: false, err: "CBATTErrorDomain:3", atMs: 1_763_586_000_100)
+        let output = BundleOutput(
+            rumble: BundleLane<BundleRumble>(count: 1, last: nil),
+            rumbleTarget: .directBle,
+            rumbleWrite: write,
+            lightbar: BundleLane<BundleColour>(count: 0, last: nil),
+            playerLeds: BundleLane<BundlePlayer>(count: 0, last: nil),
+            triggerEffects: BundleCount(count: 0)
+        )
+        let data = try JSONEncoder().encode(output)
+        let json = try XCTUnwrap(JSONSerialization.jsonObject(with: data) as? [String: Any])
+        let last = try XCTUnwrap((json["rumble"] as? [String: Any])?["lastWrite"] as? [String: Any])
+        XCTAssertEqual(last["route"] as? String, "gattWrite")
+        XCTAssertEqual(last["reportId"] as? String, "80")
+        XCTAssertEqual(last["bytes"] as? String, "00ff0a")
+        XCTAssertEqual(last["ok"] as? Bool, false)
+        XCTAssertEqual(last["err"] as? String, "CBATTErrorDomain:3")
+        XCTAssertEqual(last["atMs"] as? Int, 1_763_586_000_100)
+    }
+
+    func testAWriteThatHasNotBeenAnsweredHasNullForItsResult() throws {
+        let write = BundleWrite(reportId: 0x80, bytes: [], ok: nil, err: nil, atMs: 1)
+        let json = try XCTUnwrap(JSONSerialization.jsonObject(with: JSONEncoder().encode(write)) as? [String: Any])
+        XCTAssertTrue(json["ok"] is NSNull)
+        XCTAssertTrue(json["err"] is NSNull)
+    }
+
     func testTheLanesIOSDoesNotCarryAreNull() throws {
         let output = try XCTUnwrap(controllers().first?["output"] as? [String: Any])
         for lane in ["triggerRumble", "micLed", "speaker", "haptics"] {

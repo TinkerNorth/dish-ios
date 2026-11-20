@@ -226,12 +226,13 @@ package struct PadOutputReading: Equatable {
 
     /// The lanes as the support file writes them, unpacked as each lane
     /// packed its command.
-    package func bundle(target: BundleRumbleTarget) -> BundleOutput {
+    package func bundle(target: BundleRumbleTarget, write: BundleWrite? = nil) -> BundleOutput {
         BundleOutput(
             rumble: BundleLane(count: rumble.total, last: lastOf(rumble) { packed, atMs in
                 BundleRumble(strong: UInt16(truncatingIfNeeded: packed >> 32), weak: UInt16(truncatingIfNeeded: packed >> 16), atMs: atMs)
             }),
             rumbleTarget: target,
+            rumbleWrite: write,
             lightbar: BundleLane(count: lightbar.total, last: lastOf(lightbar) { packed, atMs in
                 BundleColour(
                     r: UInt8(truncatingIfNeeded: packed >> 16),

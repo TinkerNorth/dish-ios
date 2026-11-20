@@ -21,8 +21,11 @@ package struct PadPathReading: Equatable {
     package let rateHz: Int?
     package let last: GamepadReport?
     package let output: PadOutputReading
+    /// The last rumble write the app made itself, for a pad it writes to.
+    package let rumbleWrite: BundleWrite?
 
-    package init(frames: UInt64, rateHz: Int?, last: GamepadReport?, output: PadOutputReading) {
+    package init(frames: UInt64, rateHz: Int?, last: GamepadReport?, output: PadOutputReading, rumbleWrite: BundleWrite? = nil) {
+        self.rumbleWrite = rumbleWrite
         self.frames = frames
         self.rateHz = rateHz
         self.last = last
@@ -144,7 +147,7 @@ private func bundleController(_ controller: ControllerFact, path: PadPathReading
         path: route,
         hardware: controller.source.map { bundleHardware($0, product: controller.name) },
         input: path.map(bundleInput),
-        output: path.map { $0.output.bundle(target: rumbleTarget(path: route, hasRumble: hasRumble)) },
+        output: path.map { $0.output.bundle(target: rumbleTarget(path: route, hasRumble: hasRumble), write: $0.rumbleWrite) },
         bluetooth: route == .bluetooth ? .lowEnergy : nil
     )
 }

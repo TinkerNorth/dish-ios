@@ -28,6 +28,27 @@ final class ControllerStringsTests: XCTestCase {
         XCTAssertEqual(strings.text("issue.a.title", locale: "pt_PT"), "Atrasado")
     }
 
+    func testEachRegionAndScriptTheFleetMeetsReadsTheTableItShouldOrEnglish() {
+        let table = ControllerStrings(tables: [
+            "en": ["k": "en"], "bs": ["k": "bs"], "de": ["k": "de"], "es": ["k": "es"], "fr": ["k": "fr"], "pt-BR": ["k": "pt-BR"]
+        ])
+        let expected = [
+            "de-AT": "de", "bs-Latn-BA": "bs", "pt-PT": "pt-BR", "pt-BR": "pt-BR", "fr-CA": "fr",
+            "es-419": "es", "en-GB": "en", "ja-JP": "en"
+        ]
+        for (locale, reads) in expected {
+            XCTAssertEqual(table.text("k", locale: locale), reads, locale)
+        }
+    }
+
+    func testAKeyMissingFromALocaleFallsBackToEnglishForThatKeyAlone() {
+        let table = ControllerStrings(tables: [
+            "en": ["a": "A", "b": "B"], "fr": ["a": "A-fr"]
+        ])
+        XCTAssertEqual(table.text("a", locale: "fr-CA"), "A-fr")
+        XCTAssertEqual(table.text("b", locale: "fr-CA"), "B", "the one key English, its neighbour still French")
+    }
+
     func testALocaleWithNoTableReadsInEnglish() {
         XCTAssertEqual(strings.text("issue.a.title", locale: "ja"), "Late")
     }

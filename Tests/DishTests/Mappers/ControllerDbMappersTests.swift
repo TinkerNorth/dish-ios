@@ -81,6 +81,19 @@ final class ControllerDbMappersTests: XCTestCase {
         XCTAssertEqual(lines.first, FactLine(key: "Eingaben kommen spät an", value: "Being investigated."))
     }
 
+    func testTheDatabaseIsReadInTheLanguageTheAppResolvedItsOwnWordsIn() {
+        let app = L10n.app
+        XCTAssertEqual(app.databaseLocale, app.catalog.locale.identifier)
+        XCTAssertEqual(
+            app.databaseLocale,
+            app.catalog.bundle.preferredLocalizations.first ?? "en",
+            "the bundle's own pick, as the catalog reads it"
+        )
+        for language in ["de", "pt-BR", "bs"] {
+            XCTAssertEqual(L10nFixture.language(language).databaseLocale, language)
+        }
+    }
+
     func testEachVerificationHasItsWordAndItsTone() {
         let chips = ControllerVerification.allCases.map { verificationChip($0) }
         XCTAssertEqual(chips.map(\.text), ["Verified", "Imported", "Reported by players", "Layout guessed", "Problems reported"])

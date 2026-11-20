@@ -109,6 +109,19 @@ Nothing yet.
   links Apple's page. iOS names no port to an app, so the scene reads the
   hardware's model identifier once and the engine maps it; a device the
   table does not know reads as USB-C and sees no note.
+- **The last write to a Steam Controller, in the support file.** The
+  file's rumble lane carries `lastWrite` for a Steam Controller Dish
+  reads over Bluetooth: the route (`gattWrite`), the report id, the value as
+  Dish gave it to Bluetooth in hex, whether Bluetooth answered the write
+  and with which error, and when it was written. A pad GameController
+  reads has `lastWrite` null, since the framework writes and Dish never
+  sees the bytes. The record is kept on the Steam links' own queue with no
+  lock and no allocation in a write; the report reads it once.
+- **Tests for the controller database's languages.** de-AT reads German,
+  bs-Latn-BA Bosnian, pt-PT and pt-BR Brazilian Portuguese, fr-CA French,
+  es-419 Spanish, en-GB English and ja-JP English, and a key one language
+  leaves out reads in English for that key alone.
+
 
 ### Changed
 

@@ -134,6 +134,12 @@ extension CoreBluetoothRadio: CBPeripheralDelegate {
         events.characteristicsFound(peripheral.identifier, found.map(\.uuid.uuidString))
     }
 
+    /// The answer to a write with response; the error's word is made only
+    /// when there is one.
+    func peripheral(_ peripheral: CBPeripheral, didWriteValueFor characteristic: CBCharacteristic, error: (any Error)?) {
+        events.wrote(peripheral.identifier, error: error.map { "\(($0 as NSError).domain):\(($0 as NSError).code)" })
+    }
+
     /// Only the input the pad was subscribed to reaches the decoder.
     func peripheral(_ peripheral: CBPeripheral, didUpdateValueFor characteristic: CBCharacteristic, error: (any Error)?) {
         guard error == nil, characteristic === inputs[peripheral.identifier], let value = characteristic.value else { return }
