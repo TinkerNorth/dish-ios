@@ -46,17 +46,36 @@ Nothing yet.
 - **The controller data in Diagnostics.** The App section gains the
   version in force and where it came from (built in or downloaded), the
   built-in version, and when the last check ran and how it ended.
-- **Email diagnostics.** Diagnostics gains Email diagnostics: Dish writes
-  `dish-diagnostics-dish-ios-<yyyyMMdd-HHmmss>.json` (the fleet's
-  `dish-diagnostics.v1` bundle: the app and its build, the device model and
-  iOS version, the controller data, each controller's record, path and what
-  GameController said of it, the hosts as "Host 1", "Host 2" with their
-  kind, version, protocol and link, and the flight recorder) and opens a
-  message to support@tinkernorth.com in your own mail app, with the page's
-  summary in the body and the file attached; where no mail account is set
-  up, the share sheet takes the file. Nothing is sent until you press Send.
-  The file never holds pairing keys, fingerprints, addresses, Wi-Fi names or
-  the names of your PCs.
+- **Report a problem, and Ask a question.** Diagnostics gains Report a
+  problem and Ask a question, one screen in two categories: pick what it is
+  about (controller not recognised, no rumble or feedback, connection or
+  latency, audio, something else, a question), write what happened and what
+  you expected, and pick the controller it concerns, preselected to a pad
+  connected now. The screen lists in plain words what the file will hold,
+  Preview file shows the file itself, and Continue in Mail opens a message to
+  support@tinkernorth.com in your own mail app, under
+  `Dish support: <category> · Dish for iOS <version> on <model>`, with your
+  words first, then the page's summary, and the file attached; where no mail
+  account is set up, the share sheet takes the file. Nothing is sent until
+  you press Send. The file, `dish-diagnostics-dish-ios-<yyyyMMdd-HHmmss>.json`
+  (the fleet's `dish-diagnostics.v1` bundle), holds your report; the app and
+  its build; the device model, iOS version, battery, thermal state and Low
+  Power Mode; the controller data; every controller, the on-screen one
+  included, with its record, its path (`gameController`, `bluetooth`,
+  `virtual`), the frames it published, their rate and the last one, and what
+  reached each feedback lane with the last command; each PC as "Host 1",
+  "Host 2" with the session as this iPhone sees it (each slot with the
+  backend and result the PC answered, the last heartbeat ack, the round
+  trips, and the datagrams sent and received by kind) and, from a Satellite
+  of 2.3.0 or later with a session up, that PC's own snapshot of the
+  connection, asked for over the authenticated client with a two-second
+  wait; an older Satellite, told by the version its capabilities gave and
+  never asked, or one that does not know the connection, refuses the proof
+  or does not answer in time, leaves the capabilities the app already
+  fetched and the reason, every answer naming the PC by its alias alone,
+  and a Moonlight host its serverinfo version, never its name; and the
+  flight recorder. The file never holds pairing keys,
+  fingerprints, addresses, Wi-Fi names or the names of your PCs.
 
 - **The on-screen controller is always listed.** As Android's Virtual
   Controller is: one of the controllers from the first launch, bound and

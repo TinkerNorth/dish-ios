@@ -231,6 +231,34 @@ final class HTTPClient: Sendable {
         return out
     }
 
+    /// `GET /api/connections/{id}/diagnostics`: the satellite's own word on
+    /// this connection, for the support file (2.3.0 and later; an older one
+    /// answers 404). Authenticated like the session routes, and given up on
+    /// after `timeout`, which is told apart from no answer at all.
+    func getConnectionDiagnostics(
+        ip: String,
+        port: Int,
+        connectionId: String,
+        deviceId: String,
+        hmacProof: String,
+        timeout: TimeInterval
+    ) async -> SnapshotReply {
+        guard let url = URL(string: "https://\(ip):\(port)/api/connections/\(connectionId)/diagnostics") else { return .unreachable }
+        var req = URLRequest(url: url, timeoutInterval: timeout)
+        req.httpMethod = "GET"
+        req.setValue(deviceId, forHTTPHeaderField: "X-Device-Id")
+        req.setValue(hmacProof, forHTTPHeaderField: "X-Hmac-Proof")
+        do {
+            let (data, response) = try await session.data(for: req)
+            guard let status = (response as? HTTPURLResponse)?.statusCode else { return .unreachable }
+            return .answered(status: status, body: data)
+        } catch let failure as URLError where failure.code == .timedOut {
+            return .timedOut
+        } catch {
+            return .unreachable
+        }
+    }
+
     // MARK: - Plumbing
 
     /// One exchange's raw result, before route-specific DTO parsing.

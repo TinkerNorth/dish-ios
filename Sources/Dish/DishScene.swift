@@ -162,7 +162,8 @@ private struct SceneRoot {
             controllerDbGateway: liveControllerDbGateway(),
             controllerDbCache: ControllerDbCache(directory: ControllerDbCache.defaultDirectory()),
             identity: identity,
-            mailer: DiagnosticsMailComposer(presenter: frontController)
+            mailer: DiagnosticsMailComposer(presenter: frontController),
+            deviceConditions: SystemDeviceConditions(process: ProcessInfo.processInfo)
         )
         let navigation = NavigationStore(
             onboarding: model.onboarding,

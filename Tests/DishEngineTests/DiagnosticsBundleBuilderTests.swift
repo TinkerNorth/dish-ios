@@ -5,8 +5,8 @@ import DishCore
 import XCTest
 @testable import DishEngine
 
-/// The bundle from the facts the Diagnostics page renders: each pad Dish
-/// reads with its record and its path, the hosts as aliases in the page's
+/// The bundle from the facts the Diagnostics page renders: each controller
+/// with its record and its path, the hosts as aliases in the page's
 /// order, the log with every host renamed, and nothing a person would not
 /// hand a stranger: no host's name, no address, no key.
 @MainActor
@@ -131,12 +131,13 @@ final class DiagnosticsBundleBuilderTests: XCTestCase {
             verification: "verified",
             transport: .bluetooth,
             path: .bluetooth,
-            hardware: BundleHardware(vid: "28de", pid: "1303", product: "Valve Steam Controller (2026, Bluetooth)", category: nil)
+            hardware: BundleHardware(vid: "28de", pid: "1303", product: "Valve Steam Controller (2026, Bluetooth)", category: nil),
+            bluetooth: .lowEnergy
         ))
     }
 
     func testAGameControllerPadCarriesNoRecordAndWhatTheFrameworkSaid() {
-        XCTAssertEqual(bundle.controllers.last, BundleController(
+        XCTAssertEqual(bundle.controllers[1], BundleController(
             record: nil,
             verification: nil,
             transport: .bluetooth,
@@ -145,8 +146,10 @@ final class DiagnosticsBundleBuilderTests: XCTestCase {
         ))
     }
 
-    func testTheOnScreenControllerIsNotAPad() {
-        XCTAssertEqual(bundle.controllers.count, 2)
+    func testTheOnScreenControllerIsTheVirtualPathWithNoLinkAndNoHardware() {
+        XCTAssertEqual(bundle.controllers.count, 3)
+        let onScreen = BundleController(record: nil, verification: nil, transport: nil, path: .virtual, hardware: nil)
+        XCTAssertEqual(bundle.controllers.last, onScreen)
     }
 
     func testTheHostsAreAliasesInThePagesOrder() {

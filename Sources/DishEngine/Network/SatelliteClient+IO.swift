@@ -29,16 +29,18 @@ extension SatelliteClient {
             )
             PacketCodec.writeInnerHeader(msgType: msgType, payloadCount: payloadCount, into: inner)
             encode(UnsafeMutableRawBufferPointer(rebasing: inner[ProtocolConstants.innerHeaderSize...]))
-            gate.hold { sealAndSend(datagram, innerCount: innerCount) }
+            let handedOver = gate.hold { sealAndSend(datagram, innerCount: innerCount) }
+            if handedOver { tally.countSent(msgType) }
         }
     }
 
     /// The caller holds the gate, from the counter's claim to the `sendto`.
     /// A counter never wraps: past 2^32 − 1 the session goes silent, and the
     /// proactive re-key fires 268M packets before that.
-    private func sealAndSend(_ datagram: UnsafeMutableRawBufferPointer, innerCount: Int) {
+    /// True once the datagram is sealed and handed to the socket.
+    private func sealAndSend(_ datagram: UnsafeMutableRawBufferPointer, innerCount: Int) -> Bool {
         let (fd, target) = sendTarget()
-        guard fd >= 0, let target, let claim = claimSend(), claim.sequence <= UInt64(UInt32.max) else { return }
+        guard fd >= 0, let target, let claim = claimSend(), claim.sequence <= UInt64(UInt32.max) else { return false }
         let counter = UInt32(claim.sequence)
         let generation = claim.generation
         let box = UnsafeMutableRawBufferPointer(rebasing: datagram[ProtocolConstants.headerSize...])
@@ -49,7 +51,7 @@ extension SatelliteClient {
             direction: .up,
             counter: counter,
             token: generation.token
-        ) else { return }
+        ) else { return false }
         PacketCodec.writeHeader(token: generation.token, counter: counter, into: datagram)
         var address = target.sockaddr
         blockingRegion("satellite.sendto")
@@ -66,6 +68,7 @@ extension SatelliteClient {
                 )
             }
         }
+        return true
     }
 
     // MARK: - Heartbeat
@@ -191,6 +194,7 @@ extension SatelliteClient {
     /// One opened message, on the receive loop; the return paths post to the
     /// pads' feedback in one hop.
     private func dispatch(_ inner: PacketCodec.InnerMessage) {
+        tally.countReceived(inner.msgType)
         let handlers = refreshReceiveHandlers()
         switch inner.msgType {
         case ProtocolConstants.msgHeartbeatAck: acknowledge(inner.payload)

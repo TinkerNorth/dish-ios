@@ -198,36 +198,9 @@ final class DiagnosticsPageMappersTests: XCTestCase {
         ])
     }
 
-    func testEmailDiagnosticsSendsTheSummaryWithTheOneSentence() throws {
-        let state = try steamPage()
-        XCTAssertEqual(state.email, "Email diagnostics")
-        XCTAssertEqual(state.mailBody, """
-        Dish
-        App version: 0.1.0
-        Protocol: v4
-        Local Network: Not asked yet
-        Controller database: Version 3, downloaded
-        Built-in version: v1
-        Last check: Updated · Nov 19, 2026 at 9:04\u{202F}PM
-
-        Controllers
-        Valve Steam Controller (2026, Bluetooth)
-        Name: Valve Steam Controller (2026, Bluetooth)
-        Record: valve-steam-controller-2026-bluetooth
-        Verification: Verified
-
-        The file holds this page and its log, never pairing keys, fingerprints, IP addresses, Wi-Fi names or PC names.
-        """)
-    }
-
-    func testTheMailNamesNoPC() throws {
-        let state = try page(FactsFixture.shell(diagnostics: DiagnosticsSnapshot(hosts: [host()], pads: [steamPad()])))
-        XCTAssertFalse(state.mailBody.contains("Den PC"), state.mailBody)
-        XCTAssertFalse(state.mailBody.contains("10.0.0.2"), state.mailBody)
-        XCTAssertTrue(state.transcript.contains("Den PC"), "the page itself still names it")
-    }
-
-    func testTheMailWithNoControllerSaysSo() throws {
-        XCTAssertTrue(try page(FactsFixture.shell()).mailBody.contains("Controllers\nNo controllers connected\n\nThe file holds"))
+    func testThePageOpensTheReportAsAProblemOrAQuestion() throws {
+        let state = try page(FactsFixture.shell())
+        XCTAssertEqual(state.reportProblem, "Report a problem")
+        XCTAssertEqual(state.askQuestion, "Ask a question")
     }
 }

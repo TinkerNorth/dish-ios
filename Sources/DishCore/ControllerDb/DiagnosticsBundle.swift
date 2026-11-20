@@ -6,7 +6,8 @@
 // own mail app addressed to support. A field this client knows nothing of
 // is written as null, never left out, so a reader can tell "not known" from
 // "not asked". The shape has no field for a pairing key, a fingerprint, an
-// address, a Wi-Fi name or a host's name: hosts are aliases.
+// address, a Wi-Fi name or a host's name: hosts are aliases, and a
+// satellite's own snapshot is the document it scrubbed for this connection.
 
 import Foundation
 
@@ -35,10 +36,29 @@ package struct BundleDevice: Equatable, Encodable {
     package let model: String
     /// "iOS 26.1".
     package let os: String
+    package let conditions: BundleConditions
 
-    package init(model: String, os: String) {
+    package init(model: String, os: String, conditions: BundleConditions = .unknown) {
         self.model = model
         self.os = os
+        self.conditions = conditions
+    }
+
+    private enum CodingKeys: String, CodingKey {
+        case model, os, battery, thermal, powerSave, wifi, usbHost
+    }
+
+    /// iOS tells an app nothing of its Wi-Fi link or of a USB host, so both
+    /// are null on every iPhone and iPad.
+    package func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(model, forKey: .model)
+        try container.encode(os, forKey: .os)
+        try container.encode(conditions.battery, forKey: .battery)
+        try container.encode(conditions.thermal?.rawValue, forKey: .thermal)
+        try container.encode(conditions.powerSave, forKey: .powerSave)
+        try container.encodeNil(forKey: .wifi)
+        try container.encodeNil(forKey: .usbHost)
     }
 }
 
@@ -77,11 +97,12 @@ package struct BundleControllerDb: Equatable, Encodable {
     }
 }
 
-/// How the pad reaches this client: GameController's reading, or Dish's own
-/// over CoreBluetooth.
+/// How the pad reaches this client: GameController's reading, Dish's own
+/// over CoreBluetooth, or the on-screen controller the app draws.
 package enum BundlePath: String, Equatable {
     case gameController
     case bluetooth
+    case virtual
 }
 
 /// What the system said of the pad: the ids where Dish reads it itself, the
@@ -129,18 +150,27 @@ package struct BundleController: Equatable, Encodable {
     /// Nil when no record matched.
     package let record: String?
     package let verification: String?
-    package let transport: ControllerTransport
+    /// Nil for the on-screen controller, which no link carries.
+    package let transport: ControllerTransport?
     package let path: BundlePath
-    package let hardware: BundleHardware
+    /// Nil for the on-screen controller, which has no hardware to tell of.
+    package let hardware: BundleHardware?
     package let outcomes: [BundleOutcome]
+    package let input: BundleInput?
+    package let output: BundleOutput?
+    /// Nil where Dish does not read the pad over Bluetooth itself.
+    package let bluetooth: BundleBluetooth?
 
     package init(
         record: String?,
         verification: String?,
-        transport: ControllerTransport,
+        transport: ControllerTransport?,
         path: BundlePath,
-        hardware: BundleHardware,
-        outcomes: [BundleOutcome] = []
+        hardware: BundleHardware?,
+        outcomes: [BundleOutcome] = [],
+        input: BundleInput? = nil,
+        output: BundleOutput? = nil,
+        bluetooth: BundleBluetooth? = nil
     ) {
         self.record = record
         self.verification = verification
@@ -148,22 +178,29 @@ package struct BundleController: Equatable, Encodable {
         self.path = path
         self.hardware = hardware
         self.outcomes = outcomes
+        self.input = input
+        self.output = output
+        self.bluetooth = bluetooth
     }
 
     private enum CodingKeys: String, CodingKey {
-        case record, verification, transport, path, hardware, lastFeedback, outcomes
+        case record, verification, transport, path, hardware, lastFeedback, outcomes, input, output, bluetooth
     }
 
-    /// iOS keeps no account of a pad's last feedback, so it is null.
+    /// iOS keeps no account of a pad's last feedback beyond its output
+    /// lanes, so `lastFeedback` is null.
     package func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encode(record, forKey: .record)
         try container.encode(verification, forKey: .verification)
-        try container.encode(transport.rawValue, forKey: .transport)
+        try container.encode(transport?.rawValue, forKey: .transport)
         try container.encode(path.rawValue, forKey: .path)
         try container.encode(hardware, forKey: .hardware)
         try container.encodeNil(forKey: .lastFeedback)
         try container.encode(outcomes, forKey: .outcomes)
+        try container.encode(input, forKey: .input)
+        try container.encode(output, forKey: .output)
+        try container.encode(bluetooth, forKey: .bluetooth)
     }
 }
 
@@ -188,20 +225,35 @@ package struct BundleHost: Equatable, Encodable {
     package let protocolVersion: Int?
     package let link: String
     package let grants: BundleGrants
+    /// The client's own view of the session; nil while none is up.
+    package let session: BundleSession?
+    /// What the host said of itself, or the client's copy and why.
+    package let snapshot: BundleHostSnapshot
 
-    package init(alias: String, kind: String, version: String?, protocolVersion: Int?, link: String, grants: BundleGrants) {
+    package init(
+        alias: String,
+        kind: String,
+        version: String?,
+        protocolVersion: Int?,
+        link: String,
+        grants: BundleGrants,
+        session: BundleSession? = nil,
+        snapshot: BundleHostSnapshot = .none
+    ) {
         self.alias = alias
         self.kind = kind
         self.version = version
         self.protocolVersion = protocolVersion
         self.link = link
         self.grants = grants
+        self.session = session
+        self.snapshot = snapshot
     }
 
     private enum CodingKeys: String, CodingKey {
         case alias, kind, version
         case protocolVersion = "protocol"
-        case link, grants
+        case link, grants, session, snapshot, snapshotError
     }
 
     package func encode(to encoder: Encoder) throws {
@@ -212,6 +264,9 @@ package struct BundleHost: Equatable, Encodable {
         try container.encode(protocolVersion, forKey: .protocolVersion)
         try container.encode(link, forKey: .link)
         try container.encode(grants, forKey: .grants)
+        try container.encode(session, forKey: .session)
+        try container.encode(snapshot.snapshot, forKey: .snapshot)
+        try container.encode(snapshot.error?.rawValue, forKey: .snapshotError)
     }
 }
 
@@ -229,6 +284,8 @@ package struct BundleLogLine: Equatable, Encodable {
 
 package struct DiagnosticsBundle: Equatable, Encodable {
     package let createdAtMs: Int64
+    /// The person's own words; nil for a file sent without a report.
+    package let report: BundleReport?
     package let app: BundleApp
     package let device: BundleDevice
     package let controllerDb: BundleControllerDb
@@ -243,9 +300,11 @@ package struct DiagnosticsBundle: Equatable, Encodable {
         controllerDb: BundleControllerDb,
         controllers: [BundleController],
         hosts: [BundleHost],
-        log: [BundleLogLine]
+        log: [BundleLogLine],
+        report: BundleReport? = nil
     ) {
         self.createdAtMs = createdAtMs
+        self.report = report
         self.app = app
         self.device = device
         self.controllerDb = controllerDb
@@ -255,13 +314,14 @@ package struct DiagnosticsBundle: Equatable, Encodable {
     }
 
     private enum CodingKeys: String, CodingKey {
-        case bundle, createdAt, app, device, controllerDb, controllers, hosts, log
+        case bundle, createdAt, report, app, device, controllerDb, controllers, hosts, log
     }
 
     package func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encode(DiagnosticsBundleVersion.current, forKey: .bundle)
         try container.encode(bundleInstant(createdAtMs), forKey: .createdAt)
+        try container.encode(report, forKey: .report)
         try container.encode(app, forKey: .app)
         try container.encode(device, forKey: .device)
         try container.encode(controllerDb, forKey: .controllerDb)
@@ -294,10 +354,4 @@ package func diagnosticsFileName(app: String, atMs: Int64, timeZone: TimeZone) -
     formatter.dateFormat = "yyyyMMdd-HHmmss"
     let stamp = formatter.string(from: Date(timeIntervalSince1970: Double(atMs) / 1000))
     return "dish-diagnostics-\(app)-\(stamp).json"
-}
-
-/// `Dish diagnostics: <app> <version> on <device model>`, the contract's
-/// subject, the same in every language so support can sort by it.
-package func diagnosticsMailSubject(app: String, version: String, model: String) -> String {
-    "Dish diagnostics: \(app) \(version) on \(model)"
 }

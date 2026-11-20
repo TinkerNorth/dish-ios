@@ -2044,6 +2044,40 @@
         }
       }
     },
+    "A question" : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pitanje"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Eine Frage"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Una pregunta"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Une question"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uma pergunta"
+          }
+        }
+      }
+    },
     "A session carries four controllers at most, and %@ already has four. Unbind one to make room." : {
       "comment" : "Banner body; the argument is the host's name.",
       "localizations" : {
@@ -3105,6 +3139,40 @@
         }
       }
     },
+    "Ask a question" : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Postavi pitanje"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Frage stellen"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hacer una pregunta"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Poser une question"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fazer uma pergunta"
+          }
+        }
+      }
+    },
     "Asked %@ to close the app it is running." : {
       "comment" : "Banner: the dish asked the host to close its app.",
       "localizations" : {
@@ -3136,6 +3204,74 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Pedimos a %@ que feche o app em execução."
+          }
+        }
+      }
+    },
+    "Asking your PCs and writing the file…" : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pitam vaše PC-ove i pišem datoteku…"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Deine PCs werden gefragt und die Datei wird geschrieben…"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Preguntando a tus PC y escribiendo el archivo…"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Interrogation de vos PC et écriture du fichier…"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Consultando seus PCs e gravando o arquivo…"
+          }
+        }
+      }
+    },
+    "Audio" : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zvuk"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Audio"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Audio"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Audio"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Áudio"
           }
         }
       }
@@ -4302,6 +4438,40 @@
         }
       }
     },
+    "Choose one" : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Odaberi"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Auswählen"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Elige una"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Choisir"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Escolha uma"
+          }
+        }
+      }
+    },
     "Click" : {
       "localizations" : {
         "bs" : {
@@ -4721,6 +4891,40 @@
         }
       }
     },
+    "Connection or latency" : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Veza ili kašnjenje"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Verbindung oder Latenz"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Conexión o latencia"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Connexion ou latence"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Conexão ou latência"
+          }
+        }
+      }
+    },
     "Connections" : {
       "localizations" : {
         "bs" : {
@@ -4785,6 +4989,40 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Continuar"
+          }
+        }
+      }
+    },
+    "Continue in Mail" : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nastavi u Mailu"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "In Mail fortfahren"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Continuar en Mail"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Continuer dans Mail"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Continuar no Mail"
           }
         }
       }
@@ -4922,6 +5160,40 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Índice do controle"
+          }
+        }
+      }
+    },
+    "Controller not recognised" : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kontroler nije prepoznat"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Controller nicht erkannt"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mando no reconocido"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Manette non reconnue"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Controle não reconhecido"
           }
         }
       }
@@ -6408,6 +6680,40 @@
         }
       }
     },
+    "Dish's version, this device's model and iOS version, its battery, temperature and Low Power Mode" : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Verziju Disha, model i verziju iOS-a ovog uređaja, njegovu bateriju, temperaturu i način rada uštede energije"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die Version von Dish, Modell und iOS-Version dieses Geräts, seinen Akku, seine Temperatur und den Stromsparmodus"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La versión de Dish, el modelo y la versión de iOS de este dispositivo, su batería, su temperatura y el modo de bajo consumo"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La version de Dish, le modèle et la version d’iOS de cet appareil, sa batterie, sa température et le mode économie d’énergie"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A versão do Dish, o modelo e a versão do iOS deste dispositivo, sua bateria, temperatura e o Modo de Pouca Energia"
+          }
+        }
+      }
+    },
     "Done" : {
       "localizations" : {
         "bs" : {
@@ -6750,6 +7056,74 @@
         }
       }
     },
+    "Each PC as Host 1, Host 2: its version, its session as Dish sees it, and what the PC says of it" : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Svaki PC kao Host 1, Host 2: njegovu verziju, sesiju kako je Dish vidi i šta PC kaže o njoj"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Jeden PC als Host 1, Host 2: seine Version, seine Sitzung aus Sicht von Dish und was der PC darüber sagt"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cada PC como Host 1, Host 2: su versión, su sesión tal como la ve Dish y lo que el PC dice de ella"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Chaque PC sous le nom Host 1, Host 2 : sa version, sa session vue par Dish et ce que le PC en dit"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cada PC como Host 1, Host 2: sua versão, sua sessão como o Dish a vê e o que o PC diz dela"
+          }
+        }
+      }
+    },
+    "Each controller's name, how it connects, and counts of what it sent and what it was sent" : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Naziv svakog kontrolera, način povezivanja te broj onoga što je poslao i primio"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Name und Verbindungsart jedes Controllers sowie die Anzahl dessen, was er gesendet und empfangen hat"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El nombre de cada mando, cómo se conecta y el recuento de lo que envió y recibió"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Le nom de chaque manette, sa connexion, et le décompte de ce qu’elle a envoyé et reçu"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O nome de cada controle, como ele se conecta e a contagem do que enviou e recebeu"
+          }
+        }
+      }
+    },
     "Each host’s session, each controller down to the wire, and a log of what changed." : {
       "localizations" : {
         "bs" : {
@@ -6814,40 +7188,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Cada um é configurado de um jeito um pouco diferente."
-          }
-        }
-      }
-    },
-    "Email diagnostics" : {
-      "localizations" : {
-        "bs" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Pošalji dijagnostiku e-poštom"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Diagnose per E-Mail senden"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Enviar diagnóstico por correo"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Envoyer les diagnostics par e-mail"
-          }
-        },
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Enviar diagnóstico por e-mail"
           }
         }
       }
@@ -11749,6 +12089,40 @@
         }
       }
     },
+    "No rumble or feedback" : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nema vibracije ni povratne reakcije"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Keine Vibration oder Rückmeldung"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sin vibración ni respuesta"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pas de vibration ni de retour"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sem vibração ou resposta"
+          }
+        }
+      }
+    },
     "No session right now" : {
       "localizations" : {
         "bs" : {
@@ -11779,6 +12153,40 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Nenhuma sessão no momento"
+          }
+        }
+      }
+    },
+    "None" : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nijedan"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Keiner"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ninguno"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aucune"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nenhum"
           }
         }
       }
@@ -14043,6 +14451,40 @@
         }
       }
     },
+    "Preview file" : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pregledaj datoteku"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Datei ansehen"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ver archivo"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aperçu du fichier"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ver arquivo"
+          }
+        }
+      }
+    },
     "Privacy policy" : {
       "localizations" : {
         "bs" : {
@@ -14776,6 +15218,40 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Proteção contra repetição"
+          }
+        }
+      }
+    },
+    "Report a problem" : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prijavi problem"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Problem melden"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Informar de un problema"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Signaler un problème"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Relatar um problema"
           }
         }
       }
@@ -16182,6 +16658,40 @@
         }
       }
     },
+    "Something else" : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nešto drugo"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Etwas anderes"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Otra cosa"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Autre chose"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Outra coisa"
+          }
+        }
+      }
+    },
     "Source code" : {
       "localizations" : {
         "bs" : {
@@ -17275,6 +17785,40 @@
         }
       }
     },
+    "The controller data's version and its last check" : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Verziju podataka o kontrolerima i njihovu posljednju provjeru"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die Version der Controller-Daten und ihre letzte Prüfung"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La versión de los datos de mandos y su última comprobación"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La version des données des manettes et leur dernière vérification"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A versão dos dados de controles e a última verificação"
+          }
+        }
+      }
+    },
     "The controller left before the binding was applied." : {
       "localizations" : {
         "bs" : {
@@ -17343,6 +17887,74 @@
         }
       }
     },
+    "The events Diagnostics recorded" : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Događaje koje je Dijagnostika zabilježila"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die Ereignisse, die die Diagnose aufgezeichnet hat"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Los eventos que registró Diagnóstico"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Les événements enregistrés par les diagnostics"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Os eventos que o Diagnóstico registrou"
+          }
+        }
+      }
+    },
+    "The file could not be written. Try again." : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Datoteka nije mogla biti zapisana. Pokušajte ponovo."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die Datei konnte nicht geschrieben werden. Versuche es noch einmal."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No se pudo escribir el archivo. Inténtalo de nuevo."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Le fichier n’a pas pu être écrit. Réessayez."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Não foi possível gravar o arquivo. Tente novamente."
+          }
+        }
+      }
+    },
     "The file holds this page and its log, never pairing keys, fingerprints, IP addresses, Wi-Fi names or PC names." : {
       "localizations" : {
         "bs" : {
@@ -17373,6 +17985,40 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "O arquivo contém esta página e seu registro, nunca chaves de pareamento, impressões digitais, endereços IP, nomes de redes Wi-Fi nem nomes de PCs."
+          }
+        }
+      }
+    },
+    "The file will hold" : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Datoteka će sadržavati"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die Datei enthält"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El archivo contendrá"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Le fichier contiendra"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O arquivo conterá"
           }
         }
       }
@@ -19637,6 +20283,40 @@
         }
       }
     },
+    "What happened, and what did you expect?" : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Šta se desilo i šta ste očekivali?"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Was ist passiert, und was hast du erwartet?"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "¿Qué pasó y qué esperabas?"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Que s’est-il passé, et qu’attendiez-vous ?"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O que aconteceu e o que você esperava?"
+          }
+        }
+      }
+    },
     "What is Dish?" : {
       "localizations" : {
         "bs" : {
@@ -19701,6 +20381,40 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "O que é o Satellite?"
+          }
+        }
+      }
+    },
+    "What is it about?" : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O čemu se radi?"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Worum geht es?"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "¿De qué se trata?"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "De quoi s’agit-il ?"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Do que se trata?"
           }
         }
       }
@@ -20461,6 +21175,40 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Sua gorjeta mantém o Dish grátis para todos."
+          }
+        }
+      }
+    },
+    "Your words and the category you picked" : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vaše riječi i kategoriju koju ste odabrali"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Deine Worte und die gewählte Kategorie"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tus palabras y la categoría que elegiste"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vos mots et la catégorie choisie"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Suas palavras e a categoria escolhida"
           }
         }
       }

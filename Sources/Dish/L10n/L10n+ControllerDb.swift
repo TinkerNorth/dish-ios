@@ -4,8 +4,8 @@
 import Foundation
 
 /// The controller database: Settings' switch and Check now in the website
-/// privacy policy's words, Diagnostics' lines and Email diagnostics, and a
-/// controller's record on its page and its card.
+/// privacy policy's words, Diagnostics' lines and the report's mail note,
+/// and a controller's record on its page and its card.
 extension L10n {
 
     // MARK: - Settings
@@ -77,10 +77,6 @@ extension L10n {
 
     var lastCheck: String {
         catalog.text("Last check")
-    }
-
-    var emailDiagnostics: String {
-        catalog.text("Email diagnostics")
     }
 
     /// The mail's one sentence under the summary: what the file holds and

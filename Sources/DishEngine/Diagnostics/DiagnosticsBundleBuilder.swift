@@ -2,14 +2,48 @@
 // Copyright (C) 2026 Dish contributors.
 //
 // The diagnostics bundle, built from the facts the Diagnostics page already
-// renders and nothing else: the app and the device, the controller data,
-// each pad Dish reads with its record, the hosts as aliases, and the flight
-// recorder. A host is "Host 1", "Host 2" in the order the page lists them,
-// in the log too; its name, its address and its keys have no field to go
-// in. Pure: the model hands in the facts and writes the file.
+// renders and the readings a report takes: the person's words, the app and
+// the device with its conditions, the controller data, every controller
+// path with what went in and came out, the hosts as aliases with the
+// client's view of each session and what each host said of itself, and the
+// flight recorder. A host is "Host 1", "Host 2" in the order the page lists
+// them, in the log too; its name, its address and its keys have no field to
+// go in. Pure: the model hands in the facts and writes the file.
 
 import DishCore
 import Foundation
+
+/// What one pad's path carried, as the model read it: the frames it
+/// published, their rate, the last of them, and its feedback lanes.
+package struct PadPathReading: Equatable {
+    package let frames: UInt64
+    /// Nil while the rate was never sampled.
+    package let rateHz: Int?
+    package let last: GamepadReport?
+    package let output: PadOutputReading
+
+    package init(frames: UInt64, rateHz: Int?, last: GamepadReport?, output: PadOutputReading) {
+        self.frames = frames
+        self.rateHz = rateHz
+        self.last = last
+        self.output = output
+    }
+}
+
+/// What a report learned of one host: the version it last told, the
+/// client's view of the session, and what the host said of itself.
+package struct HostReading: Equatable {
+    /// A satellite's server version from its capabilities; nil where unread.
+    package let version: String?
+    package let session: BundleSession?
+    package let snapshot: BundleHostSnapshot
+
+    package init(version: String? = nil, session: BundleSession?, snapshot: BundleHostSnapshot) {
+        self.version = version
+        self.session = session
+        self.snapshot = snapshot
+    }
+}
 
 /// The facts one bundle is made from, as the model read them.
 package struct DiagnosticsBundleFacts: Equatable {
@@ -19,6 +53,12 @@ package struct DiagnosticsBundleFacts: Equatable {
     package let controllers: [ControllerFact]
     package let hosts: [HostDiagnostics]
     package let events: [DiagnosticsEvent]
+    package let report: BundleReport?
+    package let conditions: BundleConditions
+    /// Each controller's path, by its slot id.
+    package let paths: [String: PadPathReading]
+    /// Each host's reading, by its row id.
+    package let hostReadings: [String: HostReading]
 
     package init(
         createdAtMs: Int64,
@@ -26,7 +66,11 @@ package struct DiagnosticsBundleFacts: Equatable {
         controllerDb: ControllerDbStatus,
         controllers: [ControllerFact],
         hosts: [HostDiagnostics],
-        events: [DiagnosticsEvent]
+        events: [DiagnosticsEvent],
+        report: BundleReport? = nil,
+        conditions: BundleConditions = .unknown,
+        paths: [String: PadPathReading] = [:],
+        hostReadings: [String: HostReading] = [:]
     ) {
         self.createdAtMs = createdAtMs
         self.identity = identity
@@ -34,19 +78,29 @@ package struct DiagnosticsBundleFacts: Equatable {
         self.controllers = controllers
         self.hosts = hosts
         self.events = events
+        self.report = report
+        self.conditions = conditions
+        self.paths = paths
+        self.hostReadings = hostReadings
     }
 }
 
 package func diagnosticsBundle(_ facts: DiagnosticsBundleFacts) -> DiagnosticsBundle {
     let aliases = hostAliases(facts.hosts)
+    let device = BundleDevice(
+        model: facts.identity.model,
+        os: "\(DiagnosticsApp.systemName) \(facts.identity.systemVersion)",
+        conditions: facts.conditions
+    )
     return DiagnosticsBundle(
         createdAtMs: facts.createdAtMs,
         app: BundleApp(name: DiagnosticsApp.name, version: facts.identity.appVersion, build: facts.identity.appBuild),
-        device: BundleDevice(model: facts.identity.model, os: "\(DiagnosticsApp.systemName) \(facts.identity.systemVersion)"),
+        device: device,
         controllerDb: bundleControllerDb(facts.controllerDb),
-        controllers: facts.controllers.compactMap(bundleController),
-        hosts: facts.hosts.enumerated().map { bundleHost($1, alias: hostAlias($0)) },
-        log: facts.events.map { bundleLogLine($0, aliases: aliases) }
+        controllers: facts.controllers.map { bundleController($0, path: facts.paths[$0.id]) },
+        hosts: facts.hosts.enumerated().map { bundleHost($1, alias: hostAlias($0), reading: facts.hostReadings[$1.id]) },
+        log: facts.events.map { bundleLogLine($0, aliases: aliases) },
+        report: facts.report
     )
 }
 
@@ -78,17 +132,25 @@ private func bundleControllerDb(_ status: ControllerDbStatus) -> BundleControlle
     )
 }
 
-/// A pad a reader made; the on-screen controller is the app's own and has
-/// no hardware to tell of.
-private func bundleController(_ controller: ControllerFact) -> BundleController? {
-    guard let source = controller.source else { return nil }
+/// Every controller, the on-screen one as the virtual path with no link
+/// and no hardware; what its path carried rides beside it.
+private func bundleController(_ controller: ControllerFact, path: PadPathReading?) -> BundleController {
+    let route = controller.source.map(bundlePath) ?? .virtual
+    let hasRumble = controller.features.contains { $0.feature == .rumble }
     return BundleController(
         record: controller.record?.id,
         verification: controller.record?.verification.rawValue,
-        transport: bundleTransport(controller.link),
-        path: bundlePath(source),
-        hardware: bundleHardware(source, product: controller.name)
+        transport: controller.source.map { _ in bundleTransport(controller.link) },
+        path: route,
+        hardware: controller.source.map { bundleHardware($0, product: controller.name) },
+        input: path.map(bundleInput),
+        output: path.map { $0.output.bundle(target: rumbleTarget(path: route, hasRumble: hasRumble)) },
+        bluetooth: route == .bluetooth ? .lowEnergy : nil
     )
+}
+
+private func bundleInput(_ path: PadPathReading) -> BundleInput {
+    BundleInput(frames: path.frames, rateHz: path.rateHz, last: path.last.map(BundleInputState.init))
 }
 
 private func bundleTransport(_ link: ControllerLink) -> ControllerTransport {
@@ -114,14 +176,16 @@ private func bundleHardware(_ source: PadSource, product: String) -> BundleHardw
     }
 }
 
-private func bundleHost(_ host: HostDiagnostics, alias: String) -> BundleHost {
+private func bundleHost(_ host: HostDiagnostics, alias: String, reading: HostReading?) -> BundleHost {
     BundleHost(
         alias: alias,
         kind: connectionKindWord(host.summary.kind),
-        version: host.moonlight?.info?.appVersion,
+        version: host.moonlight?.info?.appVersion ?? reading?.version,
         protocolVersion: hostProtocol(host),
         link: linkStateWord(host.summary.live),
-        grants: BundleGrants(mic: false, speaker: false, hapticAudio: false)
+        grants: BundleGrants(mic: false, speaker: false, hapticAudio: false),
+        session: reading?.session,
+        snapshot: scrubbed(reading?.snapshot ?? .none, host: host, alias: alias)
     )
 }
 
@@ -196,4 +260,11 @@ private func eventTag(_ kind: DiagnosticsEventKind) -> String {
     case .padBound: "padBound"
     case .padUnbound: "padUnbound"
     }
+}
+
+/// Whatever the host answered, its own label and address read as its alias.
+private func scrubbed(_ entry: BundleHostSnapshot, host: HostDiagnostics, alias: String) -> BundleHostSnapshot {
+    let naming = [host.summary.name, host.summary.address]
+    let document = entry.snapshot.map { scrubbedSnapshot($0, naming: naming, alias: alias) }
+    return BundleHostSnapshot(snapshot: document, error: entry.error)
 }

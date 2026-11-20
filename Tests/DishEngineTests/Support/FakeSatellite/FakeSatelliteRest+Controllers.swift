@@ -106,6 +106,7 @@ extension FakeSatelliteRest {
                     "ctrlIdx": idx,
                     "result": "ok",
                     "appliedType": descriptor["type"] as? Int ?? 0,
+                    "backend": "fake",
                     "motion": ["sinkSupportedForType": true, "backendOk": true]
                 ]
             ])

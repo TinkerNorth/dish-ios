@@ -8,8 +8,7 @@ import XCTest
 /// The controller database through the model: a Steam Controller over
 /// Bluetooth carries its record and the issues it shows here, a pad
 /// GameController reads carries none, the check is armed at launch and
-/// only in the foreground, Settings' intents reach the store, and Email
-/// diagnostics writes the bundle and hands the mail seam one message.
+/// only in the foreground, and Settings' intents reach the store.
 @MainActor
 final class AppModelControllerDbTests: XCTestCase {
 
@@ -138,32 +137,5 @@ final class AppModelControllerDbTests: XCTestCase {
         await model.controllerDb.settle()
         XCTAssertEqual(gateway.requests, [.manifest(etag: nil)])
         XCTAssertEqual(model.controllerDbFacts.status.lastCheckResult, .offline)
-    }
-
-    // MARK: - Email diagnostics
-
-    func testEmailDiagnosticsHandsTheMailAppOneMessageToSupport() throws {
-        let model = try model([Self.steam2026])
-        model.emailDiagnostics(body: "the summary")
-        let mail = try XCTUnwrap(mailer.mails.first)
-        XCTAssertEqual(mailer.mails.count, 1)
-        XCTAssertEqual(mail.recipient, "support@tinkernorth.com")
-        XCTAssertEqual(mail.subject, "Dish diagnostics: Dish for iOS 1.1.0 on iPhone18,1")
-        XCTAssertEqual(mail.body, "the summary")
-        XCTAssertEqual(mail.attachment.deletingLastPathComponent().standardizedFileURL, diagnosticsFolder.standardizedFileURL)
-        XCTAssertTrue(mail.attachment.lastPathComponent.hasPrefix("dish-diagnostics-dish-ios-"))
-        XCTAssertEqual(mail.attachment.pathExtension, "json")
-    }
-
-    func testTheAttachmentIsTheBundleOfThePadsAndTheData() throws {
-        let model = try model([Self.steam2026])
-        model.emailDiagnostics(body: "")
-        let file = try XCTUnwrap(mailer.mails.first?.attachment)
-        let object = try XCTUnwrap(JSONSerialization.jsonObject(with: Data(contentsOf: file)) as? [String: Any])
-        XCTAssertEqual(object["bundle"] as? Int, 1)
-        let controllers = try XCTUnwrap(object["controllers"] as? [[String: Any]])
-        XCTAssertEqual(controllers.first?["record"] as? String, "valve-steam-controller-2026-bluetooth")
-        XCTAssertEqual((object["controllerDb"] as? [String: Any])?["activeVersion"] as? Int, 1)
-        XCTAssertEqual((object["device"] as? [String: String])?["model"], "iPhone18,1")
     }
 }

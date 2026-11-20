@@ -74,6 +74,19 @@ extension WifiConnection {
         editSlots { $0.markApplied(slotId) }
     }
 
+    /// The satellite's answer for the slot, kept for the support file.
+    func recordSlotApply(_ apply: SlotApply, for slotId: String) {
+        editSlots { $0.recordApply(apply, for: slotId) }
+    }
+
+    /// Each bound slot by index, with what the satellite last answered.
+    var slotsInIndexOrder: [(slotId: String, slot: SatelliteSlot, descriptor: ControllerDescriptor)] {
+        slotTable.boundSlotIds.compactMap { slotId in
+            guard let slot = slotTable.slots[slotId], let descriptor = slotTable.descriptor(for: slotId) else { return nil }
+            return (slotId, slot, descriptor)
+        }
+    }
+
     func setCapabilities(_ capabilities: ControllerCapabilities, for slotId: String) {
         editSlots { $0.setCapabilities(capabilities, for: slotId) }
     }

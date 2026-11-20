@@ -55,13 +55,16 @@ final class DiagnosticsBundleTests: XCTestCase {
         let object = try object()
         XCTAssertEqual(object["bundle"] as? Int, 1)
         XCTAssertEqual(object["createdAt"] as? String, "2026-11-19T21:04:11Z")
-        XCTAssertEqual(Set(object.keys), ["bundle", "createdAt", "app", "device", "controllerDb", "controllers", "hosts", "log"])
+        XCTAssertEqual(Set(object.keys), ["bundle", "createdAt", "report", "app", "device", "controllerDb", "controllers", "hosts", "log"])
+        XCTAssertTrue(object["report"] is NSNull, "a file sent without a report says so")
     }
 
     func testTheAppAndTheDeviceAreNamed() throws {
         let object = try object()
         XCTAssertEqual(object["app"] as? [String: String], ["name": "dish-ios", "version": "1.1.0", "build": "7"])
-        XCTAssertEqual(object["device"] as? [String: String], ["model": "iPhone18,1", "os": "iOS 26.1"])
+        let device = try XCTUnwrap(object["device"] as? [String: Any])
+        XCTAssertEqual(device["model"] as? String, "iPhone18,1")
+        XCTAssertEqual(device["os"] as? String, "iOS 26.1")
     }
 
     func testTheDatabaseBeforeItsFirstCheckSaysNullForTheCheck() throws {
@@ -145,8 +148,8 @@ final class DiagnosticsBundleTests: XCTestCase {
     func testTheMailGoesToSupportUnderTheContractsSubject() {
         XCTAssertEqual(DiagnosticsMailAddress.support, "support@tinkernorth.com")
         XCTAssertEqual(
-            diagnosticsMailSubject(app: "Dish for iOS", version: "1.1.0", model: "iPhone18,1"),
-            "Dish diagnostics: Dish for iOS 1.1.0 on iPhone18,1"
+            supportMailSubject(category: "Keine Vibration", app: "Dish for iOS", version: "1.1.0", model: "iPhone18,1"),
+            "Dish support: Keine Vibration · Dish for iOS 1.1.0 on iPhone18,1"
         )
     }
 }

@@ -42,6 +42,11 @@ package final class AppModel {
     let mailer: any DiagnosticsMailer
     /// Where a diagnostics bundle is written before it is attached.
     let diagnosticsFolder: URL
+    /// The device's battery and conditions, as the support file tells them.
+    let deviceBattery: any DeviceBattery
+    let deviceConditions: any DeviceConditions
+    /// The support report being prepared, previewed or handed to the mail app.
+    let reportSource = StateSource<ReportPreparation>(initial: .idle)
     /// The port this device hosts a wired pad through, as the scene read it.
     let devicePort: DevicePort
     let setupSource = StateSource<SetupState?>(initial: nil)
@@ -110,7 +115,8 @@ package final class AppModel {
         controllerDb: ControllerDbStore,
         identity: DeviceIdentity = .unknown,
         mailer: any DiagnosticsMailer = InertDiagnosticsMailer(),
-        diagnosticsFolder: URL = defaultDiagnosticsFolder()
+        diagnosticsFolder: URL = defaultDiagnosticsFolder(),
+        deviceConditions: any DeviceConditions = InertDeviceConditions()
     ) {
         self.onboarding = onboarding
         self.appearance = appearance
@@ -128,6 +134,8 @@ package final class AppModel {
         self.identity = identity
         self.mailer = mailer
         self.diagnosticsFolder = diagnosticsFolder
+        self.deviceBattery = deviceBattery
+        self.deviceConditions = deviceConditions
         lowPower = LowPowerWatch(ticker: lowPowerTicker)
         let log = DiagnosticsLogStore()
         diagnosticsLog = log
@@ -181,7 +189,8 @@ package final class AppModel {
         controllerDbCache: ControllerDbCache? = nil,
         controllerDbTicker: any Ticker = TimerTicker(),
         identity: DeviceIdentity = .unknown,
-        mailer: any DiagnosticsMailer = InertDiagnosticsMailer()
+        mailer: any DiagnosticsMailer = InertDiagnosticsMailer(),
+        deviceConditions: any DeviceConditions = InertDeviceConditions()
     ) {
         let device = DevicePreferenceStore(defaults: defaults)
         let network = NetworkStack(defaults: defaults, keyStore: keyStore, pins: pins) { wireDeviceName(device.state, on: deviceKind) }
@@ -220,7 +229,8 @@ package final class AppModel {
             batteryTicker: batteryTicker,
             controllerDb: controllerDb,
             identity: identity,
-            mailer: mailer
+            mailer: mailer,
+            deviceConditions: deviceConditions
         )
         Self.mintMoonlightIdentity(into: network)
     }

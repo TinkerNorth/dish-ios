@@ -147,6 +147,7 @@ The network engine has these, under dish-mac's names:
 | `SatelliteClient` (`+IO`, `+Streams`, `SendGate`, `ReceiveHandlers`) | gateway, and the hot path's sink | The UDP data plane: one POSIX socket, the session key, the counters, the replay guard, the heartbeat and the receive thread. It is the `PadSink` a bound pad's feed sends to. |
 | `BonjourScan`, `MdnsBrowser`, `LocalNetworkProbe` | gateways | The `_satellite._udp` browse, and what it says about the Local Network permission. |
 | `ControllerDbStore` (`ControllerDb/`) | store | The controller database in force (the bundled copy, or the cached download when newer) and its check against `dish.tinkernorth.com/controllers/v1/`, ten seconds after launch and six hours after each check while in the foreground, never with its switch off; every decision is a `DishCore` function (`controllerDbGate`, `manifestStep`, `installStep`, `controllerDbCheckDelayMs`). |
+| `AppModel+Report`, `WifiConnectionManager+Diagnostics`, `WireTally` | intents, gateway, tally | Report a problem: every figure read at once, each live satellite of 2.3.0 or later asked for its own snapshot over `HTTPClient.getConnectionDiagnostics` within two seconds (every decision a `DishCore` function: `asksForConnectionDiagnostics`, `snapshotOutcome`, `satelliteSnapshot`, `moonlightSnapshot`), the `dish-diagnostics.v1` file written and handed to the mail seam; the session's datagrams by kind, relaxed tallies on the send path and the receive loop. |
 | `ControllerDbHTTPClient`, `ControllerDbCache` | gateway, repository | The website over an ephemeral `URLSession`, no cookie, no query; the downloaded files under `Application Support/Dish/controllers-v1`, swapped in whole and verified against their manifest as they load. |
 
 The Moonlight hosts have these, under dish-mac's names, in `Moonlight/`:
@@ -176,7 +177,9 @@ scene, because only UIKit can fill them: `Pasteboard` (`SystemPasteboard`),
 `DeviceBattery` (`SystemDeviceBattery`, `UIDevice`'s level and charge
 state) and `DiagnosticsMailer` (`DiagnosticsMailComposer`, MessageUI's
 compose sheet or the share sheet), each `Inert` in a model built outside the
-scene. So does the controller database's `ControllerDbGateway`: the scene
+scene; `DeviceConditions` (`SystemDeviceConditions` over the process's
+`ProcessInfo`: the thermal state and Low Power Mode, read when a support
+report is made) is handed in by the scene too. So does the controller database's `ControllerDbGateway`: the scene
 hands in `ControllerDbHTTPClient`, and a model built outside it gets
 `OfflineControllerDbGateway`, which never reaches the website.
 

@@ -32,6 +32,14 @@ enum Page: Hashable {
     case moonlightHosts
     /// Controllers › a controller › Dead zones, by its slot id.
     case deadZones(id: String)
+    /// Diagnostics › Report a problem, or Ask a question: one screen.
+    case report(ReportStart)
+}
+
+/// Which of Diagnostics' two entries opened the report.
+enum ReportStart: Hashable {
+    case problem
+    case question
 }
 
 /// Where the setup cover opens.

@@ -1,6 +1,6 @@
 # Dish for iOS: Privacy Policy
 
-**Effective date:** 2026-11-19.
+**Effective date:** 2026-11-20.
 **Canonical copy:** this file, at
 [`https://github.com/TinkerNorth/dish-ios/blob/main/PRIVACY.md`](https://github.com/TinkerNorth/dish-ios/blob/main/PRIVACY.md).
 
@@ -16,10 +16,10 @@ This policy describes the app as it is today: it finds a Satellite on your
 Wi-Fi, pairs with it and streams a controller's input to it, and it does the
 same with a Moonlight host (Sunshine, Apollo or Wolf) on your network. It also
 checks TinkerNorth's website for a newer list of the controllers it knows
-(section 2.4), and it can hand a diagnostics file to your own mail app when
-you ask it to (section 2.5). Section 2.2 says exactly what crosses your
-network; this file changes in the same commit as the code that makes it
-untrue.
+(section 2.4), and it can hand a support report, your own words with a
+diagnostics file, to your own mail app when you ask it to (section 2.5).
+Section 2.2 says exactly what crosses your network; this file changes in the
+same commit as the code that makes it untrue.
 
 ---
 
@@ -38,8 +38,8 @@ untrue.
   list of controllers, on by default and switched off in Settings (section
   2.4); Support Dish's question to the App Store, through StoreKit, for the
   price of its three tips, where a tip you choose is an App Store purchase
-  (section 2.3); and a diagnostics email, which only you send, from your own
-  mail app (section 2.5).
+  (section 2.3); and a support report, your words with a diagnostics file,
+  which only you send, from your own mail app (section 2.5).
 - It stores its preferences, the PCs you paired and a device id on your
   iPhone (section 2.1), each PC's pairing key and the app's Moonlight
   identity in the Keychain, and each PC's certificate fingerprint in a file
@@ -102,7 +102,7 @@ yours started on it; the protocol has no way to unpair, so the host keeps its
 own record of this iPhone until you remove it there. The setup walk keeps your answers in
 memory while it is open. No database or log is written by the app, beside
 the controller database it downloads (above), the diagnostics file it writes
-when you tap Email diagnostics (section 2.5), and TipKit's own store: Apple's TipKit framework keeps, in the app's container,
+when you tap Preview file or Continue in Mail on Report a problem (section 2.5), and TipKit's own store: Apple's TipKit framework keeps, in the app's container,
 which of the app's four hints were shown, closed or no longer needed, so a
 hint does not come back. It holds no name, address or controller.
 
@@ -127,8 +127,8 @@ memory only and gone when the app quits. It also shows which controller
 database version is in force, where it came from and how the last check
 ended, and, for a Steam Controller read over Bluetooth, its record in that
 database. Copy puts that page's text on the pasteboard and Share hands it to
-the share sheet, each only when you tap it; Email diagnostics is described
-in section 2.5. The app sends none of it anywhere on its own.
+the share sheet, each only when you tap it; Report a problem and Ask a
+question are described in section 2.5. The app sends none of it anywhere on its own.
 
 ### 2.2 Sent to your own LAN, not to TinkerNorth
 
@@ -161,6 +161,13 @@ nothing of it leaves that network:
   and this iPhone: Dish reads its input and writes it the settings that turn
   its keyboard-and-mouse mode off and on again, and the 2026 controller's
   rumble. Dish talks to no other Bluetooth device.
+- **A support report** (section 2.5), only when you tap Preview file or
+  Continue in Mail: one HTTPS request on port 9443 to each PC running
+  Satellite 2.3.0 or later that has a session up with this iPhone, over the same pinned
+  connection and pairing proof as the control plane, asking what that PC
+  knows of this iPhone's connection (`/api/connections/{id}/diagnostics`).
+  It carries nothing but the device id and the proof, and the app waits two
+  seconds at most for the answer.
 - **Moonlight discovery**: a Bonjour browse for `_nvstream._tcp` when the
   Moonlight hosts page opens and when you tap Scan there, which sends nothing
   of yours and reads the hosts' announcements.
@@ -185,7 +192,7 @@ nothing of it leaves that network:
 
 Two things can reach TinkerNorth, both described below: the controller
 database check, which asks TinkerNorth's website for a newer controller list
-and carries nothing about you (section 2.4), and a diagnostics email, which
+and carries nothing about you (section 2.4), and a support report, which
 reaches us only if you send it from your own mail app (section 2.5). There is
 no app update check (the App Store and TestFlight deliver updates) and no
 crash reporter.
@@ -235,32 +242,62 @@ builds both make this check. Earlier versions of this policy said the app
 talked to no TinkerNorth server at all; since 1.1.0 this check is the one
 exception.
 
-### 2.5 Diagnostics by email
+### 2.5 Reporting a problem
 
-When something does not work, you can send us a diagnostics file from
-Settings › Setup & help › Diagnostics › Email diagnostics. Nothing happens
-unless you tap it. The app writes one file,
+When something does not work, or you have a question, you can write to us from
+Settings › Setup & help › Diagnostics › Report a problem (or Ask a question,
+the same screen). Nothing happens unless you tap Preview file or Continue in
+Mail there. You pick what the report is about, write what happened and what
+you expected, and may pick the controller it concerns; the screen lists what
+the file will hold before anything moves, and Preview file shows you the file
+itself. The app then writes one file,
 `dish-diagnostics-dish-ios-<date>-<time>.json`, in its temporary folder, and
-opens a new message in your own mail app addressed to
-`support@tinkernorth.com`, with the Diagnostics page's summary in the body and
-the file attached; where no mail account is set up on this iPhone, it opens
-the share sheet with the file instead. Nothing is sent until you press Send,
-and you can read the file or remove it first. The message then travels like
-any email you send, through your own mail provider.
+Continue in Mail opens a new message in your own mail app addressed to
+`support@tinkernorth.com`, with your words first in the body, then the
+Diagnostics page's summary, and the file attached; where no mail account is set
+up on this iPhone, it opens the share sheet with the file instead. Nothing is
+sent until you press Send, and you can read the file or remove it first. The
+message then travels like any email you send, through your own mail provider.
+
+To make the file, the app asks each PC running Satellite 2.3.0 or later that
+has a session up with this iPhone what it knows of that connection (section
+2.2). The PC answers with its own scrubbed account of this iPhone's
+connection: its Satellite version and platform, its controller drivers and
+their versions, the virtual controllers this iPhone's pads became with what
+went in and came out of them, the audio it granted, its counters and its log
+lines for this connection, with no machine name, no other device's name or
+address, and no secret. A PC that cannot answer in two seconds, or runs an
+older Satellite, is represented by what the app already fetched from it (its
+version, protocol, drivers and audio grant). A Moonlight host is not asked
+anything; the file holds the version it already gave, never its name.
+Whatever a PC answered, the app replaces that PC's name and address with its
+alias everywhere in the answer before it enters the file.
 
 The file holds:
 
+- Your own words, the category you picked, and the controller you picked, by
+  its record id or its name.
 - The app's version and build.
-- Your device's model identifier (such as `iPhone18,1`) and iOS version.
+- Your device's model identifier (such as `iPhone18,1`) and iOS version, its
+  battery level and whether it is charging, its temperature as iOS rates it
+  (nominal to critical), and whether Low Power Mode is on. iOS gives an app no
+  Wi-Fi signal reading, so the file has none.
 - Which controller database version the app uses, where it came from, and
   when the last check ran and how it ended.
-- For each attached controller: its record in the controller database where
-  Dish reads the controller's ids itself (the Steam Controllers over
-  Bluetooth), its verification, how it is connected and how Dish reads it,
-  its name, and the product category GameController gives it.
+- For each controller, the on-screen one included: its record in the
+  controller database where Dish reads the controller's ids itself (the Steam
+  Controllers over Bluetooth), its verification, how it is connected and how
+  Dish reads it, its name, the product category GameController gives it, how
+  many input frames it published and at what rate with the last one (the
+  buttons held and where the sticks and triggers stood), and how many
+  rumble, light-bar, player-light and trigger commands reached it with the
+  last of each.
 - The PCs you use, as "Host 1", "Host 2", with their kind (Satellite or
-  Moonlight), version where the host gave one, protocol and link state,
-  never their names or addresses.
+  Moonlight), version, protocol and link state, the session as this iPhone
+  sees it (each controller slot and what the PC answered for it, the last
+  heartbeat answer, the round-trip times, and counts of each kind of message
+  sent and received), and what the PC said of the connection, as above. Never
+  their names or addresses.
 - The Diagnostics page's log of this run, with every PC named by its alias.
 
 It **never** holds pairing keys or secrets, certificate fingerprints, IP
@@ -288,9 +325,10 @@ Improvements; that is Apple's mechanism and policy, not the app's.
 | Keeping the screen on (the idle timer) | Held off only while a session is up and Keep screen on is set, so that iOS does not lock the screen and suspend Dish mid-game. There is no session in this version, so it is never held. |
 | App Intents (Siri, Spotlight, the Shortcuts app) | Five actions (open the gamepad, the touchpad or the mouse, dim the screen, connect to a paired PC) that open the app; no permission is asked and nothing is donated (section 2.1). |
 | TipKit | Four hints about the app's own controls, remembered on the iPhone (section 2.1). |
-| Battery monitoring (`UIDevice`) | The iPhone's battery level and charging state, read while a controller is attached so a PC is told the lower of it and the controller's; no permission is asked and nothing is stored (section 2.1). |
+| Battery monitoring (`UIDevice`) | The iPhone's battery level and charging state, read while a controller is attached so a PC is told the lower of it and the controller's, and when a support report is made, for its file (section 2.5); no permission is asked and nothing is stored (section 2.1). |
 | The network, beyond your LAN | One HTTPS request to `dish.tinkernorth.com` ten seconds after launch and every six hours while Dish is in the foreground, and when you tap Check now, unless the switch is off (section 2.4). No permission is asked. |
-| The mail compose sheet (MessageUI) | Opened only when you tap Email diagnostics, addressed to support with the diagnostics file attached; the app cannot send it, only you can (section 2.5). No permission is asked. |
+| The mail compose sheet (MessageUI) | Opened only when you tap Continue in Mail on Report a problem, addressed to support with your words and the diagnostics file; the app cannot send it, only you can (section 2.5). No permission is asked. |
+| The thermal state and Low Power Mode (`ProcessInfo`) | Read only when a support report is made, for its file (section 2.5); no permission is asked and nothing is stored. |
 | Bluetooth (Core Bluetooth), declared in `App/Info.plist` with the usage text "Dish reads the Steam Controllers you pair and sends their input straight to your PC." | Reading the Steam Controllers you paired in Settings › Bluetooth, which iOS keeps from games. Off until you turn on Settings › Steam Controllers › Read over Bluetooth, which is when iOS asks; the app neither scans for nor pairs with anything, and looks only among the devices iOS has already connected. If you refuse, the row says so and points to Settings. |
 
 The app asks for no other permission. It does not use the camera, the
