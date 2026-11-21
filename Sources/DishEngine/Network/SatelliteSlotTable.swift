@@ -18,6 +18,16 @@ struct SatelliteSlot: Equatable {
     /// The satellite confirmed the slot plugged. The desire can exist before
     /// the bitmap bit does, and that gap is not drift.
     var applied = false
+    /// What the satellite last answered for the slot; nil until it answered.
+    var lastApply: SlotApply?
+}
+
+/// One apply answer for a slot: the type the host says is in force, the
+/// backend it put the pad on, and its result word.
+struct SlotApply: Equatable {
+    let appliedType: Int
+    let backend: String?
+    let result: String
 }
 
 /// A satellite connection's pads, keyed by slot id, at most
@@ -118,6 +128,11 @@ struct SatelliteSlotTable: Equatable {
         slots[slotId]?.applied = true
         applyCounts[slotId, default: 0] += 1
         return true
+    }
+
+    /// The satellite's answer for a bound slot, whatever it was.
+    mutating func recordApply(_ apply: SlotApply, for slotId: String) {
+        slots[slotId]?.lastApply = apply
     }
 
     /// The session ended: nothing is plugged on the satellite's side.

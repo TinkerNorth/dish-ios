@@ -220,6 +220,13 @@ final class FakeSatelliteStore: @unchecked Sendable {
         var ackBackendAvailableOverride: Bool?
         /// Version 3: the probe grants the mic, the speaker and the haptics lanes.
         var controllerAudioEnabled = false
+        /// How the connection's diagnostics route answers: absent, as a
+        /// satellite older than 2.3.0, until a test says otherwise.
+        var diagnosticsRoute = FakeDiagnosticsRoute.absent
+        /// The version the probe tells: older than the diagnostics route
+        /// unless a test says otherwise.
+        var serverVersion = "1.6.0"
+        var diagnosticsGets = 0
         // Records.
         var sessionPuts: [[String: Any]] = []
         var reconcileGets: [String] = []

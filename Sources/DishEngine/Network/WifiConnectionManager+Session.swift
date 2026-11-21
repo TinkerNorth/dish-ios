@@ -260,6 +260,9 @@ extension WifiConnectionManager {
     /// that let go meanwhile has nothing to record.
     func recordSlotOutcome(_ applied: ControllerApplyDto?, index: Int, conn: WifiConnection) {
         guard let slotId = conn.slotId(at: index) else { return }
+        if let applied {
+            conn.recordSlotApply(SlotApply(appliedType: applied.appliedType, backend: applied.backend, result: applied.result), for: slotId)
+        }
         if let applied, applied.slotIsLive {
             conn.markSlotApplied(slotId)
             recordMotionStatus(applied, connectionId: conn.id, slotId: slotId)

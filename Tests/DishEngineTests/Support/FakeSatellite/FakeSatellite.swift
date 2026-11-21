@@ -155,6 +155,23 @@ final class FakeSatellite: @unchecked Sendable {
         set { store.with { $0.answerPinWithPending = newValue } }
     }
 
+    /// How `GET /api/connections/{id}/diagnostics` answers.
+    var diagnosticsRoute: FakeDiagnosticsRoute {
+        get { store.with { $0.diagnosticsRoute } }
+        set { store.with { $0.diagnosticsRoute = newValue } }
+    }
+
+    /// The version the capabilities probe tells.
+    var serverVersion: String {
+        get { store.with { $0.serverVersion } }
+        set { store.with { $0.serverVersion = newValue } }
+    }
+
+    /// The diagnostics GETs, counted once the route exists.
+    var diagnosticsGets: Int {
+        store.with { $0.diagnosticsGets }
+    }
+
     /// Force the next authed REST calls to 401 with this machine code
     /// ("NOT_PAIRED" / "BAD_PROOF"); nil restores normal auth.
     var forced401Code: String? {

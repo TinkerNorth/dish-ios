@@ -15,11 +15,46 @@ final class SteamLink {
     var reader: SteamPadReader?
     var rumble = TritonRumble()
     var resending = false
+    /// For each write given to the radio and not yet answered, in order: the
+    /// number of the rumble write it was, or 0 for any other. One small
+    /// array, appended and dropped from on the links' queue.
+    var unanswered: [Int] = []
+    var rumbleWrites = 0
+    var lastRumbleWrite: SteamRumbleWrite?
 
     init(pad: UUID, serial: Int) {
         self.pad = pad
         self.serial = serial
+        unanswered.reserveCapacity(8)
     }
+
+    /// Writes down that a write went to the radio: a rumble write is kept
+    /// as the pad's last, any other only holds its place in the answers.
+    func noteWrite(_ write: SteamWrite, _ value: [UInt8], rumble: Bool, atMs: Int64) {
+        guard rumble else {
+            unanswered.append(0)
+            return
+        }
+        rumbleWrites += 1
+        unanswered.append(rumbleWrites)
+        lastRumbleWrite = SteamRumbleWrite(number: rumbleWrites, reportId: write.reportId, bytes: value, atMs: atMs)
+    }
+}
+
+/// The last rumble write made to a pad, until the radio answers it.
+struct SteamRumbleWrite {
+    let number: Int
+    let reportId: UInt8
+    /// The value as the radio was given it; no copy, the array is shared.
+    let bytes: [UInt8]
+    let atMs: Int64
+    var answer: SteamWriteAnswer = .pending
+}
+
+enum SteamWriteAnswer: Equatable {
+    case pending
+    case succeeded
+    case failed(String)
 }
 
 /// The Steam Controllers paired over Bluetooth, read on a queue of their
@@ -101,6 +136,29 @@ package actor SteamLinks: SteamRadioEvents, FeedbackActuators {
 
     package nonisolated func received(_ value: Data, from pad: UUID) {
         assumeIsolated { $0.receive(value, from: pad) }
+    }
+
+    package nonisolated func wrote(_ pad: UUID, error: String?) {
+        assumeIsolated { $0.answered(pad, error: error) }
+    }
+
+    // MARK: - What the support file reads
+
+    /// The last rumble write made to each claimed pad, by slot id, as the
+    /// bundle writes it. Read on the queue once, by a report; never on the
+    /// write path.
+    package func rumbleWrites() -> [String: BundleWrite] {
+        var writes: [String: BundleWrite] = [:]
+        for (pad, link) in links {
+            guard let last = link.lastRumbleWrite else { continue }
+            let (ok, err): (Bool?, String?) = switch last.answer {
+            case .pending: (nil, nil)
+            case .succeeded: (true, nil)
+            case let .failed(word): (false, word)
+            }
+            writes[steamSlotId(pad)] = BundleWrite(reportId: last.reportId, bytes: last.bytes, ok: ok, err: err, atMs: last.atMs)
+        }
+        return writes
     }
 
     // MARK: - The feedback queue's side, which drains here
@@ -221,14 +279,27 @@ package actor SteamLinks: SteamRadioEvents, FeedbackActuators {
         link.reader?.release()
         link.reader = nil
         link.rumble = TritonRumble()
+        link.unanswered.removeAll(keepingCapacity: true) // a gone pad answers nothing
         let pad = link.pad
         tellOwner { $0.ended(pad) }
     }
 
-    private func send(_ writes: [SteamWrite], to pad: UUID) {
+    private func send(_ writes: [SteamWrite], to pad: UUID, rumble: Bool = false) {
+        let link = links[pad]
         for write in writes {
-            radio?.write(steamBleValue(of: write), to: steamBleCharacteristic(for: write), of: pad)
+            let value = steamBleValue(of: write)
+            radio?.write(value, to: steamBleCharacteristic(for: write), of: pad)
+            link?.noteWrite(write, value, rumble: rumble, atMs: wallClockMilliseconds())
         }
+    }
+
+    /// A write was answered; the answers come in the order the writes went,
+    /// and only the last rumble write's is kept.
+    private func answered(_ pad: UUID, error: String?) {
+        guard let link = links[pad], !link.unanswered.isEmpty else { return }
+        let number = link.unanswered.removeFirst()
+        guard number != 0, number == link.lastRumbleWrite?.number else { return }
+        link.lastRumbleWrite?.answer = error.map(SteamWriteAnswer.failed) ?? .succeeded
     }
 
     /// In order on the main queue, so a claim and its end arrive as they happened.
@@ -287,6 +358,6 @@ package actor SteamLinks: SteamRadioEvents, FeedbackActuators {
     }
 
     private func sendRumble(_ report: [UInt8], to pad: UUID) {
-        send([SteamWrite(kind: .output, reportId: TritonReportId.hapticRumble, bytes: report)], to: pad)
+        send([SteamWrite(kind: .output, reportId: TritonReportId.hapticRumble, bytes: report)], to: pad, rumble: true)
     }
 }

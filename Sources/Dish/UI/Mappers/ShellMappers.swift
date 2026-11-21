@@ -72,6 +72,8 @@ func pageTitle(_ page: Page, words: L10n = .app) -> String {
     case .diagnostics: words.diagnostics
     case .moonlightHosts: words.moonlightHosts
     case .deadZones: words.deadZones
+    case .report(.problem): words.reportAProblem
+    case .report(.question): words.askAQuestion
     }
 }
 

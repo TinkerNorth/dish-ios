@@ -147,12 +147,23 @@ private struct SceneRoot {
     init(orientation: OrientationLock, idiom: DeviceIdiom) {
         TipKitTips.configure(hidden: UserDefaults.standard.bool(forKey: TipKitTips.hiddenKey))
         let hardware = hardwareModel(machine: unameMachine(), simulated: ProcessInfo.processInfo.environment[simulatedModelKey])
+        let identity = DeviceIdentity(
+            appVersion: shortVersion(of: .main),
+            appBuild: buildVersion(of: .main),
+            model: hardware,
+            systemVersion: UIDevice.current.systemVersion
+        )
         let model = AppModel(
             defaults: .standard,
             pasteboard: SystemPasteboard(),
             deviceBattery: SystemDeviceBattery(),
             deviceKind: deviceKind(idiom),
-            devicePort: devicePort(modelIdentifier: hardware)
+            devicePort: devicePort(modelIdentifier: hardware),
+            controllerDbGateway: liveControllerDbGateway(),
+            controllerDbCache: ControllerDbCache(directory: ControllerDbCache.defaultDirectory()),
+            identity: identity,
+            mailer: DiagnosticsMailComposer(presenter: frontController),
+            deviceConditions: SystemDeviceConditions(process: ProcessInfo.processInfo)
         )
         let navigation = NavigationStore(
             onboarding: model.onboarding,
@@ -197,6 +208,27 @@ private func refreshOrientations(_ controller: UIViewController) {
 /// The bundle's marketing version, empty when the bundle carries none.
 private func shortVersion(of bundle: Bundle) -> String {
     bundle.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? ""
+}
+
+/// The bundle's build number, empty when the bundle carries none.
+private func buildVersion(of bundle: Bundle) -> String {
+    bundle.object(forInfoDictionaryKey: "CFBundleVersion") as? String ?? ""
+}
+
+/// The website's controller data over HTTPS, the one server of
+/// TinkerNorth's the app asks anything of.
+private func liveControllerDbGateway() -> any ControllerDbGateway {
+    guard let base = URL(string: ControllerDbSchedule.baseURLString) else { return OfflineControllerDbGateway() }
+    return ControllerDbHTTPClient(base: base)
+}
+
+/// The controller on top of the foreground window, which the mail sheet is
+/// presented over.
+@MainActor
+private func frontController() -> UIViewController? {
+    let scenes = UIApplication.shared.connectedScenes.compactMap { $0 as? UIWindowScene }
+    let window = scenes.flatMap(\.windows).first(where: \.isKeyWindow) ?? scenes.first?.windows.first
+    return topmostController(window?.rootViewController)
 }
 
 /// The system clipboard behind the model's `Pasteboard` seam: the one

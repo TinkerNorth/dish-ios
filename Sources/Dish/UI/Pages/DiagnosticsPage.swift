@@ -11,10 +11,11 @@ import SwiftUI
 /// a second measurement. The source ticks while the page shows.
 struct DiagnosticsPage: View {
     @Environment(AppModel.self) private var model
+    @Environment(NavigationStore.self) private var navigation
     @Environment(\.appVersion) private var appVersion
 
     var body: some View {
-        DiagnosticsPageBody(state: diagnosticsPageState(facts: model.shellFacts, appVersion: appVersion), copy: copy)
+        DiagnosticsPageBody(state: diagnosticsPageState(facts: model.shellFacts, appVersion: appVersion), copy: copy, report: report)
             .onAppear { model.pageAppeared(.diagnostics) }
             .onDisappear { model.pageDisappeared(.diagnostics) }
     }
@@ -22,13 +23,19 @@ struct DiagnosticsPage: View {
     private func copy(_ transcript: String) {
         model.copyToPasteboard(transcript)
     }
+
+    private func report(_ start: ReportStart) {
+        navigation.send(.push(.report(start)))
+    }
 }
 
 /// The page over its state, so a preview can draw every state. Copy and
-/// Share hand over the same transcript; Copy says so once it has.
+/// Share hand over the same transcript; Copy says so once it has. Report a
+/// problem and Ask a question open the report, one screen in two categories.
 struct DiagnosticsPageBody: View {
     let state: DiagnosticsPageState
     let copy: @MainActor (String) -> Void
+    let report: @MainActor (ReportStart) -> Void
 
     @State private var copied = false
 
@@ -40,6 +47,15 @@ struct DiagnosticsPageBody: View {
                 SectionEyebrow(title: state.app.title, color: DishTheme.muted)
             } footer: {
                 SettingsFooter(text: state.intro)
+            }
+            .listRowBackground(DishTheme.surface)
+            Section {
+                RowButton(action: reportProblem) {
+                    Text(state.reportProblem).font(DishFont.body).foregroundStyle(DishTheme.primary)
+                }
+                RowButton(action: askQuestion) {
+                    Text(state.askQuestion).font(DishFont.body).foregroundStyle(DishTheme.primary)
+                }
             }
             .listRowBackground(DishTheme.surface)
             DiagnosticsCardsSection(state: state.hosts)
@@ -67,6 +83,14 @@ struct DiagnosticsPageBody: View {
     private func copyTranscript() {
         copy(state.transcript)
         copied = true
+    }
+
+    private func reportProblem() {
+        report(.problem)
+    }
+
+    private func askQuestion() {
+        report(.question)
     }
 }
 
@@ -221,14 +245,14 @@ private struct EmptyNote: View {
     ]
     let shell = previewFacts(localNetwork: .allowed, diagnostics: diagnostics, events: events)
     NavigationStack {
-        DiagnosticsPageBody(state: diagnosticsPageState(facts: shell, appVersion: "0.1.0"), copy: { _ in })
+        DiagnosticsPageBody(state: diagnosticsPageState(facts: shell, appVersion: "0.1.0"), copy: { _ in }, report: { _ in })
     }
 }
 
 #Preview("Nothing seen") {
     let shell = previewFacts(localNetwork: .unknown, diagnostics: DiagnosticsSnapshot(), events: [])
     NavigationStack {
-        DiagnosticsPageBody(state: diagnosticsPageState(facts: shell, appVersion: "0.1.0"), copy: { _ in })
+        DiagnosticsPageBody(state: diagnosticsPageState(facts: shell, appVersion: "0.1.0"), copy: { _ in }, report: { _ in })
     }
 }
 

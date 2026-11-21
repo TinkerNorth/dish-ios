@@ -85,7 +85,13 @@ package final class GameControllerInput: ControllerSource {
     package func attach(_ controller: GCController) {
         let id = slotId(for: controller)
         guard let pad = controller.extendedGamepad else {
-            recordSlot(ControllerSlot(id: id, name: Self.name(of: controller), link: Self.link(of: controller), readable: false))
+            recordSlot(ControllerSlot(
+                id: id,
+                name: Self.name(of: controller),
+                link: Self.link(of: controller),
+                readable: false,
+                source: .gameController(category: controller.productCategory)
+            ))
             return
         }
         let feed = processor.feed(for: id)
@@ -95,7 +101,8 @@ package final class GameControllerInput: ControllerSource {
             name: Self.name(of: controller),
             link: Self.link(of: controller),
             capabilities: Self.detectCapabilities(controller, pad: pad),
-            family: Self.family(of: controller)
+            family: Self.family(of: controller),
+            source: .gameController(category: controller.productCategory)
         ))
         Self.installReportHandler(pad: pad, feed: feed)
         Self.installMotionHandler(controller: controller, feed: feed)

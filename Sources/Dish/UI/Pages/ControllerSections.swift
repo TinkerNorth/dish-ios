@@ -189,6 +189,37 @@ struct ControllerTelemetrySection: View {
     }
 }
 
+/// CONTROLLER DATABASE: the record's name and id with its verification as
+/// a chip, then each known issue, its title over its body.
+struct ControllerRecordSection: View {
+    let state: ControllerRecordState
+
+    var body: some View {
+        Section {
+            ForEach(state.lines) { line in
+                LabeledContent(line.key) {
+                    Text(line.value).font(DishFont.monoDetail).multilineTextAlignment(.trailing).textSelection(.enabled)
+                }
+                .foregroundStyle(DishTheme.onSurface)
+            }
+            ForEach(state.issues) { issue in
+                VStack(alignment: .leading, spacing: DishSpace.s1) {
+                    Text(issue.title).font(DishFont.headline).foregroundStyle(DishTheme.warning)
+                    Text(issue.body).font(DishFont.detail).foregroundStyle(DishTheme.muted)
+                }
+            }
+        } header: {
+            HStack(spacing: DishSpace.s3) {
+                SectionEyebrow(title: state.title, color: DishTheme.muted)
+                if let chip = state.chip {
+                    Chip(text: chip.text, tone: chip.tone)
+                }
+            }
+        }
+        .listRowBackground(DishTheme.surface)
+    }
+}
+
 /// Emulate as: Dish's four pads, or the protocol's four while the pad is
 /// bound to a Moonlight host, with the footer saying what Auto sends.
 struct ControllerEmulateSection: View {

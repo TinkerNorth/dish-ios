@@ -24,7 +24,8 @@ private struct ClockedModel {
             network: TestNetwork.stack(defaults: defaults),
             tips: RecordedTipStore(shelf: .success([])),
             motionSensor: FakeMotionSensor(),
-            resendTicker: ManualTicker()
+            resendTicker: ManualTicker(),
+            controllerDb: .offline(defaults: defaults)
         )
     }
 }

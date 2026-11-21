@@ -1,0 +1,273 @@
+// SPDX-License-Identifier: LGPL-3.0-or-later
+// Copyright (C) 2026 Dish contributors.
+//
+// The diagnostics bundle, built from the facts the Diagnostics page already
+// renders and the readings a report takes: the person's words, the app and
+// the device with its conditions, the controller data, every controller
+// path with what went in and came out, the hosts as aliases with the
+// client's view of each session and what each host said of itself, and the
+// flight recorder. A host is "Host 1", "Host 2" in the order the page lists
+// them, in the log too; its name, its address and its keys have no field to
+// go in. Pure: the model hands in the facts and writes the file.
+
+import DishCore
+import Foundation
+
+/// What one pad's path carried, as the model read it: the frames it
+/// published, their rate, the last of them, and its feedback lanes.
+package struct PadPathReading: Equatable {
+    package let frames: UInt64
+    /// Nil while the rate was never sampled.
+    package let rateHz: Int?
+    package let last: GamepadReport?
+    package let output: PadOutputReading
+    /// The last rumble write the app made itself, for a pad it writes to.
+    package let rumbleWrite: BundleWrite?
+
+    package init(frames: UInt64, rateHz: Int?, last: GamepadReport?, output: PadOutputReading, rumbleWrite: BundleWrite? = nil) {
+        self.rumbleWrite = rumbleWrite
+        self.frames = frames
+        self.rateHz = rateHz
+        self.last = last
+        self.output = output
+    }
+}
+
+/// What a report learned of one host: the version it last told, the
+/// client's view of the session, and what the host said of itself.
+package struct HostReading: Equatable {
+    /// A satellite's server version from its capabilities; nil where unread.
+    package let version: String?
+    package let session: BundleSession?
+    package let snapshot: BundleHostSnapshot
+
+    package init(version: String? = nil, session: BundleSession?, snapshot: BundleHostSnapshot) {
+        self.version = version
+        self.session = session
+        self.snapshot = snapshot
+    }
+}
+
+/// The facts one bundle is made from, as the model read them.
+package struct DiagnosticsBundleFacts: Equatable {
+    package let createdAtMs: Int64
+    package let identity: DeviceIdentity
+    package let controllerDb: ControllerDbStatus
+    package let controllers: [ControllerFact]
+    package let hosts: [HostDiagnostics]
+    package let events: [DiagnosticsEvent]
+    package let report: BundleReport?
+    package let conditions: BundleConditions
+    /// Each controller's path, by its slot id.
+    package let paths: [String: PadPathReading]
+    /// Each host's reading, by its row id.
+    package let hostReadings: [String: HostReading]
+
+    package init(
+        createdAtMs: Int64,
+        identity: DeviceIdentity,
+        controllerDb: ControllerDbStatus,
+        controllers: [ControllerFact],
+        hosts: [HostDiagnostics],
+        events: [DiagnosticsEvent],
+        report: BundleReport? = nil,
+        conditions: BundleConditions = .unknown,
+        paths: [String: PadPathReading] = [:],
+        hostReadings: [String: HostReading] = [:]
+    ) {
+        self.createdAtMs = createdAtMs
+        self.identity = identity
+        self.controllerDb = controllerDb
+        self.controllers = controllers
+        self.hosts = hosts
+        self.events = events
+        self.report = report
+        self.conditions = conditions
+        self.paths = paths
+        self.hostReadings = hostReadings
+    }
+}
+
+package func diagnosticsBundle(_ facts: DiagnosticsBundleFacts) -> DiagnosticsBundle {
+    let aliases = hostAliases(facts.hosts)
+    let device = BundleDevice(
+        model: facts.identity.model,
+        os: "\(DiagnosticsApp.systemName) \(facts.identity.systemVersion)",
+        conditions: facts.conditions
+    )
+    return DiagnosticsBundle(
+        createdAtMs: facts.createdAtMs,
+        app: BundleApp(name: DiagnosticsApp.name, version: facts.identity.appVersion, build: facts.identity.appBuild),
+        device: device,
+        controllerDb: bundleControllerDb(facts.controllerDb),
+        controllers: facts.controllers.map { bundleController($0, path: facts.paths[$0.id]) },
+        hosts: facts.hosts.enumerated().map { bundleHost($1, alias: hostAlias($0), reading: facts.hostReadings[$1.id]) },
+        log: facts.events.map { bundleLogLine($0, aliases: aliases) },
+        report: facts.report
+    )
+}
+
+/// "Host 1" for the first host the page lists.
+package func hostAlias(_ offset: Int) -> String {
+    "Host \(offset + 1)"
+}
+
+/// What the log calls a host whose row is gone: never its name.
+package let unlistedHostAlias = "Host"
+
+/// Each host's alias by the label the flight recorder knows it by.
+private func hostAliases(_ hosts: [HostDiagnostics]) -> [String: String] {
+    var aliases: [String: String] = [:]
+    for (offset, host) in hosts.enumerated() where aliases[host.summary.recordName] == nil {
+        aliases[host.summary.recordName] = hostAlias(offset)
+    }
+    return aliases
+}
+
+/// The switch off is a result of its own, whatever the last check said.
+private func bundleControllerDb(_ status: ControllerDbStatus) -> BundleControllerDb {
+    BundleControllerDb(
+        bundledVersion: status.bundledVersion,
+        activeVersion: status.activeVersion,
+        source: status.source,
+        lastCheckAtMs: status.lastCheckAtMs,
+        lastCheckResult: status.checksEnabled ? status.lastCheckResult : .off
+    )
+}
+
+/// Every controller, the on-screen one as the virtual path with no link
+/// and no hardware; what its path carried rides beside it.
+private func bundleController(_ controller: ControllerFact, path: PadPathReading?) -> BundleController {
+    let route = controller.source.map(bundlePath) ?? .virtual
+    let hasRumble = controller.features.contains { $0.feature == .rumble }
+    return BundleController(
+        record: controller.record?.id,
+        verification: controller.record?.verification.rawValue,
+        transport: controller.source.map { _ in bundleTransport(controller.link) },
+        path: route,
+        hardware: controller.source.map { bundleHardware($0, product: controller.name) },
+        input: path.map(bundleInput),
+        output: path.map { $0.output.bundle(target: rumbleTarget(path: route, hasRumble: hasRumble), write: $0.rumbleWrite) },
+        bluetooth: route == .bluetooth ? .lowEnergy : nil
+    )
+}
+
+private func bundleInput(_ path: PadPathReading) -> BundleInput {
+    BundleInput(frames: path.frames, rateHz: path.rateHz, last: path.last.map(BundleInputState.init))
+}
+
+private func bundleTransport(_ link: ControllerLink) -> ControllerTransport {
+    switch link {
+    case .usbC: .usb
+    case .bluetooth, .onScreen: .bluetooth
+    }
+}
+
+private func bundlePath(_ source: PadSource) -> BundlePath {
+    switch source {
+    case .gameController: .gameController
+    case .bluetooth: .bluetooth
+    }
+}
+
+private func bundleHardware(_ source: PadSource, product: String) -> BundleHardware {
+    switch source {
+    case let .gameController(category):
+        BundleHardware(vid: nil, pid: nil, product: product, category: category)
+    case let .bluetooth(vendorId, productId):
+        BundleHardware(vid: String(format: "%04x", vendorId), pid: String(format: "%04x", productId), product: product, category: nil)
+    }
+}
+
+private func bundleHost(_ host: HostDiagnostics, alias: String, reading: HostReading?) -> BundleHost {
+    BundleHost(
+        alias: alias,
+        kind: connectionKindWord(host.summary.kind),
+        version: host.moonlight?.info?.appVersion ?? reading?.version,
+        protocolVersion: hostProtocol(host),
+        link: linkStateWord(host.summary.live),
+        grants: BundleGrants(mic: false, speaker: false, hapticAudio: false),
+        session: reading?.session,
+        snapshot: scrubbed(reading?.snapshot ?? .none, host: host, alias: alias)
+    )
+}
+
+/// The protocol a satellite's session settled on; nil while none is up, and
+/// for a Moonlight host, whose protocol has no version of Dish's.
+private func hostProtocol(_ host: HostDiagnostics) -> Int? {
+    switch host.summary.kind {
+    case .satellite, .bluetooth: host.facts.live ? host.facts.settledProtocol : nil
+    case .moonlight: nil
+    }
+}
+
+func connectionKindWord(_ kind: ConnectionKind) -> String {
+    switch kind {
+    case .satellite: "satellite"
+    case .moonlight: "moonlight"
+    case .bluetooth: "bluetooth"
+    }
+}
+
+func linkStateWord(_ state: LinkState) -> String {
+    switch state {
+    case .stale: "stale"
+    case .saved: "saved"
+    case .ready: "ready"
+    case .connecting: "connecting"
+    case .connected: "connected"
+    case .unstable: "unstable"
+    }
+}
+
+/// One recorder line in the maintainers' words: its kind as the tag, then
+/// who it is about, a host by its alias.
+private func bundleLogLine(_ event: DiagnosticsEvent, aliases: [String: String]) -> BundleLogLine {
+    BundleLogLine(atMs: event.atMs, tag: eventTag(event.kind), message: eventMessage(event, aliases: aliases))
+}
+
+private func eventMessage(_ event: DiagnosticsEvent, aliases: [String: String]) -> String {
+    let host = aliases[event.host] ?? unlistedHostAlias
+    switch event.kind {
+    case .linkAppeared: return "\(alias(of: event.subject, aliases: aliases)): \(linkStateWord(event.to))"
+    case .linkChanged: return "\(alias(of: event.subject, aliases: aliases)): \(linkStateWord(event.from)) -> \(linkStateWord(event.to))"
+    case .linkRemoved: return alias(of: event.subject, aliases: aliases)
+    case .padAttached: return padWord(event.subject)
+    case .padDetached, .padBound, .padUnbound: return event.host.isEmpty ? padWord(event.subject) : "\(padWord(event.subject)) on \(host)"
+    }
+}
+
+/// A link's subject is a host: its alias, never its name.
+private func alias(of subject: DiagnosticsSubject, aliases: [String: String]) -> String {
+    switch subject {
+    case let .named(name): aliases[name] ?? unlistedHostAlias
+    case .onScreenGamepad: unlistedHostAlias
+    }
+}
+
+/// A pad by the name its vendor gave it; the on-screen controller by its role.
+private func padWord(_ subject: DiagnosticsSubject) -> String {
+    switch subject {
+    case let .named(name): name
+    case .onScreenGamepad: "on-screen gamepad"
+    }
+}
+
+private func eventTag(_ kind: DiagnosticsEventKind) -> String {
+    switch kind {
+    case .linkAppeared: "linkAppeared"
+    case .linkChanged: "linkChanged"
+    case .linkRemoved: "linkRemoved"
+    case .padAttached: "padAttached"
+    case .padDetached: "padDetached"
+    case .padBound: "padBound"
+    case .padUnbound: "padUnbound"
+    }
+}
+
+/// Whatever the host answered, its own label and address read as its alias.
+private func scrubbed(_ entry: BundleHostSnapshot, host: HostDiagnostics, alias: String) -> BundleHostSnapshot {
+    let naming = [host.summary.name, host.summary.address]
+    let document = entry.snapshot.map { scrubbedSnapshot($0, naming: naming, alias: alias) }
+    return BundleHostSnapshot(snapshot: document, error: entry.error)
+}

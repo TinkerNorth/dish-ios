@@ -191,6 +191,8 @@ struct ControllerPadState: Equatable {
     let deadZones: String?
     /// Nil until the pad has sent a report.
     let telemetry: ControllerTelemetryState?
+    /// Nil for a pad whose ids Dish does not read.
+    let record: ControllerRecordState?
     /// Unbind, the red row at the foot; nil while nothing is bound.
     let unbind: RowActionItem<ControllerAction>?
 }
@@ -218,6 +220,7 @@ func controllerPageState(
     apply: ApplyFact? = nil,
     pads: [PadDiagnostics] = [],
     port: DevicePort = .usbC,
+    strings: ControllerStrings = ControllerStrings(tables: [:]),
     id: String,
     words: L10n = .app
 ) -> ControllerPageState {
@@ -231,7 +234,7 @@ func controllerPageState(
     return ControllerPageState(
         title: controllerName(controller, words: words),
         subtitle: controllerSubtitle(controller, port: port, words: words),
-        content: .pad(controllerPadState(controller, paired: paired, apply: apply, pads: pads, port: port, words: words))
+        content: .pad(controllerPadState(controller, paired: paired, apply: apply, pads: pads, port: port, strings: strings, words: words))
     )
 }
 
@@ -246,6 +249,7 @@ private func controllerPadState(
     apply: ApplyFact?,
     pads: [PadDiagnostics],
     port: DevicePort,
+    strings: ControllerStrings,
     words: L10n
 ) -> ControllerPadState {
     let rows = controller.features.map { functionRow($0, of: controller, words: words) }
@@ -279,6 +283,7 @@ private func controllerPadState(
         footnote: words.noPadAudio,
         deadZones: hasDeadZones(controller.link) ? words.deadZones : nil,
         telemetry: telemetryState(controller, readings: pads, words: words),
+        record: controllerRecordState(controller, strings: strings, words: words),
         unbind: offers.unbind
     )
 }

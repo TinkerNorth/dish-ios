@@ -86,6 +86,21 @@ package struct TrackpadsFact: Equatable {
     }
 }
 
+/// The controller database's record for a pad Dish reads itself: its id,
+/// its verification, and the issues it shows on this device over its
+/// transport. Its words are the database's strings, which the app reads.
+package struct ControllerRecordFact: Equatable {
+    package let id: String
+    package let verification: ControllerVerification
+    package let issues: [ControllerIssue]
+
+    package init(id: String, verification: ControllerVerification, issues: [ControllerIssue] = []) {
+        self.id = id
+        self.verification = verification
+        self.issues = issues
+    }
+}
+
 /// A controller Dish knows: a pad on a link, or the on-screen gamepad.
 package struct ControllerFact: Equatable, Identifiable {
     package let id: String
@@ -114,6 +129,11 @@ package struct ControllerFact: Equatable, Identifiable {
     /// A Steam Controller's trackpads, in place of the Touchpad switch; nil
     /// for every other controller.
     package let trackpads: TrackpadsFact?
+    /// How Dish reads the pad; nil for the on-screen controller.
+    package let source: PadSource?
+    /// The database's record, found only for a pad whose ids Dish reads
+    /// itself: GameController names none.
+    package let record: ControllerRecordFact?
 
     package init(
         id: String,
@@ -128,7 +148,9 @@ package struct ControllerFact: Equatable, Identifiable {
         motion: MotionFact = MotionFact(carries: false, status: nil),
         hostEmulation: HostEmulationFact? = nil,
         surfaces: [PlayScreen] = [],
-        trackpads: TrackpadsFact? = nil
+        trackpads: TrackpadsFact? = nil,
+        source: PadSource? = nil,
+        record: ControllerRecordFact? = nil
     ) {
         self.id = id
         self.name = name
@@ -143,6 +165,8 @@ package struct ControllerFact: Equatable, Identifiable {
         self.hostEmulation = hostEmulation
         self.surfaces = surfaces
         self.trackpads = trackpads
+        self.source = source
+        self.record = record
     }
 }
 

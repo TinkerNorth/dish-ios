@@ -129,6 +129,8 @@ package final class WifiConnectionManager {
     @ObservationIgnored var catalogs: [String: CatalogDTO] = [:]
     /// Per-satellite capabilities probe, read before the first session PUT.
     @ObservationIgnored var capabilities: [String: ServerCapabilitiesDTO] = [:]
+    /// How long the support file waits for a satellite's own snapshot.
+    @ObservationIgnored var snapshotTimeoutSeconds = HostSnapshotPolicy.timeoutSeconds
     /// Depth-counted so a superseded approval flow unwinding after its
     /// cancellation cannot clear the marker its successor holds.
     @ObservationIgnored private var pairingDepth: [String: Int] = [:]

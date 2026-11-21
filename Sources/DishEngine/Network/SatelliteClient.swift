@@ -64,6 +64,9 @@ package final class SatelliteClient: Sendable {
     /// another token, a replay, a failed AEAD): Diagnostics reads both.
     let received = AtomicCounter()
     let dropped = AtomicCounter()
+    /// Datagrams sent and opened this session by message kind: the support
+    /// file reads them.
+    let tally = WireTally()
     let receiveRunning = AtomicBool(false)
     /// Balances the receive loop, so `closeSocket` can join it (bounded by
     /// the 500 ms receive timeout) before the fd closes.
@@ -161,6 +164,7 @@ package final class SatelliteClient: Sendable {
         lastRecvCounter.set(0)
         received.reset()
         dropped.reset()
+        tally.reset()
         missedAcks.set(0)
         connectionAlive.set(true)
         heartbeatAckWord.store(0)

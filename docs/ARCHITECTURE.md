@@ -66,7 +66,7 @@ own directory.
 | Module | Role | Depends on | May import |
 |---|---|---|---|
 | `DishCore` | The pure core: the setup machine (`Setup/`), the protocol constants (`ProtocolConstants.swift`), the wire codecs and the session crypto (`Wire/`), the policy reducers (`Reducers/`), and under `Moonlight/` the Moonlight host protocol's pure half (the wire formats and the control seal, the PIN pairing, the host's XML replies and the RTSP text, the controller numbers, what a pad's arrival declares, the pad table the hot path reads, the session reducer and the telemetry conversions) with the ENet client the control stream rides on (`Moonlight/Enet/`, a pure state machine with an injected clock), ported from dish-mac under its names and pinned by the fleet's vectors and Wolf's, and under `DirectInput/` the Steam Controllers over Bluetooth: dish-mac's decoders, trackpad router, plan and model rows, SDL's iOS GATT facts (`SteamBleGatt.swift`) and a link's lifecycle (`SteamLinkMachine.swift`). | nothing | Foundation, CryptoKit, CommonCrypto (the pairing's AES-ECB, which CryptoKit does not offer) |
-| `DishKernel` | The dataflow primitive `StateSource` (below) | nothing | Foundation, Observation |
+| `DishKernel` | The dataflow primitive `StateSource` and the `Repository` protocol (below) | nothing | Foundation, Observation |
 | `DishEngine` | Everything that owns state or touches the platform: the preference stores (`Preferences/`), the minute clock (`Clock/`), the Local Network seam and its Bonjour implementation (`LocalNetwork/`), the GameController bridge and the hot path's pad side (`Input/`), the satellite pool, the REST control plane and the UDP data plane (`Network/`), the Moonlight hosts' edges (`Moonlight/`: the keychain identity, one-connection HTTP with mutual TLS, the pinning gateway, the host store, the RTSP handshake, the UDP control socket and media pinger, the control session that seals input onto the ENet link, the connection that holds a host's pads and live session, the feedback router and the manager that probes, pairs, converges the bindings onto one session per host and forgets), the diagnostics source and its flight recorder (`Diagnostics/`), the App Store's tips (`Support/`), the facts the UI draws (`Models/`) and `AppModel`, the one composition root, with its intents by topic. The Steam Controllers over Bluetooth are `Input/`'s too: `SteamBluetoothPads`, their links (`SteamLinks`, `SteamPadReader`) and the CoreBluetooth radio. | `DishCore`, `DishKernel` | Foundation, Observation, os, Synchronization, GameController, CoreBluetooth, CoreHaptics, CoreMotion, StoreKit, Network, Security, CryptoKit, Darwin, DishCore, DishKernel; never SwiftUI or UIKit |
 | `Dish` | The SwiftUI library: `DishScene` and `OrientationLock` (the two `public` types), the navigation machine and its store, the shell, the pages, the setup cover and the dim, the kit, the mappers, the theme, the localized words and their catalog | `DishEngine`, `DishCore`, `DishKernel` | Foundation, Observation, SwiftUI, UIKit (only `UI/Theme.swift`, `DishScene.swift`, the scene's seams and the kit's `Fingers.swift`), the three modules |
 | `Dish` | The SwiftUI library: `DishScene` and `OrientationLock` (the two `public` types), the scene's seams under `Scene/` (the orientation lock, the window's reader), the navigation machine and its store, the shell, the pages, the setup cover and the dim, the kit, the mappers, the theme, the localized words and their catalog | `DishEngine`, `DishCore`, `DishKernel` | Foundation, Observation, SwiftUI, UIKit (only `UI/Theme.swift`, `DishScene.swift`, `Scene/Orientation.swift`, `Scene/LowPowerScreen.swift` and the kit's `Fingers.swift`), the three modules |
@@ -112,8 +112,11 @@ implementation details. Every store in the engine is shaped the same way
 a `static let`, `UserDefaults` is injected, the setter returns early on an
 equal value and persists before it republishes.
 
-The kernel's other four primitives (`Composer`, `Controller`, `Repository`,
-`AsyncState`) are not ported; each has a row in
+`Repository` is the kernel's dumb keyed storage: the controller database's
+cache (`ControllerDbCache`, files by their published path under Application
+Support) is one, and `ControllerDbStore` holds it beside a `StateSource` of
+the index in force. The kernel's other three primitives (`Composer`,
+`Controller`, `AsyncState`) are not ported; each has a row in
 [`../Tests/PARITY.md`](../Tests/PARITY.md), and the wave that needs it ports it
 with its tests. Until then a derived value is a computed property: the
 model's fact slices (`controllersFacts`, `connectionsFacts`, `sessionFacts`
@@ -143,6 +146,9 @@ The network engine has these, under dish-mac's names:
 | `HTTPClient`, `PairingClient`, `TofuPinningDelegate` | gateways | The REST control plane over `URLSession`, TOFU-pinned. |
 | `SatelliteClient` (`+IO`, `+Streams`, `SendGate`, `ReceiveHandlers`) | gateway, and the hot path's sink | The UDP data plane: one POSIX socket, the session key, the counters, the replay guard, the heartbeat and the receive thread. It is the `PadSink` a bound pad's feed sends to. |
 | `BonjourScan`, `MdnsBrowser`, `LocalNetworkProbe` | gateways | The `_satellite._udp` browse, and what it says about the Local Network permission. |
+| `ControllerDbStore` (`ControllerDb/`) | store | The controller database in force (the bundled copy, or the cached download when newer) and its check against `dish.tinkernorth.com/controllers/v1/`, ten seconds after launch and six hours after each check while in the foreground, never with its switch off; every decision is a `DishCore` function (`controllerDbGate`, `manifestStep`, `installStep`, `controllerDbCheckDelayMs`). |
+| `AppModel+Report`, `WifiConnectionManager+Diagnostics`, `WireTally` | intents, gateway, tally | Report a problem: every figure read at once, each live satellite of 2.3.0 or later asked for its own snapshot over `HTTPClient.getConnectionDiagnostics` within two seconds (every decision a `DishCore` function: `asksForConnectionDiagnostics`, `snapshotOutcome`, `satelliteSnapshot`, `moonlightSnapshot`), the `dish-diagnostics.v1` file written and handed to the mail seam; the session's datagrams by kind, relaxed tallies on the send path and the receive loop. |
+| `ControllerDbHTTPClient`, `ControllerDbCache` | gateway, repository | The website over an ephemeral `URLSession`, no cookie, no query; the downloaded files under `Application Support/Dish/controllers-v1`, swapped in whole and verified against their manifest as they load. |
 
 The Moonlight hosts have these, under dish-mac's names, in `Moonlight/`:
 
@@ -166,10 +172,16 @@ replaces them: `LocalNetworkAccess` (`BonjourLocalNetworkAccess`, the scan;
 `DiscoveryPaths` (the live browse, or a scripted LAN), and the Steam
 Controllers' `SteamRadio` (`CoreBluetoothRadio`, made by a factory only once
 the person opts in; `FakeSteamRadio` in the tests) with its `SteamClock`
-(`QueueClock`, or `ManualSteamClock`). Two have theirs in the
-scene, because only UIKit can fill them: `Pasteboard` (`SystemPasteboard`)
-and `DeviceBattery` (`SystemDeviceBattery`, `UIDevice`'s level and charge
-state), each `Inert` in a model built outside the scene.
+(`QueueClock`, or `ManualSteamClock`). Three have theirs in the
+scene, because only UIKit can fill them: `Pasteboard` (`SystemPasteboard`),
+`DeviceBattery` (`SystemDeviceBattery`, `UIDevice`'s level and charge
+state) and `DiagnosticsMailer` (`DiagnosticsMailComposer`, MessageUI's
+compose sheet or the share sheet), each `Inert` in a model built outside the
+scene; `DeviceConditions` (`SystemDeviceConditions` over the process's
+`ProcessInfo`: the thermal state and Low Power Mode, read when a support
+report is made) is handed in by the scene too. So does the controller database's `ControllerDbGateway`: the scene
+hands in `ControllerDbHTTPClient`, and a model built outside it gets
+`OfflineControllerDbGateway`, which never reaches the website.
 
 ## The composition root
 

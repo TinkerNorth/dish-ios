@@ -24,6 +24,9 @@ struct ServerCapabilitiesDTO: Decodable, Equatable {
     var controllerAudioPresent = false
     /// Some listed backend is available and builds audio personas.
     var anyBackendAudio = false
+    /// Each listed backend, most-preferred first, as the support file
+    /// copies it for a satellite that cannot answer for itself.
+    var backendRows: [CapabilityBackendFact] = []
     /// Client-side: a body arrived.
     var reachable = false
 
@@ -38,8 +41,27 @@ struct ServerCapabilitiesDTO: Decodable, Equatable {
     }
 
     private struct BackendRow: Decodable {
+        var id: String?
         var available: Bool?
         var audio: Bool?
+        var errorCode: String?
+        var lifecycle: String?
+        var driverVersion: String?
+        var bundledVersion: String?
+        var versionState: String?
+
+        var fact: CapabilityBackendFact {
+            CapabilityBackendFact(
+                id: id ?? "",
+                available: available,
+                errorCode: errorCode,
+                lifecycle: lifecycle,
+                driverVersion: driverVersion,
+                bundledVersion: bundledVersion,
+                versionState: versionState,
+                audio: audio
+            )
+        }
     }
 
     init(from decoder: Decoder) throws {
@@ -57,6 +79,22 @@ struct ServerCapabilitiesDTO: Decodable, Equatable {
         self.controllerAudioPresent = audio != nil
         let backends = (try? container.decodeIfPresent([BackendRow].self, forKey: .backends)) ?? []
         self.anyBackendAudio = backends.contains { ($0.available ?? false) && ($0.audio ?? false) }
+        self.backendRows = backends.map(\.fact)
+    }
+
+    /// What the support file copies from this probe, with the catalog's
+    /// schema version when a catalog was read.
+    func facts(catalogVersion: Int?) -> SatelliteCapabilitiesFacts {
+        let audio = controllerAudio
+        return SatelliteCapabilitiesFacts(
+            serverVersion: serverVersion,
+            protocolVersion: protocolVersion,
+            backends: backendRows,
+            controllerAudio: controllerAudioPresent
+                ? CapabilityAudioFact(enabled: audio.enabled, mic: audio.mic, speaker: audio.speaker, hapticAudio: audio.hapticAudio)
+                : nil,
+            catalogVersion: catalogVersion
+        )
     }
 }
 

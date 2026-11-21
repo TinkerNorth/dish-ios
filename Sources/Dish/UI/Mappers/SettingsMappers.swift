@@ -143,6 +143,7 @@ struct SettingsPageState: Equatable {
     let streaming: StreamingSectionState
     let features: ForwardedFeaturesSectionState
     let steamControllers: SteamControllersSectionState
+    let controllerDb: ControllerDbSectionState
     let help: SetupHelpSectionState
     let appearance: AppearanceSectionState
     let about: AboutSectionState
@@ -152,6 +153,7 @@ func settingsPageState(
     preferences: PreferencesFacts,
     forwarding: ForwardingFlags = ForwardingFlags(),
     steamBluetooth: SteamBluetoothStatus = .off,
+    controllerDb: ControllerDbStatus = ControllerDbFacts.none.status,
     appVersion: String,
     words: L10n = .app
 ) -> SettingsPageState {
@@ -166,6 +168,7 @@ func settingsPageState(
         streaming: streamingSection(preferences, words: words),
         features: forwardedFeatures(forwarding, words: words),
         steamControllers: steamControllersSection(steamBluetooth, words: words),
+        controllerDb: controllerDbSection(controllerDb, words: words),
         help: SetupHelpSectionState(
             title: words.setupAndHelp,
             guide: words.setupGuide,

@@ -106,6 +106,26 @@ final class FakeSteamRadio: SteamRadio, Sendable {
         queue.sync { events.characteristicsFound(pad, characteristics) }
     }
 
+    private let answered = Locked<Int>(0)
+
+    /// How many writes the links have made to the pad so far.
+    func writeCount(of pad: UUID) -> Int {
+        calls.filter { if case let .write(written, _, _) = $0 { written == pad } else { false } }.count
+    }
+
+    /// The write callback as CoreBluetooth gives it, in order: one answer
+    /// for each write not yet answered, up to the `total`th, and every one
+    /// is a success unless `error` (a `domain:code` word) is given for the
+    /// last of them.
+    func answerWrites(of pad: UUID, upTo total: Int? = nil, error: String? = nil) {
+        let end = total ?? writeCount(of: pad)
+        let start = answered.get()
+        answered.set(max(start, end))
+        for index in start ..< max(start, end) {
+            queue.sync { events.wrote(pad, error: index == end - 1 ? error : nil) }
+        }
+    }
+
     func notify(_ value: [UInt8], from pad: UUID) {
         queue.sync { events.received(Data(value), from: pad) }
     }

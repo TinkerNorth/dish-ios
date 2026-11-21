@@ -12,8 +12,8 @@ MIT-licensed C (ENet, section 2c), and one is implemented from the
 documentation and MIT source of a host (Wolf, section 2b), and the Steam
 Controllers' Bluetooth protocols are implemented from the facts of zlib-licensed
 SDL (section 2d); the three notices are kept below. Nothing is bundled but the app's own String Catalog, its
-asset catalogs, the fleet's app mark and this notice, which Settings › About ›
-Open source licenses shows.
+asset catalogs, the fleet's app mark, the fleet's controller database and this
+notice, which Settings › About › Open source licenses shows.
 
 ---
 
@@ -21,7 +21,7 @@ Open source licenses shows.
 
 | Component | Version | SPDX | How it reaches the user | Attribution obligation |
 |---|---|---|---|---|
-| Apple system frameworks (Foundation, Observation, Synchronization, SwiftUI, UIKit, os, GameController, CoreBluetooth, CoreHaptics, StoreKit, Network, Security, CryptoKit, CommonCrypto) | the iOS the app runs on | Apple SDK license | Dynamically linked against the user's iOS. Nothing is bundled. StoreKit sells Support Dish's tips; the App Store, not Dish, handles the payment. | None for redistributors of the app |
+| Apple system frameworks (Foundation, Observation, Synchronization, SwiftUI, UIKit, MessageUI, os, GameController, CoreBluetooth, CoreHaptics, StoreKit, Network, Security, CryptoKit, CommonCrypto) | the iOS the app runs on | Apple SDK license | Dynamically linked against the user's iOS. Nothing is bundled. StoreKit sells Support Dish's tips; the App Store, not Dish, handles the payment. | None for redistributors of the app |
 | [ENet](https://github.com/cgutman/enet) (cgutman fork, commit `44c85e1`) | the fork Wolf pins | `MIT` | No C is compiled. The client subset of its reliable-UDP protocol is ported to Swift under `Sources/DishCore/Moonlight/Enet/`; section 2c. | Keep the copyright and permission notice below |
 | [SDL](https://github.com/libsdl-org/SDL) (`main` at commit `b029df0`) | the commit read | `Zlib` | No C is compiled. The Steam Controllers' Bluetooth LE protocols (SDL's iOS CoreBluetooth backend and its two drivers) are ported to Swift under `Sources/DishCore/DirectInput/` by way of dish-mac's port; section 2d. | Keep the notice below (zlib asks for none in a binary; it is kept as an acknowledgment) |
 | [SwiftFormat](https://github.com/nicklockwood/SwiftFormat) | 0.61.1 | `MIT` | Build and CI only, as a pinned release binary (`scripts/tools.sh`). Not in the app. | None for redistributors of the app |
@@ -39,6 +39,13 @@ TinkerNorth's own, covered by this repository's own license: the artwork (the
 app mark is the fleet's, `dish-linux`'s `resources/brand/dish-logo.svg`), the
 String Catalog, and `THIRD_PARTY.md`, a copy of this file that
 `VersionConsistencyTests` keeps equal to it.
+
+`Sources/DishCore/Resources/controllers-v1/` is the fleet's controller
+database, dbVersion 1, copied byte for byte from TinkerNorth's dish-website
+(`public/controllers/v1/`): TinkerNorth's own, like the artwork and the
+String Catalog above. The records marked `imported` carry vendor and product ids taken, as
+facts and not as code, from SDL's hidapi controller list by way of
+dish-android's tables.
 
 ### CI and release tooling
 

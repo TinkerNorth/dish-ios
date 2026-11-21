@@ -21,10 +21,14 @@ let package = Package(
         .library(name: "DishKernel", targets: ["DishKernel"])
     ],
     targets: [
-        // The pure core: the reducers and, later, the wire. Foundation only.
+        // The pure core: the reducers and the wire. Foundation only. Its
+        // resource is the controller database the app was built with, byte
+        // for byte as dish-website publishes `/controllers/v1/`: copied, not
+        // processed, so the digests in its manifest still hold.
         .target(
             name: "DishCore",
             path: "Sources/DishCore",
+            resources: [.copy("Resources/controllers-v1")],
             swiftSettings: warningsAreErrors
         ),
         // The dataflow primitives the engine's stores are built on.

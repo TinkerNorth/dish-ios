@@ -84,7 +84,7 @@ module may import.
 | a store, a seam to the platform, a clock, an intent, a socket or a request, or the composition root | `DishEngine` (`Sources/DishEngine`) | Foundation, Observation, os, Synchronization, GameController, CoreBluetooth, CoreHaptics, Network, Security, CryptoKit, Darwin, DishCore, DishKernel; never SwiftUI or UIKit |
 | a view, a theme token, a localized word, a mapper, or the navigation | `Dish` (`Sources/Dish`) | SwiftUI, Observation, Foundation, the three modules; UIKit only in `UI/Theme.swift`, `DishScene.swift`, `Scene/Orientation.swift`, `Scene/LowPowerScreen.swift` and the kit's `Fingers.swift`; never Network, GameController, Security, CryptoKit |
 | the `@main` | `App/Sources/DishApp.swift` | SwiftUI, Dish |
-| a view, a theme token, a localized word, a mapper, or the navigation | `Dish` (`Sources/Dish`) | SwiftUI, Observation, Foundation, the three modules; UIKit only in `UI/Theme.swift`, `DishScene.swift`, the scene's seams and the kit's `Fingers.swift`; TipKit only in the kit's `HintTip.swift` and `Scene/TipKitTips.swift`; never Network, GameController, Security, CryptoKit |
+| a view, a theme token, a localized word, a mapper, or the navigation | `Dish` (`Sources/Dish`) | SwiftUI, Observation, Foundation, the three modules; UIKit only in `UI/Theme.swift`, `DishScene.swift`, the scene's seams and the kit's `Fingers.swift`; MessageUI only in `Scene/DiagnosticsMailComposer.swift`; TipKit only in the kit's `HintTip.swift` and `Scene/TipKitTips.swift`; never Network, GameController, Security, CryptoKit |
 | an App Intent (it is a navigation event) | `Sources/Dish/Intents/`, `public` so the app target can name it; its App Shortcut in `App/Sources/DishShortcuts.swift` | AppIntents, besides the `Dish` imports |
 | the `@main`, and the App Shortcuts provider | `App/Sources/DishApp.swift`, `App/Sources/DishShortcuts.swift` | SwiftUI, AppIntents, Dish |
 
@@ -98,9 +98,10 @@ Within the engine, pick the primitive that matches what the thing does:
 | imperative commands spanning several sources | a coordinator, constructed by `AppModel` |
 
 `StateSource` is held, not subclassed: it is a `final class`, and a store has
-one as a private property and forwards its `state`. The kernel's other
-primitives (`Composer`, `Controller`, `Repository`, `AsyncState`) are not
-ported yet; the rows for them are in [`Tests/PARITY.md`](Tests/PARITY.md).
+one as a private property and forwards its `state`. `Repository`, dumb
+keyed storage, is ported with the controller database's cache
+(`ControllerDbCache`). The kernel's other primitives (`Composer`,
+`Controller`, `AsyncState`) are not ported yet; the rows for them are in [`Tests/PARITY.md`](Tests/PARITY.md).
 
 The rules, and why each exists, are in [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md).
 Two that catch people out: the engine never words anything (a fact is an enum

@@ -20,7 +20,62 @@ lockstep across the repos share a version number.
 
 ## [Unreleased]
 
+Nothing yet.
+
+## [1.1.0] - 2026-11-19
+
 ### Added
+
+- **The controller database.** Dish ships the fleet's controller database
+  (dbVersion 1, 272 records, served from
+  `https://dish.tinkernorth.com/controllers/v1/`) and checks the website
+  for a newer copy ten seconds after launch and every six hours while it is
+  in the foreground: the manifest with `If-None-Match`, then, only for a
+  newer version, the controller list and its strings in each language, each
+  file checked against the manifest's size and SHA-256 before it replaces
+  the cached copy whole. The requests carry no query and no identifier.
+  Settings › Controller database carries "Check for controller updates
+  automatically", on by default, and "Check now"; with the switch off no
+  request leaves the device and Check now is not offered.
+- **A Steam Controller's record on its page and its card.** A Steam
+  Controller read over Bluetooth shows, on its page and on its Diagnostics
+  card, the database's record: its name, its id, its verification as a
+  chip, and the known issues filed for Bluetooth on this device. A pad
+  GameController reads shows nothing from the database, since iOS names no
+  USB or Bluetooth ids to an app.
+- **The controller data in Diagnostics.** The App section gains the
+  version in force and where it came from (built in or downloaded), the
+  built-in version, and when the last check ran and how it ended.
+- **Report a problem, and Ask a question.** Diagnostics gains Report a
+  problem and Ask a question, one screen in two categories: pick what it is
+  about (controller not recognised, no rumble or feedback, connection or
+  latency, audio, something else, a question), write what happened and what
+  you expected, and pick the controller it concerns, preselected to a pad
+  connected now. The screen lists in plain words what the file will hold,
+  Preview file shows the file itself, and Continue in Mail opens a message to
+  support@tinkernorth.com in your own mail app, under
+  `Dish support: <category> · Dish for iOS <version> on <model>`, with your
+  words first, then the page's summary, and the file attached; where no mail
+  account is set up, the share sheet takes the file. Nothing is sent until
+  you press Send. The file, `dish-diagnostics-dish-ios-<yyyyMMdd-HHmmss>.json`
+  (the fleet's `dish-diagnostics.v1` bundle), holds your report; the app and
+  its build; the device model, iOS version, battery, thermal state and Low
+  Power Mode; the controller data; every controller, the on-screen one
+  included, with its record, its path (`gameController`, `bluetooth`,
+  `virtual`), the frames it published, their rate and the last one, and what
+  reached each feedback lane with the last command; each PC as "Host 1",
+  "Host 2" with the session as this iPhone sees it (each slot with the
+  backend and result the PC answered, the last heartbeat ack, the round
+  trips, and the datagrams sent and received by kind) and, from a Satellite
+  of 2.3.0 or later with a session up, that PC's own snapshot of the
+  connection, asked for over the authenticated client with a two-second
+  wait; an older Satellite, told by the version its capabilities gave and
+  never asked, or one that does not know the connection, refuses the proof
+  or does not answer in time, leaves the capabilities the app already
+  fetched and the reason, every answer naming the PC by its alias alone,
+  and a Moonlight host its serverinfo version, never its name; and the
+  flight recorder. The file never holds pairing keys,
+  fingerprints, addresses, Wi-Fi names or the names of your PCs.
 
 - **The on-screen controller is always listed.** As Android's Virtual
   Controller is: one of the controllers from the first launch, bound and
@@ -54,6 +109,19 @@ lockstep across the repos share a version number.
   links Apple's page. iOS names no port to an app, so the scene reads the
   hardware's model identifier once and the engine maps it; a device the
   table does not know reads as USB-C and sees no note.
+- **The last write to a Steam Controller, in the support file.** The
+  file's rumble lane carries `lastWrite` for a Steam Controller Dish
+  reads over Bluetooth: the route (`gattWrite`), the report id, the value as
+  Dish gave it to Bluetooth in hex, whether Bluetooth answered the write
+  and with which error, and when it was written. A pad GameController
+  reads has `lastWrite` null, since the framework writes and Dish never
+  sees the bytes. The record is kept on the Steam links' own queue with no
+  lock and no allocation in a write; the report reads it once.
+- **Tests for the controller database's languages.** de-AT reads German,
+  bs-Latn-BA Bosnian, pt-PT and pt-BR Brazilian Portuguese, fr-CA French,
+  es-419 Spanish, en-GB English and ja-JP English, and a key one language
+  leaves out reads in English for that key alone.
+
 
 ### Changed
 
@@ -502,5 +570,6 @@ miss. `Tests/PARITY.md` lists everything not built.
   threw them away. The scene now holds its root in `OnFirstUse`, which makes
   it the first time the kept build reads it, so a process makes one.
 
-[Unreleased]: https://github.com/TinkerNorth/dish-ios/compare/1.0.0...main
+[Unreleased]: https://github.com/TinkerNorth/dish-ios/compare/1.1.0...main
+[1.1.0]: https://github.com/TinkerNorth/dish-ios/compare/1.0.0...1.1.0
 [1.0.0]: https://github.com/TinkerNorth/dish-ios/releases/tag/1.0.0

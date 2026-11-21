@@ -34,6 +34,19 @@ package final class AppModel {
     @ObservationIgnored let recorder: DiagnosticsRecorder
     /// The clipboard, the scene's to fill.
     let pasteboard: any Pasteboard
+    /// The controller database in force and its check against the website.
+    package let controllerDb: ControllerDbStore
+    /// The app and the device, as the scene read them.
+    let identity: DeviceIdentity
+    /// The person's mail app, the scene's to fill.
+    let mailer: any DiagnosticsMailer
+    /// Where a diagnostics bundle is written before it is attached.
+    let diagnosticsFolder: URL
+    /// The device's battery and conditions, as the support file tells them.
+    let deviceBattery: any DeviceBattery
+    let deviceConditions: any DeviceConditions
+    /// The support report being prepared, previewed or handed to the mail app.
+    let reportSource = StateSource<ReportPreparation>(initial: .idle)
     /// The port this device hosts a wired pad through, as the scene read it.
     let devicePort: DevicePort
     let setupSource = StateSource<SetupState?>(initial: nil)
@@ -98,7 +111,12 @@ package final class AppModel {
         devicePort: DevicePort = .usbC,
         lowPowerTicker: any Ticker = TimerTicker(),
         deviceBattery: any DeviceBattery = InertDeviceBattery(),
-        batteryTicker: any Ticker = TimerTicker()
+        batteryTicker: any Ticker = TimerTicker(),
+        controllerDb: ControllerDbStore,
+        identity: DeviceIdentity = .unknown,
+        mailer: any DiagnosticsMailer = InertDiagnosticsMailer(),
+        diagnosticsFolder: URL = defaultDiagnosticsFolder(),
+        deviceConditions: any DeviceConditions = InertDeviceConditions()
     ) {
         self.onboarding = onboarding
         self.appearance = appearance
@@ -112,6 +130,12 @@ package final class AppModel {
         self.diagnostics = diagnostics
         self.pasteboard = pasteboard
         self.devicePort = devicePort
+        self.controllerDb = controllerDb
+        self.identity = identity
+        self.mailer = mailer
+        self.diagnosticsFolder = diagnosticsFolder
+        self.deviceBattery = deviceBattery
+        self.deviceConditions = deviceConditions
         lowPower = LowPowerWatch(ticker: lowPowerTicker)
         let log = DiagnosticsLogStore()
         diagnosticsLog = log
@@ -131,14 +155,17 @@ package final class AppModel {
         observeLowPower()
         resumeSteamControllers()
         onScreenBattery.start(onScreenSlotId)
+        controllerDb.resume()
     }
 
     /// Every store over the same defaults, the wall clock, the pads iOS
     /// sees and the Steam Controllers over Bluetooth (each weighed against
     /// the device's battery the scene hands in; the Bluetooth radio made only
     /// once the person opts in), the satellite pool with its keys in the
-    /// Keychain, the Bonjour scan as the Local Network seam, the App Store
-    /// and the phone's sensors.
+    /// Keychain, the Bonjour scan as the Local Network seam, the App Store,
+    /// the phone's sensors, and the controller database over the gateway
+    /// and the cache the scene hands in; with none, it never leaves the
+    /// device and caches in a folder of its own.
     package convenience init(
         defaults: UserDefaults,
         clock: ClockSource = ClockSource(ticker: TimerTicker(), now: Date.init),
@@ -157,7 +184,13 @@ package final class AppModel {
         devicePort: DevicePort = .usbC,
         lowPowerTicker: any Ticker = TimerTicker(),
         steamRadio: @escaping SteamRadioFactory = { CoreBluetoothRadio(events: $0, queue: $1) },
-        steamClock: (any SteamClock)? = nil
+        steamClock: (any SteamClock)? = nil,
+        controllerDbGateway: any ControllerDbGateway = OfflineControllerDbGateway(),
+        controllerDbCache: ControllerDbCache? = nil,
+        controllerDbTicker: any Ticker = TimerTicker(),
+        identity: DeviceIdentity = .unknown,
+        mailer: any DiagnosticsMailer = InertDiagnosticsMailer(),
+        deviceConditions: any DeviceConditions = InertDeviceConditions()
     ) {
         let device = DevicePreferenceStore(defaults: defaults)
         let network = NetworkStack(defaults: defaults, keyStore: keyStore, pins: pins) { wireDeviceName(device.state, on: deviceKind) }
@@ -168,6 +201,13 @@ package final class AppModel {
             makeRadio: steamRadio,
             clock: steamClock,
             deviceBattery: deviceBattery
+        )
+        let controllerDb = ControllerDbStore(
+            bundled: BundledControllerDb.load() ?? .empty,
+            cache: controllerDbCache ?? ControllerDbCache(directory: privateControllerDbFolder()),
+            gateway: controllerDbGateway,
+            preferences: ControllerDbPreferenceStore(defaults: defaults),
+            ticker: controllerDbTicker
         )
         self.init(
             onboarding: OnboardingPreferenceStore(defaults: defaults),
@@ -186,7 +226,11 @@ package final class AppModel {
             devicePort: devicePort,
             lowPowerTicker: lowPowerTicker,
             deviceBattery: deviceBattery,
-            batteryTicker: batteryTicker
+            batteryTicker: batteryTicker,
+            controllerDb: controllerDb,
+            identity: identity,
+            mailer: mailer,
+            deviceConditions: deviceConditions
         )
         Self.mintMoonlightIdentity(into: network)
     }
@@ -210,4 +254,16 @@ package final class AppModel {
     package var setup: SetupState? {
         setupSource.state
     }
+}
+
+/// The temporary folder a diagnostics bundle is written to before the mail
+/// app takes it; iOS empties it on its own.
+package func defaultDiagnosticsFolder() -> URL {
+    FileManager.default.temporaryDirectory.appendingPathComponent("Diagnostics", isDirectory: true)
+}
+
+/// A cache folder of a model's own, for a model the scene did not build,
+/// which never downloads into it.
+func privateControllerDbFolder() -> URL {
+    FileManager.default.temporaryDirectory.appendingPathComponent("controllers-\(UUID().uuidString)", isDirectory: true)
 }

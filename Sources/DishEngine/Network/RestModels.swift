@@ -21,6 +21,9 @@ struct ControllerApplyDto: Decodable, Equatable {
     var result = ""
     var resultCode = ApplyResult.unknown
     var appliedType = Int(ProtocolConstants.controllerTypeXbox)
+    /// The backend the host materialised the pad on; nil where the host
+    /// left it out (additive) or the slot is not plugged.
+    var backend: String?
     var motionSinkSupportedForType = false
     var motionBackendOk = false
 
@@ -36,7 +39,7 @@ struct ControllerApplyDto: Decodable, Equatable {
 
     init() {}
 
-    private enum CodingKeys: String, CodingKey { case ctrlIdx, result, appliedType, motion }
+    private enum CodingKeys: String, CodingKey { case ctrlIdx, result, appliedType, backend, motion }
     private struct MotionDto: Decodable {
         var sinkSupportedForType: Bool?
         var backendOk: Bool?
@@ -49,6 +52,7 @@ struct ControllerApplyDto: Decodable, Equatable {
         self.resultCode = ApplyResult(wireName: result)
         self.appliedType = try container.decodeIfPresent(Int.self, forKey: .appliedType)
             ?? Int(ProtocolConstants.controllerTypeXbox)
+        self.backend = try? container.decodeIfPresent(String.self, forKey: .backend)
         let motion = try container.decodeIfPresent(MotionDto.self, forKey: .motion)
         self.motionSinkSupportedForType = motion?.sinkSupportedForType ?? false
         self.motionBackendOk = motion?.backendOk ?? false

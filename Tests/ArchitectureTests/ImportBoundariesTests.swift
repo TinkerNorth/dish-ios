@@ -41,7 +41,9 @@ final class ImportBoundariesTests: XCTestCase {
         ),
         Layer(
             directory: "Sources/Dish",
-            allowed: ["Foundation", "Observation", "SwiftUI", "UIKit", "AppIntents", "TipKit", "DishCore", "DishEngine", "DishKernel"]
+            allowed: [
+                "Foundation", "Observation", "SwiftUI", "UIKit", "AppIntents", "TipKit", "MessageUI", "DishCore", "DishEngine", "DishKernel"
+            ]
         ),
         Layer(directory: "App/Sources", allowed: ["SwiftUI", "AppIntents", "Dish"])
     ]
@@ -49,13 +51,17 @@ final class ImportBoundariesTests: XCTestCase {
     /// The only files of the UI library that may import UIKit: the theme's
     /// dynamic colours, the scene, the app delegate the scene turns the
     /// window through (UIKit asks a delegate for the orientations it allows),
-    /// the window's touch watcher and screen dimmer the scene installs, and
-    /// the kit's finger surface (UIKit hands a view its touches the moment
-    /// they land, several at once; a SwiftUI gesture waits on arbitration).
+    /// the window's touch watcher and screen dimmer the scene installs, the
+    /// mail sheet the scene presents over the window, and the kit's finger
+    /// surface (UIKit hands a view its touches the moment they land, several
+    /// at once; a SwiftUI gesture waits on arbitration).
     private static let uikitFiles: Set = [
         "Sources/Dish/UI/Theme.swift", "Sources/Dish/DishScene.swift", "Sources/Dish/Scene/Orientation.swift",
-        "Sources/Dish/Scene/LowPowerScreen.swift", "Sources/Dish/UI/Kit/Fingers.swift"
+        "Sources/Dish/Scene/LowPowerScreen.swift", "Sources/Dish/Scene/DiagnosticsMailComposer.swift", "Sources/Dish/UI/Kit/Fingers.swift"
     ]
+    /// The one file that may import MessageUI: the scene's mail seam, which
+    /// presents the compose sheet the diagnostics bundle rides.
+    private static let messageUIFile = "Sources/Dish/Scene/DiagnosticsMailComposer.swift"
     /// Where App Intents may be imported: the intents themselves (an intent
     /// is a navigation event), the scene that hands them their router, and
     /// the app target, which App Intents reads the App Shortcuts from.
@@ -116,6 +122,15 @@ final class ImportBoundariesTests: XCTestCase {
         for file in files where !Self.appIntentsHomes.contains(where: { file.hasPrefix($0) }) {
             let imports = try RepoFiles.imports(of: RepoFiles.read(file))
             XCTAssertFalse(imports.contains("AppIntents"), "\(file) imports AppIntents; an intent lives in Sources/Dish/Intents")
+        }
+    }
+
+    func testMessageUIStaysWithTheScenesMailSeam() throws {
+        let files = RepoFiles.swiftFiles(under: "Sources") + RepoFiles.swiftFiles(under: "App/Sources")
+        XCTAssertTrue(files.contains(Self.messageUIFile), "the mail seam is a scene file")
+        for file in files where file != Self.messageUIFile {
+            let imports = try RepoFiles.imports(of: RepoFiles.read(file))
+            XCTAssertFalse(imports.contains("MessageUI"), "\(file) imports MessageUI; the mail sheet is the scene's")
         }
     }
 

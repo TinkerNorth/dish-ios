@@ -458,12 +458,18 @@ func hostCard(_ host: HostDiagnostics, locale: Locale = .current, words: L10n = 
 
 /// A controller's card wears its health as the dot and the chip, as its
 /// row on the Controllers tab does.
-func padCard(_ pad: PadDiagnostics, port: DevicePort = .usbC, words: L10n = .app) -> DiagnosticsCardState {
-    DiagnosticsCardState(
+func padCard(
+    _ pad: PadDiagnostics,
+    port: DevicePort = .usbC,
+    strings: ControllerStrings = ControllerStrings(tables: [:]),
+    words: L10n = .app
+) -> DiagnosticsCardState {
+    let record = recordLines(pad.controller, strings: strings, words: words) + issueLines(pad.controller, strings: strings, words: words)
+    return DiagnosticsCardState(
         id: pad.id,
         title: controllerName(pad.controller, words: words),
         dot: destinationDot(pad.controller.destination?.health),
         chip: healthText(pad.controller, words: words),
-        lines: padLines(pad, port: port, words: words)
+        lines: padLines(pad, port: port, words: words) + record
     )
 }

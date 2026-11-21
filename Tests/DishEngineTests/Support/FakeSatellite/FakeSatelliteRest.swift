@@ -10,6 +10,7 @@
 // tests always have `certificateDER`). Routes implemented: POST/DELETE
 // /api/pair, GET /api/pair/status, PUT /api/connections, GET/DELETE
 // /api/connections/{id}, PUT/DELETE /api/connections/{id}/controllers/{idx},
+// GET /api/connections/{id}/diagnostics (404 unless a knob says otherwise),
 // GET /api/server/capabilities, GET /api/catalog (ETag/304).
 
 import Foundation
@@ -158,7 +159,8 @@ final class FakeSatelliteRest: @unchecked Sendable {
         case ("DELETE", "/api/pair"): return selfUnpair(request)
         case ("PUT", "/api/connections"): return putSession(request, on: connection)
         case ("GET", "/api/server/capabilities"):
-            return FakeSatelliteHttp.json(200, raw: Self.capabilitiesJSON(controllerAudio: store.with { $0.controllerAudioEnabled }))
+            let (audio, version) = store.with { ($0.controllerAudioEnabled, $0.serverVersion) }
+            return FakeSatelliteHttp.json(200, raw: Self.capabilitiesJSON(controllerAudio: audio, serverVersion: version))
         case ("GET", "/api/catalog"): return catalog(request)
         default:
             if request.plainPath.hasPrefix("/api/connections/") { return connectionSubroute(request) }
@@ -172,6 +174,7 @@ final class FakeSatelliteRest: @unchecked Sendable {
         switch (request.method, parts.count) {
         case ("GET", 1): return reconcile(request, id: parts[0])
         case ("DELETE", 1): return closeSession(request, id: parts[0])
+        case ("GET", 2) where parts[1] == "diagnostics": return connectionDiagnostics(request, id: parts[0])
         case ("PUT", 3) where parts[1] == "controllers":
             guard let idx = Int(parts[2]) else { return FakeSatelliteHttp.json(400, ["error": "bad ctrlIdx"]) }
             return putSlot(request, id: parts[0], idx: idx)
@@ -313,6 +316,7 @@ final class FakeSatelliteRest: @unchecked Sendable {
                 "ctrlIdx": ctrl["ctrlIdx"] as? Int ?? 0,
                 "result": failure ?? "ok",
                 "appliedType": ctrl["type"] as? Int ?? 0,
+                "backend": "fake",
                 "motion": ["sinkSupportedForType": true, "backendOk": true]
             ]
         }

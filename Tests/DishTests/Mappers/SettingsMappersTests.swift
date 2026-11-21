@@ -112,6 +112,13 @@ final class SettingsMappersTests: XCTestCase {
         settingsPageState(preferences: FactsFixture.preferences, steamBluetooth: status, appVersion: "0.1.0").steamControllers
     }
 
+    func testTheControllerDatabaseSectionFollowsItsStatus() {
+        let status = ControllerDbStatus(bundledVersion: 1, activeVersion: 2, source: .cache, checksEnabled: true, lastCheckResult: .updated)
+        let section = settingsPageState(preferences: FactsFixture.preferences, controllerDb: status, appVersion: "0.1.0").controllerDb
+        XCTAssertEqual(section, controllerDbSection(status))
+        XCTAssertEqual(section.line, "Version 2, downloaded · Updated")
+    }
+
     func testSteamControllersOverBluetoothStandOffUntilThePersonOptsIn() {
         XCTAssertEqual(page().steamControllers, SteamControllersSectionState(
             title: "Steam Controllers",

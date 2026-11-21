@@ -73,7 +73,8 @@ package extension AppModel {
             play: playFacts,
             diagnostics: diagnosticsFacts,
             forwarding: forwardingFacts,
-            steamBluetooth: steamBluetoothFacts
+            steamBluetooth: steamBluetoothFacts,
+            controllerDb: controllerDbFacts
         )
     }
 }

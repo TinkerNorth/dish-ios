@@ -1,0 +1,3 @@
+# The bundled controller database is checked byte for byte against the
+# SHA-256 digests in its manifest, so no checkout may normalise its line endings.
+Sources/DishCore/Resources/controllers-v1/** -text

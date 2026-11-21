@@ -47,6 +47,9 @@ struct DiagnosticsPageState: Equatable {
     let copy: String
     let copied: String
     let transcript: String
+    /// The two ways into the report.
+    let reportProblem: String
+    let askQuestion: String
 }
 
 func diagnosticsPageState(
@@ -59,6 +62,7 @@ func diagnosticsPageState(
     let app = DiagnosticsSectionState(
         title: words.appName,
         lines: appLines(appVersion: appVersion, localNetwork: facts.localNetwork, words: words)
+            + controllerDbLines(facts.controllerDb.status, locale: locale, timeZone: timeZone, words: words)
     )
     let hosts = DiagnosticsCardsState(
         title: words.connections,
@@ -66,7 +70,10 @@ func diagnosticsPageState(
     )
     let pads = DiagnosticsCardsState(
         title: words.controllers,
-        cards: cards(facts.diagnostics.pads.map { padCard($0, port: facts.port, words: words) }, empty: words.noControllersConnected)
+        cards: cards(
+            facts.diagnostics.pads.map { padCard($0, port: facts.port, strings: facts.controllerDb.strings, words: words) },
+            empty: words.noControllersConnected
+        )
     )
     let locks = facts.diagnostics.locks.map { DiagnosticsSectionState(title: words.lockStatistics, lines: lockLines($0, words: words)) }
     let events = eventsState(facts.diagnosticsEvents, locale: locale, timeZone: timeZone, words: words)
@@ -82,7 +89,9 @@ func diagnosticsPageState(
         events: events,
         copy: words.copy,
         copied: words.copied,
-        transcript: transcript(blocks: blocks, log: log, events: events)
+        transcript: transcript(blocks: blocks, log: log, events: events),
+        reportProblem: words.reportAProblem,
+        askQuestion: words.askAQuestion
     )
 }
 
