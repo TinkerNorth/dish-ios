@@ -167,13 +167,20 @@ package actor SteamLinks: SteamRadioEvents, FeedbackActuators {
         assumeIsolated { $0.rumbleNow(slotId, strong: strong, weak: weak, durationMs: durationMs) }
     }
 
-    /// Neither pad has a light bar, adaptive triggers or player LEDs, so no
-    /// route carries these to one.
+    /// Neither pad has a light bar, adaptive triggers, player LEDs or
+    /// trigger motors, so no route carries these to one, and neither shows
+    /// anything a bench test would put back.
     package nonisolated func lightbar(_ slotId: String, red: UInt8, green: UInt8, blue: UInt8) {}
 
     package nonisolated func triggerEffects(_ slotId: String, left: [UInt8], right: [UInt8]) {}
 
     package nonisolated func playerLeds(_ slotId: String, player: Int) {}
+
+    package nonisolated func triggerRumble(_ slotId: String, left: UInt16, right: UInt16, durationMs: UInt16) {}
+
+    package nonisolated func idleState(_ slotId: String) -> PadIdleState {
+        .none
+    }
 
     // MARK: - On the queue
 

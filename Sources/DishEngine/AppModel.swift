@@ -30,6 +30,11 @@ package final class AppModel {
     package let diagnostics: DiagnosticsSource
     /// The flight recorder's lines.
     package let diagnosticsLog: DiagnosticsLogStore
+    /// The Diagnostics bench: the tests under way and the answers.
+    let bench: BenchStore
+    /// Whether the phone has the Taptic Engine the on-screen controller's
+    /// rumble plays on.
+    let phoneHaptics: Bool
     /// Feeds the flight recorder from the rows and the controllers.
     @ObservationIgnored let recorder: DiagnosticsRecorder
     /// The clipboard, the scene's to fill.
@@ -116,7 +121,10 @@ package final class AppModel {
         identity: DeviceIdentity = .unknown,
         mailer: any DiagnosticsMailer = InertDiagnosticsMailer(),
         diagnosticsFolder: URL = defaultDiagnosticsFolder(),
-        deviceConditions: any DeviceConditions = InertDeviceConditions()
+        deviceConditions: any DeviceConditions = InertDeviceConditions(),
+        benchTicker: any Ticker = TimerTicker(),
+        benchClock: any BenchClock = SystemBenchClock(),
+        phoneHaptics: Bool = phoneHasHaptics()
     ) {
         self.onboarding = onboarding
         self.appearance = appearance
@@ -136,6 +144,8 @@ package final class AppModel {
         self.diagnosticsFolder = diagnosticsFolder
         self.deviceBattery = deviceBattery
         self.deviceConditions = deviceConditions
+        self.phoneHaptics = phoneHaptics
+        bench = BenchStore(feedback: pads.source.feedback, processor: pads.source.processor, ticker: benchTicker, clock: benchClock)
         lowPower = LowPowerWatch(ticker: lowPowerTicker)
         let log = DiagnosticsLogStore()
         diagnosticsLog = log
@@ -190,7 +200,10 @@ package final class AppModel {
         controllerDbTicker: any Ticker = TimerTicker(),
         identity: DeviceIdentity = .unknown,
         mailer: any DiagnosticsMailer = InertDiagnosticsMailer(),
-        deviceConditions: any DeviceConditions = InertDeviceConditions()
+        deviceConditions: any DeviceConditions = InertDeviceConditions(),
+        benchTicker: any Ticker = TimerTicker(),
+        benchClock: any BenchClock = SystemBenchClock(),
+        phoneHaptics: Bool = phoneHasHaptics()
     ) {
         let device = DevicePreferenceStore(defaults: defaults)
         let network = NetworkStack(defaults: defaults, keyStore: keyStore, pins: pins) { wireDeviceName(device.state, on: deviceKind) }
@@ -230,7 +243,10 @@ package final class AppModel {
             controllerDb: controllerDb,
             identity: identity,
             mailer: mailer,
-            deviceConditions: deviceConditions
+            deviceConditions: deviceConditions,
+            benchTicker: benchTicker,
+            benchClock: benchClock,
+            phoneHaptics: phoneHaptics
         )
         Self.mintMoonlightIdentity(into: network)
     }

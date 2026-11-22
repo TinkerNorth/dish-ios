@@ -82,7 +82,8 @@ final class PadFeedbackTests: XCTestCase {
 
     private func slotId(_ actuation: RecordingActuators.Actuation) -> String {
         switch actuation {
-        case let .rumble(slotId, _, _, _), let .lightbar(slotId, _, _, _), let .triggerEffects(slotId, _, _), let .playerLeds(slotId, _):
+        case let .rumble(slotId, _, _, _), let .lightbar(slotId, _, _, _), let .triggerEffects(slotId, _, _), let .playerLeds(slotId, _),
+             let .triggerRumble(slotId, _, _, _):
             slotId
         }
     }
@@ -196,6 +197,11 @@ private final class SignallingActuators: FeedbackActuators {
     func lightbar(_: String, red _: UInt8, green _: UInt8, blue _: UInt8) {}
     func triggerEffects(_: String, left _: [UInt8], right _: [UInt8]) {}
     func playerLeds(_: String, player _: Int) {}
+    func triggerRumble(_: String, left _: UInt16, right _: UInt16, durationMs _: UInt16) {}
+
+    func idleState(_: String) -> PadIdleState {
+        .none
+    }
 }
 
 /// A connection that keeps every set of routes it was handed.

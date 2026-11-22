@@ -131,16 +131,23 @@ private final class RecordingSink: PadSink {
     }
 }
 
-/// Actuators that write down what the feedback queue asked of them.
+/// Actuators that write down what the feedback queue asked of them, over a
+/// pad that shows `idle` on its own.
 final class RecordingActuators: FeedbackActuators {
     enum Actuation: Equatable {
         case rumble(String, strong: UInt16, weak: UInt16, durationMs: UInt16)
         case lightbar(String, red: UInt8, green: UInt8, blue: UInt8)
         case triggerEffects(String, left: [UInt8], right: [UInt8])
         case playerLeds(String, player: Int)
+        case triggerRumble(String, left: UInt16, right: UInt16, durationMs: UInt16)
     }
 
     private let log = Locked<[Actuation]>([])
+    private let idle: PadIdleState
+
+    init(idle: PadIdleState = .none) {
+        self.idle = idle
+    }
 
     var actuations: [Actuation] {
         log.get()
@@ -160,6 +167,14 @@ final class RecordingActuators: FeedbackActuators {
 
     func playerLeds(_ slotId: String, player: Int) {
         log.mutate { $0.append(.playerLeds(slotId, player: player)) }
+    }
+
+    func triggerRumble(_ slotId: String, left: UInt16, right: UInt16, durationMs: UInt16) {
+        log.mutate { $0.append(.triggerRumble(slotId, left: left, right: right, durationMs: durationMs)) }
+    }
+
+    func idleState(_: String) -> PadIdleState {
+        idle
     }
 }
 

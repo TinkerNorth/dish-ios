@@ -165,7 +165,8 @@ package final class GameControllerInput: ControllerSource {
             hasBattery: controller.battery != nil,
             hasTriggerEffects: dualSense,
             hasPlayerLeds: dualSense,
-            hasExtendedButtons: paddleInputs(pad) != nil
+            hasExtendedButtons: paddleInputs(pad) != nil,
+            motors: hapticMotors(controller.haptics?.supportedLocalities ?? [])
         )
     }
 
@@ -296,6 +297,21 @@ extension WireButtonWord {
     mutating func insert(_ button: WireButton, held: Bool) {
         if held { insert(button) }
     }
+}
+
+/// The motors a pad's haptics reach, by the localities it reports
+/// (`GCDeviceHaptics.supportedLocalities`): the strong motor in the left
+/// handle and the weak in the right, which the game's rumble drives, and a
+/// motor in each trigger where the pad has one. The default and all
+/// localities every pad reports name no motor of their own.
+func hapticMotors(_ localities: Set<GCHapticsLocality>) -> BenchReach {
+    let motors: [(GCHapticsLocality, BenchReach)] = [
+        (.leftHandle, .strongMotor),
+        (.rightHandle, .weakMotor),
+        (.leftTrigger, .leftTriggerMotor),
+        (.rightTrigger, .rightTriggerMotor)
+    ]
+    return motors.filter { localities.contains($0.0) }.reduce(into: BenchReach()) { $0.formUnion($1.1) }
 }
 
 /// The family a product category names: the framework's three constants,
