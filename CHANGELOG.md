@@ -121,6 +121,24 @@ Nothing yet.
   bs-Latn-BA Bosnian, pt-PT and pt-BR Brazilian Portuguese, fr-CA French,
   es-419 Spanish, en-GB English and ja-JP English, and a key one language
   leaves out reads in English for that key alone.
+- **Controller tests.** Each controller's card on Diagnostics opens
+  Controller tests, which drives the controller from the iPhone or iPad
+  alone, with no PC in the loop and whatever its switches say, then asks
+  whether it worked. A GameController pad gets each motor its haptics
+  report, the weak one, the strong one and both, at 48000 of 65535 for
+  400 ms; the motors in its triggers where it has them; its light bar red,
+  green, then blue, 400 ms each; its player LEDs as players one to four,
+  400 ms each; and both adaptive triggers at full resistance for two
+  seconds. A Steam Controller read over Bluetooth gets what Dish writes to
+  it, the 2026 pad's two motors; the on-screen controller a short buzz on
+  the iPhone. Every pad Dish reads gets dish-mac's drift and range tests,
+  over the sticks as the pad sends them, before the dead zones. A test
+  that cannot reach the controller on its path is not on the page. The
+  light bar, the player LEDs and the triggers go back to what the game last
+  set, or to what the pad showed before when the game never set them, and
+  a colour, a player or an effect the game sends while a test holds that
+  surface waits and is the one put back. Your answers ride the support
+  file's `outcomes`, each with the time its test ended.
 
 
 ### Changed

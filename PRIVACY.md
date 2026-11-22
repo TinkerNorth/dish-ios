@@ -1,6 +1,6 @@
 # Dish for iOS: Privacy Policy
 
-**Effective date:** 2026-11-20.
+**Effective date:** 2026-11-22.
 **Canonical copy:** this file, at
 [`https://github.com/TinkerNorth/dish-ios/blob/main/PRIVACY.md`](https://github.com/TinkerNorth/dish-ios/blob/main/PRIVACY.md).
 
@@ -292,6 +292,11 @@ The file holds:
   buttons held and where the sticks and triggers stood), and how many
   rumble, light-bar, player-light and trigger commands reached it with the
   last of each.
+- For each controller you tested under Diagnostics › Controller tests, the
+  tests you answered "Did it work?" for (the newest twenty of this run): each
+  test's name, your answer, and when the test ended. The tests themselves
+  only drive the controller from this device; nothing about them leaves it
+  unless you send a report.
 - The PCs you use, as "Host 1", "Host 2", with their kind (Satellite or
   Moonlight), version, protocol and link state, the session as this iPhone
   sees it (each controller slot and what the PC answered for it, the last

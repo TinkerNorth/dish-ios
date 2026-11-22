@@ -167,7 +167,9 @@ sockets, or `FakeMoonlightEdges`) and the discovery closure.
 
 The seams are protocols with one production implementation each, so a test
 replaces them: `LocalNetworkAccess` (`BonjourLocalNetworkAccess`, the scan;
-`RecordedLocalNetworkAccess` for tests), `Ticker`, `ControllerSource`,
+`RecordedLocalNetworkAccess` for tests), `Ticker`, `BenchClock`
+(`SystemBenchClock`, the uptime and the wall clock; `ManualBenchClock` in
+the tests), `ControllerSource`,
 `KeyStore` (`KeychainKeyStore`, `InMemoryKeyStore`), the manager's
 `DiscoveryPaths` (the live browse, or a scripted LAN), and the Steam
 Controllers' `SteamRadio` (`CoreBluetoothRadio`, made by a factory only once
@@ -296,6 +298,11 @@ What `AppModel` publishes today:
   `unbind(slotId:)`, `dismissApply`) and `AppModel+Session.swift`
   (`reconnect`, `enteredBackground`, `enteredForeground`). A view calls these
   and nothing else.
+  `AppModel+Bench.swift` (`benchFacts`, every controller with what its path
+  reaches (`benchReach`) and where the bench stands; `runBenchTest`, which
+  runs a test only where the reach carries it, and `answerBenchTest`), over
+  `BenchStore` (`Diagnostics/`), which the root builds over the pads'
+  feedback and processor.
   `AppModel+Moonlight.swift` (`pairMoonlight`, `cancelMoonlightPairing`,
   `newMoonlightCode`, `addMoonlightHost`, `scanMoonlightHosts`,
   `leftMoonlightHosts`, `pickMoonlightApp`, `performMoonlight`,
@@ -501,6 +508,25 @@ a satellite's rumble reaches the pad in one hop. The 3 s lizard refresh, the
 40 ms rumble re-send and the 5 s look for connected pads are `asyncAfter` on
 the queue (`QueueClock`). `LockLawTests` holds that queue to no tracked lock,
 over a claimed pad routed to a live client and rumbled by a satellite.
+
+The Diagnostics bench drives a pad through the same record and queue:
+`BenchStore` posts a test's begin, its writes and its end from the main
+actor (`FeedbackPad.benchBegin`, `benchWrite`, `benchEnd`), and each runs on
+the queue that owns the pad's actuators, the feedback queue or the Steam
+links'. A test's writes go straight to the actuators, not through the
+game's words, so they are neither counted nor kept. While a test holds a
+surface, its bit in the record's `held` word makes the drain keep the
+game's command (in the lane's tally, and for the triggers the box its
+poster made, held in a `ReaderHeld`) without writing it; the test's end
+writes back the game's last value, or what the pad showed as the test
+began (`FeedbackActuators.idleState`: the light's colour and the player
+index, read through the framework), and a buzz simply stops unless the
+game asked for rumble during it. The hot path gains one relaxed load of
+`held` per drained command and, in the trigger drain, the exchange that
+keeps its box; the receive loop and the posts are untouched, no lock is
+taken and nothing is allocated. The bench's own steps land on a 50 ms tick
+on the main actor (`FeedbackBench.swift` in `DishCore` holds every test's
+writes and times, and the rules for what goes back).
 
 A pad bound to a Moonlight host routes to a `MoonlightPadSink`: the host's
 `MoonlightPadLink` builds the frame under its lock (the pad table, the click's

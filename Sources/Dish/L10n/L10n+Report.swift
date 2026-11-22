@@ -81,6 +81,10 @@ extension L10n {
         catalog.text("Each controller's name, how it connects, and counts of what it sent and what it was sent")
     }
 
+    var holdsAnswers: String {
+        catalog.text("Your answers on each controller’s tests")
+    }
+
     var holdsHosts: String {
         catalog.text("Each PC as Host 1, Host 2: its version, its session as Dish sees it, and what the PC says of it")
     }

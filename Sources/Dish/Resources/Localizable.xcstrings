@@ -22403,6 +22403,40 @@
         }
       }
     },
+    "Your answers on each controller’s tests" : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vaši odgovori na testove svakog kontrolera"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Deine Antworten auf die Tests jedes Controllers"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tus respuestas a las pruebas de cada mando"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vos réponses aux tests de chaque manette"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Suas respostas aos testes de cada controle"
+          }
+        }
+      }
+    },
     "Your tip is waiting for approval." : {
       "localizations" : {
         "bs" : {

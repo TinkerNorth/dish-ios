@@ -85,6 +85,7 @@ func reportPageState(
             words.holdsThisDevice,
             words.holdsControllerData,
             words.holdsControllers,
+            words.holdsAnswers,
             words.holdsHosts,
             words.holdsEvents
         ],

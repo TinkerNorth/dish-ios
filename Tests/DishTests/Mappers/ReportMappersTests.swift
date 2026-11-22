@@ -112,8 +112,9 @@ final class ReportMappersTests: XCTestCase {
     func testTheFileIsDescribedInPlainWordsWithWhatItNeverHolds() throws {
         let state = try page()
         XCTAssertEqual(state.holdsTitle, "The file will hold")
-        XCTAssertEqual(state.holds.count, 6)
+        XCTAssertEqual(state.holds.count, 7)
         XCTAssertEqual(state.holds.first, "Your words and the category you picked")
+        XCTAssertEqual(state.holds[4], "Your answers on each controller’s tests", "the bench's answers ride the file")
         XCTAssertEqual(
             state.never,
             "The file holds this page and its log, never pairing keys, fingerprints, IP addresses, Wi-Fi names or PC names."
