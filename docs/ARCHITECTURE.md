@@ -525,7 +525,8 @@ game asked for rumble during it. The hot path gains one relaxed load of
 `held` per drained command and, in the trigger drain, the exchange that
 keeps its box; the receive loop and the posts are untouched, no lock is
 taken and nothing is allocated. The bench's own steps land on a 50 ms tick
-on the main actor (`FeedbackBench.swift` in `DishCore` holds every test's
+on the main actor, a `TimerTicker` in the run loop's common modes, so a
+test's steps and its end keep time while the page scrolls (`FeedbackBench.swift` in `DishCore` holds every test's
 writes and times, and the rules for what goes back).
 
 A pad bound to a Moonlight host routes to a `MoonlightPadSink`: the host's

@@ -122,7 +122,7 @@ package final class AppModel {
         mailer: any DiagnosticsMailer = InertDiagnosticsMailer(),
         diagnosticsFolder: URL = defaultDiagnosticsFolder(),
         deviceConditions: any DeviceConditions = InertDeviceConditions(),
-        benchTicker: any Ticker = TimerTicker(),
+        benchTicker: any Ticker = TimerTicker(mode: .common),
         benchClock: any BenchClock = SystemBenchClock(),
         phoneHaptics: Bool = phoneHasHaptics()
     ) {
@@ -201,7 +201,7 @@ package final class AppModel {
         identity: DeviceIdentity = .unknown,
         mailer: any DiagnosticsMailer = InertDiagnosticsMailer(),
         deviceConditions: any DeviceConditions = InertDeviceConditions(),
-        benchTicker: any Ticker = TimerTicker(),
+        benchTicker: any Ticker = TimerTicker(mode: .common),
         benchClock: any BenchClock = SystemBenchClock(),
         phoneHaptics: Bool = phoneHasHaptics()
     ) {

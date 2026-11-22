@@ -63,6 +63,34 @@ final class AppModelBenchTests: XCTestCase {
         return Rig(model: model, source: source, ticker: ticker, clock: clock)
     }
 
+    /// The model's own bench ticker, over the bench's manual clocks.
+    @MainActor
+    private struct ScrollingRig {
+        let model: AppModel
+        let source: FakeControllerSource
+        let clock: ManualBenchClock
+    }
+
+    private func scrollingRig(_ slots: [ControllerSlot]) throws -> ScrollingRig {
+        let source = FakeControllerSource(slots: slots)
+        let clock = ManualBenchClock()
+        let model = try AppModel(defaults: TestDefaults.fresh(self), controllerSource: source, benchClock: clock)
+        return ScrollingRig(model: model, source: source, clock: clock)
+    }
+
+    /// Runs the main run loop as UIKit does while a finger drags a list,
+    /// until `predicate` holds or a second passes. UIKit makes its tracking
+    /// mode one of the common modes as the app launches; the package's test
+    /// bundle runs without an app, so the helper makes it one.
+    private func scroll(until predicate: () -> Bool) {
+        let tracking = CFRunLoopMode(RunLoop.Mode.tracking.rawValue as CFString)
+        CFRunLoopAddCommonMode(CFRunLoopGetMain(), tracking)
+        let deadline = Date().addingTimeInterval(1)
+        while Date() < deadline, !predicate() {
+            RunLoop.main.run(mode: .tracking, before: Date().addingTimeInterval(0.01))
+        }
+    }
+
     // MARK: - What each controller's path reaches
 
     func testEveryListedControllerCarriesWhatItsPathReaches() throws {
@@ -109,6 +137,21 @@ final class AppModelBenchTests: XCTestCase {
         rig.model.runBenchTest(.rumbleBoth, slotId: onScreenSlotId)
         rig.source.feedback.queue.sync {}
         XCTAssertEqual(rig.source.actuators.actuations, [.rumble(onScreenSlotId, strong: 48000, weak: 48000, durationMs: 400)])
+    }
+
+    // MARK: - Keeping time
+
+    func testATestsStepsAndItsEndKeepTimeWhileThePageScrolls() throws {
+        let rig = try scrollingRig([dualSense])
+        rig.model.runBenchTest(.lightbarCycle, slotId: dualSense.id)
+        rig.clock.uptime = 1400
+        let green = RecordingActuators.Actuation.lightbar(dualSense.id, red: 0, green: 0xFF, blue: 0)
+        scroll { rig.source.actuators.actuations.contains(green) }
+        XCTAssertTrue(rig.source.actuators.actuations.contains(green), "green lands mid-scroll")
+        rig.clock.uptime = 2200
+        scroll { rig.model.benchFacts.bench.asking[dualSense.id] != nil }
+        XCTAssertEqual(rig.model.benchFacts.bench.running, [:], "the cycle ends mid-scroll")
+        XCTAssertEqual(rig.model.benchFacts.bench.asking[dualSense.id]?.test, .lightbarCycle, "Did it work? is asked mid-scroll")
     }
 
     // MARK: - One answer per run
