@@ -30,7 +30,9 @@ jobs:
     # Xcode 26 is the default on this image and the iOS 26 SDK is the
     # deployment floor; bump together with CONTRIBUTING.md.
     runs-on: macos-26
-    timeout-minutes: 60
+    # The steps add up to 47 to 51 minutes on a quick runner and past an hour on
+    # a slow one: the release build alone has taken 4 minutes and 13.
+    timeout-minutes: 90
     steps:
       - name: Checkout code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
