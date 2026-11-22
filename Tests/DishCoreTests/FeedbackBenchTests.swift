@@ -66,7 +66,11 @@ final class FeedbackBenchTests: XCTestCase {
     }
 
     func testThePhonesOneActuatorOffersOneBuzzForBothMotors() {
-        XCTAssertEqual(benchTests(.rumble, reach: [.oneActuator]), [.rumbleBoth], "the phone plays the stronger motor, so weak and strong would be one buzz")
+        XCTAssertEqual(
+            benchTests(.rumble, reach: [.oneActuator]),
+            [.rumbleBoth],
+            "the phone plays the stronger motor, so weak and strong would be one buzz"
+        )
         XCTAssertEqual(offered([.oneActuator]), [.rumbleBoth])
     }
 
@@ -202,7 +206,10 @@ final class FeedbackBenchTests: XCTestCase {
     }
 
     func testAStateSurfaceGoesBackToWhatTheGameLastSent() {
-        XCTAssertEqual(benchRestore(gameLast: BenchColour(red: 1, green: 2, blue: 3), idle: BenchColour(red: 0, green: 0, blue: 0)), BenchColour(red: 1, green: 2, blue: 3))
+        XCTAssertEqual(
+            benchRestore(gameLast: BenchColour(red: 1, green: 2, blue: 3), idle: BenchColour(red: 0, green: 0, blue: 0)),
+            BenchColour(red: 1, green: 2, blue: 3)
+        )
     }
 
     func testASurfaceTheGameNeverSetGoesBackToItsIdleState() {

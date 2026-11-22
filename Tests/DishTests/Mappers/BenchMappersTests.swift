@@ -12,7 +12,13 @@ import XCTest
 final class BenchMappersTests: XCTestCase {
 
     private static let dualSense = ControllerFact(id: "ds", name: "DualSense", link: .usbC, batteryPercent: 84, destination: nil)
-    private static let xbox = ControllerFact(id: "xbox", name: "Xbox Wireless Controller", link: .bluetooth, batteryPercent: 60, destination: nil)
+    private static let xbox = ControllerFact(
+        id: "xbox",
+        name: "Xbox Wireless Controller",
+        link: .bluetooth,
+        batteryPercent: 60,
+        destination: nil
+    )
     private static let onScreen = ControllerFact(id: onScreenSlotId, name: "", link: .onScreen, batteryPercent: nil, destination: nil)
 
     private static let dualSenseReach: BenchReach = [.strongMotor, .weakMotor, .lightbar, .playerLeds, .adaptiveTriggers, .sticks]
@@ -62,7 +68,7 @@ final class BenchMappersTests: XCTestCase {
         XCTAssertEqual(card.sections.first?.rows.map(\.label), ["Short buzz"])
     }
 
-    func testAPathThatCarriesNothingSaysSo() throws {
+    func testAPathThatCarriesNothingSaysSo() {
         let facts = BenchFacts(controllers: [Self.xbox], reach: [:])
         guard case let .pad(card) = benchPageState(id: Self.xbox.id, facts: facts).content else { return XCTFail("the pad is listed") }
         XCTAssertEqual(card.sections, [])
@@ -79,7 +85,10 @@ final class BenchMappersTests: XCTestCase {
             "Both triggers stiffen for two seconds, then go back to what the game set.",
             "The tests read the sticks as the controller sends them, before the dead zones."
         ])
-        XCTAssertEqual(benchItemNote(.triggerRumble), "A short buzz in the triggers’ own motors, whatever the controller’s rumble switch says.")
+        XCTAssertEqual(
+            benchItemNote(.triggerRumble),
+            "A short buzz in the triggers’ own motors, whatever the controller’s rumble switch says."
+        )
         XCTAssertEqual(benchItemTitle(.triggerRumble), "Trigger rumble")
     }
 
@@ -97,7 +106,11 @@ final class BenchMappersTests: XCTestCase {
         let rows = try card(Self.dualSense.id, bench).sections.flatMap(\.rows)
         XCTAssertEqual(rows.filter(\.running).map(\.id), [.lightbarCycle])
         XCTAssertEqual(rows.map(\.enabled), Array(repeating: false, count: rows.count))
-        XCTAssertEqual(try card(Self.xbox.id, bench).sections.flatMap(\.rows).map(\.enabled).contains(false), false, "another pad's bench is free")
+        XCTAssertEqual(
+            try card(Self.xbox.id, bench).sections.flatMap(\.rows).map(\.enabled).contains(false),
+            false,
+            "another pad's bench is free"
+        )
     }
 
     // MARK: - The stick tests' line

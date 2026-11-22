@@ -10,7 +10,7 @@
 import Foundation
 
 /// The bench's tests, by the names the support file carries.
-package enum BenchTest: String, CaseIterable, Equatable, Sendable {
+package enum BenchTest: String, CaseIterable, Equatable {
     case rumbleWeak = "rumble.weak"
     case rumbleStrong = "rumble.strong"
     case rumbleBoth = "rumble.both"
@@ -47,7 +47,7 @@ package enum BenchTest: String, CaseIterable, Equatable, Sendable {
 }
 
 /// What the bench tests, in the page's order.
-package enum BenchItem: CaseIterable, Equatable, Sendable {
+package enum BenchItem: CaseIterable, Equatable {
     case rumble
     case triggerRumble
     case lightbar
@@ -59,7 +59,7 @@ package enum BenchItem: CaseIterable, Equatable, Sendable {
 /// What a pad's path reaches from this device alone, as its composed
 /// capabilities say: the gate a test passes to be offered, the same one the
 /// game's own writes pass.
-package struct BenchReach: OptionSet, Hashable, Sendable {
+package struct BenchReach: OptionSet, Hashable {
     package let rawValue: UInt16
 
     package init(rawValue: UInt16) {
@@ -145,7 +145,7 @@ package enum FeedbackBench {
 }
 
 /// A colour of the light bar.
-package struct BenchColour: Hashable, Sendable {
+package struct BenchColour: Hashable {
     package let red: UInt8
     package let green: UInt8
     package let blue: UInt8
@@ -158,7 +158,7 @@ package struct BenchColour: Hashable, Sendable {
 }
 
 /// The two body motors at one level, and how long it runs.
-package struct BenchMotors: Hashable, Sendable {
+package struct BenchMotors: Hashable {
     package let strong: UInt16
     package let weak: UInt16
     package let durationMs: UInt16
@@ -171,7 +171,7 @@ package struct BenchMotors: Hashable, Sendable {
 }
 
 /// One write a test makes to the pad.
-package enum BenchWrite: Equatable, Sendable {
+package enum BenchWrite: Equatable {
     case rumble(strong: UInt16, weak: UInt16, durationMs: UInt16)
     case triggerRumble(left: UInt16, right: UInt16, durationMs: UInt16)
     case lightbar(BenchColour)
@@ -180,7 +180,7 @@ package enum BenchWrite: Equatable, Sendable {
 }
 
 /// A write at its time from the test's start.
-package struct BenchStep: Equatable, Sendable {
+package struct BenchStep: Equatable {
     package let atMs: Int64
     package let write: BenchWrite
 
@@ -192,7 +192,7 @@ package struct BenchStep: Equatable, Sendable {
 
 /// What a test holds while it runs: the motors are transient, and the light
 /// bar, the player LEDs and the adaptive triggers are state the game set.
-package enum BenchSurface: Int, CaseIterable, Sendable {
+package enum BenchSurface: Int, CaseIterable {
     case rumble
     case triggerRumble
     case lightbar
@@ -212,7 +212,7 @@ package func benchHolds(_ held: Int64, _ surface: BenchSurface) -> Bool {
 
 /// A test that drives the pad: the surface it holds, its writes, and how
 /// long it runs.
-package struct BenchPlan: Equatable, Sendable {
+package struct BenchPlan: Equatable {
     package let surface: BenchSurface
     package let steps: [BenchStep]
     package let durationMs: Int64
@@ -250,7 +250,7 @@ private func cycle(_ writes: [BenchWrite], holding surface: BenchSurface) -> Ben
 
 /// One test driving a pad: its plan, when it started, and how many of its
 /// writes are made. The clock is passed in, so a run goes on virtual time.
-package struct BenchRun: Equatable, Sendable {
+package struct BenchRun: Equatable {
     package let test: BenchTest
     package let plan: BenchPlan
     package let startMs: Int64
@@ -295,7 +295,7 @@ package func benchRumbleAfterTest(countAtStart: UInt64, countNow: UInt64, gameLa
 }
 
 /// "Did it work?" for the test a pad ran last, and when that test ended.
-package struct BenchQuestion: Equatable, Sendable {
+package struct BenchQuestion: Equatable {
     package let test: BenchTest
     package let endedAtMs: Int64
 
@@ -306,14 +306,14 @@ package struct BenchQuestion: Equatable, Sendable {
 }
 
 /// The person's answer, in the contract's words.
-package enum BenchResult: String, CaseIterable, Equatable, Sendable {
+package enum BenchResult: String, CaseIterable, Equatable {
     case worked
     case didNotWork
 }
 
 /// One answered test, `{ test, result, atMs }` as the support file carries
 /// it; `atMs` is when the test ended, in milliseconds since the Unix epoch.
-package struct BenchOutcome: Equatable, Sendable {
+package struct BenchOutcome: Equatable {
     package let test: BenchTest
     package let result: BenchResult
     package let atMs: Int64

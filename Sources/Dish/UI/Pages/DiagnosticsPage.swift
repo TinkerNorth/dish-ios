@@ -281,14 +281,24 @@ private struct EmptyNote: View {
     ]
     let shell = previewFacts(localNetwork: .allowed, diagnostics: diagnostics, events: events)
     NavigationStack {
-        DiagnosticsPageBody(state: diagnosticsPageState(facts: shell, appVersion: "0.1.0"), copy: { _ in }, report: { _ in }, test: { _ in })
+        DiagnosticsPageBody(
+            state: diagnosticsPageState(facts: shell, appVersion: "0.1.0"),
+            copy: { _ in },
+            report: { _ in },
+            test: { _ in }
+        )
     }
 }
 
 #Preview("Nothing seen") {
     let shell = previewFacts(localNetwork: .unknown, diagnostics: DiagnosticsSnapshot(), events: [])
     NavigationStack {
-        DiagnosticsPageBody(state: diagnosticsPageState(facts: shell, appVersion: "0.1.0"), copy: { _ in }, report: { _ in }, test: { _ in })
+        DiagnosticsPageBody(
+            state: diagnosticsPageState(facts: shell, appVersion: "0.1.0"),
+            copy: { _ in },
+            report: { _ in },
+            test: { _ in }
+        )
     }
 }
 

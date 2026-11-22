@@ -101,10 +101,21 @@ private func benchSection(
     let tests = benchTests(item, reach: reach)
     guard !tests.isEmpty else { return nil }
     let rows = tests.map { test in
-        BenchTestRowState(id: test, label: benchRowLabel(test, reach: reach, words: words), running: test == running, enabled: running == nil)
+        BenchTestRowState(
+            id: test,
+            label: benchRowLabel(test, reach: reach, words: words),
+            running: test == running,
+            enabled: running == nil
+        )
     }
     let line = item == .sticks ? status : nil
-    return BenchSectionState(id: item, title: benchItemTitle(item, words: words), rows: rows, status: line, footer: benchItemNote(item, words: words))
+    return BenchSectionState(
+        id: item,
+        title: benchItemTitle(item, words: words),
+        rows: rows,
+        status: line,
+        footer: benchItemNote(item, words: words)
+    )
 }
 
 func benchItemTitle(_ item: BenchItem, words: L10n = .app) -> String {
@@ -178,7 +189,10 @@ func stickResultText(_ result: StickTestResult, words: L10n = .app) -> String {
     case .range:
         return paragraph(
             words.stickReach(stickPercent(result.reachLeft, words: words), stickPercent(result.reachRight, words: words)),
-            words.circularityError(circularityText(result.circularityLeft, words: words), circularityText(result.circularityRight, words: words))
+            words.circularityError(
+                circularityText(result.circularityLeft, words: words),
+                circularityText(result.circularityRight, words: words)
+            )
         )
     }
 }
@@ -202,7 +216,10 @@ func benchResultText(_ result: BenchResult, words: L10n = .app) -> String {
 func benchAnswers(_ id: String, reach: BenchReach, bench: BenchState, words: L10n = .app) -> BenchAnswersState {
     let question = bench.asking[id].map { words.didTestWork(benchTestName($0.test, reach: reach, words: words)) }
     let kept = (bench.answers[id] ?? []).reversed().enumerated().map { offset, outcome in
-        BenchAnswerLine(id: offset, text: dotted(benchTestName(outcome.test, reach: reach, words: words), benchResultText(outcome.result, words: words)))
+        BenchAnswerLine(
+            id: offset,
+            text: dotted(benchTestName(outcome.test, reach: reach, words: words), benchResultText(outcome.result, words: words))
+        )
     }
     return BenchAnswersState(
         title: words.didItWork,

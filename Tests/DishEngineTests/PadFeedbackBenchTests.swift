@@ -150,10 +150,15 @@ final class PadFeedbackBenchTests: XCTestCase {
         pad.benchWrite(.rumble(strong: 48000, weak: 48000, durationMs: 400))
         pad.benchEnd(.rumble)
         feedback.queue.sync {}
-        XCTAssertEqual(actuators.actuations, [
+        let beforeAndBuzz: [RecordingActuators.Actuation] = [
             .rumble("pad", strong: 1000, weak: 2000, durationMs: 500),
             .rumble("pad", strong: 48000, weak: 48000, durationMs: 400)
-        ], "the buzz runs out on its own; a rumble the game sent before it is not replayed")
+        ]
+        XCTAssertEqual(
+            actuators.actuations,
+            beforeAndBuzz,
+            "the buzz runs out on its own; a rumble the game sent before it is not replayed"
+        )
     }
 
     func testARumbleTheGameAskedForDuringABuzzIsPutBackAsItEnds() {
@@ -197,7 +202,11 @@ final class PadFeedbackBenchTests: XCTestCase {
         pad.benchBegin(.lightbar)
         pad.benchEnd(.lightbar)
         feedback.queue.sync {}
-        XCTAssertEqual(actuators.actuations, [.lightbar("pad", red: 0, green: 0, blue: 0)], "a pad without a light takes the write as nothing")
+        XCTAssertEqual(
+            actuators.actuations,
+            [.lightbar("pad", red: 0, green: 0, blue: 0)],
+            "a pad without a light takes the write as nothing"
+        )
     }
 
     // MARK: - Another source's pad

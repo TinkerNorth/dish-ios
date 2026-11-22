@@ -48,7 +48,10 @@ final class BenchReachTests: XCTestCase {
     }
 
     func testAnXboxPadWithImpulseTriggersReachesItsFourMotorsAndItsSticks() {
-        let capabilities = ControllerCapabilities(hasRumble: true, motors: [.strongMotor, .weakMotor, .leftTriggerMotor, .rightTriggerMotor])
+        let capabilities = ControllerCapabilities(
+            hasRumble: true,
+            motors: [.strongMotor, .weakMotor, .leftTriggerMotor, .rightTriggerMotor]
+        )
         let slot = ControllerSlot(id: "gc:Microsoft:Xbox", name: "Xbox Wireless Controller", capabilities: capabilities)
         XCTAssertEqual(benchReach(slot), [.strongMotor, .weakMotor, .leftTriggerMotor, .rightTriggerMotor, .sticks])
     }
@@ -77,7 +80,11 @@ final class BenchReachTests: XCTestCase {
         let indices: [GCControllerPlayerIndex] = [.index1, .index2, .index3, .index4, .indexUnset]
         XCTAssertEqual(indices.map(GameControllerInput.player(of:)), [1, 2, 3, 4, 0])
         for player in 0 ... 4 {
-            XCTAssertEqual(GameControllerInput.player(of: GameControllerInput.playerIndex(for: player)), player, "player \(player) round-trips")
+            XCTAssertEqual(
+                GameControllerInput.player(of: GameControllerInput.playerIndex(for: player)),
+                player,
+                "player \(player) round-trips"
+            )
         }
     }
 

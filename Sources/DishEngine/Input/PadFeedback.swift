@@ -25,7 +25,7 @@ package protocol FeedbackActuators: Sendable {
 /// What a pad shows on the surfaces a game can set: its light bar's colour,
 /// black for a pad without one, which takes a paint as nothing; and the
 /// player its LEDs show, 0 for none.
-package struct PadIdleState: Equatable, Sendable {
+package struct PadIdleState: Equatable {
     package let lightbar: BenchColour
     package let player: Int
 
@@ -301,7 +301,11 @@ private func rumbleMotors(_ word: Int64) -> BenchMotors {
 
 /// A light-bar colour as its word packs it: red, green, then blue.
 private func lightbarColour(_ word: Int64) -> BenchColour {
-    BenchColour(red: UInt8(truncatingIfNeeded: word >> 16), green: UInt8(truncatingIfNeeded: word >> 8), blue: UInt8(truncatingIfNeeded: word))
+    BenchColour(
+        red: UInt8(truncatingIfNeeded: word >> 16),
+        green: UInt8(truncatingIfNeeded: word >> 8),
+        blue: UInt8(truncatingIfNeeded: word)
+    )
 }
 
 private func packedColour(_ colour: BenchColour) -> Int64 {

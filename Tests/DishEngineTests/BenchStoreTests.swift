@@ -71,12 +71,13 @@ final class BenchStoreTests: XCTestCase {
         rig.tick(at: 1800)
         rig.clock.wall = 1_800_000_001_200
         rig.tick(at: 2200)
-        XCTAssertEqual(rig.actuations, [
+        let cycleThenBack: [RecordingActuators.Actuation] = [
             .lightbar("pad", red: 0xFF, green: 0, blue: 0),
             .lightbar("pad", red: 0, green: 0xFF, blue: 0),
             .lightbar("pad", red: 0, green: 0, blue: 0xFF),
             .lightbar("pad", red: 9, green: 8, blue: 7)
-        ], "the colour the pad showed before goes back")
+        ]
+        XCTAssertEqual(rig.actuations, cycleThenBack, "the colour the pad showed before goes back")
         XCTAssertEqual(rig.store.state.running, [:])
         XCTAssertEqual(rig.store.state.asking, ["pad": BenchQuestion(test: .lightbarCycle, endedAtMs: 1_800_000_001_200)])
         XCTAssertFalse(rig.ticker.running, "nothing runs, so nothing ticks")
