@@ -34,6 +34,8 @@ enum Page: Hashable {
     case deadZones(id: String)
     /// Diagnostics › Report a problem, or Ask a question: one screen.
     case report(ReportStart)
+    /// Diagnostics › a controller › Controller tests, by its slot id.
+    case bench(id: String)
 }
 
 /// Which of Diagnostics' two entries opened the report.

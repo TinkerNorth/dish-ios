@@ -15,9 +15,14 @@ struct DiagnosticsPage: View {
     @Environment(\.appVersion) private var appVersion
 
     var body: some View {
-        DiagnosticsPageBody(state: diagnosticsPageState(facts: model.shellFacts, appVersion: appVersion), copy: copy, report: report)
-            .onAppear { model.pageAppeared(.diagnostics) }
-            .onDisappear { model.pageDisappeared(.diagnostics) }
+        DiagnosticsPageBody(
+            state: diagnosticsPageState(facts: model.shellFacts, appVersion: appVersion),
+            copy: copy,
+            report: report,
+            test: test
+        )
+        .onAppear { model.pageAppeared(.diagnostics) }
+        .onDisappear { model.pageDisappeared(.diagnostics) }
     }
 
     private func copy(_ transcript: String) {
@@ -27,15 +32,21 @@ struct DiagnosticsPage: View {
     private func report(_ start: ReportStart) {
         navigation.send(.push(.report(start)))
     }
+
+    private func test(_ slotId: String) {
+        navigation.send(.push(.bench(id: slotId)))
+    }
 }
 
 /// The page over its state, so a preview can draw every state. Copy and
 /// Share hand over the same transcript; Copy says so once it has. Report a
-/// problem and Ask a question open the report, one screen in two categories.
+/// problem and Ask a question open the report, one screen in two categories;
+/// a controller's card opens its bench.
 struct DiagnosticsPageBody: View {
     let state: DiagnosticsPageState
     let copy: @MainActor (String) -> Void
     let report: @MainActor (ReportStart) -> Void
+    let test: @MainActor (String) -> Void
 
     @State private var copied = false
 
@@ -58,8 +69,8 @@ struct DiagnosticsPageBody: View {
                 }
             }
             .listRowBackground(DishTheme.surface)
-            DiagnosticsCardsSection(state: state.hosts)
-            DiagnosticsCardsSection(state: state.pads)
+            DiagnosticsCardsSection(state: state.hosts, open: test)
+            DiagnosticsCardsSection(state: state.pads, open: test)
             if let locks = state.locks {
                 DiagnosticsLinesSection(state: locks)
             }
@@ -95,15 +106,23 @@ struct DiagnosticsPageBody: View {
 }
 
 /// A section of cards: each card a row with its title, dot and chip over
-/// its lines, or the word for none.
+/// its lines, and a controller's the row that opens its bench; or the word
+/// for none.
 private struct DiagnosticsCardsSection: View {
     let state: DiagnosticsCardsState
+    let open: @MainActor (String) -> Void
 
     var body: some View {
         Section {
             switch state.cards {
             case let .empty(note): EmptyNote(text: note)
-            case let .cards(cards): ForEach(cards) { DiagnosticsCardView(card: $0) }
+            case let .cards(cards):
+                ForEach(cards) { card in
+                    DiagnosticsCardView(card: card)
+                    if let bench = card.bench {
+                        BenchOpenRow(title: bench, slotId: card.id, open: open)
+                    }
+                }
             }
         } header: {
             SectionEyebrow(title: state.title, color: DishTheme.muted)
@@ -123,6 +142,23 @@ private struct DiagnosticsLinesSection: View {
             SectionEyebrow(title: state.title, color: DishTheme.muted)
         }
         .listRowBackground(DishTheme.surface)
+    }
+}
+
+/// The row under a controller's card that opens its bench.
+private struct BenchOpenRow: View {
+    let title: String
+    let slotId: String
+    let open: @MainActor (String) -> Void
+
+    var body: some View {
+        RowButton(action: go) {
+            Text(title).font(DishFont.body).foregroundStyle(DishTheme.primary)
+        }
+    }
+
+    private func go() {
+        open(slotId)
     }
 }
 
@@ -245,14 +281,14 @@ private struct EmptyNote: View {
     ]
     let shell = previewFacts(localNetwork: .allowed, diagnostics: diagnostics, events: events)
     NavigationStack {
-        DiagnosticsPageBody(state: diagnosticsPageState(facts: shell, appVersion: "0.1.0"), copy: { _ in }, report: { _ in })
+        DiagnosticsPageBody(state: diagnosticsPageState(facts: shell, appVersion: "0.1.0"), copy: { _ in }, report: { _ in }, test: { _ in })
     }
 }
 
 #Preview("Nothing seen") {
     let shell = previewFacts(localNetwork: .unknown, diagnostics: DiagnosticsSnapshot(), events: [])
     NavigationStack {
-        DiagnosticsPageBody(state: diagnosticsPageState(facts: shell, appVersion: "0.1.0"), copy: { _ in }, report: { _ in })
+        DiagnosticsPageBody(state: diagnosticsPageState(facts: shell, appVersion: "0.1.0"), copy: { _ in }, report: { _ in }, test: { _ in })
     }
 }
 
