@@ -83,4 +83,14 @@ final class DeviceFamilyTests: XCTestCase {
         let gate = try RepoFiles.read("scripts/ci-local.sh")
         XCTAssertTrue(gate.contains("scripts/test.sh ipad"), "ci-local.sh runs the UI tests on the iPad CI runs them on")
     }
+
+    /// One simulator is booted at a time: a runner starts none beside the one
+    /// it creates, and `test.sh` deletes what it made when its suite ends, so
+    /// the iPad's UI tests never share the machine with a leftover iPhone.
+    func testOneSimulatorIsBootedAtATime() throws {
+        let simulator = try RepoFiles.read("scripts/ci-simulator.sh")
+        XCTAssertTrue(simulator.contains("xcrun simctl shutdown all"), "a runner shuts every other simulator down before it creates one")
+        let test = try RepoFiles.read("scripts/test.sh")
+        XCTAssertTrue(test.contains("trap 'xcrun simctl delete"), "test.sh deletes the simulator it created when the suite ends")
+    }
 }

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # SPDX-License-Identifier: LGPL-3.0-or-later
 # ============================================================================
-#  ci-simulator.sh — a simulator CI can trust: created on the newest runtime
+#  ci-simulator.sh - a simulator CI can trust: created on the newest runtime
 #  that supports it, booted, and read back from `simctl list` as Booted
 #  before xcodebuild is pointed at it.
 #
@@ -83,6 +83,14 @@ print(runtimes[-1]["identifier"] if runtimes else "")
 
 create() {
     local name="$1" prefix="$2" device_type runtime udid status
+    # One simulator runs at a time on a runner. In ios-ci.yml's runs of 2026-11-18
+    # to 2026-11-23 the iPhone simulator stayed booted while the iPad's UI tests
+    # ran, and the same UI tests took 60 to 330 seconds each (49 at most with one
+    # simulator); the three failures on record were XCTest's calls to the
+    # simulator timing out. A developer's Mac keeps its own simulators.
+    if [ -n "${GITHUB_ACTIONS:-}" ]; then
+        xcrun simctl shutdown all >&2
+    fi
     device_type="$(newest_device_type "$prefix")"
     runtime="$(newest_runtime_for "$device_type")"
     [ -n "$device_type" ] && [ -n "$runtime" ] || { echo "no $prefix device type on an available iOS runtime" >&2; exit 1; }
