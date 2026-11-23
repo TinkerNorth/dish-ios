@@ -256,7 +256,8 @@ itself. The app then writes one file,
 `dish-diagnostics-dish-ios-<date>-<time>.json`, in its temporary folder, and
 Continue in Mail opens a new message in your own mail app addressed to
 `support@tinkernorth.com`, with your words first in the body, then the
-Diagnostics page's summary, and the file attached; where no mail account is set
+Diagnostics page's summary of the app and your controllers, which names no PC
+and carries no address, and the file attached; where no mail account is set
 up on this iPhone, it opens the share sheet with the file instead. Nothing is
 sent until you press Send, and you can read the file or remove it first. The
 message then travels like any email you send, through your own mail provider.

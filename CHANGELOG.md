@@ -33,7 +33,11 @@ Nothing yet.
   in the foreground: the manifest with `If-None-Match`, then, only for a
   newer version, the controller list and its strings in each language, each
   file checked against the manifest's size and SHA-256 before it replaces
-  the cached copy whole. The requests carry no query and no identifier.
+  the cached copy whole. The requests carry no query and no identifier,
+  and name one language for every device (`Accept-Language: *`) instead of
+  yours; a transfer that has not finished within a minute ends the check as
+  offline, so a server that trickles bytes cannot hold Check now and the
+  six-hour check off.
   Settings › Controller database carries "Check for controller updates
   automatically", on by default, and "Check now"; with the switch off no
   request leaves the device and Check now is not offered.
@@ -55,7 +59,8 @@ Nothing yet.
   Preview file shows the file itself, and Continue in Mail opens a message to
   support@tinkernorth.com in your own mail app, under
   `Dish support: <category> · Dish for iOS <version> on <model>`, with your
-  words first, then the page's summary, and the file attached; where no mail
+  words first, then the page's summary of the app and the controllers, which
+  names no PC and carries no address, and the file attached; where no mail
   account is set up, the share sheet takes the file. Nothing is sent until
   you press Send. The file, `dish-diagnostics-dish-ios-<yyyyMMdd-HHmmss>.json`
   (the fleet's `dish-diagnostics.v1` bundle), holds your report; the app and
@@ -115,8 +120,7 @@ Nothing yet.
   Dish gave it to Bluetooth in hex, whether Bluetooth answered the write
   and with which error, and when it was written. A pad GameController
   reads has `lastWrite` null, since the framework writes and Dish never
-  sees the bytes. The record is kept on the Steam links' own queue with no
-  lock and no allocation in a write; the report reads it once.
+  sees the bytes. The report reads it once.
 - **Tests for the controller database's languages.** de-AT reads German,
   bs-Latn-BA Bosnian, pt-PT and pt-BR Brazilian Portuguese, fr-CA French,
   es-419 Spanish, en-GB English and ja-JP English, and a key one language
@@ -139,6 +143,17 @@ Nothing yet.
   a colour, a player or an effect the game sends while a test holds that
   surface waits and is the one put back. Your answers ride the support
   file's `outcomes`, each with the time its test ended.
+- **Hot path: what the diagnostics and the bench add.** Each satellite
+  datagram handed to the socket and each one the receive loop opens bumps
+  one relaxed counter of its kind (`WireTally`). Each feedback command a
+  pad's queue takes, on the feedback queue or the Steam links' queue, is
+  recorded in its lane (`LaneTally`): a clock read and three relaxed atomic
+  stores. The same drain reads the bench's `held` word once, relaxed, and
+  the trigger drain keeps the effect's box with one exchange. Each write to
+  a Steam Controller over Bluetooth is noted on the links' queue: a clock
+  read and an append to a small array reserved as the link opens. No lock,
+  no hop, and no allocation but the array's growth past eight unanswered
+  writes; nothing on these paths reads what they record.
 
 
 ### Changed
