@@ -14,10 +14,12 @@ fetch_swiftformat
 
 # A rule that times out on a loaded runner is not a finding, so the lint runs
 # once more then; any other failure stands.
-if ! output="$("$TOOLS/swiftformat" --lint . 2>&1)"; then
+# Explicit config: SwiftFormat also reads every parent directory's .swiftformat,
+# which in a worktree under the main checkout is another copy.
+if ! output="$("$TOOLS/swiftformat" --config .swiftformat --lint . 2>&1)"; then
     echo "$output"
     grep -q "rule timed out" <<<"$output" || exit 1
     echo "A rule timed out on a slow machine; linting once more."
-    "$TOOLS/swiftformat" --lint .
+    "$TOOLS/swiftformat" --config .swiftformat --lint .
 fi
 echo "$output"
