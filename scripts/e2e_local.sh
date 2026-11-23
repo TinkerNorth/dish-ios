@@ -142,11 +142,13 @@ cleanup() {
 trap cleanup EXIT
 
 # Hermetic: a test lane never phones GitHub for updates. The isolated HOME
-# seeds the satellite's config with the check off (dish-mac's lane found
-# that the update check, left on, crashed satellite 2.1.3 mid-run).
+# seeds the satellite's config with the update check off (dish-mac's lane
+# found that the update check, left on, crashed satellite 2.1.3 mid-run), and
+# since 2.3.0 the controller database check too (it would ask
+# dish.tinkernorth.com ten seconds after start).
 SAT_CONFIG_DIR="${E2E_HOME}/Library/Application Support/satellite"
 mkdir -p "${SAT_CONFIG_DIR}"
-printf '{"autoCheck": false, "autoDownload": false}\n' >"${SAT_CONFIG_DIR}/config.json"
+printf '{"autoCheck": false, "autoDownload": false, "controllerDbUpdates": false}\n' >"${SAT_CONFIG_DIR}/config.json"
 
 log "starting satellite headless (isolated HOME=${E2E_HOME}, update check off)"
 HOME="${E2E_HOME}" "${SATELLITE_BIN}" >"${SAT_LOG}" 2>&1 &

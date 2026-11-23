@@ -352,6 +352,7 @@ Dish clients follow, so a fact ported between clients keeps its shape.
 | `LintConfigTests` | the lint thresholds this document names; CI runs SwiftLint strict and SwiftFormat in lint mode |
 | `ToolPinTests` | `scripts/tools.sh` is the one place a tool or Xcode pin lives: no workflow repeats one, every macos-26 workflow selects Xcode through `select-xcode.sh`, and `project.yml`, `THIRD_PARTY.md` and this document name the same versions |
 | `WorkflowPinTests` | every `uses:` is a 40-character commit SHA |
+| `E2EWorkflowTests` | the end-to-end lane runs `scripts/e2e_local.sh` against a satellite pinned by tag, and the script seeds that satellite's update and controller database checks off before it starts |
 | `VersionConsistencyTests` | `VERSION` is `MAJOR.MINOR.PATCH`, `project.yml` carries it as `MARKETING_VERSION`, the changelog's newest heading names it or is `[Unreleased]`, the Info.plist reads both bundle versions from build settings, and the protocol number the documents name is the one the code offers |
 | `LocalizationTests` | the catalog and the funnel agree, in every language, with placeholders intact; no view holds an English literal |
 | `AppIntentsLocalizationTests` | the App Intents' words and the App Shortcuts' phrases are keys of the app target's two catalogs, every key is used, in every language, with placeholders intact |
