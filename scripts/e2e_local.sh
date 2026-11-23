@@ -115,7 +115,9 @@ else
         log "building satellite (${BUILD_TYPE}) in ${SATELLITE_REPO}/${SATELLITE_BUILD_DIR}"
         cmake -S "${SATELLITE_REPO}" -B "${SATELLITE_REPO}/${SATELLITE_BUILD_DIR}" \
             -DCMAKE_BUILD_TYPE="${BUILD_TYPE}" >/dev/null
-        cmake --build "${SATELLITE_REPO}/${SATELLITE_BUILD_DIR}" --target satellite -j >/dev/null
+        # Bound -j: a bare `-j` makes a macOS runner swap into a multi-hour hang
+        # (the satellite's macos-ci.yml says so), which this lane's 2.3.0 run did.
+        cmake --build "${SATELLITE_REPO}/${SATELLITE_BUILD_DIR}" --target satellite -j "$(sysctl -n hw.ncpu)" >/dev/null
     fi
 fi
 [ -x "${SATELLITE_BIN}" ] || fail "satellite binary not found/executable at ${SATELLITE_BIN}"
