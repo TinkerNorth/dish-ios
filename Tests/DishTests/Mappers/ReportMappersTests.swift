@@ -202,6 +202,34 @@ final class ReportMappersTests: XCTestCase {
         XCTAssertFalse(body.contains("Den PC"), body)
     }
 
+    /// The facts a report of pads bound to a satellite with a name and an
+    /// address and to a Moonlight host name those hosts as each pad's
+    /// destination alone (`AppModelReportMailTests`); the body holds neither.
+    func testTheMailCarriesNoHostsNameOrAddress() throws {
+        let toSatellite = ControllerFact(
+            id: "pad",
+            name: "DualSense",
+            link: .bluetooth,
+            batteryPercent: nil,
+            destination: DestinationFact(id: "canary", name: "CANARY-PC-NAME", health: .online)
+        )
+        let toMoonlight = ControllerFact(
+            id: "pad-ml",
+            name: "Xbox Wireless Controller",
+            link: .bluetooth,
+            batteryPercent: nil,
+            destination: DestinationFact(id: "ml", name: "CANARY-PC-NAME-ML", health: .online),
+            hostEmulation: HostEmulationFact(type: 1, isOverride: false)
+        )
+        let draft = ReportDraftState(category: .connection, text: "It drops.", controllerId: "pad")
+        let mail = try XCTUnwrap(try page(facts: facts([toSatellite, toMoonlight]), draft: draft).mail)
+        for canary in ["CANARY-PC-NAME", "192.0.2.77", "fe80::c0ff:ee77", "CANARY-PC-NAME-ML"] {
+            XCTAssertFalse(mail.body.contains(canary), mail.body)
+            XCTAssertFalse(mail.category.contains(canary))
+        }
+        XCTAssertTrue(mail.body.contains("DualSense\nXbox Wireless Controller"), "each pad by its name alone")
+    }
+
     func testAMailWithNoWordsOpensOnTheSummary() throws {
         let body = try XCTUnwrap(try page(draft: ReportDraftState(category: .question, text: "", controllerId: nil)).mail?.body)
         XCTAssertTrue(body.hasPrefix("Dish\n"), body)
