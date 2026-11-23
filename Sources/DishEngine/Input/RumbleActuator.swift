@@ -6,10 +6,11 @@ import Foundation
 import GameController
 
 /// Per-controller haptic actuator: `GCController.haptics` and two
-/// `CHHapticEngine`s, the strong (low-frequency) motor at `.leftHandle` and
-/// the weak one at `.rightHandle`, so one satellite rumble drives both.
-/// Vibration only: the light bar has its own return path. It runs on the
-/// feedback queue, which owns it.
+/// `CHHapticEngine`s, one per motor of a pair: the handles, the strong
+/// (low-frequency) motor at `.leftHandle` and the weak one at `.rightHandle`,
+/// so one satellite rumble drives both; or the triggers, `.leftTrigger` and
+/// `.rightTrigger`, which only the bench drives. Vibration only: the light
+/// bar has its own return path. It runs on the feedback queue, which owns it.
 ///
 /// Engines are kept started: starting one per command adds ~5–10 ms. Each
 /// motor keeps the player for the level it is playing and restarts that same
@@ -21,23 +22,23 @@ import GameController
 /// adapters) makes `init?` fail, and the caller skips actuation.
 final class RumbleActuator {
     private let controller: GCController
-    private var strongMotor: HapticMotor?
-    private var weakMotor: HapticMotor?
+    private var leftMotor: HapticMotor?
+    private var rightMotor: HapticMotor?
 
-    /// Nil when the controller vends no engine at either handle.
-    init?(controller: GCController) {
+    /// Nil when the controller vends no engine at either motor of the pair.
+    init?(controller: GCController, pair: MotorPair) {
         guard let haptics = controller.haptics else { return nil }
         self.controller = controller
-        strongMotor = haptics.createEngine(withLocality: .leftHandle).flatMap(HapticMotor.init(engine:))
-        weakMotor = haptics.createEngine(withLocality: .rightHandle).flatMap(HapticMotor.init(engine:))
-        if strongMotor == nil, weakMotor == nil { return nil }
+        leftMotor = haptics.createEngine(withLocality: pair.left).flatMap(HapticMotor.init(engine:))
+        rightMotor = haptics.createEngine(withLocality: pair.right).flatMap(HapticMotor.init(engine:))
+        if leftMotor == nil, rightMotor == nil { return nil }
     }
 
     func shutdown() {
-        strongMotor?.shutdown()
-        weakMotor?.shutdown()
-        strongMotor = nil
-        weakMotor = nil
+        leftMotor?.shutdown()
+        rightMotor?.shutdown()
+        leftMotor = nil
+        rightMotor = nil
     }
 
     /// The longest one packet may run the motors. The satellite owns a held
@@ -53,13 +54,40 @@ final class RumbleActuator {
         return TimeInterval(capped) / 1000.0
     }
 
-    /// `strong` drives the low-frequency motor and `weak` the high-frequency
-    /// one, each normalised from the wire's 0...65535 to CoreHaptics' 0...1.
-    func apply(strong: UInt16, weak: UInt16, durationMs: UInt16) {
+    /// Each motor at its level, normalised from the wire's 0...65535 to
+    /// CoreHaptics' 0...1: on the handles, the strong motor is the left.
+    func apply(left: UInt16, right: UInt16, durationMs: UInt16) {
         let duration = Self.holdSeconds(durationMs: durationMs)
-        strongMotor?.drive(magnitude: strong, duration: duration)
-        weakMotor?.drive(magnitude: weak, duration: duration)
+        leftMotor?.drive(magnitude: left, duration: duration)
+        rightMotor?.drive(magnitude: right, duration: duration)
     }
+}
+
+/// The pair of motors an actuator drives, by the localities GameController
+/// names for them (`GCDeviceHapticsLocality.h`).
+enum MotorPair {
+    case handles
+    case triggers
+
+    var left: GCHapticsLocality {
+        switch self {
+        case .handles: .leftHandle
+        case .triggers: .leftTrigger
+        }
+    }
+
+    var right: GCHapticsLocality {
+        switch self {
+        case .handles: .rightHandle
+        case .triggers: .rightTrigger
+        }
+    }
+}
+
+/// Whether this iPhone has the Taptic Engine the on-screen controller's
+/// rumble plays on; false in the simulator.
+package func phoneHasHaptics() -> Bool {
+    CHHapticEngine.capabilitiesForHardware().supportsHaptics
 }
 
 /// The on-screen controller's rumble on the iPhone's own Taptic Engine. The

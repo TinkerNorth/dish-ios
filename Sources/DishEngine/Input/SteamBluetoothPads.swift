@@ -94,14 +94,22 @@ package final class SteamBluetoothPads {
 }
 
 /// A claimed pad as the list shows it: its model's name, on Bluetooth, with
-/// its IMU, its trackpads, the 2026 pad's motors and the extended buttons
-/// both fill, and no battery of its own.
+/// its IMU, its trackpads, the 2026 pad's two motors (report 0x80's left and
+/// right, the strong on the left) and the extended buttons both fill, and no
+/// battery of its own.
 func steamSlot(_ pad: UUID, _ model: SteamBleModel) -> ControllerSlot {
-    ControllerSlot(
+    let motors: BenchReach = model.plan.rumbles ? [.strongMotor, .weakMotor] : []
+    return ControllerSlot(
         id: steamSlotId(pad),
         name: model.name,
         link: .bluetooth,
-        capabilities: ControllerCapabilities(hasMotion: true, hasTouchpad: true, hasRumble: model.plan.rumbles, hasExtendedButtons: true),
+        capabilities: ControllerCapabilities(
+            hasMotion: true,
+            hasTouchpad: true,
+            hasRumble: model.plan.rumbles,
+            hasExtendedButtons: true,
+            motors: motors
+        ),
         family: .other,
         trackpads: model.trackpads,
         source: .bluetooth(vendorId: SteamBleModels.vendorId, productId: model.productId)

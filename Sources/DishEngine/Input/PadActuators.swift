@@ -6,8 +6,9 @@ import Foundation
 import GameController
 
 /// The controllers as the feedback queue drives them: each slot's controller
-/// as the main actor last filed it, and the rumble actuator made for it on
-/// first use. An actor whose executor is the feedback queue, so its state is
+/// as the main actor last filed it, and the rumble actuators made for it on
+/// first use, the handles' for the game and the bench, the triggers' for the
+/// bench alone. An actor whose executor is the feedback queue, so its state is
 /// the queue's and the compiler knows it: a drain on that queue enters it
 /// without a hop, and nothing here waits on the main thread.
 ///
@@ -18,6 +19,7 @@ package actor PadActuators: FeedbackActuators {
     package nonisolated let queue: DispatchSerialQueue
     private var controllers: [String: GCController] = [:]
     private var rumblers: [String: RumbleActuator] = [:]
+    private var triggerRumblers: [String: RumbleActuator] = [:]
     private var phone: PhoneRumble?
 
     package nonisolated var unownedExecutor: UnownedSerialExecutor {
@@ -41,6 +43,7 @@ package actor PadActuators: FeedbackActuators {
         let controller = identity.flatMap(Self.attachedController)
         guard controllers[slotId] !== controller else { return }
         rumblers.removeValue(forKey: slotId)?.shutdown()
+        triggerRumblers.removeValue(forKey: slotId)?.shutdown()
         controllers[slotId] = controller
     }
 
@@ -55,7 +58,17 @@ package actor PadActuators: FeedbackActuators {
         guard slotId != onScreenSlotId else {
             return assumeIsolated { $0.phoneRumbler()?.apply(strong: strong, weak: weak, durationMs: durationMs) }
         }
-        assumeIsolated { $0.rumbler(for: slotId)?.apply(strong: strong, weak: weak, durationMs: durationMs) }
+        assumeIsolated { $0.rumbler(for: slotId)?.apply(left: strong, right: weak, durationMs: durationMs) }
+    }
+
+    package nonisolated func triggerRumble(_ slotId: String, left: UInt16, right: UInt16, durationMs: UInt16) {
+        assumeIsolated { $0.triggerRumbler(for: slotId)?.apply(left: left, right: right, durationMs: durationMs) }
+    }
+
+    /// The light's colour and the player the controller shows now; the
+    /// on-screen controller, and a slot whose controller went, show nothing.
+    package nonisolated func idleState(_ slotId: String) -> PadIdleState {
+        assumeIsolated { $0.shown(slotId) }
     }
 
     package nonisolated func lightbar(_ slotId: String, red: UInt8, green: UInt8, blue: UInt8) {
@@ -70,6 +83,12 @@ package actor PadActuators: FeedbackActuators {
 
     package nonisolated func playerLeds(_ slotId: String, player: Int) {
         assumeIsolated { $0.controllers[slotId]?.playerIndex = GameControllerInput.playerIndex(for: player) }
+    }
+
+    private func shown(_ slotId: String) -> PadIdleState {
+        guard let controller = controllers[slotId] else { return .none }
+        let colour = controller.light.map { GameControllerInput.benchColour($0.color) } ?? PadIdleState.none.lightbar
+        return PadIdleState(lightbar: colour, player: GameControllerInput.player(of: controller.playerIndex))
     }
 
     private func paint(_ slotId: String, red: UInt8, green: UInt8, blue: UInt8) {
@@ -92,8 +111,16 @@ package actor PadActuators: FeedbackActuators {
     /// A pad without haptics takes no actuator and its rumble is dropped.
     private func rumbler(for slotId: String) -> RumbleActuator? {
         if let existing = rumblers[slotId] { return existing }
-        guard let controller = controllers[slotId], let fresh = RumbleActuator(controller: controller) else { return nil }
+        guard let controller = controllers[slotId], let fresh = RumbleActuator(controller: controller, pair: .handles) else { return nil }
         rumblers[slotId] = fresh
+        return fresh
+    }
+
+    /// A pad whose triggers have no motors takes no actuator there.
+    private func triggerRumbler(for slotId: String) -> RumbleActuator? {
+        if let existing = triggerRumblers[slotId] { return existing }
+        guard let controller = controllers[slotId], let fresh = RumbleActuator(controller: controller, pair: .triggers) else { return nil }
+        triggerRumblers[slotId] = fresh
         return fresh
     }
 }

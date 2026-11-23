@@ -85,7 +85,8 @@ extension AppModel {
             report: bundleReport(draft),
             conditions: deviceConditionsReading,
             paths: padPathReadings(),
-            hostReadings: keyed(hosts.map { ($0.id, hostReading($0, reply: replies[$0.id])) })
+            hostReadings: keyed(hosts.map { ($0.id, hostReading($0, reply: replies[$0.id])) }),
+            outcomes: bench.state.answers
         )
         return writeReport(facts)
     }

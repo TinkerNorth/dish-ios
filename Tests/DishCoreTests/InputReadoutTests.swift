@@ -4,7 +4,8 @@
 import XCTest
 @testable import DishCore
 
-/// The button table is the XUSB word the other clients write.
+/// The button table is the XUSB word the other clients write, and a stick
+/// axis reads as a fraction of full travel the way the inspectors read it.
 final class InputReadoutTests: XCTestCase {
 
     func testTheButtonTableIsTheXusbWordInBitOrder() {
@@ -13,5 +14,16 @@ final class InputReadoutTests: XCTestCase {
             0x0100, 0x0200, 0x0400, 0x0800, 0x1000, 0x2000, 0x4000, 0x8000
         ])
         XCTAssertEqual(WireButton.micMute.bit, MicMute.buttonBit, "the mic-mute button is the word's one unassigned slot")
+    }
+
+    /// dish-android's and dish-mac's inspectors divide by 32768, so one
+    /// sample reads the same on every client: full push one way is -1, the
+    /// other just short of 1.
+    func testAStickAxisIsAFractionOfFullTravel() {
+        XCTAssertEqual(InputReadout.stickScale, 32768)
+        XCTAssertEqual(InputReadout.stickFraction(0), 0)
+        XCTAssertEqual(InputReadout.stickFraction(.min), -1)
+        XCTAssertEqual(InputReadout.stickFraction(16384), 0.5)
+        XCTAssertEqual(InputReadout.stickSample(x: -16384, y: 8192), StickSample(x: -0.5, y: 0.25))
     }
 }

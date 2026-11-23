@@ -1,6 +1,6 @@
 # Dish for iOS: Privacy Policy
 
-**Effective date:** 2026-11-20.
+**Effective date:** 2026-11-22.
 **Canonical copy:** this file, at
 [`https://github.com/TinkerNorth/dish-ios/blob/main/PRIVACY.md`](https://github.com/TinkerNorth/dish-ios/blob/main/PRIVACY.md).
 
@@ -228,11 +228,13 @@ it has when anything does not match.
 `dish.tinkernorth.com` is an Amazon S3 bucket behind Amazon CloudFront,
 operated for TinkerNorth by Amazon Web Services. The requests carry no
 identifier, no cookie and no query, and use the system's default
-`User-Agent`; the only header the app adds is `If-None-Match`, with the
-`ETag` the site gave the last manifest. What the host's access logs can see is
-what any web server sees: the IP address the request came from, and the
-time. We use those logs as we use the rest of the website's: for capacity
-planning and abuse detection only.
+`User-Agent`; the app adds `Accept-Language: *`, the same on every device,
+in place of the system's, which would name your languages, and on the
+manifest `If-None-Match`, with the `ETag` the site gave the last one. A
+transfer that has not finished within a minute is given up. What the host's
+access logs can see is what any web server sees: the IP address the request
+came from, and the time. We use those logs as we use the rest of the
+website's: for capacity planning and abuse detection only.
 
 *Check for controller updates automatically* in Settings, on by default,
 turns the check off. With it off, no request for the controller list leaves
@@ -254,7 +256,8 @@ itself. The app then writes one file,
 `dish-diagnostics-dish-ios-<date>-<time>.json`, in its temporary folder, and
 Continue in Mail opens a new message in your own mail app addressed to
 `support@tinkernorth.com`, with your words first in the body, then the
-Diagnostics page's summary, and the file attached; where no mail account is set
+Diagnostics page's summary of the app and your controllers, which names no PC
+and carries no address, and the file attached; where no mail account is set
 up on this iPhone, it opens the share sheet with the file instead. Nothing is
 sent until you press Send, and you can read the file or remove it first. The
 message then travels like any email you send, through your own mail provider.
@@ -291,7 +294,13 @@ The file holds:
   many input frames it published and at what rate with the last one (the
   buttons held and where the sticks and triggers stood), and how many
   rumble, light-bar, player-light and trigger commands reached it with the
-  last of each.
+  last of each; for a Steam Controller read over Bluetooth, also the last
+  rumble write Dish made to it, its bytes, and how Bluetooth answered.
+- For each controller you tested under Diagnostics › Controller tests, the
+  tests you answered "Did it work?" for (the newest twenty of this run): each
+  test's name, your answer, and when the test ended. The tests themselves
+  only drive the controller from this device; nothing about them leaves it
+  unless you send a report.
 - The PCs you use, as "Host 1", "Host 2", with their kind (Satellite or
   Moonlight), version, protocol and link state, the session as this iPhone
   sees it (each controller slot and what the PC answered for it, the last

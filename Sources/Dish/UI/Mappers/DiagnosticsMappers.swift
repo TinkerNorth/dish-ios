@@ -23,6 +23,9 @@ struct DiagnosticsCardState: Equatable, Identifiable {
     let dot: Color?
     let chip: String?
     let lines: [FactLine]
+    /// The row under a controller's card that opens its bench; nil for a
+    /// PC, and for a controller Dish cannot read.
+    var bench: String?
 }
 
 enum DiagnosticsCards: Equatable {
@@ -470,6 +473,7 @@ func padCard(
         title: controllerName(pad.controller, words: words),
         dot: destinationDot(pad.controller.destination?.health),
         chip: healthText(pad.controller, words: words),
-        lines: padLines(pad, port: port, words: words) + record
+        lines: padLines(pad, port: port, words: words) + record,
+        bench: pad.controller.supported ? words.testThisController : nil
     )
 }

@@ -11,18 +11,24 @@ package protocol Ticker: AnyObject {
     func stop()
 }
 
-/// The production ticker: a repeating `Timer` on the main run loop.
+/// The production ticker: a repeating `Timer` on the main run loop, in
+/// `mode`; `.common` keeps ticking while a scroll view tracks a finger.
 @MainActor
 package final class TimerTicker: Ticker {
+    private let mode: RunLoop.Mode
     private var timer: Timer?
 
-    package init() {}
+    package init(mode: RunLoop.Mode = .default) {
+        self.mode = mode
+    }
 
     package func start(every seconds: TimeInterval, _ tick: @escaping @MainActor () -> Void) {
         timer?.invalidate()
-        timer = Timer.scheduledTimer(withTimeInterval: seconds, repeats: true) { _ in
+        let next = Timer(timeInterval: seconds, repeats: true) { _ in
             MainActor.assumeIsolated(tick)
         }
+        RunLoop.main.add(next, forMode: mode)
+        timer = next
     }
 
     package func stop() {

@@ -146,6 +146,36 @@ final class DiagnosticsBundleBuilderTests: XCTestCase {
         ))
     }
 
+    /// "Did it work?" answered on the bench rides each controller's entry
+    /// as `{ test, result, atMs }`, under the contract's names, oldest first.
+    func testAControllersAnswersRideItsEntryUnderTheContractsNames() throws {
+        let answers = [
+            BenchOutcome(test: .rumbleWeak, result: .worked, atMs: 1_763_585_990_000),
+            BenchOutcome(test: .lightbarCycle, result: .didNotWork, atMs: 1_763_585_995_000)
+        ]
+        let facts = DiagnosticsBundleFacts(
+            createdAtMs: 0,
+            identity: .unknown,
+            controllerDb: Self.facts.controllerDb,
+            controllers: [Self.xboxPad, Self.onScreen],
+            hosts: [],
+            events: [],
+            outcomes: [Self.xboxPad.id: answers]
+        )
+        let controllers = diagnosticsBundle(facts).controllers
+        XCTAssertEqual(controllers.first?.outcomes, [
+            BundleOutcome(test: "rumble.weak", result: "worked", atMs: 1_763_585_990_000),
+            BundleOutcome(test: "lightbar.cycle", result: "didNotWork", atMs: 1_763_585_995_000)
+        ])
+        XCTAssertEqual(controllers.last?.outcomes, [], "a controller no one tested has none")
+        let file = try XCTUnwrap(JSONSerialization.jsonObject(with: encodeDiagnosticsBundle(diagnosticsBundle(facts))) as? [String: Any])
+        let entries = try XCTUnwrap(file["controllers"] as? [[String: Any]])
+        let first = try XCTUnwrap(entries.first?["outcomes"] as? [[String: Any]]).first
+        XCTAssertEqual(first?["test"] as? String, "rumble.weak")
+        XCTAssertEqual(first?["result"] as? String, "worked")
+        XCTAssertEqual(first?["atMs"] as? Int64, 1_763_585_990_000)
+    }
+
     func testTheOnScreenControllerIsTheVirtualPathWithNoLinkAndNoHardware() {
         XCTAssertEqual(bundle.controllers.count, 3)
         let onScreen = BundleController(record: nil, verification: nil, transport: nil, path: .virtual, hardware: nil)

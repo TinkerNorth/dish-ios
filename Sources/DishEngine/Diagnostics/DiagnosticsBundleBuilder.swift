@@ -62,6 +62,8 @@ package struct DiagnosticsBundleFacts: Equatable {
     package let paths: [String: PadPathReading]
     /// Each host's reading, by its row id.
     package let hostReadings: [String: HostReading]
+    /// Each controller's answers on the bench, by its slot id, oldest first.
+    package let outcomes: [String: [BenchOutcome]]
 
     package init(
         createdAtMs: Int64,
@@ -73,7 +75,8 @@ package struct DiagnosticsBundleFacts: Equatable {
         report: BundleReport? = nil,
         conditions: BundleConditions = .unknown,
         paths: [String: PadPathReading] = [:],
-        hostReadings: [String: HostReading] = [:]
+        hostReadings: [String: HostReading] = [:],
+        outcomes: [String: [BenchOutcome]] = [:]
     ) {
         self.createdAtMs = createdAtMs
         self.identity = identity
@@ -85,6 +88,7 @@ package struct DiagnosticsBundleFacts: Equatable {
         self.conditions = conditions
         self.paths = paths
         self.hostReadings = hostReadings
+        self.outcomes = outcomes
     }
 }
 
@@ -100,7 +104,7 @@ package func diagnosticsBundle(_ facts: DiagnosticsBundleFacts) -> DiagnosticsBu
         app: BundleApp(name: DiagnosticsApp.name, version: facts.identity.appVersion, build: facts.identity.appBuild),
         device: device,
         controllerDb: bundleControllerDb(facts.controllerDb),
-        controllers: facts.controllers.map { bundleController($0, path: facts.paths[$0.id]) },
+        controllers: facts.controllers.map { bundleController($0, path: facts.paths[$0.id], outcomes: facts.outcomes[$0.id] ?? []) },
         hosts: facts.hosts.enumerated().map { bundleHost($1, alias: hostAlias($0), reading: facts.hostReadings[$1.id]) },
         log: facts.events.map { bundleLogLine($0, aliases: aliases) },
         report: facts.report
@@ -136,8 +140,9 @@ private func bundleControllerDb(_ status: ControllerDbStatus) -> BundleControlle
 }
 
 /// Every controller, the on-screen one as the virtual path with no link
-/// and no hardware; what its path carried rides beside it.
-private func bundleController(_ controller: ControllerFact, path: PadPathReading?) -> BundleController {
+/// and no hardware; what its path carried and its answers on the bench ride
+/// beside it.
+private func bundleController(_ controller: ControllerFact, path: PadPathReading?, outcomes: [BenchOutcome]) -> BundleController {
     let route = controller.source.map(bundlePath) ?? .virtual
     let hasRumble = controller.features.contains { $0.feature == .rumble }
     return BundleController(
@@ -146,10 +151,16 @@ private func bundleController(_ controller: ControllerFact, path: PadPathReading
         transport: controller.source.map { _ in bundleTransport(controller.link) },
         path: route,
         hardware: controller.source.map { bundleHardware($0, product: controller.name) },
+        outcomes: outcomes.map(bundleOutcome),
         input: path.map(bundleInput),
         output: path.map { $0.output.bundle(target: rumbleTarget(path: route, hasRumble: hasRumble), write: $0.rumbleWrite) },
         bluetooth: route == .bluetooth ? .lowEnergy : nil
     )
+}
+
+/// An answer under the contract's names: the test's and the result's.
+private func bundleOutcome(_ outcome: BenchOutcome) -> BundleOutcome {
+    BundleOutcome(test: outcome.test.rawValue, result: outcome.result.rawValue, atMs: outcome.atMs)
 }
 
 private func bundleInput(_ path: PadPathReading) -> BundleInput {

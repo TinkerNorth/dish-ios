@@ -222,6 +222,17 @@ final class DiagnosticsMappersTests: XCTestCase {
         XCTAssertEqual(padLines(pad(onScreen)).first, FactLine(key: "Connection", value: "On-screen"))
     }
 
+    /// A controller's card opens its bench, the on-screen controller's too;
+    /// a pad Dish cannot read has nothing to test, and a PC's card no bench.
+    func testAControllersCardOpensItsBenchButOneDishCannotReadAndAPCsDoNot() {
+        XCTAssertEqual(padCard(pad(controller())).bench, "Test this controller")
+        let onScreen = ControllerFact(id: onScreenSlotId, name: "", link: .onScreen, batteryPercent: nil, destination: nil)
+        XCTAssertEqual(padCard(pad(onScreen)).bench, "Test this controller")
+        XCTAssertNil(padCard(pad(controller(supported: false))).bench)
+        let host = HostDiagnostics(summary: summary(.saved), facts: .resting(id: "sat"), counters: .none)
+        XCTAssertNil(hostCard(host, locale: english).bench)
+    }
+
     func testEveryWireWordIsSpelled() {
         XCTAssertEqual(streamingText(.unknown), "waiting for the first heartbeat")
         XCTAssertEqual(streamingText(.no), "no")

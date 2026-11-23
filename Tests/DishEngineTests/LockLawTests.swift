@@ -9,9 +9,9 @@ import XCTest
 /// The locks each hot thread takes, read off the production objects running
 /// in their roles: a pad publishing reports, motion and touches on an input
 /// queue, a receive thread posting rumble and light-bar commands through a
-/// connection's feedback routes, the feedback queue draining them, and the
-/// main actor republishing the routing table every 100 ms and reading the
-/// tally; and the satellite path's own run, a pad routed to a live client,
+/// connection's feedback routes, the feedback queue draining them and
+/// running the bench's tests among them, and the main actor republishing the
+/// routing table every 100 ms and reading the tally; and the satellite path's own run, a pad routed to a live client,
 /// its heartbeat, and its receive loop opening a loopback satellite's
 /// return commands; and the Moonlight path's own run, a pad routed to a
 /// host's link, the control socket's queue opening the host's events, and
@@ -148,6 +148,7 @@ final class LockLawTests: XCTestCase {
         let giveUp = Date().addingTimeInterval(LockLawRun.limitSeconds)
         while tick < LockLawRun.mainTicks || group.wait(timeout: .now()) == .timedOut, Date() < giveUp {
             routing.republish(to: processor)
+            benchTests(on: feedback.pad(for: "pad"))
             tallied = processor.tallySnapshot().reports["pad"] ?? 0
             RunLoop.main.run(until: Date().addingTimeInterval(LockLawRun.mainTickSeconds))
             tick += 1
@@ -160,6 +161,17 @@ final class LockLawTests: XCTestCase {
             actuations: actuators.actuations.count,
             tallied: tallied
         )
+    }
+
+    /// A buzz and a light-bar test while the game's commands flow: each
+    /// test's hold, writes and put-back run on the feedback queue.
+    private func benchTests(on pad: FeedbackPad) {
+        pad.benchBegin(.rumble)
+        pad.benchWrite(.rumble(strong: 48000, weak: 48000, durationMs: 400))
+        pad.benchEnd(.rumble)
+        pad.benchBegin(.lightbar)
+        pad.benchWrite(.lightbar(BenchColour(red: 0xFF, green: 0, blue: 0)))
+        pad.benchEnd(.lightbar)
     }
 
     private func startInputProducer(_ feed: PadFeed, onScreen: PadFeed, queue: DispatchSerialQueue, group: DispatchGroup) {

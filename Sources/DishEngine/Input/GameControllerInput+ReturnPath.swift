@@ -90,4 +90,27 @@ extension GameControllerInput {
         default: .indexUnset
         }
     }
+
+    /// The player an index lights, as `playerIndex(for:)` takes it; an
+    /// unset index is no player.
+    nonisolated static func player(of index: GCControllerPlayerIndex) -> Int {
+        switch index {
+        case .index1: 1
+        case .index2: 2
+        case .index3: 3
+        case .index4: 4
+        case .indexUnset: 0
+        @unknown default: 0
+        }
+    }
+
+    /// A light's colour in the bytes a game writes it in, as the light bar's
+    /// return path divides each by 255.
+    nonisolated static func benchColour(_ colour: GCColor) -> BenchColour {
+        BenchColour(red: colourByte(colour.red), green: colourByte(colour.green), blue: colourByte(colour.blue))
+    }
+
+    private nonisolated static func colourByte(_ fraction: Float) -> UInt8 {
+        UInt8((min(max(fraction, 0), 1) * 255).rounded())
+    }
 }

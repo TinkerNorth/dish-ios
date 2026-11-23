@@ -22,6 +22,9 @@ package struct ControllerCapabilities: Hashable {
     /// The pad sources the protocol 4 extended buttons
     /// (`ProtocolConstants.extButton*`): the `extendedButtons` claim.
     package var hasExtendedButtons = false
+    /// The motors Dish can drive on the pad: a GameController pad's by the
+    /// haptic localities it reports, a Steam Controller's by its writer.
+    package var motors: BenchReach = []
 
     package init(
         hasMotion: Bool = false,
@@ -31,7 +34,8 @@ package struct ControllerCapabilities: Hashable {
         hasBattery: Bool = false,
         hasTriggerEffects: Bool = false,
         hasPlayerLeds: Bool = false,
-        hasExtendedButtons: Bool = false
+        hasExtendedButtons: Bool = false,
+        motors: BenchReach = []
     ) {
         self.hasMotion = hasMotion
         self.hasTouchpad = hasTouchpad
@@ -41,6 +45,7 @@ package struct ControllerCapabilities: Hashable {
         self.hasTriggerEffects = hasTriggerEffects
         self.hasPlayerLeds = hasPlayerLeds
         self.hasExtendedButtons = hasExtendedButtons
+        self.motors = motors
     }
 
     package static let none = ControllerCapabilities()

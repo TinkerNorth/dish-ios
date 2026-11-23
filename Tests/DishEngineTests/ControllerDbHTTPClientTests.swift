@@ -94,6 +94,34 @@ final class ControllerDbHTTPClientTests: XCTestCase {
         )
     }
 
+    func testTheWholeTransferIsBoundedSoACheckCannotHangForDays() throws {
+        let configuration = URLSessionConfiguration.ephemeral
+        // Built for what it sets on the configuration it is handed.
+        _ = try ControllerDbHTTPClient(base: XCTUnwrap(URL(string: ControllerDbSchedule.baseURLString)), configuration: configuration)
+        XCTAssertEqual(configuration.timeoutIntervalForRequest, 15, "an idle gap")
+        XCTAssertEqual(configuration.timeoutIntervalForResource, 60, "and the whole transfer, a trickle included")
+    }
+
+    func testEveryRequestCarriesOneNeutralLanguageNotThePersons() async throws {
+        RecordingURLProtocol.reset([
+            "/controllers/v1/manifest.json": .init(status: 304, body: Data(), headers: [:]),
+            "/controllers/v1/strings/de.json": .init(status: 200, body: Data("{}".utf8), headers: [:])
+        ])
+        let client = try client()
+        let manifest = client.manifestRequest(etag: "\"v1\"")
+        let file = client.fileRequest(ControllerDbFiles.strings("de"))
+        XCTAssertEqual(manifest.value(forHTTPHeaderField: "Accept-Language"), "*")
+        XCTAssertEqual(file.value(forHTTPHeaderField: "Accept-Language"), "*")
+        XCTAssertEqual(manifest.value(forHTTPHeaderField: "If-None-Match"), "\"v1\"")
+        XCTAssertNil(file.value(forHTTPHeaderField: "If-None-Match"))
+        let manifestReply = await client.manifest(etag: nil)
+        let fileReply = await client.file(ControllerDbFiles.strings("de"))
+        XCTAssertEqual(manifestReply, .notModified)
+        XCTAssertEqual(fileReply, Data("{}".utf8))
+        let sent = RecordingURLProtocol.requests.map { $0.value(forHTTPHeaderField: "Accept-Language") }
+        XCTAssertEqual(sent, ["*", "*"], "and it is what goes on the wire")
+    }
+
     func testAFileThatIsNotThereIsNoFile() async throws {
         RecordingURLProtocol.reset([:])
         let data = try await client().file("controllers.json")

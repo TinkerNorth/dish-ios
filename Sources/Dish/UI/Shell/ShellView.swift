@@ -145,6 +145,7 @@ private struct PageView: View {
         case .moonlightHosts: MoonlightHostsPage()
         case let .deadZones(id): DeadZonesPage(id: id)
         case let .report(start): ReportPage(start: start)
+        case let .bench(id): BenchPage(id: id)
         }
     }
 }

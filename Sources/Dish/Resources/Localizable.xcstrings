@@ -657,6 +657,40 @@
         }
       }
     },
+    "%@: did it work?" : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@: je li uspjelo?"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@: Hat es funktioniert?"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@: ¿ha funcionado?"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ : ça a marché ?"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@: funcionou?"
+          }
+        }
+      }
+    },
     "%@: removed" : {
       "localizations" : {
         "bs" : {
@@ -2109,6 +2143,74 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Uma sessão comporta no máximo quatro controles, e %@ já tem quatro. Desvincule um para abrir espaço."
+          }
+        }
+      }
+    },
+    "A short buzz in the triggers’ own motors, whatever the controller’s rumble switch says." : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kratka vibracija u motorima samih okidača, bez obzira na prekidač vibracije kontrolera."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ein kurzes Vibrieren in den Motoren der Trigger selbst, unabhängig vom Vibrationsschalter des Controllers."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Una vibración corta en los motores de los propios gatillos, diga lo que diga el interruptor de vibración del mando."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Une courte vibration dans les moteurs des gâchettes elles-mêmes, quel que soit le réglage de vibration de la manette."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uma vibração curta nos motores dos próprios gatilhos, seja qual for a chave de vibração do controle."
+          }
+        }
+      }
+    },
+    "A short buzz straight to the controller, whatever its rumble switch says." : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kratka vibracija direktno na kontroler, bez obzira na prekidač vibracije."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ein kurzes Vibrieren direkt am Controller, unabhängig vom Vibrationsschalter."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Una vibración corta directa al mando, diga lo que diga su interruptor de vibración."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Une courte vibration envoyée directement à la manette, quel que soit son réglage de vibration."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uma vibração curta direto no controle, seja qual for a chave de vibração."
           }
         }
       }
@@ -3927,6 +4029,40 @@
         }
       }
     },
+    "Both motors" : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Oba motora"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Beide Motoren"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ambos motores"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Les deux moteurs"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ambos os motores"
+          }
+        }
+      }
+    },
     "Both need a PlayStation-style controller and a Satellite connection." : {
       "localizations" : {
         "bs" : {
@@ -3957,6 +4093,74 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Os dois precisam de um controle estilo PlayStation e de uma conexão Satellite."
+          }
+        }
+      }
+    },
+    "Both trigger motors" : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Motori oba okidača"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Motoren in beiden Triggern"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Motores de ambos gatillos"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Moteurs des deux gâchettes"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Motores dos dois gatilhos"
+          }
+        }
+      }
+    },
+    "Both triggers stiffen for two seconds, then go back to what the game set." : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Oba okidača se ukrute na dvije sekunde, pa se vrate na ono što je igra postavila."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Beide Trigger werden zwei Sekunden lang schwergängig und kehren dann zu dem zurück, was das Spiel eingestellt hat."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ambos gatillos se endurecen durante dos segundos y vuelven a lo que puso el juego."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Les deux gâchettes se durcissent pendant deux secondes, puis reviennent à ce que le jeu avait réglé."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Os dois gatilhos endurecem por dois segundos e voltam ao que o jogo definiu."
           }
         }
       }
@@ -4127,6 +4331,40 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Cancelar"
+          }
+        }
+      }
+    },
+    "Capturing… %lld s" : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mjerenje… %lld s"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Messung läuft… %lld s"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Midiendo… %lld s"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mesure… %lld s"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Medindo… %lld s"
           }
         }
       }
@@ -4468,6 +4706,40 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Escolha uma"
+          }
+        }
+      }
+    },
+    "Circularity error: L %@ · R %@." : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Greška kružnosti: L %@ · R %@."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rundheitsfehler: L %@ · R %@."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Error de circularidad: L %@ · R %@."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Erreur de circularité : L %@ · R %@."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Erro de circularidade: L %@ · R %@."
           }
         }
       }
@@ -5198,6 +5470,40 @@
         }
       }
     },
+    "Controller tests" : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Testovi kontrolera"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Controller-Tests"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pruebas del mando"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tests de la manette"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Testes do controle"
+          }
+        }
+      }
+    },
     "Controllers" : {
       "localizations" : {
         "bs" : {
@@ -5604,6 +5910,40 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Diagnóstico"
+          }
+        }
+      }
+    },
+    "Did it work?" : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Je li uspjelo?"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hat es funktioniert?"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "¿Ha funcionado?"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ça a marché ?"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Funcionou?"
           }
         }
       }
@@ -6816,6 +7156,74 @@
         }
       }
     },
+    "Drift test" : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Test drifta"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Drift-Test"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prueba de deriva"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Test de dérive"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Teste de deriva"
+          }
+        }
+      }
+    },
+    "Drift test (hands off the sticks)" : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Test drifta (ne dirajte palice)"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Drift-Test (Sticks nicht berühren)"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prueba de deriva (no toques los sticks)"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Test de dérive (ne touchez pas les sticks)"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Teste de deriva (não toque nos analógicos)"
+          }
+        }
+      }
+    },
     "Dropped" : {
       "localizations" : {
         "bs" : {
@@ -7188,6 +7596,40 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Cada um é configurado de um jeito um pouco diferente."
+          }
+        }
+      }
+    },
+    "Each test drives the controller from here alone, with no PC in the loop." : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Svaki test pokreće kontroler samo odavde, bez PC-ja u petlji."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Jeder Test steuert den Controller allein von hier aus, ohne PC dazwischen."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cada prueba acciona el mando solo desde aquí, sin ningún PC de por medio."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Chaque test pilote la manette d'ici seulement, sans PC dans la boucle."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cada teste aciona o controle só daqui, sem nenhum PC no meio."
           }
         }
       }
@@ -9274,6 +9716,40 @@
         }
       }
     },
+    "It didn’t work" : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nije uspjelo"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hat nicht funktioniert"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No ha funcionado"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ça n'a pas marché"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Não funcionou"
+          }
+        }
+      }
+    },
     "It fetches data, never code, and sends nothing about you." : {
       "localizations" : {
         "bs" : {
@@ -9406,6 +9882,40 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ele recebe a entrada do Dish por Wi-Fi e se apresenta aos jogos daquele PC como um controle comum."
+          }
+        }
+      }
+    },
+    "It worked" : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uspjelo je"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hat funktioniert"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ha funcionado"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ça a marché"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Funcionou"
           }
         }
       }
@@ -9897,6 +10407,40 @@
         }
       }
     },
+    "Left trigger motor" : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Motor lijevog okidača"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Motor im linken Trigger"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Motor del gatillo izquierdo"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Moteur de la gâchette gauche"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Motor do gatilho esquerdo"
+          }
+        }
+      }
+    },
     "Let Dish find your PC" : {
       "localizations" : {
         "bs" : {
@@ -9995,6 +10539,40 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Barra de luz"
+          }
+        }
+      }
+    },
+    "Light bar cycle" : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ciklus svjetlosne trake"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lichtleisten-Zyklus"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ciclo de la barra de luz"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cycle de la barre lumineuse"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ciclo da barra de luz"
           }
         }
       }
@@ -12533,6 +13111,40 @@
         }
       }
     },
+    "Nothing on this controller’s path can be tested from here." : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ništa na putu ovog kontrolera ne može se testirati odavde."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Auf dem Pfad dieses Controllers lässt sich von hier aus nichts testen."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nada en la vía de este mando se puede probar desde aquí."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rien sur la voie de cette manette ne peut être testé d'ici."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nada no caminho deste controle pode ser testado daqui."
+          }
+        }
+      }
+    },
     "Nothing pairs without a PIN" : {
       "localizations" : {
         "bs" : {
@@ -13978,6 +14590,40 @@
         }
       }
     },
+    "Player LED cycle" : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ciklus LED indikatora igrača"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Spieler-LED-Zyklus"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ciclo de los LED de jugador"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cycle des LED de joueur"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ciclo dos LEDs de jogador"
+          }
+        }
+      }
+    },
     "Player LEDs" : {
       "localizations" : {
         "bs" : {
@@ -14008,6 +14654,40 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "LEDs de jogador"
+          }
+        }
+      }
+    },
+    "Players one to four, then back to what the game set." : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Igrači od jedan do četiri, pa nazad na ono što je igra postavila."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Spieler eins bis vier, dann zurück zu dem, was das Spiel eingestellt hat."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Jugadores del uno al cuatro, y de vuelta a lo que puso el juego."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Joueurs un à quatre, puis retour à ce que le jeu avait réglé."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Jogadores um a quatro, e de volta ao que o jogo definiu."
           }
         }
       }
@@ -14767,6 +15447,74 @@
         }
       }
     },
+    "Range test" : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Test dometa"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bereichstest"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prueba de recorrido"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Test de course"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Teste de alcance"
+          }
+        }
+      }
+    },
+    "Range test (sweep full circles)" : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Test dometa (pravite pune krugove)"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bereichstest (volle Kreise ziehen)"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prueba de recorrido (dibuja círculos completos)"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Test de course (faites des cercles complets)"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Teste de alcance (faça círculos completos)"
+          }
+        }
+      }
+    },
     "Re-pair" : {
       "localizations" : {
         "bs" : {
@@ -14797,6 +15545,40 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Reparear"
+          }
+        }
+      }
+    },
+    "Reach: L %@ · R %@." : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Domet: L %@ · R %@."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ausschlag: L %@ · R %@."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Recorrido: L %@ · R %@."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Course : L %@ · R %@."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Alcance: L %@ · R %@."
           }
         }
       }
@@ -15037,6 +15819,40 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Registro"
+          }
+        }
+      }
+    },
+    "Red, green, then blue, then back to what the game set." : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Crvena, zelena, pa plava, pa nazad na ono što je igra postavila."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rot, Grün, dann Blau, dann zurück zu dem, was das Spiel eingestellt hat."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rojo, verde, luego azul, y de vuelta a lo que puso el juego."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rouge, vert, puis bleu, puis retour à ce que le jeu avait réglé."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vermelho, verde, depois azul, e de volta ao que o jogo definiu."
           }
         }
       }
@@ -15358,6 +16174,40 @@
         }
       }
     },
+    "Resting drift: L %@ · R %@." : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Drift u mirovanju: L %@ · R %@."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ruhe-Drift: L %@ · R %@."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Deriva en reposo: L %@ · R %@."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dérive au repos : L %@ · R %@."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Deriva em repouso: L %@ · R %@."
+          }
+        }
+      }
+    },
     "Restore purchases" : {
       "localizations" : {
         "bs" : {
@@ -15530,6 +16380,40 @@
         }
       }
     },
+    "Right trigger motor" : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Motor desnog okidača"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Motor im rechten Trigger"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Motor del gatillo derecho"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Moteur de la gâchette droite"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Motor do gatilho direito"
+          }
+        }
+      }
+    },
     "Round trip" : {
       "localizations" : {
         "bs" : {
@@ -15628,6 +16512,40 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Execute o Satellite em um PC nesta Wi‑Fi e ele aparece aqui."
+          }
+        }
+      }
+    },
+    "Run a test above, then say whether it worked." : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pokrenite test iznad, pa recite je li uspio."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Führe oben einen Test aus und sag dann, ob er funktioniert hat."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ejecuta una prueba de arriba y di si ha funcionado."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lancez un test ci-dessus, puis dites s'il a marché."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Execute um teste acima e diga se funcionou."
           }
         }
       }
@@ -16556,6 +17474,40 @@
         }
       }
     },
+    "Short buzz" : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kratka vibracija"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kurzes Vibrieren"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vibración corta"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Courte vibration"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vibração curta"
+          }
+        }
+      }
+    },
     "Skip" : {
       "localizations" : {
         "bs" : {
@@ -16932,6 +17884,40 @@
         }
       }
     },
+    "Stick tests" : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Testovi palica"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stick-Tests"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pruebas de stick"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tests des sticks"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Testes de analógico"
+          }
+        }
+      }
+    },
     "Stopped responding" : {
       "localizations" : {
         "bs" : {
@@ -17031,6 +18017,74 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "A transmissão continua enquanto a tela está escurecida."
+          }
+        }
+      }
+    },
+    "Strong motor" : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Jaki motor"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Starker Motor"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Motor fuerte"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Moteur fort"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Motor forte"
+          }
+        }
+      }
+    },
+    "Suggested dead zone: %@." : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Predložena mrtva zona: %@."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Empfohlene Totzone: %@."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zona muerta sugerida: %@."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zone morte suggérée : %@."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zona morta sugerida: %@."
           }
         }
       }
@@ -17371,6 +18425,40 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Telemetria"
+          }
+        }
+      }
+    },
+    "Test this controller" : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Testiraj ovaj kontroler"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Diesen Controller testen"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Probar este mando"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tester cette manette"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Testar este controle"
           }
         }
       }
@@ -17853,6 +18941,40 @@
         }
       }
     },
+    "The controller sent nothing during the test." : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kontroler tokom testa nije poslao ništa."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Der Controller hat während des Tests nichts gesendet."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El mando no envió nada durante la prueba."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La manette n'a rien envoyé pendant le test."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O controle não enviou nada durante o teste."
+          }
+        }
+      }
+    },
     "The download did not verify" : {
       "localizations" : {
         "bs" : {
@@ -18190,6 +19312,40 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "O código está no GitHub em github.com/TinkerNorth."
+          }
+        }
+      }
+    },
+    "The tests read the sticks as the controller sends them, before the dead zones." : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Testovi čitaju palice onako kako ih kontroler šalje, prije mrtvih zona."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die Tests lesen die Sticks so, wie der Controller sie sendet, vor den Totzonen."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Las pruebas leen los sticks tal como los envía el mando, antes de las zonas muertas."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Les tests lisent les sticks tels que la manette les envoie, avant les zones mortes."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Os testes leem os analógicos como o controle os envia, antes das zonas mortas."
           }
         }
       }
@@ -19179,6 +20335,74 @@
         }
       }
     },
+    "Trigger resistance" : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Otpor okidača"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Trigger-Widerstand"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Resistencia de los gatillos"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Résistance des gâchettes"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Resistência dos gatilhos"
+          }
+        }
+      }
+    },
+    "Trigger rumble" : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vibracija okidača"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Trigger-Vibration"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vibración de los gatillos"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vibration des gâchettes"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vibração dos gatilhos"
+          }
+        }
+      }
+    },
     "Try again" : {
       "localizations" : {
         "bs" : {
@@ -20147,6 +21371,40 @@
         }
       }
     },
+    "Weak motor" : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Slabi motor"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Schwacher Motor"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Motor suave"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Moteur faible"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Motor fraco"
+          }
+        }
+      }
+    },
     "Website" : {
       "localizations" : {
         "bs" : {
@@ -21111,6 +22369,74 @@
         }
       }
     },
+    "Your answers go in the support file." : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vaši odgovori idu u datoteku za podršku."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Deine Antworten kommen in die Support-Datei."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tus respuestas van en el archivo de soporte."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vos réponses vont dans le fichier d'assistance."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Suas respostas vão no arquivo de suporte."
+          }
+        }
+      }
+    },
+    "Your answers on each controller’s tests" : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vaši odgovori na testove svakog kontrolera"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Deine Antworten auf die Tests jedes Controllers"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tus respuestas a las pruebas de cada mando"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vos réponses aux tests de chaque manette"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Suas respostas aos testes de cada controle"
+          }
+        }
+      }
+    },
     "Your tip is waiting for approval." : {
       "localizations" : {
         "bs" : {
@@ -21876,6 +23202,40 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "mouse"
+          }
+        }
+      }
+    },
+    "n/a" : {
+      "localizations" : {
+        "bs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "n/d"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "k. A."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "n/d"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "n/d"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "n/d"
           }
         }
       }
