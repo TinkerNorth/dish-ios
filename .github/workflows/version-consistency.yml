@@ -64,6 +64,17 @@ jobs:
           [ "$marketing" = "$ver" ] \
             || err "project.yml MARKETING_VERSION is '${marketing:-missing}' but VERSION is '$ver'"
 
+          # A link reference may name only a tag the repository has (or main/HEAD):
+          # the headings of a release that was never tagged carry no link.
+          tags="$(git ls-remote --tags --refs origin | sed 's#.*refs/tags/##')"
+          while IFS= read -r ref; do
+            [ -n "$ref" ] || continue
+            for name in $(sed -E 's#\.\.\.# #' <<<"$ref"); do
+              case "$name" in main|HEAD) continue ;; esac
+              grep -qxF "$name" <<<"$tags" || err "CHANGELOG.md links the tag '$name', which this repository does not have"
+            done
+          done < <(sed -nE 's#^\[[^]]+\]: https://github\.com/[^/]+/[^/]+/(releases/tag|compare)/(.*)$#\2#p' CHANGELOG.md)
+
           if [ "$fail" -ne 0 ]; then
             echo "::error::Version sources drifted. VERSION is the source; CONTRIBUTING.md, 'Cutting a release', has the mirror list."
             exit 1
