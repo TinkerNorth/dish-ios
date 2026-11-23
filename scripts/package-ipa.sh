@@ -21,5 +21,6 @@ mkdir -p "$payload/Payload"
 cp -R "$archive/Products/Applications/Dish.app" "$payload/Payload/"
 rm -f "$output"
 (cd "$payload" && zip -qry "$output" Payload)
-unzip -l "$output" | grep -q 'Payload/Dish.app/Info.plist' || { echo "$output has no Payload/Dish.app" >&2; exit 1; }
+listing="$(unzip -l "$output")"
+grep -q 'Payload/Dish.app/Info.plist' <<<"$listing" || { echo "$output has no Payload/Dish.app" >&2; exit 1; }
 echo "$output"
