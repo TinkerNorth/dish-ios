@@ -1,3 +1,6 @@
 # The bundled controller database is checked byte for byte against the
 # SHA-256 digests in its manifest, so no checkout may normalise its line endings.
 Sources/DishCore/Resources/controllers-v1/** -text
+
+# The future-reader set: its bytes are what the manifest it carries vouches for.
+Tests/DishEngineTests/Fixtures/** -text

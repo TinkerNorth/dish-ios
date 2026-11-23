@@ -73,6 +73,8 @@ let package = Package(
             name: "DishEngineTests",
             dependencies: ["DishCore", "DishEngine", "DishKernel"],
             path: "Tests/DishEngineTests",
+            // Read by path, byte for byte: a resource copy would only add a bundle.
+            exclude: ["Fixtures"],
             swiftSettings: warningsAreErrors
         ),
         .testTarget(
