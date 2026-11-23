@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # SPDX-License-Identifier: LGPL-3.0-or-later
 # ============================================================================
-#  package-ipa.sh — zip the Dish.app of an unsigned archive into an IPA (a
+#  package-ipa.sh - zip the Dish.app of an unsigned archive into an IPA (a
 #  zip whose Payload/ holds the .app). Used by release.yml for the unsigned
 #  release and by ios-ci.yml's device-archive lane, so the packaging is
 #  proven before a tag.

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # SPDX-License-Identifier: LGPL-3.0-or-later
 # ============================================================================
-#  ci-local.sh — run the iOS CI gates against this worktree, in CI's order.
+#  ci-local.sh - run the iOS CI gates against this worktree, in CI's order.
 #
 #  A green run here is a green `ios-ci.yml` run: both call the same scripts
 #  (check-format.sh, check-lint.sh, generate-project.sh, test.sh,
@@ -12,6 +12,8 @@
 #  skipped quietly.
 #
 #  The gates, in order:
+#    security      the action-pin lint, the vulnerability allowlist,
+#                  OSV-Scanner and gitleaks, at the versions tools.sh pins
 #    format        swiftformat --lint
 #    lint          swiftlint --strict
 #    project       Dish.xcodeproj matches project.yml
@@ -33,8 +35,9 @@
 #      this script reports when your selected Xcode is another version.
 #    - version-consistency.yml: a text gate; VersionConsistencyTests runs the
 #      same checks in the test gate here.
-#    - security.yml, _security.yml, codeql.yml: scanners that need GitHub
-#      (OSV database, code scanning upload, dependency review).
+#    - dependency review (the repository's Dependency graph setting is off),
+#      codeql.yml (the code scanning upload) and the release-hardening dry
+#      run (a Linux job: Grype, Syft and cosign of the PR-built IPA).
 #    - e2e.yml: the same e2e_local.sh as --with-e2e, on a runner.
 #    - release.yml: the signed archive, the export and the App Store Connect
 #      upload need the six signing secrets; the rest needs a tag.
@@ -71,6 +74,9 @@ if [ "${selected%.0}" != "$XCODE_VERSION" ]; then
     echo "note: Xcode $selected is selected; CI pins $XCODE_VERSION (scripts/tools.sh). Trust CI for the pinned toolchain."
 fi
 
+tools_log "security gates"
+scripts/check-security.sh
+
 tools_log "swiftformat --lint"
 scripts/check-format.sh
 
@@ -103,8 +109,8 @@ if [ "$QUICK" -eq 0 ]; then
     tools_log "xcodebuild archive (generic iOS device, unsigned) and the IPA"
     archive="${TMPDIR:-/tmp}/dish-ci-local.xcarchive"
     scripts/archive-device.sh "$archive" CODE_SIGNING_ALLOWED=NO
-    scripts/package-ipa.sh "$archive" "${TMPDIR:-/tmp}/dish-ci-local.ipa"
-    rm -rf "$archive" "${TMPDIR:-/tmp}/dish-ci-local.ipa"
+    scripts/stage-ipa.sh "$archive" "$(tr -d '[:space:]' < VERSION)"
+    rm -rf "$archive" dist
 fi
 
 if [ "$WITH_E2E" -eq 1 ]; then

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # SPDX-License-Identifier: LGPL-3.0-or-later
 # ============================================================================
-#  select-xcode.sh — select the Xcode pinned in scripts/tools.sh
+#  select-xcode.sh - select the Xcode pinned in scripts/tools.sh
 #  (XCODE_VERSION) on a CI runner, by version and not by the image's
 #  /Applications/Xcode.app link, which moves when the image's default does.
 #  CI only: a developer's Mac keeps its own selection, and ci-local.sh says

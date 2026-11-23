@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # SPDX-License-Identifier: LGPL-3.0-or-later
 # ============================================================================
-#  generate-project.sh — regenerate Dish.xcodeproj from project.yml with
+#  generate-project.sh - regenerate Dish.xcodeproj from project.yml with
 #  the pinned XcodeGen. Run after editing project.yml and commit the result;
 #  ios-ci.yml runs it and fails when the committed project differs.
 #

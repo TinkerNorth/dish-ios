@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # SPDX-License-Identifier: LGPL-3.0-or-later
 # ============================================================================
-#  build-release.sh — the Release build of the app for the simulator, into
+#  build-release.sh - the Release build of the app for the simulator, into
 #  build/ (Dish.app lands in build/Build/Products/Release-iphonesimulator).
 #  Called by ci-local.sh and by ios-ci.yml, which uploads the .app.
 # ============================================================================

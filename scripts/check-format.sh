@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # SPDX-License-Identifier: LGPL-3.0-or-later
 # ============================================================================
-#  check-format.sh — SwiftFormat in lint mode with the pinned release binary.
+#  check-format.sh - SwiftFormat in lint mode with the pinned release binary.
 #  Called by ci-local.sh and by ios-ci.yml.
 # ============================================================================
 

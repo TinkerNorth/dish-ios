@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # SPDX-License-Identifier: LGPL-3.0-or-later
 # ============================================================================
-#  test.sh — one xcodebuild test run on a simulator this script creates,
+#  test.sh - one xcodebuild test run on a simulator this script creates,
 #  boots and deletes (scripts/ci-simulator.sh). Called by ci-local.sh and by
 #  ios-ci.yml.
 #

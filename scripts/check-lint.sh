@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # SPDX-License-Identifier: LGPL-3.0-or-later
 # ============================================================================
-#  check-lint.sh — SwiftLint --strict with the pinned release binary. Called
+#  check-lint.sh - SwiftLint --strict with the pinned release binary. Called
 #  by ci-local.sh and by ios-ci.yml; under GitHub Actions the findings are
 #  annotations on the diff.
 # ============================================================================

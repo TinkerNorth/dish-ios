@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # SPDX-License-Identifier: LGPL-3.0-or-later
 # ============================================================================
-#  archive-device.sh — archive the app for a generic iOS device, the build
+#  archive-device.sh - archive the app for a generic iOS device, the build
 #  release.yml ships, and check what it made: Dish.app is in the archive,
 #  carries an arm64 slice and reports the version in VERSION.
 #

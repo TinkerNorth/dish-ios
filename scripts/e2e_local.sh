@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # SPDX-License-Identifier: LGPL-3.0-or-later
 # ============================================================================
-#  e2e_local.sh — loopback end-to-end: this client vs the REAL satellite
+#  e2e_local.sh - loopback end-to-end: this client vs the REAL satellite
 #
 #  Runs the actual C++ satellite server (sibling repo; built here when its
 #  binary is missing) headless with an isolated $HOME (its config, paired
