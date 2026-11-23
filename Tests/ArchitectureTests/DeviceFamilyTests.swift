@@ -10,7 +10,6 @@ import XCTest
 /// in the local gate. A change to one alone is caught here.
 final class DeviceFamilyTests: XCTestCase {
 
-    private static let iPadDestination = "platform=iOS Simulator,name=iPad Pro 11-inch (M5)"
     private static let allFour: Set = [
         "UIInterfaceOrientationPortrait",
         "UIInterfaceOrientationPortraitUpsideDown",
@@ -45,18 +44,22 @@ final class DeviceFamilyTests: XCTestCase {
     }
 
     /// A fresh runner may list no simulator by name, and one it created and
-    /// booted has gone missing by the time xcodebuild looked, so CI makes its
-    /// iPad (the newest iPad Pro 11-inch, on the newest runtime that supports
-    /// it) through `scripts/ci-simulator.sh` and runs the UI tests through it
-    /// too, which reads the iPad back as booted first.
-    func testCIRunsTheUITestsOnAnIPadItCreatedAndReadBack() throws {
+    /// booted has gone missing by the time xcodebuild looked, so the iPad
+    /// (the newest iPad Pro 11-inch, on the newest runtime that supports it)
+    /// is made through `scripts/ci-simulator.sh`, and the UI tests run through
+    /// it too, which reads the iPad back as booted first. CI and `ci-local.sh`
+    /// both reach it through `scripts/test.sh ipad`.
+    func testTheIPadSuiteMakesItsIPadAndRunsTheUIBundleAloneThroughTheScript() throws {
+        let test = try RepoFiles.read("scripts/test.sh")
+        XCTAssertTrue(test.contains(#"prefix="iPad Pro 11-inch""#), "test.sh makes its iPad an iPad Pro 11-inch")
+        XCTAssertTrue(test.contains(#"scripts/ci-simulator.sh create "$name" "$prefix""#), "through the script")
+        XCTAssertTrue(test.contains(#"scripts/ci-simulator.sh run "$udid" "$name" "$prefix""#), "and runs on it through the script")
+        XCTAssertTrue(test.contains("-only-testing:DishUITests"), "the iPad pass runs the UI bundle alone")
+    }
+
+    func testCIRunsTheIPadSuite() throws {
         let workflow = try RepoFiles.read(".github/workflows/ios-ci.yml")
-        XCTAssertTrue(
-            workflow.contains(#"scripts/ci-simulator.sh create "CI iPad" "iPad Pro 11-inch""#),
-            "ios-ci.yml makes its iPad an iPad Pro 11-inch, through the script"
-        )
-        XCTAssertTrue(workflow.contains(#"scripts/ci-simulator.sh run "$IPAD_UDID""#), "the UI tests run on that iPad, through the script")
-        XCTAssertTrue(workflow.contains("-only-testing:DishUITests"), "the iPad pass runs the UI bundle alone")
+        XCTAssertTrue(workflow.contains("scripts/test.sh ipad"), "ios-ci.yml runs the UI tests on the iPad through test.sh")
     }
 
     /// The script creates and boots the device, trusts `simctl list` over
@@ -78,7 +81,6 @@ final class DeviceFamilyTests: XCTestCase {
 
     func testTheLocalGateRunsTheSameIPad() throws {
         let gate = try RepoFiles.read("scripts/ci-local.sh")
-        XCTAssertTrue(gate.contains(Self.iPadDestination), "ci-local.sh runs the UI tests on the iPad CI runs them on")
-        XCTAssertTrue(gate.contains("-only-testing:DishUITests"))
+        XCTAssertTrue(gate.contains("scripts/test.sh ipad"), "ci-local.sh runs the UI tests on the iPad CI runs them on")
     }
 }

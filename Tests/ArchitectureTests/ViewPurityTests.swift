@@ -235,4 +235,24 @@ final class ViewPurityTests: XCTestCase {
         let matches = regex.matches(in: source, range: NSRange(source.startIndex..., in: source))
         return Set(matches.compactMap { match in Range(match.range(at: group), in: source).map { String(source[$0]) } })
     }
+
+    /// The rules this file enforces are the ones the documents name: the
+    /// highest `V<n>` here is the end of the "V1 to V<n>" range they quote.
+    func testTheDocumentsNameTheRangeOfRulesThisTestEnforces() throws {
+        let source = try RepoFiles.read("Tests/ArchitectureTests/ViewPurityTests.swift")
+        let regex = try NSRegularExpression(pattern: #"name: "V(\d+) |XCTAssertEqual\(offenders, \[\], "V(\d+): "#)
+        let numbers = regex.matches(in: source, range: NSRange(source.startIndex..., in: source)).flatMap { match in
+            (1 ... 2).compactMap { Range(match.range(at: $0), in: source).flatMap { Int(source[$0]) } }
+        }
+        let enforced = try XCTUnwrap(numbers.max())
+        for file in ["CONTRIBUTING.md", "Tests/PARITY.md", "docs/UI_CONTRACT.md"] {
+            let text = try RepoFiles.read(file)
+            let range = try NSRegularExpression(pattern: #"V1 (?:to|through|-) ?V(\d+)"#)
+            for match in range.matches(in: text, range: NSRange(text.startIndex..., in: text)) {
+                let digits = try XCTUnwrap(Range(match.range(at: 1), in: text))
+                let named = try XCTUnwrap(Int(text[digits]))
+                XCTAssertEqual(named, enforced, "\(file) names rules V1 to V\(named); the test enforces V1 to V\(enforced)")
+            }
+        }
+    }
 }

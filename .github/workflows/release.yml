@@ -37,9 +37,7 @@ on:
 # `-unsigned` in its filename; it installs only after re-signing.
 
 permissions:
-  contents: write
-  id-token: write
-  attestations: write
+  contents: read
 
 concurrency:
   group: release-${{ github.ref }}
@@ -75,6 +73,7 @@ jobs:
     name: Required release secrets gate
     needs: [gates]
     runs-on: ubuntu-24.04
+    timeout-minutes: 5
     outputs:
       signed: ${{ steps.check.outputs.signed }}
     steps:
@@ -128,40 +127,35 @@ jobs:
     timeout-minutes: 60
     env:
       SIGNED: ${{ needs.required-secrets.outputs.signed }}
+      TAG: ${{ inputs.tag || github.ref_name }}
     steps:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: ${{ inputs.tag || github.ref }}
+          persist-credentials: false
 
       - name: Select Xcode
-        run: sudo xcode-select -s /Applications/Xcode.app
+        run: scripts/select-xcode.sh
 
       # VERSION is the one source of the app's version; a tag that disagrees
       # would publish an app that reports a different number than its release.
       - name: Assert the tag matches VERSION
         run: |
           set -euo pipefail
-          tag="${{ inputs.tag || github.ref_name }}"
           version="$(tr -d '[:space:]' < VERSION)"
-          if [ "$tag" != "$version" ]; then
-            echo "::error::tag '$tag' does not match VERSION '$version'"
+          if [ "$TAG" != "$version" ]; then
+            echo "::error::tag '$TAG' does not match VERSION '$version'"
             exit 1
           fi
-          echo "tag $tag matches VERSION"
+          echo "tag $TAG matches VERSION"
 
       # The build number is the run number: App Store Connect wants it to rise
       # with every upload of one marketing version.
       - name: Archive unsigned
         if: env.SIGNED != 'true'
         run: |
-          set -euo pipefail
-          xcodebuild archive \
-            -project Dish.xcodeproj \
-            -scheme DishApp \
-            -configuration Release \
-            -destination "generic/platform=iOS" \
-            -archivePath "$RUNNER_TEMP/Dish.xcarchive" \
+          scripts/archive-device.sh "$RUNNER_TEMP/Dish.xcarchive" \
             CURRENT_PROJECT_VERSION=${{ github.run_number }} \
             CODE_SIGNING_ALLOWED=NO
 
@@ -204,13 +198,7 @@ jobs:
       - name: Archive signed
         if: env.SIGNED == 'true'
         run: |
-          set -euo pipefail
-          xcodebuild archive \
-            -project Dish.xcodeproj \
-            -scheme DishApp \
-            -configuration Release \
-            -destination "generic/platform=iOS" \
-            -archivePath "$RUNNER_TEMP/Dish.xcarchive" \
+          scripts/archive-device.sh "$RUNNER_TEMP/Dish.xcarchive" \
             CURRENT_PROJECT_VERSION=${{ github.run_number }} \
             CODE_SIGN_STYLE=Manual \
             CODE_SIGN_IDENTITY="Apple Distribution" \
@@ -269,19 +257,16 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p dist
-          tag="${{ inputs.tag || github.ref_name }}"
           archive="$RUNNER_TEMP/Dish.xcarchive"
           if [ "${SIGNED}" = "true" ]; then
-            ditto -c -k --keepParent "${archive}/dSYMs" "dist/dish-${tag}-dSYMs.zip"
+            ditto -c -k --keepParent "${archive}/dSYMs" "dist/dish-${TAG}-dSYMs.zip"
           else
             # An IPA is a zip whose Payload/ holds the .app. The versioned copy
             # carries the honesty marker; dish-ios.ipa is the stable name and
-            # never changes shape, signed or not.
-            payload="$RUNNER_TEMP/ipa"
-            mkdir -p "${payload}/Payload"
-            cp -R "${archive}/Products/Applications/Dish.app" "${payload}/Payload/"
-            (cd "${payload}" && zip -qry "$GITHUB_WORKSPACE/dist/dish-${tag}-unsigned.ipa" Payload)
-            cp "dist/dish-${tag}-unsigned.ipa" dist/dish-ios.ipa
+            # never changes shape, signed or not. ios-ci.yml packages the same
+            # way on every pull request.
+            scripts/package-ipa.sh "${archive}" "dist/dish-${TAG}-unsigned.ipa"
+            cp "dist/dish-${TAG}-unsigned.ipa" dist/dish-ios.ipa
           fi
           ls -l dist/
 
@@ -295,6 +280,7 @@ jobs:
     name: Harden artifacts (scan, SBOM, sign)
     needs: [release]
     runs-on: ubuntu-24.04
+    timeout-minutes: 30
     permissions:
       contents: read
       id-token: write
@@ -421,7 +407,7 @@ jobs:
     needs: [harden]
     permissions:
       id-token: write
-      contents: write
+      contents: read
       actions: read
     uses: slsa-framework/slsa-github-generator/.github/workflows/generator_generic_slsa3.yml@f7dd8c54c2067bafc12ca7a55595d5ee9b75204a # v2.1.0
     with:
@@ -433,12 +419,20 @@ jobs:
       # wants a vX.Y.Z tag and refuses the ref, as 1.0.1's release did.
       compile-generator: true
 
+  # The release is uploaded as a DRAFT first and flipped to published last,
+  # so nothing that follows a release (a manifest, a store listing) can point
+  # at a half-published one. There is no measurements job and no latest.json
+  # here, so the flip follows the upload at once.
   publish:
     name: Publish to GitHub Releases
     needs: [required-secrets, harden, provenance]
     runs-on: ubuntu-24.04
+    timeout-minutes: 15
     permissions:
       contents: write
+    env:
+      TAG: ${{ inputs.tag || github.ref_name }}
+      GH_TOKEN: ${{ github.token }}
     steps:
       - name: Download hardened bundle
         uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
@@ -470,10 +464,19 @@ jobs:
           fi
           cat note.md
 
-      - name: Upload to GitHub Releases
+      - name: Upload the draft GitHub Release
+        id: draft
         uses: softprops/action-gh-release@8a0cd651e5b2365bd640854a3fa5dfc70e4875f3 # v3.0.4
         with:
           tag_name: ${{ inputs.tag || github.ref_name }}
           body_path: note.md
           generate_release_notes: true
+          draft: true
+          prerelease: ${{ contains(inputs.tag || github.ref_name, '-') }}
           files: release/**/*
+
+      # By id, not by tag: a draft has no tag page to look a name up on.
+      - name: Publish the release
+        env:
+          RELEASE_ID: ${{ steps.draft.outputs.id }}
+        run: gh api --method PATCH "repos/${GITHUB_REPOSITORY}/releases/${RELEASE_ID}" -F draft=false

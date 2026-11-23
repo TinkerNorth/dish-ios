@@ -1,13 +1,18 @@
 #!/usr/bin/env bash
 # SPDX-License-Identifier: LGPL-3.0-or-later
 # ============================================================================
-#  tools.sh — the pinned release binaries the gates run with, fetched once
-#  into .build/tools and verified by SHA-256. Sourced by ci-local.sh and
-#  generate-project.sh; ios-ci.yml pins the same versions and digests. A bump
-#  is a deliberate commit that reformats or regenerates the tree with it, in
-#  this file, ios-ci.yml and THIRD_PARTY.md together.
+#  tools.sh — the one place a toolchain pin lives: the Xcode the apple jobs
+#  select and the release binaries the gates run with, fetched once into
+#  .build/tools and verified by SHA-256. Sourced by ci-local.sh, the gate
+#  scripts (check-format.sh, check-lint.sh, generate-project.sh) and, through
+#  them, every workflow. A bump is a deliberate commit that reformats or
+#  regenerates the tree with it, here and in THIRD_PARTY.md and CONTRIBUTING.md,
+#  which ToolPinTests keeps equal to this file.
 # ============================================================================
 
+# The Xcode the macos-26 image carries and CI selects by this version
+# (scripts/select-xcode.sh), so an image update cannot change the toolchain.
+XCODE_VERSION="26.6"
 SWIFTFORMAT_VERSION="0.64.7"
 SWIFTFORMAT_SHA256="e82e224325cbd3403fc7b68caf6c917926dc106de3af875fca4b87e3c4634038"
 SWIFTLINT_VERSION="0.65.1"
