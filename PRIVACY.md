@@ -66,8 +66,8 @@ Preferences are stored with `UserDefaults` in the app's preferences domain
 | Setting | Holds | Used for |
 |---|---|---|
 | `theme_mode` | `system`, `light` or `dark` (the fleet's key and values) | Drawing the app in the appearance you chose |
-| `device_name` | The name you typed for "Name on your PC", trimmed; empty when you have not set one | The name the PC will list this iPhone by once the app can pair; iOS tells apps only "iPhone", so you name it |
-| `keep_screen_on` | A switch, on by default | Holding the screen on while a session streams (there is no session yet) |
+| `device_name` | The name you typed for "Name on your PC", trimmed; empty when you have not set one | The name a PC lists this iPhone by when you pair; iOS tells apps only "iPhone", so you name it |
+| `keep_screen_on` | A switch, on by default | Holding the screen on while a session streams with a controller bound, so iOS does not lock it mid-game |
 | `dim_after_seconds` | 10, 20, 30, 60, 120 or 0 for never; 20 by default | When the low-power dim rises while streaming |
 | `onboarding_welcome_completed` | Whether the welcome was finished or skipped | Showing the setup cover on its own only once |
 | `local_network_primed` | Whether the setup walk has explained the Local Network question (dish-mac's key) | Keeping the Connections tab from looking for PCs as it opens, which is what makes iOS ask, until that explanation was seen; your own scan counts as the question asked |
@@ -204,8 +204,8 @@ privacy policy. Dish never sees your card or your Apple Account; it receives
 only StoreKit's signed record that the tip completed, which it marks finished
 and does not store. A tip unlocks nothing.
 
-The only way this app causes a request to a TinkerNorth or third-party address
-is if you tap a link, which hands the URL to your default browser and is then
+Beyond those two, the only way this app causes a request to a TinkerNorth or
+third-party address is if you tap a link, which hands the URL to your default browser and is then
 between you and that site. Today those links are Satellite's download page
 from the setup flow, Sunshine's project page from the Moonlight hosts page,
 Dish's page in the Settings app, and Settings › About's and Help & FAQ's links
@@ -331,7 +331,7 @@ Improvements; that is Apple's mechanism and policy, not the app's.
 |---|---|
 | Local network access and Bonjour (`_satellite._udp`, `_nvstream._tcp`), declared in `App/Info.plist` with the usage text "Dish finds Satellite on your Wi‑Fi and sends controller input straight to your PC." | Finding PCs on your Wi-Fi and talking to the one you chose; everything stays on your LAN. iOS asks once, at the first scan, which the setup flow's primer runs after it has explained why; if you refuse, the Connections page says so and points to Settings. The Moonlight service is browsed when the Moonlight hosts page opens. |
 | The Keychain | One item per paired PC, holding its pairing key, and the Moonlight identity, a key and its certificate (section 2.1). |
-| Keeping the screen on (the idle timer) | Held off only while a session is up and Keep screen on is set, so that iOS does not lock the screen and suspend Dish mid-game. There is no session in this version, so it is never held. |
+| Keeping the screen on (the idle timer) | Held off only while a session streams with a controller bound and Keep screen on is set, so that iOS does not lock the screen and suspend Dish mid-game;. |
 | App Intents (Siri, Spotlight, the Shortcuts app) | Five actions (open the gamepad, the touchpad or the mouse, dim the screen, connect to a paired PC) that open the app; no permission is asked and nothing is donated (section 2.1). |
 | TipKit | Four hints about the app's own controls, remembered on the iPhone (section 2.1). |
 | Battery monitoring (`UIDevice`) | The iPhone's battery level and charging state, read while a controller is attached so a PC is told the lower of it and the controller's, and when a support report is made, for its file (section 2.5); no permission is asked and nothing is stored (section 2.1). |

@@ -8,7 +8,7 @@ wireless-gamepad product end-to-end:
 - [`dish-windows`](https://github.com/TinkerNorth/dish-windows): Windows client (Qt6 / SDL2)
 - [`dish-linux`](https://github.com/TinkerNorth/dish-linux): Linux client (Qt6 / SDL2)
 - [`dish-mac`](https://github.com/TinkerNorth/dish-mac): macOS client (SwiftUI)
-- [`dish-ios`](https://github.com/TinkerNorth/dish-ios): iPhone client (SwiftUI)
+- [`dish-ios`](https://github.com/TinkerNorth/dish-ios): iPhone and iPad client (SwiftUI)
 
 Each repo has its own `CONTRIBUTING.md#security` section with
 ecosystem-specific local commands; this file is the single source of
@@ -53,7 +53,7 @@ In scope:
 
 - All six repos above.
 - Release artifacts attached to GitHub Releases for any of the six repos.
-- The wire protocol (protocol 3; the single source of truth is
+- The wire protocol (protocol 4, which clients still speak down to 1; the single source of truth is
   [`satellite/docs/contract.md`](https://github.com/TinkerNorth/satellite/blob/main/docs/contract.md)):
   the HTTPS `:9443` control plane (TOFU-pinned self-signed TLS, HMAC
   proof-of-key headers, declarative session PUT) and the UDP `:9876` data
@@ -80,9 +80,10 @@ Out of scope:
 |---|---|---|
 | `satellite` | latest minor on `main`; previous minor for 90 days | Windows is the canonical target; Linux is supported; macOS virtual pads require the virtual-HID entitlement (unentitled builds fall back to an inert backend) |
 | `dish-android` | latest minor on `main`; previous minor for 90 days | minSdk 24 |
+| `dish-windows` | latest minor on `main`; previous minor for 90 days | 64-bit Windows 10 (1809 or newer) and Windows 11 |
 | `dish-linux` | latest minor on `main`; previous minor for 90 days | tracks the oldest LTS the release CI builds against |
 | `dish-mac` | latest minor on `main`; previous minor for 90 days | macOS 13+ |
-| `dish-ios` | latest minor on `main`; previous minor for 90 days | iOS 26.0+; wave 1 has no network code, so its wire surface is empty until a later wave adds it |
+| `dish-ios` | latest minor on `main`; previous minor for 90 days | iOS 26.0+ on iPhone and iPad; the app speaks the whole wire protocol (pairing, the encrypted session, Moonlight hosts), so the scope above covers it |
 
 Patch releases (`X.Y.Z+1`) are issued on demand for the latest minor;
 the previous minor only receives backports for high/critical fixes.
@@ -149,7 +150,7 @@ go install github.com/slsa-framework/slsa-verifier/v2/cli/slsa-verifier@latest
 ### 1) Download every file from the Release
 
 For tag `X.Y.Z` of `<repo>` (one of `satellite`, `dish-android`,
-`dish-linux`, `dish-mac`, `dish-ios`):
+`dish-windows`, `dish-linux`, `dish-mac`, `dish-ios`):
 
 ```bash
 gh release download X.Y.Z -R TinkerNorth/<repo> -D ./release
