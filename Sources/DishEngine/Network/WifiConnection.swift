@@ -206,7 +206,7 @@ package final class WifiConnection: Identifiable, FeedbackRouteTarget {
             while !Task.isCancelled {
                 try? await Task.sleep(nanoseconds: interval)
                 guard !Task.isCancelled, let self else { return }
-                if self.aliveTick() == .sessionEnded {
+                if aliveTick() == .sessionEnded {
                     return
                 }
             }
