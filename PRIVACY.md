@@ -228,8 +228,10 @@ it has when anything does not match.
 `dish.tinkernorth.com` is an Amazon S3 bucket behind Amazon CloudFront,
 operated for TinkerNorth by Amazon Web Services. The requests carry no
 identifier, no cookie and no query, and use the system's default
-`User-Agent`; the only header the app adds is `If-None-Match`, with the
-`ETag` the site gave the last manifest. What the host's access logs can see is
+`User-Agent`; the app adds `Accept-Language: *`, the same on every device,
+in place of the system's, which would name your languages, and on the
+manifest `If-None-Match`, with the `ETag` the site gave the last one. A
+transfer that has not finished within a minute is given up. What the host's access logs can see is
 what any web server sees: the IP address the request came from, and the
 time. We use those logs as we use the rest of the website's: for capacity
 planning and abuse detection only.

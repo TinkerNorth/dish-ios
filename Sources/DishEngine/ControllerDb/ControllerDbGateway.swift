@@ -16,10 +16,15 @@ package protocol ControllerDbGateway: Sendable {
 /// The gateway over HTTPS to `dish.tinkernorth.com/controllers/v1/`, in the
 /// shape of the satellite's `HTTPClient`: an ephemeral `URLSession` with no
 /// cookies and no cache of its own, the ETag being ours to send. A request
-/// carries no query and no identifier, only its path and the system's
-/// default user agent.
+/// carries no query and no identifier, only its path, the system's default
+/// user agent and one language for every device. A gap of 15 seconds ends a
+/// request, and so does a whole minute, so a host that trickles bytes cannot
+/// hold the check open.
 package final class ControllerDbHTTPClient: ControllerDbGateway {
     private static let timeoutSeconds: TimeInterval = 15
+    private static let transferSeconds: TimeInterval = 60
+    /// One value for every device: the system's would name the person's languages.
+    static let acceptLanguage = "*"
 
     private let session: URLSession
     private let base: URL
@@ -30,6 +35,7 @@ package final class ControllerDbHTTPClient: ControllerDbGateway {
         configuration.httpShouldSetCookies = false
         configuration.urlCache = nil
         configuration.timeoutIntervalForRequest = Self.timeoutSeconds
+        configuration.timeoutIntervalForResource = Self.transferSeconds
         configuration.waitsForConnectivity = false
         session = URLSession(configuration: configuration)
         self.base = base
@@ -40,8 +46,7 @@ package final class ControllerDbHTTPClient: ControllerDbGateway {
     }
 
     package func manifest(etag: String?) async -> ManifestReply {
-        var request = URLRequest(url: base.appendingPathComponent(ControllerDbFiles.manifest))
-        if let etag { request.setValue(etag, forHTTPHeaderField: "If-None-Match") }
+        let request = manifestRequest(etag: etag)
         guard let (data, response) = try? await session.data(for: request), let http = response as? HTTPURLResponse else {
             return .unreachable
         }
@@ -49,10 +54,24 @@ package final class ControllerDbHTTPClient: ControllerDbGateway {
     }
 
     package func file(_ path: String) async -> Data? {
-        let request = URLRequest(url: base.appendingPathComponent(path))
+        let request = fileRequest(path)
         guard let (data, response) = try? await session.data(for: request) else { return nil }
         let succeeded = (response as? HTTPURLResponse)?.statusCode == 200
         return succeeded ? data : nil
+    }
+}
+
+extension ControllerDbHTTPClient {
+    func manifestRequest(etag: String?) -> URLRequest {
+        var request = fileRequest(ControllerDbFiles.manifest)
+        if let etag { request.setValue(etag, forHTTPHeaderField: "If-None-Match") }
+        return request
+    }
+
+    func fileRequest(_ path: String) -> URLRequest {
+        var request = URLRequest(url: base.appendingPathComponent(path))
+        request.setValue(Self.acceptLanguage, forHTTPHeaderField: "Accept-Language")
+        return request
     }
 }
 
