@@ -231,10 +231,10 @@ identifier, no cookie and no query, and use the system's default
 `User-Agent`; the app adds `Accept-Language: *`, the same on every device,
 in place of the system's, which would name your languages, and on the
 manifest `If-None-Match`, with the `ETag` the site gave the last one. A
-transfer that has not finished within a minute is given up. What the host's access logs can see is
-what any web server sees: the IP address the request came from, and the
-time. We use those logs as we use the rest of the website's: for capacity
-planning and abuse detection only.
+transfer that has not finished within a minute is given up. What the host's
+access logs can see is what any web server sees: the IP address the request
+came from, and the time. We use those logs as we use the rest of the
+website's: for capacity planning and abuse detection only.
 
 *Check for controller updates automatically* in Settings, on by default,
 turns the check off. With it off, no request for the controller list leaves
@@ -294,7 +294,8 @@ The file holds:
   many input frames it published and at what rate with the last one (the
   buttons held and where the sticks and triggers stood), and how many
   rumble, light-bar, player-light and trigger commands reached it with the
-  last of each.
+  last of each; for a Steam Controller read over Bluetooth, also the last
+  rumble write Dish made to it, its bytes, and how Bluetooth answered.
 - For each controller you tested under Diagnostics › Controller tests, the
   tests you answered "Did it work?" for (the newest twenty of this run): each
   test's name, your answer, and when the test ended. The tests themselves
