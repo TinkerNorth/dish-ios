@@ -100,4 +100,88 @@ final class ToolPinTests: XCTestCase {
             XCTAssertTrue(text.contains(phrase), "CONTRIBUTING.md must say \"\(phrase)\"")
         }
     }
+
+    // MARK: the shared security and release-hardening workflows
+
+    private func workflow(_ name: String) throws -> String {
+        try RepoFiles.read(".github/workflows/\(name)")
+    }
+
+    private func env(_ name: String, in text: String) -> String? {
+        Self.value(of: name, in: text)
+    }
+
+    /// `scripts/tools.sh` runs the scanners at the versions and digests the shared
+    /// `_security.yml` installs on Linux (the digests differ: the Mac assets).
+    func testToolsShPinsTheScannersTheSharedSecurityWorkflowPins() throws {
+        let security = try workflow("_security.yml")
+        for name in ["OSV_SCANNER_VERSION", "GITLEAKS_VERSION", "PYYAML_VERSION"] {
+            let local = try pin(name)
+            XCTAssertEqual(env(name, in: security), local, "scripts/tools.sh and _security.yml pin one \(name)")
+        }
+        for name in ["OSV_SCANNER_SHA256", "GITLEAKS_SHA256"] {
+            let digest = try pin(name)
+            XCTAssertNotNil(digest.range(of: "^[0-9a-f]{64}$", options: .regularExpression), "\(name) is not 64 hex digits")
+        }
+    }
+
+    func testThirdPartyNamesTheScannersAndReleaseToolsTheWorkflowsPin() throws {
+        let notice = try RepoFiles.read("THIRD_PARTY.md")
+        let security = try workflow("_security.yml")
+        let harden = try workflow("_release_harden.yml")
+        let pins = [
+            ("OSV-Scanner", env("OSV_SCANNER_VERSION", in: security)),
+            ("gitleaks", env("GITLEAKS_VERSION", in: security)),
+            ("cosign", env("COSIGN_VERSION", in: harden)),
+            ("Syft", env("SYFT_VERSION", in: harden)),
+            ("Grype", env("GRYPE_VERSION", in: harden))
+        ]
+        for (name, version) in pins {
+            let row = notice.split(separator: "\n").first { $0.hasPrefix("| [\(name)](") }
+            XCTAssertNotNil(version, "\(name) is pinned in a shared workflow")
+            let shown = version ?? "?"
+            XCTAssertTrue(
+                row?.contains("| \(shown) |") ?? false,
+                "a shared workflow pins \(name) \(shown): edit THIRD_PARTY.md and its copy"
+            )
+        }
+    }
+
+    func testTheSharedWorkflowsAreCalledNotCopied() throws {
+        let release = try workflow("release.yml")
+        let security = try workflow("security.yml")
+        let ci = try workflow("ios-ci.yml")
+        XCTAssertTrue(security.contains("uses: ./.github/workflows/_security.yml"))
+        XCTAssertTrue(release.contains("uses: ./.github/workflows/_security.yml"), "the tag re-runs the gates")
+        XCTAssertTrue(release.contains("uses: ./.github/workflows/_release_harden.yml"), "the tag hardens through the shared workflow")
+        XCTAssertTrue(ci.contains("uses: ./.github/workflows/_release_harden.yml"), "pull requests dry-run the same workflow")
+        XCTAssertTrue(ci.contains("dry-run: true"))
+        for (name, text) in try workflows() where !name.hasPrefix("_") {
+            XCTAssertFalse(text.contains("cosign sign-blob"), "\(name): signing is the shared workflow's, not inline")
+            XCTAssertFalse(text.contains("TODO_REPLACE_WITH_UPSTREAM_SHA256"), "\(name): no unpinned-tool branch")
+            XCTAssertFalse(text.contains("anchore/"), "\(name): Grype and Syft are the shared workflow's pinned binaries")
+        }
+    }
+
+    /// The provenance recipe names the generator's commit; it is the one `release.yml` pins.
+    func testSecurityNamesTheGeneratorCommitReleaseYmlPins() throws {
+        let release = try workflow("release.yml")
+        let pattern = #"generator_generic_slsa3\.yml@([0-9a-f]{40})"#
+        let found = release.range(of: pattern, options: .regularExpression)
+        let pinned = try XCTUnwrap(found.map { String(release[$0].suffix(40)) }, "release.yml pins the SLSA generator by commit")
+        let security = try RepoFiles.read("SECURITY.md")
+        let named = security.contains("generator_generic_slsa3.yml@\(pinned)")
+        XCTAssertTrue(named, "SECURITY.md must name the generator commit release.yml pins, \(pinned)")
+    }
+
+    func testTheDocumentsCarryTheBundleRecipeAndNotTheOldOne() throws {
+        for file in ["SECURITY.md", "CONTRIBUTING.md"] {
+            let text = try RepoFiles.read(file)
+            XCTAssertTrue(text.contains("_release_harden.yml@refs/tags/"), "\(file) names the signing workflow's identity")
+            XCTAssertTrue(text.contains(".sigstore.json"), "\(file) verifies a bundle per file")
+            XCTAssertFalse(text.contains("--signature"), "\(file) still carries the .sig and .crt recipe")
+            XCTAssertFalse(text.contains("certificate-identity-regexp"), "\(file) still carries the regular-expression identity")
+            XCTAssertFalse(text.contains("slsa-verifier verify-artifact"), "\(file): slsa-verifier refuses a generator pinned by commit")
+        }
+    }
 }

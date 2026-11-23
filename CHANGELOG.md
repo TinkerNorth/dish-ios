@@ -11,6 +11,12 @@ from the build setting. `version-consistency.yml` fails a pull request whose
 `VERSION`, `CHANGELOG.md` heading and `MARKETING_VERSION` disagree, and
 `release.yml` fails the tag build when the tag and `VERSION` disagree.
 
+No release of this client has been tagged yet. The `[1.1.0]` and `[1.0.0]`
+headings are dated history the tree carries before its first tag, so they have
+no link; a heading gets its link reference (`releases/tag/X.Y.Z`, or `compare/`
+between two tags) in the pull request that tags it, and `version-consistency.yml`
+fails a link to a tag the repository does not have.
+
 Cross-repo coordination: changes to the wire protocol or the pairing flow that
 need matching updates in `satellite`, `dish-android`, `dish-windows`,
 `dish-linux` or `dish-mac` are marked `[wire-coordinated]`. Releases tagged in
@@ -38,6 +44,19 @@ lockstep across the repos share a version number.
   published, and marks a hyphenated tag as a prerelease.
 - **Dependabot** pins its prefix (`chore(deps)`), its Monday schedule and its
   labels, and groups the Swift ecosystem's minor and patch updates.
+- **The shared security and release-hardening workflows.** `_security.yml`,
+  `_release_harden.yml` and the three scripts under `scripts/` are the fleet's
+  byte-identical copies. OSV-Scanner 2.7.1 and gitleaks 8.30.1 are pinned in
+  `scripts/tools.sh` and run first by `ci-local.sh` through
+  `scripts/check-security.sh`; the release signs one `.sigstore.json` bundle per
+  file with cosign 3.1.4, scans with Grype 0.122.1 and writes SBOMs with Syft
+  1.57.2 (pinned binaries, not the anchore actions), and every pull request runs
+  that hardening as a dry run over the unsigned IPA it stages.
+  `SECURITY.md` and `CONTRIBUTING.md` carry the bundle recipe, and the SLSA
+  provenance is verified with `cosign verify-blob-attestation`.
+- **The iPad UI tests** run on a runner with one simulator booted, which is
+  deleted when its suite ends; the changelog's links to tags the repository does
+  not have are gone, and `version-consistency.yml` fails one.
 - **Documents corrected:** protocol 4 and the whole wire surface in
   `SECURITY.md`, the privacy table's session rows, `Tests/PARITY.md` against
   the code, the architecture module map and the design handoff's status, and
@@ -625,7 +644,3 @@ miss. `Tests/PARITY.md` lists everything not built.
   model, which reached for the remembered PCs, and a navigation store, then
   threw them away. The scene now holds its root in `OnFirstUse`, which makes
   it the first time the kept build reads it, so a process makes one.
-
-[Unreleased]: https://github.com/TinkerNorth/dish-ios/compare/1.1.0...main
-[1.1.0]: https://github.com/TinkerNorth/dish-ios/compare/1.0.0...1.1.0
-[1.0.0]: https://github.com/TinkerNorth/dish-ios/releases/tag/1.0.0

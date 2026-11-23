@@ -24,7 +24,8 @@ scripts/ci-local.sh
 ```
 
 `scripts/ci-local.sh` runs the scripts `ios-ci.yml` runs, in CI's order:
-`check-format.sh` (SwiftFormat 0.64.7 in lint mode), `check-lint.sh`
+`check-security.sh` (the shared security gates, with the pinned OSV-Scanner and
+gitleaks), `check-format.sh` (SwiftFormat 0.64.7 in lint mode), `check-lint.sh`
 (SwiftLint 0.65.1, strict), `generate-project.sh --check` (XcodeGen 2.48.0),
 `test.sh iphone` (`xcodebuild test` on an iPhone simulator it creates and
 deletes), `test.sh ipad` (the UI tests again on an iPad simulator),
@@ -350,7 +351,7 @@ Dish clients follow, so a fact ported between clients keeps its shape.
 | `NoSuppressionsTests` | no lint suppression, no deferred-work comment, no mutable static, no host singleton outside the scene, no unchecked concurrency |
 | `LintConfigTests` | the lint thresholds this document names; CI runs SwiftLint strict and SwiftFormat in lint mode |
 | `ToolPinTests` | `scripts/tools.sh` is the one place a tool or Xcode pin lives: no workflow repeats one, every macos-26 workflow selects Xcode through `select-xcode.sh`, and `project.yml`, `THIRD_PARTY.md` and this document name the same versions |
-| `WorkflowPinTests` | every `uses:` is a 40-character commit SHA (the SLSA generator's release tag is the one exception) |
+| `WorkflowPinTests` | every `uses:` is a 40-character commit SHA |
 | `VersionConsistencyTests` | `VERSION` is `MAJOR.MINOR.PATCH`, `project.yml` carries it as `MARKETING_VERSION`, the changelog's newest heading names it or is `[Unreleased]`, the Info.plist reads both bundle versions from build settings, and the protocol number the documents name is the one the code offers |
 | `LocalizationTests` | the catalog and the funnel agree, in every language, with placeholders intact; no view holds an English literal |
 | `AppIntentsLocalizationTests` | the App Intents' words and the App Shortcuts' phrases are keys of the app target's two catalogs, every key is used, in every language, with placeholders intact |
@@ -438,6 +439,12 @@ Build + style:
   `LockLawTests` and `TrackedLockTests` in a build with
   `SWIFT_ACTIVE_COMPILATION_CONDITIONS='$(inherited) LOCK_STATS'`, which counts
   every tracked lock by thread role. `ci-local.sh --with-lock-stats` runs it.
+- `ios-ci.yml`, job **Release hardening (dry run)**, on pull requests: the
+  shared `_release_harden.yml` over the unsigned IPA the main job staged
+  (`scripts/stage-ipa.sh`, the release's own staging), with a throwaway key and
+  nothing published. It cannot exercise Fulcio, Rekor or the keyless identity,
+  the code-scanning upload, the SLSA generator or anything needing the signing
+  secrets; the tag does.
 - `version-consistency.yml`: `VERSION` is the source; `CHANGELOG.md`'s top
   heading and `project.yml`'s `MARKETING_VERSION` must agree with it.
 - `e2e.yml`, job **Pair, stream and tear down against the real satellite**:
@@ -448,9 +455,10 @@ Build + style:
 
 Security gates (also blocking):
 
-- `security.yml`, which calls `_security.yml`: action-pin lint, vulnerability
-  allowlist expiry, OSV-Scanner, gitleaks secret scan, GitHub
-  `dependency-review-action`.
+- `security.yml`, which calls the shared `_security.yml` (the same scripts
+  `scripts/check-security.sh` runs): action-pin lint, the vulnerability
+  allowlist gate, OSV-Scanner, gitleaks secret scan, and GitHub
+  `dependency-review-action` once the Dependency graph setting is on.
 - `codeql.yml`: CodeQL `swift` analysis (security-extended +
   security-and-quality query packs) over the simulator build.
 
@@ -473,57 +481,53 @@ past. Renew or remove on or before `expires`.
 ### Running security checks locally
 
 ```bash
-# Action-pin lint (40-char SHA enforcement on every uses: line)
-grep -REn '^\s*uses:' .github/workflows/ \
-  | grep -vE '@[0-9a-f]{40}\b' \
-  || echo "all pinned"
-
-# Allowlist expiry
-python3 - <<'PY'
-import datetime, yaml, sys
-data = yaml.safe_load(open('.security/allowlist.yaml').read()) or {}
-for e in data.get('exceptions', []) or []:
-    if datetime.date.fromisoformat(str(e['expires'])) < datetime.date.today():
-        print('EXPIRED:', e); sys.exit(1)
-PY
-
-# OSV-Scanner against the worktree
-osv-scanner --recursive --skip-git .
-
-# Gitleaks
-gitleaks detect --no-banner --redact --source .
+scripts/check-security.sh
 ```
 
-The pin lint's grep also lists the SLSA generator, which is pinned by its
-release tag because the generator only works that way; `WorkflowPinTests`
-names the same exception.
+It runs, from the repository root and at the versions `scripts/tools.sh` pins
+(OSV-Scanner 2.7.1 and gitleaks 8.30.1 as darwin-arm64 binaries, PyYAML 6.0.4 in
+a virtual environment under `.build/tools`; CI runs the same versions on
+Linux), what `security.yml` runs through the shared `_security.yml`:
+
+- `scripts/check-action-pins.sh`: every `uses:` is a 40-character SHA followed
+  by a `# vX.Y.Z` comment;
+- `scripts/security-allowlist.py check`: the allowlist gate;
+- `scripts/osv-scan.sh --allow-no-packages -- .`: OSV-Scanner. `Package.swift`
+  has no dependencies, so there is no `Package.resolved` for it to read and "no
+  packages found" is the true answer; the first package this app takes in lands
+  one, and `--allow-no-packages` goes (in `security.yml`, `release.yml` and the
+  script);
+- `gitleaks git --config=.gitleaks.toml --redact --exit-code=1 .`.
+
+`scripts/ci-local.sh` runs it first. Dependency review needs the repository's
+Dependency graph setting, which is off, so `security.yml` passes
+`dependency_review_enabled: false`; CodeQL runs in `codeql.yml`.
+`WorkflowPinTests` names the pin rule's one shape: a SHA with its release in a
+comment.
 
 ### Verifying a release artifact
 
 Each GitHub Release ships `dish-X.Y.Z-unsigned.ipa` (until the App Store
 secrets exist; with them the signed archive goes to App Store Connect and
-TestFlight instead) and its stable-name copy `dish-ios.ipa`, `*.sig`/`*.crt`
-(cosign keyless), `SHA256SUMS` + `SHA256SUMS.sig`/`*.crt`, the SPDX +
-CycloneDX SBOMs, and `dish-ios.intoto.jsonl` (SLSA L3).
+TestFlight instead) and its stable-name copy `dish-ios.ipa`, one
+`<file>.sigstore.json` cosign bundle per file, `SHA256SUMS` with its bundle, the
+SPDX + CycloneDX SBOMs, and `dish-ios.intoto.jsonl` (SLSA L3). No release has
+been published yet, so the commands below have not been run against one.
 
 ```bash
-shasum -a 256 -c SHA256SUMS
-
+TAG=X.Y.Z
 cosign verify-blob \
-  --certificate SHA256SUMS.crt \
-  --signature   SHA256SUMS.sig \
-  --certificate-identity-regexp '^https://github\.com/TinkerNorth/dish-ios/\.github/workflows/release\.yml@refs/tags/[0-9].*$' \
-  --certificate-oidc-issuer 'https://token.actions.githubusercontent.com' \
+  --bundle SHA256SUMS.sigstore.json \
+  --certificate-identity "https://github.com/TinkerNorth/dish-ios/.github/workflows/_release_harden.yml@refs/tags/$TAG" \
+  --certificate-oidc-issuer https://token.actions.githubusercontent.com \
   SHA256SUMS
-
-slsa-verifier verify-artifact \
-  --provenance-path dish-ios.intoto.jsonl \
-  --source-uri      github.com/TinkerNorth/dish-ios \
-  --source-tag      X.Y.Z \
-  dish-X.Y.Z-unsigned.ipa
+sha256sum --ignore-missing -c SHA256SUMS   # macOS: shasum -a 256 -c
 ```
 
-The full verification recipe lives in [`SECURITY.md`](SECURITY.md).
+The identity names `_release_harden.yml`, the workflow that ran the signing
+step. The provenance is verified with `cosign verify-blob-attestation`, not
+`slsa-verifier`, which refuses a generator called by commit; the full recipe,
+with the generator's pinned commit, lives in [`SECURITY.md`](SECURITY.md).
 
 ## Cutting a release
 
@@ -545,7 +549,10 @@ IPA, with a warning in the run and a note at the top of the release; the
 versioned IPA then carries `-unsigned` while `dish-ios.ipa` keeps its name.
 Set the repository variable `ENFORCE_RELEASE_SIGNING=true` to make missing
 secrets fail a stable tag. A tag with a hyphen (`1.2.0-rc1`) is published as a
-prerelease. There is no `latest.json`: iOS has no in-app updater, because the
+prerelease. The hardening (scan, SBOMs, `SHA256SUMS`, one cosign bundle per
+file) is the shared `_release_harden.yml`, which signs under the run's ref: a
+tag push, or `gh workflow run release.yml --ref X.Y.Z -f tag=X.Y.Z` to run it
+again, never a dispatch from a branch. There is no `latest.json`: iOS has no in-app updater, because the
 App Store and TestFlight deliver updates.
 
 The fleet's order: the website (`dish-website`) is tagged first, and the
