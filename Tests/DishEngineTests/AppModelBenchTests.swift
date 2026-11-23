@@ -154,6 +154,40 @@ final class AppModelBenchTests: XCTestCase {
         XCTAssertEqual(rig.model.benchFacts.bench.asking[dualSense.id]?.test, .lightbarCycle, "Did it work? is asked mid-scroll")
     }
 
+    // MARK: - Every way a test ends lets its surface go
+
+    /// The pad's queue is kept by its slot, so a pad that leaves mid-test
+    /// and comes back is let go as the test runs out, and the game's next
+    /// colour reaches it.
+    func testAPadThatLeavesMidTestIsLetGoAndTheGamesNextWriteReachesItWhenItReturns() throws {
+        let rig = try rig([dualSense])
+        rig.model.runBenchTest(.lightbarCycle, slotId: dualSense.id)
+        rig.source.slots = []
+        rig.tick(at: 2200)
+        XCTAssertEqual(rig.model.benchFacts.bench.running, [:])
+        XCTAssertFalse(rig.ticker.running)
+        rig.source.slots = [dualSense]
+        rig.source.feedback.pad(for: dualSense.id).post(lightbarRed: 1, green: 2, blue: 3)
+        rig.source.feedback.queue.sync {}
+        XCTAssertEqual(rig.source.actuators.actuations.last, .lightbar(dualSense.id, red: 1, green: 2, blue: 3))
+    }
+
+    /// Nothing ends a test early: the page closing, the app going to the
+    /// background and a host connecting or leaving reach no intent of the
+    /// bench. However late its ticks come back, the test ends on the first
+    /// one, puts back what a host sent meanwhile and lets go.
+    func testATestWhoseTicksStoppedEndsOnTheFirstTickBackPutsBackTheHostsWriteAndLetsGo() throws {
+        let rig = try rig([dualSense])
+        rig.model.runBenchTest(.playerLedsCycle, slotId: dualSense.id)
+        rig.source.feedback.pad(for: dualSense.id).post(player: 3)
+        rig.tick(at: 600_000)
+        XCTAssertEqual(rig.model.benchFacts.bench.asking[dualSense.id]?.test, .playerLedsCycle)
+        XCTAssertEqual(rig.source.actuators.actuations.last, .playerLeds(dualSense.id, player: 3), "the host's player goes back")
+        rig.source.feedback.pad(for: dualSense.id).post(player: 2)
+        rig.source.feedback.queue.sync {}
+        XCTAssertEqual(rig.source.actuators.actuations.last, .playerLeds(dualSense.id, player: 2), "and its next one lands")
+    }
+
     // MARK: - One answer per run
 
     func testTheAnswerToAFinishedTestIsKeptAsItsOutcome() throws {
