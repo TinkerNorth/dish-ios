@@ -135,7 +135,9 @@ package extension AppModel {
         case let .pairingPinReady(host, pin):
             moonlightPin = MoonlightPinPrompt(host: host, pin: pin)
         case let .paired(host), let .pairingFailed(host, _):
-            if moonlightPin?.host.id == host.id { moonlightPin = nil }
+            if moonlightPin?.host.id == host.id {
+                moonlightPin = nil
+            }
         case .hostReplaced, .appAlreadyRunning, .rejoinRefused, .launchRefused, .setupFailed, .hostFull, .endedByHost,
              .appCloseRequested, .noHostAnswered, .noAppsAvailable, .appRemoved:
             break
@@ -161,7 +163,9 @@ package extension AppModel {
 
     func cancelMoonlightPairing(_ hostId: String) {
         network.moonlight.cancelPairing(hostId: hostId)
-        if moonlightPin?.host.id == hostId { moonlightPin = nil }
+        if moonlightPin?.host.id == hostId {
+            moonlightPin = nil
+        }
     }
 
     /// The PIN card's New code: the exchange in flight ends and another begins.

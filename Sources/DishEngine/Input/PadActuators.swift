@@ -103,14 +103,18 @@ package actor PadActuators: FeedbackActuators {
 
     /// Made on the first rumble; an iPhone without haptics drops it.
     private func phoneRumbler() -> PhoneRumble? {
-        if let phone { return phone }
+        if let phone {
+            return phone
+        }
         phone = PhoneRumble()
         return phone
     }
 
     /// A pad without haptics takes no actuator and its rumble is dropped.
     private func rumbler(for slotId: String) -> RumbleActuator? {
-        if let existing = rumblers[slotId] { return existing }
+        if let existing = rumblers[slotId] {
+            return existing
+        }
         guard let controller = controllers[slotId], let fresh = RumbleActuator(controller: controller, pair: .handles) else { return nil }
         rumblers[slotId] = fresh
         return fresh
@@ -118,7 +122,9 @@ package actor PadActuators: FeedbackActuators {
 
     /// A pad whose triggers have no motors takes no actuator there.
     private func triggerRumbler(for slotId: String) -> RumbleActuator? {
-        if let existing = triggerRumblers[slotId] { return existing }
+        if let existing = triggerRumblers[slotId] {
+            return existing
+        }
         guard let controller = controllers[slotId], let fresh = RumbleActuator(controller: controller, pair: .triggers) else { return nil }
         triggerRumblers[slotId] = fresh
         return fresh

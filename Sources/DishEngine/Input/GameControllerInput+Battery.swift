@@ -27,7 +27,9 @@ enum BatteryPoll: Equatable {
 func batteryPoll(secondsSinceAttach seconds: Int) -> BatteryPoll? {
     let sinceFirst = seconds - kBatteryFirstReportDelaySec
     guard sinceFirst >= 0 else { return nil }
-    if sinceFirst % kBatteryPollIntervalSec == 0 { return .steady }
+    if sinceFirst % kBatteryPollIntervalSec == 0 {
+        return .steady
+    }
     let watching = sinceFirst >= kBatteryStateWatchIntervalSec && sinceFirst % kBatteryStateWatchIntervalSec == 0
     return watching ? .watch : nil
 }

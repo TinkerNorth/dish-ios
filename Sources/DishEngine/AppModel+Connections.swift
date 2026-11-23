@@ -215,7 +215,9 @@ package extension AppModel {
     /// A row's Reconnect: a session that stopped answering closes and opens
     /// again; one that is down is reached for.
     func reconnect(_ id: String) {
-        if network.hub.summary(id)?.live == .unstable { network.wifi.disconnect(id: id) }
+        if network.hub.summary(id)?.live == .unstable {
+            network.wifi.disconnect(id: id)
+        }
         connect(id)
     }
 
@@ -263,7 +265,9 @@ package extension AppModel {
     }
 
     private func attemptFailed(_ id: String, _ failure: ConnectionFailure, _ attempt: AttemptKind) {
-        if isRowNotice(failure, attempt: attempt) { recordNotice(failure, for: id) }
+        if isRowNotice(failure, attempt: attempt) {
+            recordNotice(failure, for: id)
+        }
         guard endsAReach(failure), applyWatch?.connectionId == id else { return }
         advanceApply(.linkFailed)
     }

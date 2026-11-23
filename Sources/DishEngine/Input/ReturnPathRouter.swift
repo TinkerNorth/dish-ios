@@ -61,8 +61,8 @@ package struct FeedbackRoutes {
 
     /// The light bar needs the global switch and the controller's own.
     package func lightbar(controllerIndex: UInt8, red: UInt8, green: UInt8, blue: UInt8) {
-        guard ReturnPathRouting.shouldApplyLightbar(flags: global), let route = route(controllerIndex) else { return }
-        guard ReturnPathRouting.shouldApplyLightbar(flags: route.flags) else { return }
+        guard ReturnPathRouting.shouldApplyLightbar(flags: global), let route = route(controllerIndex),
+              ReturnPathRouting.shouldApplyLightbar(flags: route.flags) else { return }
         route.pad.post(lightbarRed: red, green: green, blue: blue)
     }
 

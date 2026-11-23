@@ -135,7 +135,9 @@ final class FakeSatelliteRest: @unchecked Sendable {
         connection.receive(minimumIncompleteLength: 1, maximumLength: 256 * 1024) { [weak self] data, _, isComplete, error in
             guard let self else { return }
             var buffer = buffered
-            if let data { buffer.append(data) }
+            if let data {
+                buffer.append(data)
+            }
             while let (request, consumed) = FakeSatelliteHttp.parseRequest(buffer) {
                 buffer.removeFirst(consumed)
                 // nil = the response was parked by the hold knob.
@@ -163,7 +165,9 @@ final class FakeSatelliteRest: @unchecked Sendable {
             return FakeSatelliteHttp.json(200, raw: Self.capabilitiesJSON(controllerAudio: audio, serverVersion: version))
         case ("GET", "/api/catalog"): return catalog(request)
         default:
-            if request.plainPath.hasPrefix("/api/connections/") { return connectionSubroute(request) }
+            if request.plainPath.hasPrefix("/api/connections/") {
+                return connectionSubroute(request)
+            }
             return FakeSatelliteHttp.json(404, ["error": "unknown route"])
         }
     }
@@ -219,7 +223,9 @@ final class FakeSatelliteRest: @unchecked Sendable {
             {
                 return .unauthorized(code: "BAD_PROOF")
             }
-            if state.pairedDeviceId == nil { state.pairedDeviceId = deviceId }
+            if state.pairedDeviceId == nil {
+                state.pairedDeviceId = deviceId
+            }
             return .ok(deviceId: deviceId)
         }
     }
@@ -255,8 +261,12 @@ final class FakeSatelliteRest: @unchecked Sendable {
         if store.with({ $0.shuttingDown }) {
             return FakeSatelliteHttp.json(503, ["error": "shutting down"])
         }
-        if case let .unauthorized(code) = authenticate(request, body: body) { return unauthorized(code) }
-        if let rejection = versionRejection(body) { return rejection }
+        if case let .unauthorized(code) = authenticate(request, body: body) {
+            return unauthorized(code)
+        }
+        if let rejection = versionRejection(body) {
+            return rejection
+        }
         guard let keyHex = store.with({ $0.pairingKeyHex }),
               let pairingKey = FakeSatelliteCrypto.hexToData(keyHex) else
         {
@@ -265,7 +275,9 @@ final class FakeSatelliteRest: @unchecked Sendable {
         let minted = mintSession(body: body, pairingKey: pairingKey)
         // Contract: replacement close-notify goes to the OLD token,
         // best-effort (only when that session ever showed a reply path).
-        if let previous = minted.previous { udp.sendClose(.replaced, to: previous) }
+        if let previous = minted.previous {
+            udp.sendClose(.replaced, to: previous)
+        }
         return respondOrHold(FakeSatelliteHttp.json(200, minted.response), on: connection)
     }
 
@@ -281,7 +293,9 @@ final class FakeSatelliteRest: @unchecked Sendable {
             let previous = state.activeToken.flatMap { state.sessions.removeValue(forKey: $0) }
             let failure = state.controllerApplyFailure
             if failure == nil {
-                if !Self.sameTopology(state.controllers, controllers) { state.epoch &+= 1 }
+                if !Self.sameTopology(state.controllers, controllers) {
+                    state.epoch &+= 1
+                }
                 state.controllers = controllers
             }
             state.lastMouseGranted = wantsMouse

@@ -16,7 +16,9 @@ final class OnFirstUse<Value> {
     }
 
     var value: Value {
-        if let made { return made }
+        if let made {
+            return made
+        }
         let fresh = make()
         made = fresh
         return fresh

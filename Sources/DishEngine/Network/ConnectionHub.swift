@@ -120,7 +120,9 @@ func linkState(_ session: SessionState?, stale: Bool, heard: Bool) -> LinkState 
 }
 
 private func restingLinkState(stale: Bool, heard: Bool) -> LinkState {
-    if stale { return .stale }
+    if stale {
+        return .stale
+    }
     return heard ? .ready : .saved
 }
 

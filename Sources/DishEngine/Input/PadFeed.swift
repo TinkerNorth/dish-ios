@@ -103,7 +103,9 @@ package final class PadFeed: Sendable {
     }
 
     private func currentRoute() -> Route? {
-        if let fresh = routeMail.take() { route.replace(with: fresh) }
+        if let fresh = routeMail.take() {
+            route.replace(with: fresh)
+        }
         return route.current?.route
     }
 

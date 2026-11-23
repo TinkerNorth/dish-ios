@@ -50,11 +50,23 @@ final class MoonlightFeedbackRouterTests: XCTestCase {
     }
 
     private var rumbles: [RecordingActuators.Actuation] {
-        actuators.actuations.filter { if case .rumble = $0 { true } else { false } }
+        actuators.actuations.filter {
+            if case .rumble = $0 {
+                true
+            } else {
+                false
+            }
+        }
     }
 
     private var lamps: [RecordingActuators.Actuation] {
-        actuators.actuations.filter { if case .lightbar = $0 { true } else { false } }
+        actuators.actuations.filter {
+            if case .lightbar = $0 {
+                true
+            } else {
+                false
+            }
+        }
     }
 
     func testBodyAndTriggerRumbleFoldPerMotorOntoTheBoundPad() {

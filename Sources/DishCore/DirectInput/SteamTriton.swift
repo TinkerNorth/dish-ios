@@ -309,7 +309,9 @@ package struct TritonRumble: Equatable {
     /// the stop once when the hold ends.
     package mutating func tick(nowMs: Int64) -> [UInt8]? {
         guard let endsAtMs else { return nil }
-        if nowMs >= endsAtMs { return command(strong: 0, weak: 0, durationMs: 0, nowMs: nowMs) }
+        if nowMs >= endsAtMs {
+            return command(strong: 0, weak: 0, durationMs: 0, nowMs: nowMs)
+        }
         guard nowMs - lastSentMs >= TritonRumbleRule.resendMs else { return nil }
         lastSentMs = nowMs
         return tritonRumbleReport(left: left, right: right)

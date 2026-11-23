@@ -187,7 +187,9 @@ private struct SceneRoot {
 @MainActor
 private func touched(_ model: AppModel, _ navigation: NavigationStore) {
     model.touched()
-    if navigation.state.dimmed { navigation.send(.wake) }
+    if navigation.state.dimmed {
+        navigation.send(.wake)
+    }
 }
 
 /// The device the engine names itself for when the person gave it no name.
@@ -202,7 +204,9 @@ func deviceKind(_ idiom: DeviceIdiom) -> DeviceKind {
 @MainActor
 private func refreshOrientations(_ controller: UIViewController) {
     controller.setNeedsUpdateOfSupportedInterfaceOrientations()
-    if let presented = controller.presentedViewController { refreshOrientations(presented) }
+    if let presented = controller.presentedViewController {
+        refreshOrientations(presented)
+    }
 }
 
 /// The bundle's marketing version, empty when the bundle carries none.

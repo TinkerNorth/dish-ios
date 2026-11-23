@@ -18,7 +18,9 @@ package struct LockRoleCounters: Equatable {
 
     mutating func add(_ release: LockRelease) {
         acquisitions += 1
-        if release.contended { contended += 1 }
+        if release.contended {
+            contended += 1
+        }
         waitTotalNs &+= release.waitNs
         waitMaxNs = max(waitMaxNs, release.waitNs)
         holdTotalNs &+= release.holdNs
@@ -158,7 +160,9 @@ final class LockStatsRegistry: Sendable {
     }
 
     private static func intern(_ name: String, names: inout [String], ids: inout [String: Int]) -> Int {
-        if let known = ids[name] { return known }
+        if let known = ids[name] {
+            return known
+        }
         let id = names.count
         names.append(name)
         ids[name] = id

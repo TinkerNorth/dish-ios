@@ -26,7 +26,9 @@ enum LocalNetworkProbe {
     /// Whether a browser error is the mDNS daemon holding the browse on the
     /// Local Network policy.
     static func isLocalNetworkDenial(_ error: NWError) -> Bool {
-        if case let .dns(code) = error { return code == policyDeniedCode }
+        if case let .dns(code) = error {
+            return code == policyDeniedCode
+        }
         return false
     }
 }

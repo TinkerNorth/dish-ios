@@ -104,7 +104,9 @@ func moonlightPhaseText(_ phase: MoonlightSessionPhase, summary: ConnectionSumma
 /// The app our session settled on; else the host's own current game, by its
 /// id, since the host names no title in /serverinfo; else none.
 func moonlightRunningAppText(_ facts: MoonlightHostDiagnostics, info: MoonlightServerInfo, words: L10n = .app) -> String {
-    if let app = facts.appName, !app.isEmpty { return app }
+    if let app = facts.appName, !app.isEmpty {
+        return app
+    }
     return info.currentGame == 0 ? words.none : String(info.currentGame)
 }
 

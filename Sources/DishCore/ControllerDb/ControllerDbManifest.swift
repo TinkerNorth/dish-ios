@@ -123,11 +123,11 @@ package func verifiedControllerDbSet(manifest: ControllerDbManifest, files: [Str
     let everyFileMatches = manifest.files.allSatisfy { path, entry in
         files[path].map { fileMatches($0, entry) } ?? false
     }
-    guard everyFileMatches else { return nil }
-    guard let body = files[ControllerDbFiles.controllers],
+    guard everyFileMatches,
+          let body = files[ControllerDbFiles.controllers],
           case let .success(database) = decodeControllerDatabase(body),
-          database.dbVersion == manifest.dbVersion else { return nil }
-    guard let tables = stringTables(manifest: manifest, files: files) else { return nil }
+          database.dbVersion == manifest.dbVersion,
+          let tables = stringTables(manifest: manifest, files: files) else { return nil }
     return ControllerDbSet(manifest: manifest, database: database, strings: ControllerStrings(tables: tables))
 }
 

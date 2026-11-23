@@ -75,7 +75,9 @@ package final class PadFeedback {
     }
 
     package func pad(for slotId: String) -> FeedbackPad {
-        if let pad = pads[slotId] { return pad }
+        if let pad = pads[slotId] {
+            return pad
+        }
         let lane = lanes.first { slotId.hasPrefix($0.prefix) }
         let pad = FeedbackPad(slotId: slotId, queue: lane?.queue ?? queue, actuators: lane?.actuators ?? actuators)
         pads[slotId] = pad

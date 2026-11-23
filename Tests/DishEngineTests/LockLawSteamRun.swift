@@ -46,7 +46,9 @@ struct LockLawSteamRun {
         for frame in 0 ..< frames {
             let state = TritonReportBytes.state(UInt32(frame % 2), reportId: 0x45, imuTick: UInt32(frame + 1))
             radio.notify(state.value, from: pad)
-            if frame % rumbleEvery == 0 { feedback.post(rumbleStrong: 30000, weak: 10000, durationMs: 100) }
+            if frame % rumbleEvery == 0 {
+                feedback.post(rumbleStrong: 30000, weak: 10000, durationMs: 100)
+            }
         }
         pads.links.queue.sync {}
         return LockLawSteamRun(snapshot: lockStatsSnapshot(), uplinks: client.sendCounter, rumbles: radio.writes(to: rumble, of: pad).count)

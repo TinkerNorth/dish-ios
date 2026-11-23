@@ -251,7 +251,9 @@ package actor SteamLinks: SteamRadioEvents, FeedbackActuators {
         for effect in step.effects {
             run(effect, on: link)
         }
-        if step.stage == .ended { links.removeValue(forKey: pad) }
+        if step.stage == .ended {
+            links.removeValue(forKey: pad)
+        }
     }
 
     private func run(_ effect: SteamLinkEffect, on link: SteamLink) {
@@ -270,7 +272,9 @@ package actor SteamLinks: SteamRadioEvents, FeedbackActuators {
     /// sign its notifications are on.
     private func receive(_ value: Data, from pad: UUID) {
         guard let link = links[pad] else { return }
-        if link.reader == nil { advance(pad, .reportArrived) }
+        if link.reader == nil {
+            advance(pad, .reportArrived)
+        }
         link.reader?.read(value)
     }
 
@@ -338,8 +342,8 @@ package actor SteamLinks: SteamRadioEvents, FeedbackActuators {
 
     /// The 2015 pad has no motors; a pad not claimed takes nothing.
     private func rumbleNow(_ slotId: String, strong: UInt16, weak: UInt16, durationMs: UInt16) {
-        guard let pad = steamPad(slotId: slotId), let link = links[pad], case let .claimed(input) = link.stage else { return }
-        guard input.model.plan.rumbles else { return }
+        guard let pad = steamPad(slotId: slotId), let link = links[pad], case let .claimed(input) = link.stage,
+              input.model.plan.rumbles else { return }
         sendRumble(link.rumble.command(strong: strong, weak: weak, durationMs: durationMs, nowMs: clock.nowMs()), to: pad)
         guard link.rumble.running, !link.resending else { return }
         link.resending = true
@@ -356,7 +360,9 @@ package actor SteamLinks: SteamRadioEvents, FeedbackActuators {
     /// its hold ends.
     private func resend(_ pad: UUID, _ serial: Int) {
         guard let link = links[pad], link.serial == serial else { return }
-        if let report = link.rumble.tick(nowMs: clock.nowMs()) { sendRumble(report, to: pad) }
+        if let report = link.rumble.tick(nowMs: clock.nowMs()) {
+            sendRumble(report, to: pad)
+        }
         guard link.rumble.running else {
             link.resending = false
             return

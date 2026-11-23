@@ -52,7 +52,9 @@ package final class GamepadInputProcessor {
 
     /// The device's feed, made with its dead zones and its route on first use.
     package func feed(for deviceId: DeviceId) -> PadFeed {
-        if let feed = feeds[deviceId] { return feed }
+        if let feed = feeds[deviceId] {
+            return feed
+        }
         let feed = PadFeed(deviceId: deviceId, lastInputMs: lastInputMs, sent: sent)
         feed.useDeadzones(deadzones[deviceId] ?? untunedZones)
         feed.post(route: resolve(deviceId))
@@ -110,9 +112,15 @@ package final class GamepadInputProcessor {
             let reports = feed.record.reportCount
             let motion = feed.record.motionCount
             let touch = feed.record.touchCount
-            if reports > 0 { tally.reports[deviceId] = reports }
-            if motion > 0 { tally.motion[deviceId] = motion }
-            if touch > 0 { tally.touch[deviceId] = touch }
+            if reports > 0 {
+                tally.reports[deviceId] = reports
+            }
+            if motion > 0 {
+                tally.motion[deviceId] = motion
+            }
+            if touch > 0 {
+                tally.touch[deviceId] = touch
+            }
         }
         return tally
     }

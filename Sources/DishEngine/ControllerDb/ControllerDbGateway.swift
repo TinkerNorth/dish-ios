@@ -64,7 +64,9 @@ package final class ControllerDbHTTPClient: ControllerDbGateway {
 extension ControllerDbHTTPClient {
     func manifestRequest(etag: String?) -> URLRequest {
         var request = fileRequest(ControllerDbFiles.manifest)
-        if let etag { request.setValue(etag, forHTTPHeaderField: "If-None-Match") }
+        if let etag {
+            request.setValue(etag, forHTTPHeaderField: "If-None-Match")
+        }
         return request
     }
 

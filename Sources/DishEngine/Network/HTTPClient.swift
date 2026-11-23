@@ -289,8 +289,12 @@ final class HTTPClient: Sendable {
         // Every authenticated route carries the device id + a proof of the
         // pairing key (contract §hmacProof). Empty values are omitted — the
         // pairing bootstrap routes are the only unauthenticated ones.
-        if !deviceId.isEmpty { req.setValue(deviceId, forHTTPHeaderField: "X-Device-Id") }
-        if !hmacProof.isEmpty { req.setValue(hmacProof, forHTTPHeaderField: "X-Hmac-Proof") }
+        if !deviceId.isEmpty {
+            req.setValue(deviceId, forHTTPHeaderField: "X-Device-Id")
+        }
+        if !hmacProof.isEmpty {
+            req.setValue(hmacProof, forHTTPHeaderField: "X-Hmac-Proof")
+        }
         req.httpBody = body
         do {
             let (data, response) = try await session.data(for: req)

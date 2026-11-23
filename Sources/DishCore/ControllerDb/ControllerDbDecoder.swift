@@ -105,8 +105,8 @@ private struct RecordFile: Decodable {
 
 private func controllerRecord(_ file: RecordFile) -> ControllerRecord? {
     let schemaFits = file.schema.map { $0 == ControllerDbSchema.version } ?? true
-    guard schemaFits, !file.id.isEmpty else { return nil }
-    guard let verification = ControllerVerification(rawValue: file.support.verification.state) else { return nil }
+    guard schemaFits, !file.id.isEmpty,
+          let verification = ControllerVerification(rawValue: file.support.verification.state) else { return nil }
     return ControllerRecord(
         id: file.id,
         usb: (file.identity?.usb ?? []).map { $0.lowercased() },

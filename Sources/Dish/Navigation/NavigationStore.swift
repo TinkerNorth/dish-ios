@@ -51,7 +51,9 @@ final class NavigationStore {
         self.learned = learned
         let firstRun = !onboarding.state.welcomeCompleted
         state = NavigationState(cover: firstRun ? .setup(.firstRun) : nil)
-        if firstRun { startSetup(.firstRun) }
+        if firstRun {
+            startSetup(.firstRun)
+        }
     }
 
     func send(_ event: NavigationEvent) {
@@ -59,7 +61,9 @@ final class NavigationStore {
         let step = reduceNavigation(before, event)
         move(to: step.state, from: before)
         step.effects.forEach(run)
-        if let hint = learnedHint(event, from: before, to: step.state) { learned(hint) }
+        if let hint = learnedHint(event, from: before, to: step.state) {
+            learned(hint)
+        }
     }
 
     /// A play cover rises and falls without the cover's slide, so the
@@ -123,7 +127,9 @@ final class NavigationStore {
     }
 
     private func coverChanged(_ cover: Cover?) {
-        if cover == nil, state.cover != nil { send(.coverDismissed) }
+        if cover == nil, state.cover != nil {
+            send(.coverDismissed)
+        }
     }
 
     private func listSelected(_ page: Page?, in tab: Tab) {
@@ -139,6 +145,8 @@ final class NavigationStore {
     }
 
     private func sheetChanged(_ sheet: Sheet?) {
-        if sheet == nil, state.sheet != nil { send(.closeSheet) }
+        if sheet == nil, state.sheet != nil {
+            send(.closeSheet)
+        }
     }
 }

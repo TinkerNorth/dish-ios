@@ -290,7 +290,9 @@ final class FakeSatellite: @unchecked Sendable {
         store.with { state in
             let before = state.controllers.count
             state.controllers.removeAll { ($0["ctrlIdx"] as? Int ?? -1) == ctrlIdx }
-            if state.controllers.count != before { state.epoch &+= 1 }
+            if state.controllers.count != before {
+                state.epoch &+= 1
+            }
         }
     }
 
@@ -348,7 +350,9 @@ final class FakeSatellite: @unchecked Sendable {
     /// Every MIC_AUDIO frame the data plane decrypted, in order.
     var micFrames: [(seq: UInt16, opus: Data)] {
         frames.compactMap { frame in
-            if case let .micAudio(_, seq, opus) = frame.detail { return (seq, opus) }
+            if case let .micAudio(_, seq, opus) = frame.detail {
+                return (seq, opus)
+            }
             return nil
         }
     }

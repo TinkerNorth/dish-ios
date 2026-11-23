@@ -221,7 +221,9 @@ func presentedSheet(_ state: NavigationState, by host: SheetHost) -> Sheet? {
 private func selected(_ state: NavigationState, _ tab: Tab) -> NavigationStep {
     var next = state
     let reselected = state.tab == tab
-    if reselected { next.paths[tab] = [] }
+    if reselected {
+        next.paths[tab] = []
+    }
     next.tab = tab
     return NavigationStep(state: next, effects: [])
 }

@@ -78,7 +78,9 @@ package final class BenchStore {
     /// takes the place of any the pad still waits on.
     func start(_ test: BenchTest, slotId: String) {
         guard state.running[slotId] == nil else { return }
-        if let plan = benchPlan(test) { return drive(test, plan: plan, slotId: slotId) }
+        if let plan = benchPlan(test) {
+            return drive(test, plan: plan, slotId: slotId)
+        }
         guard let kind = test.stickKind else { return }
         capture(kind, test: test, slotId: slotId)
     }

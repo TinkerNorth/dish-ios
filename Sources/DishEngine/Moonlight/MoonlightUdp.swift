@@ -99,7 +99,9 @@ final class UdpControlTransport: MoonlightControlTransport, Sendable {
 
     private func cancelIfDrained() {
         let drained = closing.get() && graceElapsed.get() && inFlight.load() == 0
-        if drained { connection.cancel() }
+        if drained {
+            connection.cancel()
+        }
     }
 
     private func stateChanged(_ state: NWConnection.State) {
@@ -128,14 +130,18 @@ final class UdpControlTransport: MoonlightControlTransport, Sendable {
     private func receive() {
         connection.receiveMessage { [weak self] data, _, _, error in
             guard let self, error == nil else { return }
-            if let data, !data.isEmpty { deliver(data) }
+            if let data, !data.isEmpty {
+                deliver(data)
+            }
             receive()
         }
     }
 
     /// On the receive queue: the newest handler, then the datagram.
     private func deliver(_ data: Data) {
-        if let fresh = handlerMail.take() { handler.replace(with: fresh) }
+        if let fresh = handlerMail.take() {
+            handler.replace(with: fresh)
+        }
         handler.current?.handle(data)
     }
 }

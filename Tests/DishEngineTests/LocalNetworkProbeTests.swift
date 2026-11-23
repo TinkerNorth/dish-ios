@@ -45,7 +45,9 @@ final class LocalNetworkProbeTests: XCTestCase {
         let browser = NWBrowser(for: .bonjourWithTXTRecord(type: MdnsBrowser.serviceType, domain: nil), using: NWParameters())
         browser.stateUpdateHandler = { state in
             seen.mutate { $0.append(String(describing: state)) }
-            if case .ready = state { ready.fulfill() }
+            if case .ready = state {
+                ready.fulfill()
+            }
             if case let .waiting(error) = state, LocalNetworkProbe.isLocalNetworkDenial(error) {
                 XCTFail("held on the Local Network policy: \(error)")
             }

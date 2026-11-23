@@ -105,7 +105,9 @@ final class CoreBluetoothRadio: NSObject, SteamRadio {
 extension CoreBluetoothRadio: CBCentralManagerDelegate {
     func centralManagerDidUpdateState(_ central: CBCentralManager) {
         let state = steamRadioState(central.state, authorization: CBManager.authorization)
-        if !steamRadioKeepsPeripherals(state) { forgetAll() }
+        if !steamRadioKeepsPeripherals(state) {
+            forgetAll()
+        }
         events.radioChanged(state)
     }
 

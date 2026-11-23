@@ -137,7 +137,9 @@ package func reduceTouchSurface(_ state: TouchSurfaceState, _ event: TouchSurfac
     switch event {
     case let .finger(slot, x, y):
         next.set(slot, state.contact(slot).touched(x: x, y: y))
-        if slot == .second { next.secondByZone = false }
+        if slot == .second {
+            next.secondByZone = false
+        }
     case let .lifted(slot):
         next.set(slot, state.contact(slot).lifted)
     case let .clickZone(zone, held):
