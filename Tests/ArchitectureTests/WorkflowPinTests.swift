@@ -85,4 +85,27 @@ final class WorkflowPinTests: XCTestCase {
         }
         XCTAssertEqual(empty, [], "a mapping with nothing under it fails the whole workflow")
     }
+
+    /// `THIRD_PARTY.md` lists each action at the release its pin's comment
+    /// names (`uses: owner/repo@sha # vX.Y.Z`), so the notice cannot drift
+    /// from the workflows the way two of its rows once did.
+    func testThirdPartyListsEachActionAtItsPinnedRelease() throws {
+        let notice = try RepoFiles.read("THIRD_PARTY.md")
+        let pattern = try NSRegularExpression(pattern: #"uses:\s+([\w.-]+/[\w.-]+)(?:/[^@\s]*)?@[0-9a-f]{40}\s+#\s+(v\d+\.\d+\.\d+)"#)
+        var pinned: [String: String] = [:]
+        for file in try workflowFiles() {
+            let text = try RepoFiles.read(file)
+            for match in pattern.matches(in: text, range: NSRange(text.startIndex..., in: text)) {
+                if let repo = Range(match.range(at: 1), in: text), let version = Range(match.range(at: 2), in: text) {
+                    pinned[String(text[repo])] = String(text[version])
+                }
+            }
+        }
+        XCTAssertFalse(pinned.isEmpty, "the sweep must see a pinned action")
+        for (repo, version) in pinned.sorted(by: { $0.key < $1.key }) {
+            let row = notice.split(separator: "\n").first { $0.contains("(https://github.com/\(repo))") }
+            XCTAssertNotNil(row, "THIRD_PARTY.md lists no row for \(repo)")
+            XCTAssertTrue(row?.contains("| \(version) |") ?? false, "THIRD_PARTY.md must list \(repo) at \(version)")
+        }
+    }
 }

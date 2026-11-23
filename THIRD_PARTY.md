@@ -29,7 +29,8 @@ notice, which Settings › About › Open source licenses shows.
 | [XcodeGen](https://github.com/yonaskolb/XcodeGen) | 2.48.0 | `MIT` | Build and CI only, as a pinned release binary (`scripts/tools.sh`); generates `Dish.xcodeproj`. Not in the app. | None for redistributors of the app |
 
 The pinned tools are verified by SHA-256 against the digests in
-`scripts/tools.sh` and `.github/workflows/ios-ci.yml`.
+`scripts/tools.sh`, the one place a pin lives; the workflows call the scripts
+that source it.
 
 `App/Dish.storekit` is a StoreKit configuration for the simulator and for
 Xcode's run action only; it lists the three tip products and is not in the app.
@@ -59,12 +60,12 @@ output (signatures, provenance) ship beside it.
 | [actions/upload-artifact](https://github.com/actions/upload-artifact) | v7.0.2 | `MIT` | the simulator `.app`, the release payload, the gitleaks report |
 | [actions/download-artifact](https://github.com/actions/download-artifact) | v8.0.2 | `MIT` | `release.yml` |
 | [actions/setup-python](https://github.com/actions/setup-python) | v7.1.0 | `MIT` | the allowlist expiry check |
-| [actions/dependency-review-action](https://github.com/actions/dependency-review-action) | v5.0.0 | `MIT` | `security.yml` |
-| [github/codeql-action](https://github.com/github/codeql-action) | v4.39.1 | `MIT` | `codeql.yml`, and the Grype SARIF upload |
+| [actions/dependency-review-action](https://github.com/actions/dependency-review-action) | v5.0.1 | `MIT` | `security.yml` |
+| [github/codeql-action](https://github.com/github/codeql-action) | v4.39.4 | `MIT` | `codeql.yml`, and the Grype SARIF upload |
 | [anchore/scan-action](https://github.com/anchore/scan-action) (Grype) | v7.4.2 | `MIT` | the release vulnerability scan |
 | [anchore/sbom-action](https://github.com/anchore/sbom-action) (Syft) | v0.24.3 | `Apache-2.0` | the SPDX and CycloneDX SBOMs |
 | [slsa-github-generator](https://github.com/slsa-framework/slsa-github-generator) | v2.1.0 | `Apache-2.0` | the SLSA L3 provenance |
-| [softprops/action-gh-release](https://github.com/softprops/action-gh-release) | v3.0.3 | `MIT` | publishing the GitHub Release |
+| [softprops/action-gh-release](https://github.com/softprops/action-gh-release) | v3.0.4 | `MIT` | publishing the GitHub Release |
 | [cosign](https://github.com/sigstore/cosign) | 2.4.1 | `Apache-2.0` | keyless signatures |
 | [OSV-Scanner](https://github.com/google/osv-scanner) | 1.9.0 | `Apache-2.0` | `_security.yml` |
 | [gitleaks](https://github.com/gitleaks/gitleaks) | 8.30.1 | `MIT` | `_security.yml` |
