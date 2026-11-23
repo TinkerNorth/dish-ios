@@ -24,9 +24,9 @@ notice, which Settings › About › Open source licenses shows.
 | Apple system frameworks (Foundation, Observation, Synchronization, SwiftUI, UIKit, MessageUI, os, GameController, CoreBluetooth, CoreHaptics, StoreKit, Network, Security, CryptoKit, CommonCrypto) | the iOS the app runs on | Apple SDK license | Dynamically linked against the user's iOS. Nothing is bundled. StoreKit sells Support Dish's tips; the App Store, not Dish, handles the payment. | None for redistributors of the app |
 | [ENet](https://github.com/cgutman/enet) (cgutman fork, commit `44c85e1`) | the fork Wolf pins | `MIT` | No C is compiled. The client subset of its reliable-UDP protocol is ported to Swift under `Sources/DishCore/Moonlight/Enet/`; section 2c. | Keep the copyright and permission notice below |
 | [SDL](https://github.com/libsdl-org/SDL) (`main` at commit `b029df0`) | the commit read | `Zlib` | No C is compiled. The Steam Controllers' Bluetooth LE protocols (SDL's iOS CoreBluetooth backend and its two drivers) are ported to Swift under `Sources/DishCore/DirectInput/` by way of dish-mac's port; section 2d. | Keep the notice below (zlib asks for none in a binary; it is kept as an acknowledgment) |
-| [SwiftFormat](https://github.com/nicklockwood/SwiftFormat) | 0.61.1 | `MIT` | Build and CI only, as a pinned release binary (`scripts/tools.sh`). Not in the app. | None for redistributors of the app |
-| [SwiftLint](https://github.com/realm/SwiftLint) | 0.65.0 | `MIT` | Build and CI only, as a pinned release binary (`scripts/tools.sh`). Not in the app. | None for redistributors of the app |
-| [XcodeGen](https://github.com/yonaskolb/XcodeGen) | 2.46.0 | `MIT` | Build and CI only, as a pinned release binary (`scripts/tools.sh`); generates `Dish.xcodeproj`. Not in the app. | None for redistributors of the app |
+| [SwiftFormat](https://github.com/nicklockwood/SwiftFormat) | 0.64.7 | `MIT` | Build and CI only, as a pinned release binary (`scripts/tools.sh`). Not in the app. | None for redistributors of the app |
+| [SwiftLint](https://github.com/realm/SwiftLint) | 0.65.1 | `MIT` | Build and CI only, as a pinned release binary (`scripts/tools.sh`). Not in the app. | None for redistributors of the app |
+| [XcodeGen](https://github.com/yonaskolb/XcodeGen) | 2.48.0 | `MIT` | Build and CI only, as a pinned release binary (`scripts/tools.sh`); generates `Dish.xcodeproj`. Not in the app. | None for redistributors of the app |
 
 The pinned tools are verified by SHA-256 against the digests in
 `scripts/tools.sh` and `.github/workflows/ios-ci.yml`.

@@ -23,8 +23,8 @@ scripts/setup-hooks.sh
 scripts/ci-local.sh
 ```
 
-`scripts/ci-local.sh` downloads the same SwiftFormat 0.61.1, SwiftLint 0.65.0
-and XcodeGen 2.46.0 release binaries CI pins (`scripts/tools.sh`, verified by
+`scripts/ci-local.sh` downloads the same SwiftFormat 0.64.7, SwiftLint 0.65.1
+and XcodeGen 2.48.0 release binaries CI pins (`scripts/tools.sh`, verified by
 SHA-256, into `.build/tools`), then runs the format check, the strict lint,
 the project drift check, `xcodebuild test` on an iPhone simulator, the UI
 tests again on an iPad simulator, and the Release build. A green run there is
