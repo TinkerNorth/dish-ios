@@ -189,6 +189,41 @@ final class ToolPinTests: XCTestCase {
         }
     }
 
+    // MARK: the components SBOM
+
+    /// Syft does not look inside the IPA, so `scripts/write-sbom.sh` writes
+    /// what the app carries beside it, on every pull request's staging and on
+    /// the tag's, signed or not, and the hardening folds it into the product
+    /// SBOM. The script names every component `THIRD_PARTY.md` says reaches
+    /// the user, at the commit it names; run, it checks the same against the
+    /// notice and fails the staging when they part.
+    func testTheIpaIsStagedWithAComponentsSbomThatNamesWhatTheAppCarries() throws {
+        let stage = try RepoFiles.read("scripts/stage-ipa.sh")
+        XCTAssertTrue(stage.contains(#"scripts/write-sbom.sh "dist/dish-ios-components.spdx.json""#), "stage-ipa.sh writes it into dist/")
+        let release = try workflow("release.yml")
+        XCTAssertTrue(
+            release.contains(#"scripts/write-sbom.sh "dist/dish-ios-components.spdx.json" "${TAG}""#),
+            "a signed tag, which does not call stage-ipa.sh, writes it too"
+        )
+        let script = try RepoFiles.read("scripts/write-sbom.sh")
+        let notice = try RepoFiles.read("THIRD_PARTY.md")
+        let start = try XCTUnwrap(notice.range(of: "## 1. Summary"), "THIRD_PARTY.md has its summary").upperBound
+        let summary = notice[start...].components(separatedBy: "\n#").first ?? ""
+        var shipped = 0
+        for line in summary.split(separator: "\n") where line.hasPrefix("| [") && !line.contains("Not in the app") {
+            guard let close = line.firstIndex(of: "]") else { continue }
+            let name = String(line[line.index(line.startIndex, offsetBy: 3) ..< close])
+            shipped += 1
+            XCTAssertTrue(
+                script.contains("\"\(name.lowercased())\""),
+                "THIRD_PARTY.md says \(name) reaches the user: write-sbom.sh must name it"
+            )
+        }
+        XCTAssertEqual(shipped, 2, "THIRD_PARTY.md's summary names ENet and SDL as reaching the user")
+        XCTAssertTrue(script.contains("controllers-v1/manifest.json"), "the bundled controller database is named at its dbVersion")
+        XCTAssertTrue(script.contains("Not in the app"), "run, the script checks itself against THIRD_PARTY.md")
+    }
+
     /// The provenance recipe names the generator's commit; it is the one `release.yml` pins.
     func testSecurityNamesTheGeneratorCommitReleaseYmlPins() throws {
         let release = try workflow("release.yml")
@@ -208,6 +243,7 @@ final class ToolPinTests: XCTestCase {
             XCTAssertFalse(text.contains("--signature"), "\(file) still carries the .sig and .crt recipe")
             XCTAssertFalse(text.contains("certificate-identity-regexp"), "\(file) still carries the regular-expression identity")
             XCTAssertFalse(text.contains("slsa-verifier verify-artifact"), "\(file): slsa-verifier refuses a generator pinned by commit")
+            XCTAssertFalse(text.contains("--new-bundle-format"), "\(file): cosign 3 reads the bundle without the deprecated flag")
         }
     }
 }

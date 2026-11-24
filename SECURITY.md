@@ -101,8 +101,7 @@ Each repo runs the same shape of gates:
 - Allowlist gate: `.security/allowlist.yaml` is the only place a
   vulnerability is accepted; an entry past `expires`, or more than 90 days out,
   fails.
-- Dependency review: GitHub advisory DB (PR-only; it runs once the
-  repository's Dependency graph setting is on).
+- Dependency review: GitHub advisory DB (PR-only).
 - OSV-Scanner: vendored components and manifest dependencies;
   ecosystem-specific scope (see each repo's `security.yml`).
 - Gitleaks: secret scanning over the git history.
@@ -163,9 +162,10 @@ cd "$REPO-$TAG"
 
 You should see the platform artifacts (for `dish-ios`: `dish-X.Y.Z-unsigned.ipa`
 and the stable `dish-ios.ipa`, or the dSYMs when the build went to App Store
-Connect), `SHA256SUMS` with its bundle, `<product>.sbom.spdx.json` and
-`<product>.sbom.cdx.json`, and `<product>.intoto.jsonl` (the SLSA L3
-provenance).
+Connect), `dish-ios-components.spdx.json` (what the app carries, which the
+product SBOM folds in, since Syft does not look inside an IPA), `SHA256SUMS`
+with its bundle, `<product>.sbom.spdx.json` and `<product>.sbom.cdx.json`, and
+`<product>.intoto.jsonl` (the SLSA L3 provenance).
 
 ### 2) One bundle per file
 
@@ -196,7 +196,7 @@ commit from the provenance's `builder.id`:
 
 ```bash
 cosign verify-blob-attestation \
-  --bundle "dish-ios.intoto.jsonl" --new-bundle-format --type slsaprovenance \
+  --bundle "dish-ios.intoto.jsonl" --type slsaprovenance \
   --certificate-identity "https://github.com/slsa-framework/slsa-github-generator/.github/workflows/generator_generic_slsa3.yml@f7dd8c54c2067bafc12ca7a55595d5ee9b75204a" \
   --certificate-oidc-issuer https://token.actions.githubusercontent.com \
   dish-X.Y.Z-unsigned.ipa
@@ -215,11 +215,6 @@ jq -S . dish-ios.sbom.spdx.json | less
 
 ## Known gaps
 
-- **Branch protection on `main`.** The repos run on a
-  free org plan that does not expose required-status-check enforcement
-  for private repositories. Direct pushes to `main` are blocked by
-  convention only; the per-repo CI workflows are the de-facto gate.
-  See the matching `README.md` in each repo for the full text.
 - **The iOS release may be unsigned.** Until the six App Store secrets
   exist, `dish-ios` publishes `dish-X.Y.Z-unsigned.ipa` (also as
   `dish-ios.ipa`). It does not install as downloaded: it must be

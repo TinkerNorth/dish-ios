@@ -59,9 +59,9 @@ jobs:
       # Package.swift has no dependencies, so no manifest OSV-Scanner reads
       # exists (see security.yml).
       osv_allow_no_packages: true
-      # The Dependency graph setting is off (the maintainer's to enable); the
-      # job also only means anything on a pull request.
-      dependency_review_enabled: false
+      # The Dependency graph is on; the job itself runs only on a pull
+      # request, so on a tag it is skipped.
+      dependency_review_enabled: true
 
   # ─────────────────────────────────────────────────────────────────────
   # Signing-secret gate. Advisory by default, as the satellite's and the
@@ -269,6 +269,9 @@ jobs:
             # way on every pull request.
             scripts/stage-ipa.sh "${archive}" "${TAG}"
           fi
+          # What the app carries, which Syft cannot read inside an IPA; the
+          # hardening folds it into the product SBOM, signed tag or not.
+          scripts/write-sbom.sh "dist/dish-ios-components.spdx.json" "${TAG}"
           ls -l dist/
 
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2

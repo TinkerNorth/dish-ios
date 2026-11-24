@@ -57,7 +57,16 @@ lockstep across the repos share a version number.
 - **The iPad UI tests** run on a runner with one simulator booted, which is
   deleted when its suite ends; the changelog's links to tags the repository does
   not have are gone, and `version-consistency.yml` fails one.
-- **The README is the family's.** It says plainly that Dish for iOS is built
+- **The release's bill of materials says what the app carries.** Syft cannot
+  look inside an IPA, so `scripts/write-sbom.sh` writes
+  `dish-ios-components.spdx.json` (ENet and SDL at the commits the ports read,
+  and the bundled controller database) beside it on every pull request and on
+  the tag, checked against `THIRD_PARTY.md`, and the shared hardening, updated
+  to the fleet's newest copy, folds it into the product SBOM and scans that.
+  The provenance recipe drops cosign's deprecated `--new-bundle-format`.
+- **Dependency review runs on every pull request**, and `main` is protected:
+  the required checks and squash-only merges are in `CONTRIBUTING.md`.
+ It says plainly that Dish for iOS is built
   but not released, what it does with each controller today, what iOS does not
   allow and what is not ported yet, and how to run it in the simulator from a
   fresh clone. Its version, tool versions, links and the blocks every Dish

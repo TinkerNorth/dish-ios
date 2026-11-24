@@ -350,7 +350,7 @@ Dish clients follow, so a fact ported between clients keeps its shape.
 | `LicenseHeaderTests` | the two-line SPDX header on every Swift file and on the manifest |
 | `NoSuppressionsTests` | no lint suppression, no deferred-work comment, no mutable static, no host singleton outside the scene, no unchecked concurrency |
 | `LintConfigTests` | the lint thresholds this document names; CI runs SwiftLint strict and SwiftFormat in lint mode |
-| `ToolPinTests` | `scripts/tools.sh` is the one place a tool or Xcode pin lives: no workflow repeats one, every macos-26 workflow selects Xcode through `select-xcode.sh`, and `project.yml`, `THIRD_PARTY.md`, this document and `README.md` name the same versions |
+| `ToolPinTests` | `scripts/tools.sh` is the one place a tool or Xcode pin lives: no workflow repeats one, every macos-26 workflow selects Xcode through `select-xcode.sh`, and `project.yml`, `THIRD_PARTY.md`, this document and `README.md` name the same versions; the IPA is staged with `scripts/write-sbom.sh`'s components SBOM, which names every component `THIRD_PARTY.md` says reaches the user |
 | `WorkflowPinTests` | every `uses:` is a 40-character commit SHA |
 | `E2EWorkflowTests` | the end-to-end lane runs `scripts/e2e_local.sh` against a satellite pinned by tag, and the script seeds that satellite's update and controller database checks off before it starts |
 | `VersionConsistencyTests` | `VERSION` is `MAJOR.MINOR.PATCH`, `project.yml` carries it as `MARKETING_VERSION`, the changelog's newest heading names it or is `[Unreleased]`, the Info.plist reads both bundle versions from build settings, the protocol number the documents name is the one the code offers, and `README.md` names `VERSION`, carries the family's shared blocks word for word (`Tests/ArchitectureTests/Fixtures/readme-shared.md`) and links only files and headings that exist |
@@ -415,8 +415,12 @@ Dish clients follow, so a fact ported between clients keeps its shape.
   `Tests/PARITY.md` lands in the same change.
 - Keep commits focused; squash noisy fixup commits before review.
 
-> **Note on branch protection.** Treat the PR-based flow as a convention
-> unless the platform enforces it, and rely on CI as the quality gate.
+`main` is protected, for administrators too: a pull request merges only when
+it is up to date with `main` and these checks pass: `Build, test, lint,
+format`, `Lock statistics build and tests`, `Analyze (swift)`, the four
+`shared /` jobs of the security workflow, and `Release hardening (dry run) /
+scan, SBOM, sign`. Merges are squash merges only, so each pull request lands
+as one commit on `main`, and that commit is the one a release tag names.
 
 ## What CI runs
 
@@ -500,9 +504,10 @@ Linux), what `security.yml` runs through the shared `_security.yml`:
   script);
 - `gitleaks git --config=.gitleaks.toml --redact --exit-code=1 .`.
 
-`scripts/ci-local.sh` runs it first. Dependency review needs the repository's
-Dependency graph setting, which is off, so `security.yml` passes
-`dependency_review_enabled: false`; CodeQL runs in `codeql.yml`.
+`scripts/ci-local.sh` runs it first. Dependency review runs on every pull
+request (`dependency_review_enabled: true`; the repository's Dependency graph
+and Dependabot alerts are on) and only in CI, since it reads GitHub's view of
+the pull request; CodeQL runs in `codeql.yml`.
 `WorkflowPinTests` names the pin rule's one shape: a SHA with its release in a
 comment.
 

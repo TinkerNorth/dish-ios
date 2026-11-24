@@ -21,7 +21,8 @@
 #                  tests again on an iPad simulator
 #    release       the Release build for the simulator
 #    archive       the unsigned archive for a generic iOS device, packaged as
-#                  an IPA the way release.yml packages the unsigned release
+#                  an IPA the way release.yml packages the unsigned release,
+#                  with its components SBOM (write-sbom.sh)
 #
 #  Options:
 #    --quick           skip the release and archive gates
@@ -35,7 +36,7 @@
 #      this script reports when your selected Xcode is another version.
 #    - version-consistency.yml: a text gate; VersionConsistencyTests runs the
 #      same checks in the test gate here.
-#    - dependency review (the repository's Dependency graph setting is off),
+#    - dependency review (it reads GitHub's view of the pull request),
 #      codeql.yml (the code scanning upload) and the release-hardening dry
 #      run (a Linux job: Grype, Syft and cosign of the PR-built IPA).
 #    - e2e.yml: the same e2e_local.sh as --with-e2e, on a runner.
