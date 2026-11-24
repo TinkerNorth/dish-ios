@@ -1,15 +1,8 @@
 name: Security
 
-# PR-time security gates for dish-ios. Pulls the shared jobs from this
-# repo's local copy of `_security.yml` (action-pin lint, allowlist-
-# expiry, OSV-Scanner, dependency-review, gitleaks). CodeQL lives in
-# codeql.yml because it has its own matrix.
-#
-# The app has no third-party dependencies, so there is no Package.resolved
-# for OSV to read; it scans the worktree anyway, which keeps the gate in
-# place for the day a dependency lands. `dependency-review-action` stays on:
-# it reads the manifest diff of a PR and fails on high-severity findings
-# against GitHub's advisory DB, so a first dependency is checked on arrival.
+# Security gates on every pull request, every push to main and weekly. The jobs live in the
+# shared _security.yml (action-pin lint, allowlist expiry, OSV-Scanner, dependency review,
+# gitleaks); CodeQL lives in codeql.yml because it has its own matrix.
 
 on:
   push:
@@ -17,7 +10,7 @@ on:
   pull_request:
     branches: [main]
   schedule:
-    - cron: "0 6 * * 1"
+    - cron: "0 6 * * 1" # weekly, Monday 06:00 UTC
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -25,16 +18,20 @@ concurrency:
 
 permissions:
   contents: read
-  pull-requests: read
-  security-events: write
 
 jobs:
   shared:
+    # Exactly what _security.yml declares; a narrower grant fails the call at startup.
+    permissions:
+      contents: read
+      pull-requests: read
     uses: ./.github/workflows/_security.yml
     with:
-      osv_scan_paths: |
-        .
-      gitleaks_enabled: true
+      osv_scan_paths: .
+      # Package.swift has no dependencies, so there is no Package.resolved and no other
+      # manifest OSV-Scanner reads: its "no packages found" is the true answer here. The
+      # first package this app takes in lands a Package.resolved, and this line goes.
+      osv_allow_no_packages: true
+      # The repository's Dependency graph and Dependabot alerts are on, so
+      # dependency review runs on every pull request.
       dependency_review_enabled: true
-      action_pin_lint_enabled: true
-      allowlist_expiry_enabled: true

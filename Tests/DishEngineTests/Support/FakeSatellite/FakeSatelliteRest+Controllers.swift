@@ -16,7 +16,9 @@ extension FakeSatelliteRest {
 
     func reconcile(_ request: FakeSatelliteHttp.Request, id: String) -> FakeSatelliteHttp.Response {
         let body = FakeSatelliteHttp.parseJSON(request.body)
-        if case let .unauthorized(code) = authenticate(request, body: body) { return unauthorized(code) }
+        if case let .unauthorized(code) = authenticate(request, body: body) {
+            return unauthorized(code)
+        }
         guard id == connectionId else { return notFound() }
         return store.with { state -> FakeSatelliteHttp.Response in
             guard state.activeToken != nil else { return self.notFound() }
@@ -29,7 +31,9 @@ extension FakeSatelliteRest {
                     "touchpadMode": ctrl["touchpadMode"] as? String ?? "off",
                     "motion": ["sinkSupportedForType": true, "backendOk": true]
                 ]
-                if let caps = ctrl["caps"] { view["caps"] = caps }
+                if let caps = ctrl["caps"] {
+                    view["caps"] = caps
+                }
                 return view
             }
             return FakeSatelliteHttp.json(200, [
@@ -47,7 +51,9 @@ extension FakeSatelliteRest {
     /// Graceful client close: no close-notify (the closer already knows).
     func closeSession(_ request: FakeSatelliteHttp.Request, id: String) -> FakeSatelliteHttp.Response {
         let body = FakeSatelliteHttp.parseJSON(request.body)
-        if case let .unauthorized(code) = authenticate(request, body: body) { return unauthorized(code) }
+        if case let .unauthorized(code) = authenticate(request, body: body) {
+            return unauthorized(code)
+        }
         guard id == connectionId else { return notFound() }
         return store.with { state -> FakeSatelliteHttp.Response in
             guard state.activeToken != nil else { return self.notFound() }
@@ -63,9 +69,23 @@ extension FakeSatelliteRest {
 
     // MARK: - Controller sub-resource (contract §Controller)
 
+    private func applyFailure(_ result: String, idx: Int, epoch: UInt16, type: Int) -> FakeSatelliteHttp.Response {
+        FakeSatelliteHttp.json(200, [
+            "epoch": Int(epoch),
+            "controller": [
+                "ctrlIdx": idx,
+                "result": result,
+                "appliedType": type,
+                "motion": ["sinkSupportedForType": false, "backendOk": false]
+            ]
+        ])
+    }
+
     func putSlot(_ request: FakeSatelliteHttp.Request, id: String, idx: Int) -> FakeSatelliteHttp.Response {
         let body = FakeSatelliteHttp.parseJSON(request.body)
-        if case let .unauthorized(code) = authenticate(request, body: body) { return unauthorized(code) }
+        if case let .unauthorized(code) = authenticate(request, body: body) {
+            return unauthorized(code)
+        }
         guard id == connectionId else { return notFound() }
         return store.with { state -> FakeSatelliteHttp.Response in
             guard state.activeToken != nil else { return self.notFound() }
@@ -76,15 +96,7 @@ extension FakeSatelliteRest {
                 // replugFailed leaves the previous pad in force; every other
                 // code means the slot is not plugged (contract §Session).
                 let priorType = existing.map { state.controllers[$0]["type"] as? Int ?? 0 }
-                return FakeSatelliteHttp.json(200, [
-                    "epoch": Int(state.epoch),
-                    "controller": [
-                        "ctrlIdx": idx,
-                        "result": failure,
-                        "appliedType": priorType ?? (descriptor["type"] as? Int ?? 0),
-                        "motion": ["sinkSupportedForType": false, "backendOk": false]
-                    ]
-                ])
+                return applyFailure(failure, idx: idx, epoch: state.epoch, type: priorType ?? (descriptor["type"] as? Int ?? 0))
             }
             var list = state.controllers
             if let existing {
@@ -93,7 +105,9 @@ extension FakeSatelliteRest {
                 let typeChanged = (list[existing]["type"] as? Int ?? 0) != (descriptor["type"] as? Int ?? 0)
                 if !(list[existing] as NSDictionary).isEqual(to: descriptor) {
                     list[existing] = descriptor
-                    if typeChanged { state.epoch &+= 1 }
+                    if typeChanged {
+                        state.epoch &+= 1
+                    }
                 }
             } else {
                 list.append(descriptor)
@@ -116,13 +130,17 @@ extension FakeSatelliteRest {
     /// Removes the SLOT only; the session lives on (contract).
     func deleteSlot(_ request: FakeSatelliteHttp.Request, id: String, idx: Int) -> FakeSatelliteHttp.Response {
         let body = FakeSatelliteHttp.parseJSON(request.body)
-        if case let .unauthorized(code) = authenticate(request, body: body) { return unauthorized(code) }
+        if case let .unauthorized(code) = authenticate(request, body: body) {
+            return unauthorized(code)
+        }
         guard id == connectionId else { return notFound() }
         return store.with { state -> FakeSatelliteHttp.Response in
             guard state.activeToken != nil else { return self.notFound() }
             let before = state.controllers.count
             state.controllers.removeAll { ($0["ctrlIdx"] as? Int ?? -1) == idx }
-            if state.controllers.count != before { state.epoch &+= 1 }
+            if state.controllers.count != before {
+                state.epoch &+= 1
+            }
             return FakeSatelliteHttp.json(200, ["ok": true, "epoch": Int(state.epoch)])
         }
     }

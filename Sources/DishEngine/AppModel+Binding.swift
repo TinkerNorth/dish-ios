@@ -183,7 +183,9 @@ package extension AppModel {
     private func attachedPadsChanged() {
         let present = presentSlotIds
         network.hub.keepPresent(present)
-        if let watch = applyWatch, !present.contains(watch.slotId) { advanceApply(.padGone) }
+        if let watch = applyWatch, !present.contains(watch.slotId) {
+            advanceApply(.padGone)
+        }
         refreshRouting()
         followAttachedPads()
     }
@@ -207,7 +209,9 @@ package extension AppModel {
     /// run that had failed on it is moot, so its word goes.
     internal func slotConfirmed(connectionId: String, slotId: String) {
         let target = ApplyTarget(slotId: slotId, connectionId: connectionId)
-        if applyTarget == target, applyEndedFailed(bindingProgress) { advanceApply(.dismissed) }
+        if applyTarget == target, applyEndedFailed(bindingProgress) {
+            advanceApply(.dismissed)
+        }
         guard let watch = applyWatch, watch.slotId == slotId, watch.connectionId == connectionId else { return }
         advanceApply(.hostConfirmed)
     }
@@ -248,8 +252,12 @@ package extension AppModel {
     internal func advanceApply(_ event: ApplyEvent) {
         let before = bindingProgress
         let next = reduceApply(before, event)
-        if next != before { bindingProgress = next }
-        if applyInFlight(before), !applyInFlight(next) { endApplyWatch() }
+        if next != before {
+            bindingProgress = next
+        }
+        if applyInFlight(before), !applyInFlight(next) {
+            endApplyWatch()
+        }
     }
 }
 

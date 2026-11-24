@@ -31,7 +31,9 @@ final class RumbleActuator {
         self.controller = controller
         leftMotor = haptics.createEngine(withLocality: pair.left).flatMap(HapticMotor.init(engine:))
         rightMotor = haptics.createEngine(withLocality: pair.right).flatMap(HapticMotor.init(engine:))
-        if leftMotor == nil, rightMotor == nil { return nil }
+        if leftMotor == nil, rightMotor == nil {
+            return nil
+        }
     }
 
     func shutdown() {
@@ -98,8 +100,8 @@ final class PhoneRumble {
 
     /// Nil on an iPhone without haptics, and in the simulator.
     init?() {
-        guard CHHapticEngine.capabilitiesForHardware().supportsHaptics else { return nil }
-        guard let engine = try? CHHapticEngine(), let motor = HapticMotor(engine: engine) else { return nil }
+        guard CHHapticEngine.capabilitiesForHardware().supportsHaptics, let engine = try? CHHapticEngine(),
+              let motor = HapticMotor(engine: engine) else { return nil }
         self.motor = motor
     }
 

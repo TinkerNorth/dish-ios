@@ -173,7 +173,9 @@ func benchTestName(_ test: BenchTest, reach: BenchReach, words: L10n = .app) -> 
 /// The stick tests' line: the countdown while one captures, else the last
 /// result, else nothing.
 func stickStatus(secondsLeft: Int?, result: StickTestResult?, words: L10n = .app) -> String? {
-    if let secondsLeft { return words.capturingSeconds(secondsLeft) }
+    if let secondsLeft {
+        return words.capturingSeconds(secondsLeft)
+    }
     return result.map { stickResultText($0, words: words) }
 }
 

@@ -30,7 +30,9 @@ extension SatelliteClient {
             PacketCodec.writeInnerHeader(msgType: msgType, payloadCount: payloadCount, into: inner)
             encode(UnsafeMutableRawBufferPointer(rebasing: inner[ProtocolConstants.innerHeaderSize...]))
             let handedOver = gate.hold { sealAndSend(datagram, innerCount: innerCount) }
-            if handedOver { tally.countSent(msgType) }
+            if handedOver {
+                tally.countSent(msgType)
+            }
         }
     }
 

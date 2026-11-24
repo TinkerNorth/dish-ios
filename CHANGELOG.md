@@ -11,6 +11,12 @@ from the build setting. `version-consistency.yml` fails a pull request whose
 `VERSION`, `CHANGELOG.md` heading and `MARKETING_VERSION` disagree, and
 `release.yml` fails the tag build when the tag and `VERSION` disagree.
 
+No release of this client has been tagged yet; `[1.1.0]` is the first one, and
+`[1.0.0]` is dated history the tree carries from before it, never tagged. A
+heading gets its link reference (`releases/tag/X.Y.Z`, or `compare/` between
+two tags) in the first pull request after its tag exists, and
+`version-consistency.yml` fails a link to a tag the repository does not have.
+
 Cross-repo coordination: changes to the wire protocol or the pairing flow that
 need matching updates in `satellite`, `dish-android`, `dish-windows`,
 `dish-linux` or `dish-mac` are marked `[wire-coordinated]`. Releases tagged in
@@ -22,7 +28,7 @@ lockstep across the repos share a version number.
 
 Nothing yet.
 
-## [1.1.0] - 2026-11-19
+## [1.1.0] - 2026-11-23
 
 ### Added
 
@@ -156,6 +162,18 @@ Nothing yet.
   writes; nothing on these paths reads what they record.
 
 
+- **A bill of materials of what the app carries.** The release ships
+  `dish-ios-components.spdx.json` beside the IPA: ENet and SDL at the commits
+  the Swift ports read, and the bundled controller database, written by
+  `scripts/write-sbom.sh` and checked against `THIRD_PARTY.md`. The release's
+  own SBOM folds it in and the vulnerability scan reads it, since neither tool
+  looks inside an IPA.
+- **A README for the person who arrives.** It says that Dish for iOS is built
+  and not yet released, what it does with each kind of controller, what iOS
+  does not allow, what is not ported yet, and how to run it in the simulator
+  from a fresh clone; tests hold its version, tool versions, links and the
+  text every Dish README shares.
+
 ### Changed
 
 - **The play screens' way out is a back button.** The pause menu and its
@@ -223,9 +241,6 @@ Nothing yet.
   the row a split's detail shows is tinted. Nothing uses the silent plain
   or borderless styles, a NavigationLink or a Link any more, and setup's
   cards sit on the surface colour like every other list.
-- **The screen stays awake only for a pad.** Keep screen on holds the
-  phone awake only while a session streams with a pad bound; a bare
-  connection lets it lock like any other app.
 - **Low power waits for a pad.** The countdown arms only while a session
   streams with a pad bound, never for a bare connection, one being brought
   back, or one that stopped responding.
@@ -235,6 +250,31 @@ Nothing yet.
 - **The play screens rise and fall without the cover's slide.** The slide
   fought the window's turn to landscape and back; now the turn is the one
   motion.
+
+- **Contributors: one path for local builds and CI.** `scripts/ci-local.sh`
+  and `ios-ci.yml` call the same scripts (`check-format.sh`, `check-lint.sh`,
+  `test.sh`, `build-release.sh`, `archive-device.sh`, `stage-ipa.sh`), with
+  `--with-lock-stats` and `--with-e2e` for the two slower lanes. Every pull
+  request archives the app for a generic iOS device without signing and
+  stages the unsigned IPA, so a device-only error cannot first appear at the
+  tag. SwiftFormat 0.64.7, SwiftLint 0.65.1, XcodeGen 2.48.0 and the Xcode CI
+  selects (26.6) are pinned once, in `scripts/tools.sh`; every action is at
+  its latest release.
+- **The release is hardened like the rest of the fleet's.** The tag re-runs
+  the shared security gates (the action-pin lint, the allowlist, OSV-Scanner
+  2.7.1, gitleaks 8.30.1), and the shared hardening scans with Grype, writes
+  SBOMs with Syft and signs one cosign bundle per file; every pull request
+  runs that hardening as a dry run on the IPA it stages, and dependency
+  review runs on every pull request. The release is uploaded as a draft and
+  published once complete. `SECURITY.md` carries the cosign 3 verification
+  recipe.
+- **Documents corrected:** protocol 4 and the whole wire surface in
+  `SECURITY.md`, the privacy table's session rows, `Tests/PARITY.md` against
+  the code, the architecture map, the design handoff's status, the release
+  procedure, and `main`'s protection and squash-only merges in
+  `CONTRIBUTING.md`. Guards in the architecture tests keep the protocol
+  number, the tool and action versions and the files the ledger names equal to
+  the code.
 
 ### Fixed
 
@@ -264,12 +304,11 @@ Nothing yet.
   fingers, the scroll strip no longer sends a sample for a finger that only
   landed, and the face diamond's place-holding cells no longer take a strip
   off the bottom of Y, X and B.
-- **The scene builds its objects once.** SwiftUI calls the scene's
-  initializer again on its own (at launch and on a scene phase change) and
-  keeps only the first build's state; each extra call used to build a whole
-  model, which reached for the remembered PCs, and a navigation store, then
-  threw them away. The scene now holds its root in `OnFirstUse`, which makes
-  it the first time the kept build reads it, so a process makes one.
+- **The end-to-end lane stays off the network.** Its Satellite 2.3.0 starts
+  with the update check and the controller database check off, so a test run
+  asks nothing of GitHub or dish.tinkernorth.com.
+- **The iPad UI tests run with one simulator booted** on a runner, which
+  removes the timeouts two booted simulators caused.
 
 ## [1.0.0] - 2026-11-15
 
@@ -602,7 +641,3 @@ miss. `Tests/PARITY.md` lists everything not built.
   model, which reached for the remembered PCs, and a navigation store, then
   threw them away. The scene now holds its root in `OnFirstUse`, which makes
   it the first time the kept build reads it, so a process makes one.
-
-[Unreleased]: https://github.com/TinkerNorth/dish-ios/compare/1.1.0...main
-[1.1.0]: https://github.com/TinkerNorth/dish-ios/compare/1.0.0...1.1.0
-[1.0.0]: https://github.com/TinkerNorth/dish-ios/releases/tag/1.0.0

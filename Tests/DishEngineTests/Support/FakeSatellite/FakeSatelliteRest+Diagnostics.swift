@@ -23,8 +23,12 @@ extension FakeSatelliteRest {
             state.diagnosticsGets += 1
             return state.diagnosticsRoute
         }
-        if case .absent = route { return FakeSatelliteHttp.json(404, ["error": "unknown route"]) }
-        if case let .unauthorized(code) = authenticate(request, body: [:]) { return unauthorized(code) }
+        if case .absent = route {
+            return FakeSatelliteHttp.json(404, ["error": "unknown route"])
+        }
+        if case let .unauthorized(code) = authenticate(request, body: [:]) {
+            return unauthorized(code)
+        }
         guard id == connectionId else { return notFound() }
         switch route {
         case .absent, .unknownConnection:

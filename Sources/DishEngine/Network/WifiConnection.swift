@@ -109,11 +109,15 @@ package final class WifiConnection: Identifiable, FeedbackRouteTarget {
     }
 
     func updateServer(_ server: DiscoveredServer) {
-        if server != self.server { self.server = server }
+        if server != self.server {
+            self.server = server
+        }
     }
 
     func markConnecting() {
-        if hasLiveSession { return }
+        if hasLiveSession {
+            return
+        }
         state = .linking
     }
 
@@ -126,7 +130,9 @@ package final class WifiConnection: Identifiable, FeedbackRouteTarget {
         let before = slotTable.descriptorsByIndex()
         var table = slotTable
         let result = edit(&table)
-        if table != slotTable { slotTable = table }
+        if table != slotTable {
+            slotTable = table
+        }
         convergeIndices(changedIndices(before, table.descriptorsByIndex()))
         return result
     }
@@ -200,7 +206,9 @@ package final class WifiConnection: Identifiable, FeedbackRouteTarget {
             while !Task.isCancelled {
                 try? await Task.sleep(nanoseconds: interval)
                 guard !Task.isCancelled, let self else { return }
-                if self.aliveTick() == .sessionEnded { return }
+                if aliveTick() == .sessionEnded {
+                    return
+                }
             }
         }
     }
@@ -247,8 +255,12 @@ package final class WifiConnection: Identifiable, FeedbackRouteTarget {
     private func publishLatency(_ live: SatelliteClient) {
         let snapshot = live.latencySnapshot()
         let rounded = snapshot.p50OneWayMs.map { ($0 * 10).rounded() / 10 }
-        if rounded != latencyOneWayMs { latencyOneWayMs = rounded }
-        if snapshot.samples != latencySamples { latencySamples = snapshot.samples }
+        if rounded != latencyOneWayMs {
+            latencyOneWayMs = rounded
+        }
+        if snapshot.samples != latencySamples {
+            latencySamples = snapshot.samples
+        }
     }
 
     private func evaluateReconcile() {
@@ -289,7 +301,9 @@ package final class WifiConnection: Identifiable, FeedbackRouteTarget {
     private func teardown(parkedOn endState: SessionState) {
         let existing = client
         let nothingToTearDown = state == .idle && existing == nil && endState == .idle
-        if nothingToTearDown { return }
+        if nothingToTearDown {
+            return
+        }
         aliveTask?.cancel()
         aliveTask = nil
         isRegisteringController = false
@@ -305,7 +319,9 @@ package final class WifiConnection: Identifiable, FeedbackRouteTarget {
         latencyOneWayMs = nil
         latencySamples = 0
         state = endState
-        if existing != nil { onClientChanged?() }
+        if existing != nil {
+            onClientChanged?()
+        }
     }
 
     // MARK: - Reconcile state

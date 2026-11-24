@@ -141,7 +141,8 @@ final class ControllerDbMappersTests: XCTestCase {
             line: "Version 1, built in · Not checked yet",
             checkNow: "Check now",
             canCheckNow: true,
-            footer: "Dish asks dish.tinkernorth.com for a newer list of the controllers it knows. It fetches data, never code, and sends nothing about you."
+            footer: "Dish asks dish.tinkernorth.com for a newer list of the controllers it knows. "
+                + "It fetches data, never code, and sends nothing about you."
         ))
     }
 

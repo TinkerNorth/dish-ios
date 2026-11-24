@@ -104,7 +104,9 @@ final class MoonlightPadLink: Sendable {
             guard let pad, before == nil, let live = held.sender else { return (pad, nil) }
             return (pad, Announcement(pad: pad, mask: held.table.activeMask, live: live))
         }
-        if let announcement { announce(announcement) }
+        if let announcement {
+            announce(announcement)
+        }
         return pad
     }
 
@@ -119,7 +121,9 @@ final class MoonlightPadLink: Sendable {
             guard let number, let live = held.sender else { return (remaining, nil) }
             return (remaining, FrameOut(live: live, frame: MoonlightInput.PadFrame(controller: number, activeMask: held.table.activeMask)))
         }
-        if let unplug { unplug.live.sendControllerState(unplug.frame) }
+        if let unplug {
+            unplug.live.sendControllerState(unplug.frame)
+        }
         return remaining
     }
 
@@ -183,11 +187,15 @@ final class MoonlightPadLink: Sendable {
     func sendTouchpad(_ slotId: String, sample: TouchpadSample) {
         let out = held.withLock { held -> (any MoonlightPadSending, MoonlightPadTable.TouchOut)? in
             guard let live = held.sender, let touch = held.table.touch(slotId, sample: sample) else { return nil }
-            if touch.replay != nil { held.sentByNumber[Int(touch.controller)] += 1 }
+            if touch.replay != nil {
+                held.sentByNumber[Int(touch.controller)] += 1
+            }
             return (live, touch)
         }
         guard let out else { return }
-        if let replay = out.1.replay { out.0.sendControllerState(replay) }
+        if let replay = out.1.replay {
+            out.0.sendControllerState(replay)
+        }
         for emission in out.1.emissions {
             out.0.sendControllerTouch(controller: out.1.controller, emission: emission)
         }

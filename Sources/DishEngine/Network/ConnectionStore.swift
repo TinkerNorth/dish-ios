@@ -39,7 +39,9 @@ package final class ConnectionStore {
     /// Stable per-install id, made once. Not a secret: it rides every REST
     /// call in `X-Device-Id`.
     func getOrCreateDeviceId() -> String {
-        if let existing = defaults.string(forKey: Self.deviceIdKey) { return existing }
+        if let existing = defaults.string(forKey: Self.deviceIdKey) {
+            return existing
+        }
         let fresh = UUID().uuidString.replacingOccurrences(of: "-", with: "").lowercased()
         defaults.set(fresh, forKey: Self.deviceIdKey)
         return fresh
@@ -58,7 +60,9 @@ package final class ConnectionStore {
     /// machine id collapses the legacy ghosts at its address, carrying their
     /// key forward; a known satellite at a new address takes its pin along.
     func remember(_ server: DiscoveredServer) {
-        if isBlank(server.machineId), refreshKnownBox(server) { return }
+        if isBlank(server.machineId), refreshKnownBox(server) {
+            return
+        }
         let id = server.id
         if !isBlank(server.machineId) {
             collapseLegacyGhosts(server, stableId: id)
@@ -88,7 +92,9 @@ package final class ConnectionStore {
             let upgradesLegacyRow = rows.contains { row in
                 isBlank(row.machineId) && row.ip == server.ip && row.udpPort == server.udpPort
             }
-            if knownIds.contains(server.id) || upgradesLegacyRow { remember(server) }
+            if knownIds.contains(server.id) || upgradesLegacyRow {
+                remember(server)
+            }
         }
     }
 

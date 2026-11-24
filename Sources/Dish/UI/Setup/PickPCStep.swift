@@ -158,7 +158,9 @@ private struct SetupPCRowView: View {
 
     private func choose() {
         pick(row.pick)
-        if let serverId = row.pairServerId { pair(serverId) }
+        if let serverId = row.pairServerId {
+            pair(serverId)
+        }
     }
 }
 

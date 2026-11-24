@@ -8,7 +8,7 @@ wireless-gamepad product end-to-end:
 - [`dish-windows`](https://github.com/TinkerNorth/dish-windows): Windows client (Qt6 / SDL2)
 - [`dish-linux`](https://github.com/TinkerNorth/dish-linux): Linux client (Qt6 / SDL2)
 - [`dish-mac`](https://github.com/TinkerNorth/dish-mac): macOS client (SwiftUI)
-- [`dish-ios`](https://github.com/TinkerNorth/dish-ios): iPhone client (SwiftUI)
+- [`dish-ios`](https://github.com/TinkerNorth/dish-ios): iPhone and iPad client (SwiftUI)
 
 Each repo has its own `CONTRIBUTING.md#security` section with
 ecosystem-specific local commands; this file is the single source of
@@ -53,7 +53,7 @@ In scope:
 
 - All six repos above.
 - Release artifacts attached to GitHub Releases for any of the six repos.
-- The wire protocol (protocol 3; the single source of truth is
+- The wire protocol (protocol 4, which clients still speak down to 1; the single source of truth is
   [`satellite/docs/contract.md`](https://github.com/TinkerNorth/satellite/blob/main/docs/contract.md)):
   the HTTPS `:9443` control plane (TOFU-pinned self-signed TLS, HMAC
   proof-of-key headers, declarative session PUT) and the UDP `:9876` data
@@ -80,9 +80,10 @@ Out of scope:
 |---|---|---|
 | `satellite` | latest minor on `main`; previous minor for 90 days | Windows is the canonical target; Linux is supported; macOS virtual pads require the virtual-HID entitlement (unentitled builds fall back to an inert backend) |
 | `dish-android` | latest minor on `main`; previous minor for 90 days | minSdk 24 |
+| `dish-windows` | latest minor on `main`; previous minor for 90 days | 64-bit Windows 10 (1809 or newer) and Windows 11 |
 | `dish-linux` | latest minor on `main`; previous minor for 90 days | tracks the oldest LTS the release CI builds against |
 | `dish-mac` | latest minor on `main`; previous minor for 90 days | macOS 13+ |
-| `dish-ios` | latest minor on `main`; previous minor for 90 days | iOS 26.0+; wave 1 has no network code, so its wire surface is empty until a later wave adds it |
+| `dish-ios` | latest minor on `main`; previous minor for 90 days | iOS 26.0+ on iPhone and iPad; the app speaks the whole wire protocol (pairing, the encrypted session, Moonlight hosts), so the scope above covers it |
 
 Patch releases (`X.Y.Z+1`) are issued on demand for the latest minor;
 the previous minor only receives backports for high/critical fixes.
@@ -95,14 +96,19 @@ Each repo runs the same shape of gates:
 
 **On every PR** (blocking):
 
-- Action-pin lint: every `uses:` line must reference a 40-char SHA.
-- Allowlist expiry: `.security/allowlist.yaml` entries must be unexpired.
+- Action-pin lint: every `uses:` line must reference a 40-char SHA followed
+  by a `# vX.Y.Z` comment (`scripts/check-action-pins.sh`).
+- Allowlist gate: `.security/allowlist.yaml` is the only place a
+  vulnerability is accepted; an entry past `expires`, or more than 90 days out,
+  fails.
 - Dependency review: GitHub advisory DB (PR-only).
-- OSV-Scanner: vendored components + manifest deps; ecosystem-specific
-  scope (see each repo's `security.yml`).
-- Gitleaks: secret scanning over the worktree.
+- OSV-Scanner: vendored components and manifest dependencies;
+  ecosystem-specific scope (see each repo's `security.yml`).
+- Gitleaks: secret scanning over the git history.
 - CodeQL: `cpp` for `satellite` / `dish-linux`, `swift` for `dish-mac` and `dish-ios`,
   `java-kotlin` + `cpp` for `dish-android`.
+- Release hardening, as a dry run: the steps below that follow a tag, run on
+  the pull request's own build with a throwaway key and nothing published.
 
 **On every tagged release** (also blocking):
 
@@ -112,15 +118,15 @@ Each repo runs the same shape of gates:
   + notarization, Android keystore). For `dish-ios` the gate is advisory
   by default: without the six App Store secrets named in `release.yml`
   the tag ships an unsigned IPA, with a warning, unless the repository
-  variable `ENFORCE_RELEASE_SIGNING` is `true`. `workflow_dispatch` runs against
-  feature branches still produce `-unsigned` artifacts for testing the
-  pipeline.
-- Artifact-level vulnerability scan: Anchore Grype, fails on
+  variable `ENFORCE_RELEASE_SIGNING` is `true`.
+- Artifact-level vulnerability scan: Anchore Grype (a pinned binary), fails on
   CRITICAL/HIGH.
-- SBOM generation: Syft, both SPDX-JSON and CycloneDX-JSON.
-- `SHA256SUMS` over every artifact + its signatures + the SBOMs.
-- Cosign keyless signing: every artifact and `SHA256SUMS` get a `.sig`
-  + `.crt`, anchored in the Sigstore transparency log.
+- SBOM generation: Syft (a pinned binary), both SPDX-JSON and CycloneDX-JSON.
+- `SHA256SUMS` over every artifact and the SBOMs.
+- Cosign keyless signing: every file and `SHA256SUMS` get a
+  `<file>.sigstore.json` bundle, anchored in the Sigstore transparency log. The
+  signing run must be on the tag ref: a tag push, or
+  `gh workflow run release.yml --ref X.Y.Z -f tag=X.Y.Z`.
 - SLSA L3 build provenance: `slsa-framework/slsa-github-generator`
   emits `<repo>.intoto.jsonl`.
 
@@ -132,123 +138,83 @@ Release page.
 
 ## Verifying a release artifact (consumer recipe)
 
+No `dish-ios` release has been published yet, so none of these commands has been run against one.
+
 This recipe works the same way for every release, every repo, every
-platform: only the artifact filenames change.
+platform; only the artifact filenames change. Each file carries one Sigstore
+bundle, `<file>.sigstore.json`. The tag is bare `X.Y.Z` in every command.
 
 ### 0) Pre-requisites
 
 ```bash
-# cosign 2.x
-brew install cosign            # macOS
-go install github.com/sigstore/cosign/v2/cmd/cosign@latest
-
-# slsa-verifier (for the SLSA provenance step)
-go install github.com/slsa-framework/slsa-verifier/v2/cli/slsa-verifier@latest
+# cosign 3.x: brew install cosign, or a release binary from
+# github.com/sigstore/cosign/releases (check it against cosign_checksums.txt)
 ```
 
 ### 1) Download every file from the Release
 
-For tag `X.Y.Z` of `<repo>` (one of `satellite`, `dish-android`,
-`dish-linux`, `dish-mac`, `dish-ios`):
+```bash
+TAG=X.Y.Z
+REPO=dish-ios   # or satellite, dish-android, dish-mac, dish-windows, dish-linux
+gh release download "$TAG" -R "TinkerNorth/$REPO" -D "$REPO-$TAG"
+cd "$REPO-$TAG"
+```
+
+You should see the platform artifacts (for `dish-ios`: `dish-X.Y.Z-unsigned.ipa`
+and the stable `dish-ios.ipa`, or the dSYMs when the build went to App Store
+Connect), `dish-ios-components.spdx.json` (what the app carries, which the
+product SBOM folds in, since Syft does not look inside an IPA), `SHA256SUMS`
+with its bundle, `<product>.sbom.spdx.json` and `<product>.sbom.cdx.json`, and
+`<product>.intoto.jsonl` (the SLSA L3 provenance).
+
+### 2) One bundle per file
 
 ```bash
-gh release download X.Y.Z -R TinkerNorth/<repo> -D ./release
-cd release
-ls
-```
-
-You should see (filenames vary per repo):
-
-```
-satellite-...        # platform binary / installer / .app / .ipa / .apk / etc.
-                     # (dish-ios: dish-X.Y.Z-unsigned.ipa and the stable dish-ios.ipa)
-satellite-....sig    # cosign signature
-satellite-....crt    # cosign certificate
-SHA256SUMS
-SHA256SUMS.sig
-SHA256SUMS.crt
-satellite.sbom.spdx.json
-satellite.sbom.cdx.json
-satellite.intoto.jsonl   # SLSA L3 provenance
-```
-
-### 2) Verify the checksum bundle
-
-```bash
-sha256sum -c SHA256SUMS         # Linux / Windows
-shasum -a 256 -c SHA256SUMS     # macOS
-```
-
-Every line must say `OK`. A failure here means the artifact was
-modified after release.
-
-### 3) Verify cosign signed `SHA256SUMS` from the right workflow
-
-```bash
+# SHA256SUMS was signed by this repository's release workflow, on this tag.
 cosign verify-blob \
-  --certificate SHA256SUMS.crt \
-  --signature   SHA256SUMS.sig \
-  --certificate-identity-regexp '^https://github\.com/TinkerNorth/<repo>/\.github/workflows/release\.yml@refs/tags/[0-9].*$' \
-  --certificate-oidc-issuer 'https://token.actions.githubusercontent.com' \
+  --bundle SHA256SUMS.sigstore.json \
+  --certificate-identity "https://github.com/TinkerNorth/$REPO/.github/workflows/_release_harden.yml@refs/tags/$TAG" \
+  --certificate-oidc-issuer https://token.actions.githubusercontent.com \
   SHA256SUMS
+
+# Every file you downloaded matches it (macOS: shasum -a 256 -c).
+sha256sum --ignore-missing -c SHA256SUMS
 ```
 
-Output ends with `Verified OK`. The `--certificate-identity-regexp`
-binds the signature to a specific workflow path on `TinkerNorth/<repo>` ,
-substitute the actual GitHub organisation. A match means the signature
-came from a tagged-release run of `release.yml` on the public commit
-that produced these artifacts; the Sigstore transparency log
-(`https://search.sigstore.dev/`) carries the same record.
+The identity is exact, not a regular expression, and names
+`_release_harden.yml` because the certificate's identity is the workflow that
+ran the signing step. To verify one file on its own, run the same
+`cosign verify-blob` with `--bundle <file>.sigstore.json` and `<file>`.
 
-To verify each artifact individually (not just `SHA256SUMS`):
+### 3) The SLSA L3 provenance
+
+`<product>.intoto.jsonl` is a Sigstore bundle whose statement names every
+released file by SHA-256. It is signed by the SLSA generator at the exact
+commit the workflow pins, which `slsa-verifier` refuses ("invalid ref") because
+that is not a release tag, so verify it with cosign, naming the generator's
+commit from the provenance's `builder.id`:
 
 ```bash
-for f in *.exe *.zip *.deb *.AppImage *.apk *.aab *.ipa; do
-  [ -f "$f" ] || continue
-  cosign verify-blob \
-    --certificate "$f.crt" \
-    --signature   "$f.sig" \
-    --certificate-identity-regexp '^https://github\.com/TinkerNorth/<repo>/\.github/workflows/release\.yml@refs/tags/[0-9].*$' \
-    --certificate-oidc-issuer 'https://token.actions.githubusercontent.com' \
-    "$f"
-done
+cosign verify-blob-attestation \
+  --bundle "dish-ios.intoto.jsonl" --type slsaprovenance \
+  --certificate-identity "https://github.com/slsa-framework/slsa-github-generator/.github/workflows/generator_generic_slsa3.yml@f7dd8c54c2067bafc12ca7a55595d5ee9b75204a" \
+  --certificate-oidc-issuer https://token.actions.githubusercontent.com \
+  dish-X.Y.Z-unsigned.ipa
 ```
 
-### 4) Verify the SLSA L3 provenance
+(The commit is the generator v2.1.0 that `release.yml` pins; use the one in
+the provenance you are checking.)
+
+### 4) (Optional) Inspect the SBOM
 
 ```bash
-slsa-verifier verify-artifact \
-  --provenance-path <repo>.intoto.jsonl \
-  --source-uri      github.com/TinkerNorth/<repo> \
-  --source-tag      X.Y.Z \
-  <artifact-filename>
-```
-
-This proves the artifact was produced by a tagged run of `release.yml`
-on the named source repo. Output ends with
-`PASSED: SLSA verification passed`.
-
-### 5) (Optional) Inspect the SBOM
-
-```bash
-# Top-level summary
-syft attestation --output spdx-json release/<repo>.sbom.spdx.json
-
-# Or just diff against last release
-diff <(jq -S . prev-release/<repo>.sbom.spdx.json) \
-     <(jq -S . release/<repo>.sbom.spdx.json) \
-  | less
+jq -S . dish-ios.sbom.spdx.json | less
 ```
 
 ---
 
 ## Known gaps
 
-- **Branch protection on `main`.** The repos run on a
-  free org plan that does not expose required-status-check enforcement
-  for private repositories. Direct pushes to `main` are blocked by
-  convention only; the per-repo CI workflows are the de-facto gate.
-  See the matching `README.md` in each repo for the full text.
 - **The iOS release may be unsigned.** Until the six App Store secrets
   exist, `dish-ios` publishes `dish-X.Y.Z-unsigned.ipa` (also as
   `dish-ios.ipa`). It does not install as downloaded: it must be

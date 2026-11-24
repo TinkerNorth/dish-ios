@@ -4,8 +4,12 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
+      day: "monday"
     open-pull-requests-limit: 5
+    commit-message:
+      prefix: "chore(deps)"
     labels:
+      - "dependencies"
       - "ci"
     # One PR per week for every action bump together (the way dish-android's
     # arrive): the bumps are independent one-liners, and with "require branches
@@ -15,10 +19,23 @@ updates:
         patterns:
           - "*"
 
+  # The language ecosystem, kept in the fleet's shape. Package.swift has no
+  # dependencies today (the pinned build tools are not packages and arrive by
+  # hand: scripts/tools.sh), so this entry watches nothing until the first
+  # package is added; it is there so that package is watched from its first day.
   - package-ecosystem: "swift"
     directory: "/"
     schedule:
       interval: "weekly"
+      day: "monday"
     open-pull-requests-limit: 10
+    commit-message:
+      prefix: "chore(deps)"
     labels:
       - "dependencies"
+      - "ci"
+    groups:
+      swift-minor-and-patch:
+        update-types:
+          - "minor"
+          - "patch"

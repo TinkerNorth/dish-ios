@@ -94,14 +94,18 @@ package final class OnScreenPad {
 
     package func apply(_ event: OnScreenPadEvent) {
         pad = reduceOnScreenPad(pad, event)
-        if resentReport == nil { resentReport = .released }
+        if resentReport == nil {
+            resentReport = .released
+        }
         feed.publishIfChanged(pad.report)
     }
 
     package func touch(_ event: TouchSurfaceEvent) {
         let step = reduceTouchSurface(surface, event)
         surface = step.state
-        if resentTouch == nil { resentTouch = .idle }
+        if resentTouch == nil {
+            resentTouch = .idle
+        }
         touchFeed.publishTouchpad(step.sample)
     }
 
@@ -129,8 +133,12 @@ package final class OnScreenPad {
     // MARK: - The loop
 
     private func releaseEverything() {
-        if resentReport != nil { apply(.releaseAll) }
-        if resentTouch != nil { touch(.releaseAll) }
+        if resentReport != nil {
+            apply(.releaseAll)
+        }
+        if resentTouch != nil {
+            touch(.releaseAll)
+        }
     }
 
     private func tick() {
@@ -150,7 +158,9 @@ package final class OnScreenPad {
     private func endClickPulse() {
         guard clickTicks > 0 else { return }
         clickTicks -= 1
-        if clickTicks == 0 { touch(.leftButton(held: false)) }
+        if clickTicks == 0 {
+            touch(.leftButton(held: false))
+        }
     }
 
     private func resendPad(nowNs: UInt64) {

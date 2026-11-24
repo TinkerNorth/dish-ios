@@ -102,7 +102,9 @@ package final class PadRecord: Sendable {
             if before & 1 == 0 {
                 let copy = loadFields()
                 atomicFenceAcquire()
-                if sequence.loadRelaxed() == before { return copy }
+                if sequence.loadRelaxed() == before {
+                    return copy
+                }
             }
             sched_yield()
         }

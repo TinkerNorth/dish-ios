@@ -1,15 +1,15 @@
 #!/usr/bin/env bash
 # SPDX-License-Identifier: LGPL-3.0-or-later
 # ============================================================================
-#  ci-simulator.sh — a simulator CI can trust: created on the newest runtime
+#  ci-simulator.sh - a simulator CI can trust: created on the newest runtime
 #  that supports it, booted, and read back from `simctl list` as Booted
 #  before xcodebuild is pointed at it.
 #
 #  Usage:
 #    ci-simulator.sh create <name> <device type prefix>
-#        Creates and boots a <name> of the newest device type whose name
-#        starts with the prefix, on the newest iOS runtime that lists that
-#        type among the ones it supports, and prints its udid once
+#        Creates and boots a <name> of the device type whose name is the
+#        prefix, or else the newest whose name starts with it, on the newest
+#        iOS runtime that lists that type among the ones it supports, and prints its udid once
 #        `simctl list` shows it Booted and available.
 #    ci-simulator.sh ensure <udid> <name> <device type prefix>
 #        Prints <udid> when `simctl list` shows it Booted and available;
@@ -58,7 +58,9 @@ newest_device_type() {
     xcrun simctl list devicetypes -j | python3 -I -c '
 import json, sys
 prefix = sys.argv[1]
-names = [d["identifier"] for d in json.load(sys.stdin)["devicetypes"] if d["name"].startswith(prefix)]
+types = json.load(sys.stdin)["devicetypes"]
+exact = [d["identifier"] for d in types if d["name"] == prefix]
+names = exact or [d["identifier"] for d in types if d["name"].startswith(prefix)]
 print(sorted(names)[-1] if names else "")
 ' "$1"
 }
@@ -81,6 +83,14 @@ print(runtimes[-1]["identifier"] if runtimes else "")
 
 create() {
     local name="$1" prefix="$2" device_type runtime udid status
+    # One simulator runs at a time on a runner. In ios-ci.yml's runs of 2026-11-18
+    # to 2026-11-23 the iPhone simulator stayed booted while the iPad's UI tests
+    # ran, and the same UI tests took 60 to 330 seconds each (49 at most with one
+    # simulator); the three failures on record were XCTest's calls to the
+    # simulator timing out. A developer's Mac keeps its own simulators.
+    if [ -n "${GITHUB_ACTIONS:-}" ]; then
+        xcrun simctl shutdown all >&2
+    fi
     device_type="$(newest_device_type "$prefix")"
     runtime="$(newest_runtime_for "$device_type")"
     [ -n "$device_type" ] && [ -n "$runtime" ] || { echo "no $prefix device type on an available iOS runtime" >&2; exit 1; }

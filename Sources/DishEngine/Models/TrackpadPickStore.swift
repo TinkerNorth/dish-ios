@@ -50,8 +50,8 @@ package final class TrackpadPickStore {
     }
 
     private static func row(_ fields: [String: Any]) -> (String, TouchpadPick)? {
-        guard let slotId = fields["slotId"] as? String, !slotId.isEmpty, let mode = fields["mode"] as? String else { return nil }
-        guard isValidTouchpadPickName(mode) else { return nil }
+        guard let slotId = fields["slotId"] as? String, !slotId.isEmpty, let mode = fields["mode"] as? String,
+              isValidTouchpadPickName(mode) else { return nil }
         return (slotId, TouchpadPick(wireName: mode))
     }
 }

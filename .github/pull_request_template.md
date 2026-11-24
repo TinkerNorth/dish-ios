@@ -22,8 +22,8 @@
 - [ ] Red first: a test failed before the change and passes after it.
 - [ ] Every new flow has a test, including the empty, error and loading shapes.
 - [ ] A new user-facing string has its catalog entry and all five translations.
-- [ ] `scripts/ci-local.sh` passes (format, lint strict, project drift, build and tests, release build).
-- [ ] Manual check on an iPhone or the simulator: <!-- what you tapped, with which controller and satellite -->
+- [ ] `scripts/ci-local.sh` passes (format, lint strict, project drift, build and tests, release build, device archive).
+- [ ] Manual check on an iPhone, an iPad or the simulator: <!-- what you tapped, with which controller and satellite -->
 
 ## Bookkeeping
 

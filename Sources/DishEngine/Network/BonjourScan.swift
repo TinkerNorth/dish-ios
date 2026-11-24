@@ -158,7 +158,9 @@ private final class BonjourCollector<Found: Sendable>: Sendable {
         guard case let .bonjour(record) = metadata else { return [:] }
         var txt: [String: String] = [:]
         for key in txtKeys {
-            if case let .string(value) = record.getEntry(for: key) { txt[key] = value }
+            if case let .string(value) = record.getEntry(for: key) {
+                txt[key] = value
+            }
         }
         return txt
     }
@@ -166,11 +168,15 @@ private final class BonjourCollector<Found: Sendable>: Sendable {
     private func settle(name: String, host: String?, txt: [String: String]) {
         let made = host.map { make(name, $0, txt) }
         let done = state.withLock { current -> Bool in
-            if let made { current.found[made.id] = made.found }
+            if let made {
+                current.found[made.id] = made.found
+            }
             current.pending -= 1
             return current.windowClosed && current.pending == 0
         }
-        if done { finish() }
+        if done {
+            finish()
+        }
     }
 
     /// A throwaway `NWConnection` to resolve the service endpoint to an
@@ -193,8 +199,12 @@ private final class BonjourCollector<Found: Sendable>: Sendable {
         let step = state.withLock { current -> FinishStep in
             let firstClose = !current.windowClosed
             current.windowClosed = true
-            if current.resumed { return .already }
-            if current.pending > 0 { return .waitForResolutions(firstClose: firstClose, current.connections) }
+            if current.resumed {
+                return .already
+            }
+            if current.pending > 0 {
+                return .waitForResolutions(firstClose: firstClose, current.connections)
+            }
             current.resumed = true
             let outcome = BonjourScan.Outcome(found: Array(current.found.values), localNetworkDenied: current.policyWaiting)
             return .resume(outcome, current.connections)

@@ -100,8 +100,12 @@ struct LockLawSatelliteRun {
             guard let client = DataPlaneTestHelpers.receiveSender(fd: fd) else { return }
             traffic.uplinks.increment()
             for counter in 1 ... UInt32(SatelliteRun.downlinks) {
-                if DataPlaneTestHelpers.send(downlink(counter), from: fd, to: client) { traffic.downlinks.increment() }
-                if DataPlaneTestHelpers.receiveSender(fd: fd) != nil { traffic.uplinks.increment() }
+                if DataPlaneTestHelpers.send(downlink(counter), from: fd, to: client) {
+                    traffic.downlinks.increment()
+                }
+                if DataPlaneTestHelpers.receiveSender(fd: fd) != nil {
+                    traffic.uplinks.increment()
+                }
                 Thread.sleep(forTimeInterval: SatelliteRun.downlinkSeconds)
             }
         }

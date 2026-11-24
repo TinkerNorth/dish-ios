@@ -50,6 +50,8 @@ final class ScreenDimmer {
     func apply(_ dimmed: Bool, to screen: UIScreen) {
         let move = brightnessMove(dimmed: dimmed, kept: kept, current: screen.brightness)
         kept = move.keep
-        if let brightness = move.set { screen.brightness = brightness }
+        if let brightness = move.set {
+            screen.brightness = brightness
+        }
     }
 }

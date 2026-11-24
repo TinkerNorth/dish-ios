@@ -61,12 +61,12 @@ package struct DiscoveredServer: Codable, Hashable, Identifiable {
 
     package init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
-        self.name = try container.decodeIfPresent(String.self, forKey: .name) ?? ""
-        self.ip = try container.decodeIfPresent(String.self, forKey: .ip) ?? ""
-        self.udpPort = try container.decodeIfPresent(Int.self, forKey: .udpPort) ?? defaultSatelliteUdpPort
-        self.pairPort = try container.decodeIfPresent(Int.self, forKey: .pairPort) ?? defaultSatelliteClientPort
-        self.httpPort = try container.decodeIfPresent(Int.self, forKey: .httpPort) ?? defaultSatelliteClientPort
-        self.machineId = try container.decodeIfPresent(String.self, forKey: .machineId) ?? ""
+        name = try container.decodeIfPresent(String.self, forKey: .name) ?? ""
+        ip = try container.decodeIfPresent(String.self, forKey: .ip) ?? ""
+        udpPort = try container.decodeIfPresent(Int.self, forKey: .udpPort) ?? defaultSatelliteUdpPort
+        pairPort = try container.decodeIfPresent(Int.self, forKey: .pairPort) ?? defaultSatelliteClientPort
+        httpPort = try container.decodeIfPresent(Int.self, forKey: .httpPort) ?? defaultSatelliteClientPort
+        machineId = try container.decodeIfPresent(String.self, forKey: .machineId) ?? ""
     }
 
     /// An address the user typed: an IPv4 literal, optionally `:udpPort`.
@@ -124,13 +124,13 @@ package struct RememberedWifi: Codable, Hashable, Identifiable {
 
     package init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
-        self.id = try container.decode(String.self, forKey: .id)
-        self.name = try container.decode(String.self, forKey: .name)
-        self.ip = try container.decode(String.self, forKey: .ip)
-        self.udpPort = try container.decode(Int.self, forKey: .udpPort)
-        self.pairPort = try container.decode(Int.self, forKey: .pairPort)
-        self.httpPort = try container.decode(Int.self, forKey: .httpPort)
-        self.machineId = try container.decodeIfPresent(String.self, forKey: .machineId) ?? ""
+        id = try container.decode(String.self, forKey: .id)
+        name = try container.decode(String.self, forKey: .name)
+        ip = try container.decode(String.self, forKey: .ip)
+        udpPort = try container.decode(Int.self, forKey: .udpPort)
+        pairPort = try container.decode(Int.self, forKey: .pairPort)
+        httpPort = try container.decode(Int.self, forKey: .httpPort)
+        machineId = try container.decodeIfPresent(String.self, forKey: .machineId) ?? ""
     }
 
     package func toDiscovered() -> DiscoveredServer {

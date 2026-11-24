@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # SPDX-License-Identifier: LGPL-3.0-or-later
 # ============================================================================
-#  e2e_local.sh — loopback end-to-end: this client vs the REAL satellite
+#  e2e_local.sh - loopback end-to-end: this client vs the REAL satellite
 #
 #  Runs the actual C++ satellite server (sibling repo; built here when its
 #  binary is missing) headless with an isolated $HOME (its config, paired
@@ -115,7 +115,9 @@ else
         log "building satellite (${BUILD_TYPE}) in ${SATELLITE_REPO}/${SATELLITE_BUILD_DIR}"
         cmake -S "${SATELLITE_REPO}" -B "${SATELLITE_REPO}/${SATELLITE_BUILD_DIR}" \
             -DCMAKE_BUILD_TYPE="${BUILD_TYPE}" >/dev/null
-        cmake --build "${SATELLITE_REPO}/${SATELLITE_BUILD_DIR}" --target satellite -j >/dev/null
+        # Bound -j: a bare `-j` makes a macOS runner swap into a multi-hour hang
+        # (the satellite's macos-ci.yml says so), which this lane's 2.3.0 run did.
+        cmake --build "${SATELLITE_REPO}/${SATELLITE_BUILD_DIR}" --target satellite -j "$(sysctl -n hw.ncpu)" >/dev/null
     fi
 fi
 [ -x "${SATELLITE_BIN}" ] || fail "satellite binary not found/executable at ${SATELLITE_BIN}"
@@ -140,11 +142,13 @@ cleanup() {
 trap cleanup EXIT
 
 # Hermetic: a test lane never phones GitHub for updates. The isolated HOME
-# seeds the satellite's config with the check off (dish-mac's lane found
-# that the update check, left on, crashed satellite 2.1.3 mid-run).
+# seeds the satellite's config with the update check off (dish-mac's lane
+# found that the update check, left on, crashed satellite 2.1.3 mid-run), and
+# since 2.3.0 the controller database check too (it would ask
+# dish.tinkernorth.com ten seconds after start).
 SAT_CONFIG_DIR="${E2E_HOME}/Library/Application Support/satellite"
 mkdir -p "${SAT_CONFIG_DIR}"
-printf '{"autoCheck": false, "autoDownload": false}\n' >"${SAT_CONFIG_DIR}/config.json"
+printf '{"autoCheck": false, "autoDownload": false, "controllerDbUpdates": false}\n' >"${SAT_CONFIG_DIR}/config.json"
 
 log "starting satellite headless (isolated HOME=${E2E_HOME}, update check off)"
 HOME="${E2E_HOME}" "${SATELLITE_BIN}" >"${SAT_LOG}" 2>&1 &

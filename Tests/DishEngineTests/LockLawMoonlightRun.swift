@@ -101,8 +101,20 @@ struct LockLawMoonlightRun {
             snapshot: stats,
             frames: seen.frames.count,
             motions: seen.motions,
-            rumbles: actuations.filter { if case .rumble = $0 { true } else { false } }.count,
-            lamps: actuations.filter { if case .lightbar = $0 { true } else { false } }.count
+            rumbles: actuations.filter {
+                if case .rumble = $0 {
+                    true
+                } else {
+                    false
+                }
+            }.count,
+            lamps: actuations.filter {
+                if case .lightbar = $0 {
+                    true
+                } else {
+                    false
+                }
+            }.count
         )
     }
 
@@ -125,7 +137,9 @@ struct LockLawMoonlightRun {
             discover: { [] }
         )
         manager.onEvent = { event in
-            if case let .pairingPinReady(_, pin) = event { shown.set(pin) }
+            if case let .pairingPinReady(_, pin) = event {
+                shown.set(pin)
+            }
         }
         return manager
     }

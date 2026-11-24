@@ -43,13 +43,27 @@ final class SteamTrackpadsTests: XCTestCase {
 
     private func fields(_ routed: SteamRouted) -> Set<WireField> {
         var lit: Set<WireField> = []
-        if routed.report.rx != 0 || routed.report.ry != 0 { lit.insert(.rightStick) }
-        if routed.report.buttons & WireButton.rightThumb.bit != 0 { lit.insert(.rightThumb) }
-        if routed.surface.finger0.active { lit.insert(.finger0) }
-        if routed.surface.finger1.active { lit.insert(.finger1) }
-        if routed.surface.clicked { lit.insert(.surfaceClick) }
-        if routed.report.extButtons & ProtocolConstants.extButtonLeftPadClick != 0 { lit.insert(.leftPadClickBit) }
-        if routed.report.extButtons & ProtocolConstants.extButtonRightPadClick != 0 { lit.insert(.rightPadClickBit) }
+        if routed.report.rx != 0 || routed.report.ry != 0 {
+            lit.insert(.rightStick)
+        }
+        if routed.report.buttons & WireButton.rightThumb.bit != 0 {
+            lit.insert(.rightThumb)
+        }
+        if routed.surface.finger0.active {
+            lit.insert(.finger0)
+        }
+        if routed.surface.finger1.active {
+            lit.insert(.finger1)
+        }
+        if routed.surface.clicked {
+            lit.insert(.surfaceClick)
+        }
+        if routed.report.extButtons & ProtocolConstants.extButtonLeftPadClick != 0 {
+            lit.insert(.leftPadClickBit)
+        }
+        if routed.report.extButtons & ProtocolConstants.extButtonRightPadClick != 0 {
+            lit.insert(.rightPadClickBit)
+        }
         return lit
     }
 

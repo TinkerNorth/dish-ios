@@ -3,20 +3,15 @@
 
 import XCTest
 
-/// The pinned release binaries are written twice: `scripts/tools.sh` fetches
-/// them for local runs, `.github/workflows/ios-ci.yml` for CI. A version or a
-/// digest that moves in one place alone is a gate that passes locally and
-/// fails in CI (or the reverse), so the two are compared here.
+/// `scripts/tools.sh` is the one place a toolchain pin lives: the Xcode CI
+/// selects and the release binaries the gates fetch, each with a SHA-256.
+/// Workflows pin nothing of their own (they call the scripts that source it);
+/// what documents repeat of it is compared here, so a pin that moves in one
+/// place alone fails a test and not a release.
 final class ToolPinTests: XCTestCase {
 
     private static let script = "scripts/tools.sh"
-    private static let workflow = ".github/workflows/ios-ci.yml"
-
-    /// Tools CI must pin; a tool CI does not run (XcodeGen) is compared only
-    /// when the workflow names it.
-    private static let required = ["SWIFTFORMAT", "SWIFTLINT"]
-    private static let optional = ["XCODEGEN"]
-    private static let suffixes = ["VERSION", "SHA256"]
+    private static let tools = ["SWIFTFORMAT", "SWIFTLINT", "XCODEGEN"]
 
     /// The value of `NAME` written as `NAME="value"` or `NAME: value`
     /// (optionally quoted) on a line of `text`.
@@ -29,36 +24,226 @@ final class ToolPinTests: XCTestCase {
             .map { String(text[$0]) }
     }
 
-    private func assertPinned(_ tool: String, in script: String, and workflow: String) {
-        for suffix in Self.suffixes {
-            let name = "\(tool)_\(suffix)"
-            let local = Self.value(of: name, in: script)
-            XCTAssertNotNil(local, "\(Self.script) pins no \(name)")
-            XCTAssertEqual(Self.value(of: name, in: workflow), local, "\(name) differs between \(Self.script) and \(Self.workflow)")
-        }
+    private func pin(_ name: String) throws -> String {
+        try XCTUnwrap(Self.value(of: name, in: RepoFiles.read(Self.script)), "\(Self.script) pins no \(name)")
+    }
+
+    private func workflows() throws -> [(name: String, text: String)] {
+        let directory = RepoFiles.url(".github/workflows")
+        return try FileManager.default.contentsOfDirectory(atPath: directory.path)
+            .filter { $0.hasSuffix(".yml") }
+            .sorted()
+            .map { try ($0, RepoFiles.read(".github/workflows/\($0)")) }
     }
 
     func testTheDigestsAreSha256Hex() throws {
-        let script = try RepoFiles.read(Self.script)
-        for tool in Self.required + Self.optional {
-            let digest = try XCTUnwrap(Self.value(of: "\(tool)_SHA256", in: script), "\(tool)_SHA256 is not pinned")
+        for tool in Self.tools {
+            let digest = try pin("\(tool)_SHA256")
             XCTAssertNotNil(digest.range(of: "^[0-9a-f]{64}$", options: .regularExpression), "\(tool)_SHA256 is not 64 hex digits")
         }
     }
 
-    func testCIPinsTheSameFormatAndLintTools() throws {
-        let script = try RepoFiles.read(Self.script)
-        let workflow = try RepoFiles.read(Self.workflow)
-        for tool in Self.required {
-            assertPinned(tool, in: script, and: workflow)
+    func testNoWorkflowRepeatsAToolPin() throws {
+        for (name, text) in try workflows() {
+            for tool in Self.tools {
+                XCTAssertNil(
+                    Self.value(of: "\(tool)_VERSION", in: text),
+                    "\(name) repeats \(tool)_VERSION; scripts/tools.sh is the only place"
+                )
+                XCTAssertNil(
+                    Self.value(of: "\(tool)_SHA256", in: text),
+                    "\(name) repeats \(tool)_SHA256; scripts/tools.sh is the only place"
+                )
+            }
         }
     }
 
-    func testCIPinsTheSameGeneratorWhenItRunsOne() throws {
-        let script = try RepoFiles.read(Self.script)
-        let workflow = try RepoFiles.read(Self.workflow)
-        for tool in Self.optional where workflow.contains("\(tool)_VERSION") {
-            assertPinned(tool, in: script, and: workflow)
+    func testEveryAppleJobSelectsTheXcodeByTheScript() throws {
+        for (name, text) in try workflows() {
+            XCTAssertFalse(
+                text.contains("/Applications/Xcode.app"),
+                "\(name) selects the image's default Xcode; use scripts/select-xcode.sh"
+            )
+            if text.contains("macos-26") {
+                XCTAssertTrue(text.contains("scripts/select-xcode.sh"), "\(name) runs on macos-26 and must select the pinned Xcode")
+            }
+        }
+    }
+
+    func testTheGeneratorsMinimumVersionIsThePin() throws {
+        let project = try RepoFiles.read("project.yml")
+        XCTAssertEqual(Self.value(of: "minimumXcodeGenVersion", in: project), try pin("XCODEGEN_VERSION"))
+    }
+
+    func testThirdPartyNamesTheToolsAtTheirPinnedVersions() throws {
+        let notice = try RepoFiles.read("THIRD_PARTY.md")
+        let rows = [
+            ("[SwiftFormat](https://github.com/nicklockwood/SwiftFormat)", "SWIFTFORMAT"),
+            ("[SwiftLint](https://github.com/realm/SwiftLint)", "SWIFTLINT"),
+            ("[XcodeGen](https://github.com/yonaskolb/XcodeGen)", "XCODEGEN")
+        ]
+        for (link, tool) in rows {
+            let version = try pin("\(tool)_VERSION")
+            XCTAssertTrue(notice.contains("| \(link) | \(version) |"), "THIRD_PARTY.md must list \(link) at \(version)")
+        }
+    }
+
+    func testContributingNamesTheToolsAndTheXcodeAtTheirPinnedVersions() throws {
+        let text = try RepoFiles.read("CONTRIBUTING.md").replacingOccurrences(of: "\n", with: " ")
+        let named = try [
+            "SwiftFormat \(pin("SWIFTFORMAT_VERSION"))",
+            "SwiftLint \(pin("SWIFTLINT_VERSION"))",
+            "XcodeGen \(pin("XCODEGEN_VERSION"))",
+            "Xcode \(pin("XCODE_VERSION"))"
+        ]
+        for phrase in named {
+            XCTAssertTrue(text.contains(phrase), "CONTRIBUTING.md must say \"\(phrase)\"")
+        }
+    }
+
+    /// The README names the Xcode a build needs and may name the gate tools:
+    /// each at the version `scripts/tools.sh` pins.
+    func testTheReadmeNamesTheXcodeAndTheToolsAtTheirPinnedVersions() throws {
+        let readme = try RepoFiles.read("README.md")
+        let pins = try [
+            "Xcode": pin("XCODE_VERSION"),
+            "XcodeGen": pin("XCODEGEN_VERSION"),
+            "SwiftFormat": pin("SWIFTFORMAT_VERSION"),
+            "SwiftLint": pin("SWIFTLINT_VERSION")
+        ]
+        let regex = try NSRegularExpression(pattern: #"\b(Xcode|XcodeGen|SwiftFormat|SwiftLint) ([0-9]+(?:\.[0-9]+)+)"#)
+        var named: [String: Set<String>] = [:]
+        for match in regex.matches(in: readme, range: NSRange(readme.startIndex..., in: readme)) {
+            guard let tool = Range(match.range(at: 1), in: readme), let version = Range(match.range(at: 2), in: readme) else { continue }
+            named[String(readme[tool]), default: []].insert(String(readme[version]))
+        }
+        XCTAssertNotNil(named["Xcode"], "README.md must name the Xcode a build needs")
+        for (tool, versions) in named {
+            XCTAssertEqual(
+                versions,
+                [pins[tool] ?? "?"],
+                "README.md names \(tool) \(versions.sorted()); scripts/tools.sh pins \(pins[tool] ?? "?")"
+            )
+        }
+    }
+
+    // MARK: the shared security and release-hardening workflows
+
+    private func workflow(_ name: String) throws -> String {
+        try RepoFiles.read(".github/workflows/\(name)")
+    }
+
+    private func env(_ name: String, in text: String) -> String? {
+        Self.value(of: name, in: text)
+    }
+
+    /// `scripts/tools.sh` runs the scanners at the versions and digests the shared
+    /// `_security.yml` installs on Linux (the digests differ: the Mac assets).
+    func testToolsShPinsTheScannersTheSharedSecurityWorkflowPins() throws {
+        let security = try workflow("_security.yml")
+        for name in ["OSV_SCANNER_VERSION", "GITLEAKS_VERSION", "PYYAML_VERSION"] {
+            let local = try pin(name)
+            XCTAssertEqual(env(name, in: security), local, "scripts/tools.sh and _security.yml pin one \(name)")
+        }
+        for name in ["OSV_SCANNER_SHA256", "GITLEAKS_SHA256"] {
+            let digest = try pin(name)
+            XCTAssertNotNil(digest.range(of: "^[0-9a-f]{64}$", options: .regularExpression), "\(name) is not 64 hex digits")
+        }
+    }
+
+    func testThirdPartyNamesTheScannersAndReleaseToolsTheWorkflowsPin() throws {
+        let notice = try RepoFiles.read("THIRD_PARTY.md")
+        let security = try workflow("_security.yml")
+        let harden = try workflow("_release_harden.yml")
+        let pins = [
+            ("OSV-Scanner", env("OSV_SCANNER_VERSION", in: security)),
+            ("gitleaks", env("GITLEAKS_VERSION", in: security)),
+            ("cosign", env("COSIGN_VERSION", in: harden)),
+            ("Syft", env("SYFT_VERSION", in: harden)),
+            ("Grype", env("GRYPE_VERSION", in: harden))
+        ]
+        for (name, version) in pins {
+            let row = notice.split(separator: "\n").first { $0.hasPrefix("| [\(name)](") }
+            XCTAssertNotNil(version, "\(name) is pinned in a shared workflow")
+            let shown = version ?? "?"
+            XCTAssertTrue(
+                row?.contains("| \(shown) |") ?? false,
+                "a shared workflow pins \(name) \(shown): edit THIRD_PARTY.md and its copy"
+            )
+        }
+    }
+
+    func testTheSharedWorkflowsAreCalledNotCopied() throws {
+        let release = try workflow("release.yml")
+        let security = try workflow("security.yml")
+        let ci = try workflow("ios-ci.yml")
+        XCTAssertTrue(security.contains("uses: ./.github/workflows/_security.yml"))
+        XCTAssertTrue(release.contains("uses: ./.github/workflows/_security.yml"), "the tag re-runs the gates")
+        XCTAssertTrue(release.contains("uses: ./.github/workflows/_release_harden.yml"), "the tag hardens through the shared workflow")
+        XCTAssertTrue(ci.contains("uses: ./.github/workflows/_release_harden.yml"), "pull requests dry-run the same workflow")
+        XCTAssertTrue(ci.contains("dry-run: true"))
+        for (name, text) in try workflows() where !name.hasPrefix("_") {
+            XCTAssertFalse(text.contains("cosign sign-blob"), "\(name): signing is the shared workflow's, not inline")
+            XCTAssertFalse(text.contains("TODO_REPLACE_WITH_UPSTREAM_SHA256"), "\(name): no unpinned-tool branch")
+            XCTAssertFalse(text.contains("anchore/"), "\(name): Grype and Syft are the shared workflow's pinned binaries")
+        }
+    }
+
+    // MARK: the components SBOM
+
+    /// Syft does not look inside the IPA, so `scripts/write-sbom.sh` writes
+    /// what the app carries beside it, on every pull request's staging and on
+    /// the tag's, signed or not, and the hardening folds it into the product
+    /// SBOM. The script names every component `THIRD_PARTY.md` says reaches
+    /// the user, at the commit it names; run, it checks the same against the
+    /// notice and fails the staging when they part.
+    func testTheIpaIsStagedWithAComponentsSbomThatNamesWhatTheAppCarries() throws {
+        let stage = try RepoFiles.read("scripts/stage-ipa.sh")
+        XCTAssertTrue(stage.contains(#"scripts/write-sbom.sh "dist/dish-ios-components.spdx.json""#), "stage-ipa.sh writes it into dist/")
+        let release = try workflow("release.yml")
+        XCTAssertTrue(
+            release.contains(#"scripts/write-sbom.sh "dist/dish-ios-components.spdx.json" "${TAG}""#),
+            "a signed tag, which does not call stage-ipa.sh, writes it too"
+        )
+        let script = try RepoFiles.read("scripts/write-sbom.sh")
+        let notice = try RepoFiles.read("THIRD_PARTY.md")
+        let start = try XCTUnwrap(notice.range(of: "## 1. Summary"), "THIRD_PARTY.md has its summary").upperBound
+        let summary = notice[start...].components(separatedBy: "\n#").first ?? ""
+        var shipped = 0
+        for line in summary.split(separator: "\n") where line.hasPrefix("| [") && !line.contains("Not in the app") {
+            guard let close = line.firstIndex(of: "]") else { continue }
+            let name = String(line[line.index(line.startIndex, offsetBy: 3) ..< close])
+            shipped += 1
+            XCTAssertTrue(
+                script.contains("\"\(name.lowercased())\""),
+                "THIRD_PARTY.md says \(name) reaches the user: write-sbom.sh must name it"
+            )
+        }
+        XCTAssertEqual(shipped, 2, "THIRD_PARTY.md's summary names ENet and SDL as reaching the user")
+        XCTAssertTrue(script.contains("controllers-v1/manifest.json"), "the bundled controller database is named at its dbVersion")
+        XCTAssertTrue(script.contains("Not in the app"), "run, the script checks itself against THIRD_PARTY.md")
+    }
+
+    /// The provenance recipe names the generator's commit; it is the one `release.yml` pins.
+    func testSecurityNamesTheGeneratorCommitReleaseYmlPins() throws {
+        let release = try workflow("release.yml")
+        let pattern = #"generator_generic_slsa3\.yml@([0-9a-f]{40})"#
+        let found = release.range(of: pattern, options: .regularExpression)
+        let pinned = try XCTUnwrap(found.map { String(release[$0].suffix(40)) }, "release.yml pins the SLSA generator by commit")
+        let security = try RepoFiles.read("SECURITY.md")
+        let named = security.contains("generator_generic_slsa3.yml@\(pinned)")
+        XCTAssertTrue(named, "SECURITY.md must name the generator commit release.yml pins, \(pinned)")
+    }
+
+    func testTheDocumentsCarryTheBundleRecipeAndNotTheOldOne() throws {
+        for file in ["SECURITY.md", "CONTRIBUTING.md"] {
+            let text = try RepoFiles.read(file)
+            XCTAssertTrue(text.contains("_release_harden.yml@refs/tags/"), "\(file) names the signing workflow's identity")
+            XCTAssertTrue(text.contains(".sigstore.json"), "\(file) verifies a bundle per file")
+            XCTAssertFalse(text.contains("--signature"), "\(file) still carries the .sig and .crt recipe")
+            XCTAssertFalse(text.contains("certificate-identity-regexp"), "\(file) still carries the regular-expression identity")
+            XCTAssertFalse(text.contains("slsa-verifier verify-artifact"), "\(file): slsa-verifier refuses a generator pinned by commit")
+            XCTAssertFalse(text.contains("--new-bundle-format"), "\(file): cosign 3 reads the bundle without the deprecated flag")
         }
     }
 }

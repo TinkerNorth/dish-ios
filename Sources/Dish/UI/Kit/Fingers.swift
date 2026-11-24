@@ -203,7 +203,9 @@ private final class FingerSurfaceView: UIView {
 
     override func willMove(toWindow newWindow: UIWindow?) {
         super.willMove(toWindow: newWindow)
-        if newWindow == nil { ledger = Ledger() }
+        if newWindow == nil {
+            ledger = Ledger()
+        }
     }
 
     private func apply(_ touches: Set<UITouch>, _ move: (Ledger, UITouch) -> Ledger) {

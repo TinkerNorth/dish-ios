@@ -29,7 +29,9 @@ extension WifiConnectionManager {
     /// anything else is a refusal.
     nonisolated static func classifyOpen(_ resp: SessionResponse) -> OpenOutcome {
         let unauthorized = resp.unauthorized || resp.verdict == .unauthorized
-        if unauthorized { return .unauthorized }
+        if unauthorized {
+            return .unauthorized
+        }
         if resp.verdict == .versionMismatch {
             return .versionMismatch(supported: resp.supportedProtocol, supportedMin: resp.supportedProtocolMin)
         }
@@ -405,7 +407,9 @@ extension WifiConnectionManager {
 /// What a PUT that did not grant means: an identity that changed, a PC
 /// that gave no HTTPS answer at all, or one that answered and refused.
 func refusedOpenFailure(identityChanged: Bool, reachable: Bool, detail: String?) -> ConnectionFailure {
-    if identityChanged { return .identityChanged }
+    if identityChanged {
+        return .identityChanged
+    }
     guard reachable else { return .unreachable(detail: detail ?? "") }
     return .sessionRefused(detail: detail)
 }

@@ -127,7 +127,9 @@ package final class GameControllerInput: ControllerSource {
 
     /// The handler queue a slot's controller was handed.
     package func handlerQueue(for id: String) -> DispatchSerialQueue {
-        if let queue = handlerQueues[id] { return queue }
+        if let queue = handlerQueues[id] {
+            return queue
+        }
         let queue = ThreadRole.input.queue(label: "com.tinkernorth.dish.input.\(id)", qos: .userInteractive)
         handlerQueues[id] = queue
         return queue
@@ -295,7 +297,9 @@ package final class GameControllerInput: ControllerSource {
 extension WireButtonWord {
     /// Sets the button's bit when it is held.
     mutating func insert(_ button: WireButton, held: Bool) {
-        if held { insert(button) }
+        if held {
+            insert(button)
+        }
     }
 }
 

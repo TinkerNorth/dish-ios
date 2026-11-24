@@ -41,7 +41,8 @@ enum FactsPreview {
     }
 }
 
+@MainActor
 extension PlayActions {
     /// Controls that do nothing, for a preview.
-    @MainActor static let preview = PlayActions(pad: { _ in }, touch: { _ in }, tap: {}, stop: {})
+    static let preview = PlayActions(pad: { _ in }, touch: { _ in }, tap: {}, stop: {})
 }

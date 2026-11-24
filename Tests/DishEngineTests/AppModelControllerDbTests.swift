@@ -48,7 +48,9 @@ final class AppModelControllerDbTests: XCTestCase {
     private func model(_ pads: [ControllerSlot], cached: [String: Data]? = nil) throws -> AppModel {
         let defaults = try TestDefaults.fresh(self)
         let cache = ControllerDbCache(directory: folder)
-        if let cached { XCTAssertTrue(cache.replaceAll(cached)) }
+        if let cached {
+            XCTAssertTrue(cache.replaceAll(cached))
+        }
         let store = ControllerDbStore(
             bundled: BundledControllerDb.load() ?? .empty,
             cache: cache,

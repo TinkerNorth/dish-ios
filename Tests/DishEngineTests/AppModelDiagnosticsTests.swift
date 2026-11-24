@@ -70,7 +70,9 @@ final class AppModelDiagnosticsTests: XCTestCase {
     private func settled(_ predicate: @MainActor () -> Bool) async -> Bool {
         let deadline = Date().addingTimeInterval(5)
         while Date() < deadline {
-            if predicate() { return true }
+            if predicate() {
+                return true
+            }
             try? await Task.sleep(nanoseconds: 20_000_000)
         }
         return predicate()

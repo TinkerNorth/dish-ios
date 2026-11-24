@@ -24,12 +24,18 @@ notice, which Settings › About › Open source licenses shows.
 | Apple system frameworks (Foundation, Observation, Synchronization, SwiftUI, UIKit, MessageUI, os, GameController, CoreBluetooth, CoreHaptics, StoreKit, Network, Security, CryptoKit, CommonCrypto) | the iOS the app runs on | Apple SDK license | Dynamically linked against the user's iOS. Nothing is bundled. StoreKit sells Support Dish's tips; the App Store, not Dish, handles the payment. | None for redistributors of the app |
 | [ENet](https://github.com/cgutman/enet) (cgutman fork, commit `44c85e1`) | the fork Wolf pins | `MIT` | No C is compiled. The client subset of its reliable-UDP protocol is ported to Swift under `Sources/DishCore/Moonlight/Enet/`; section 2c. | Keep the copyright and permission notice below |
 | [SDL](https://github.com/libsdl-org/SDL) (`main` at commit `b029df0`) | the commit read | `Zlib` | No C is compiled. The Steam Controllers' Bluetooth LE protocols (SDL's iOS CoreBluetooth backend and its two drivers) are ported to Swift under `Sources/DishCore/DirectInput/` by way of dish-mac's port; section 2d. | Keep the notice below (zlib asks for none in a binary; it is kept as an acknowledgment) |
-| [SwiftFormat](https://github.com/nicklockwood/SwiftFormat) | 0.61.1 | `MIT` | Build and CI only, as a pinned release binary (`scripts/tools.sh`). Not in the app. | None for redistributors of the app |
-| [SwiftLint](https://github.com/realm/SwiftLint) | 0.65.0 | `MIT` | Build and CI only, as a pinned release binary (`scripts/tools.sh`). Not in the app. | None for redistributors of the app |
-| [XcodeGen](https://github.com/yonaskolb/XcodeGen) | 2.46.0 | `MIT` | Build and CI only, as a pinned release binary (`scripts/tools.sh`); generates `Dish.xcodeproj`. Not in the app. | None for redistributors of the app |
+| [SwiftFormat](https://github.com/nicklockwood/SwiftFormat) | 0.64.7 | `MIT` | Build and CI only, as a pinned release binary (`scripts/tools.sh`). Not in the app. | None for redistributors of the app |
+| [SwiftLint](https://github.com/realm/SwiftLint) | 0.65.1 | `MIT` | Build and CI only, as a pinned release binary (`scripts/tools.sh`). Not in the app. | None for redistributors of the app |
+| [XcodeGen](https://github.com/yonaskolb/XcodeGen) | 2.48.0 | `MIT` | Build and CI only, as a pinned release binary (`scripts/tools.sh`); generates `Dish.xcodeproj`. Not in the app. | None for redistributors of the app |
+| [cosign](https://github.com/sigstore/cosign) | 3.1.4 | `Apache-2.0` | Release signing only, a pinned release binary in `_release_harden.yml`. Not in the app. | None for redistributors of the app |
+| [Syft](https://github.com/anchore/syft) | 1.57.2 | `Apache-2.0` | Release SBOMs only, a pinned release binary in `_release_harden.yml`. Not in the app. | None for redistributors of the app |
+| [Grype](https://github.com/anchore/grype) | 0.122.1 | `Apache-2.0` | Release vulnerability scan only, a pinned release binary in `_release_harden.yml`. Not in the app. | None for redistributors of the app |
+| [OSV-Scanner](https://github.com/google/osv-scanner) | 2.7.1 | `Apache-2.0` | Security gate only, a pinned release binary in `_security.yml` and `scripts/tools.sh`. Not in the app. | None for redistributors of the app |
+| [gitleaks](https://github.com/gitleaks/gitleaks) | 8.30.1 | `MIT` | Security gate only, a pinned release binary in `_security.yml` and `scripts/tools.sh`. Not in the app. | None for redistributors of the app |
 
 The pinned tools are verified by SHA-256 against the digests in
-`scripts/tools.sh` and `.github/workflows/ios-ci.yml`.
+`scripts/tools.sh`, the one place a pin lives; the workflows call the scripts
+that source it.
 
 `App/Dish.storekit` is a StoreKit configuration for the simulator and for
 Xcode's run action only; it lists the three tip products and is not in the app.
@@ -51,26 +57,22 @@ dish-android's tables.
 
 Used by the workflows only. None of it is in the app or in a release artifact,
 except that Syft's output (the SBOMs) and cosign's and the SLSA generator's
-output (signatures, provenance) ship beside it.
+output (signature bundles, provenance) ship beside it. The pinned scanners and
+signing tools are in the summary table above.
 
 | Component | Version | SPDX | Used for |
 |---|---|---|---|
 | [actions/checkout](https://github.com/actions/checkout) | v7.0.1 | `MIT` | every workflow |
 | [actions/upload-artifact](https://github.com/actions/upload-artifact) | v7.0.2 | `MIT` | the simulator `.app`, the release payload, the gitleaks report |
 | [actions/download-artifact](https://github.com/actions/download-artifact) | v8.0.2 | `MIT` | `release.yml` |
-| [actions/setup-python](https://github.com/actions/setup-python) | v7.1.0 | `MIT` | the allowlist expiry check |
-| [actions/dependency-review-action](https://github.com/actions/dependency-review-action) | v5.0.0 | `MIT` | `security.yml` |
-| [github/codeql-action](https://github.com/github/codeql-action) | v4.39.1 | `MIT` | `codeql.yml`, and the Grype SARIF upload |
-| [anchore/scan-action](https://github.com/anchore/scan-action) (Grype) | v7.4.2 | `MIT` | the release vulnerability scan |
-| [anchore/sbom-action](https://github.com/anchore/sbom-action) (Syft) | v0.24.3 | `Apache-2.0` | the SPDX and CycloneDX SBOMs |
+| [actions/setup-python](https://github.com/actions/setup-python) | v7.1.0 | `MIT` | the allowlist gate |
+| [actions/dependency-review-action](https://github.com/actions/dependency-review-action) | v5.0.1 | `MIT` | `security.yml` |
+| [github/codeql-action](https://github.com/github/codeql-action) | v4.39.4 | `MIT` | `codeql.yml`, and the Grype SARIF upload |
 | [slsa-github-generator](https://github.com/slsa-framework/slsa-github-generator) | v2.1.0 | `Apache-2.0` | the SLSA L3 provenance |
-| [softprops/action-gh-release](https://github.com/softprops/action-gh-release) | v3.0.3 | `MIT` | publishing the GitHub Release |
-| [cosign](https://github.com/sigstore/cosign) | 2.4.1 | `Apache-2.0` | keyless signatures |
-| [OSV-Scanner](https://github.com/google/osv-scanner) | 1.9.0 | `Apache-2.0` | `_security.yml` |
-| [gitleaks](https://github.com/gitleaks/gitleaks) | 8.30.1 | `MIT` | `_security.yml` |
+| [softprops/action-gh-release](https://github.com/softprops/action-gh-release) | v3.0.4 | `MIT` | publishing the GitHub Release |
 
 Each action is pinned to a 40-character commit SHA in the workflows (the SLSA
-generator by its release tag, the one exception `WorkflowPinTests` allows);
+generator too, built from source, which `compile-generator: true` asks for);
 the versions above are the tags the pins were taken from.
 
 ## 2. Reused facts, not reused code

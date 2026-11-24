@@ -144,13 +144,19 @@ private struct PairCard: View {
     /// Only digits stay, as many as a PIN has; a whole PIN is sent at once.
     private func typedChanged(_ raw: String) {
         let digits = pinDigits(raw)
-        if digits != raw { typed = digits }
-        if isWholePin(digits) { actions.submit(digits) }
+        if digits != raw {
+            typed = digits
+        }
+        if isWholePin(digits) {
+            actions.submit(digits)
+        }
     }
 
     /// A refused PIN clears the cells for the next try.
     private func rejected(_ error: String?) {
-        if error != nil { typed = "" }
+        if error != nil {
+            typed = ""
+        }
     }
 }
 

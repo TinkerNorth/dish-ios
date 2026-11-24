@@ -114,7 +114,9 @@ final class MoonlightGateway: Sendable {
         pins.forgetCertPin(host: fromHostId)
         if kept != staying {
             pins.forgetCertPin(host: toHostId)
-            if let kept { pins.setCertPin(host: toHostId, fingerprintHex: kept) }
+            if let kept {
+                pins.setCertPin(host: toHostId, fingerprintHex: kept)
+            }
         }
         return agree
     }

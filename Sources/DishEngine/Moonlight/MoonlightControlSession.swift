@@ -165,8 +165,12 @@ final class MoonlightControlSession: Sendable {
             guard let self else { return }
             let poll = link.withLock { link -> Poll in
                 guard link.handshake != nil else { return .nothing }
-                if link.enet.state == .connected { return settle(&link, connected: true) }
-                if link.enet.state == .disconnected || now() >= deadline { return settle(&link, connected: false) }
+                if link.enet.state == .connected {
+                    return settle(&link, connected: true)
+                }
+                if link.enet.state == .disconnected || now() >= deadline {
+                    return settle(&link, connected: false)
+                }
                 return .retransmit(link.enet.tick())
             }
             switch poll {
@@ -187,7 +191,9 @@ final class MoonlightControlSession: Sendable {
         let continuation = link.handshake
         link.handshake = nil
         enter(connected ? .connected : .closed, &link)
-        if connected { link.lastPingMs = now() }
+        if connected {
+            link.lastPingMs = now()
+        }
         return .settled(continuation, connected: connected)
     }
 
@@ -258,7 +264,9 @@ final class MoonlightControlSession: Sendable {
             if link.state == .connected, let termination, let datagram = link.enet.sendReliable(termination) {
                 out.append(datagram)
             }
-            if let disconnect = link.enet.disconnect() { out.append(disconnect) }
+            if let disconnect = link.enet.disconnect() {
+                out.append(disconnect)
+            }
             enter(.closed, &link)
             let continuation = link.handshake
             link.handshake = nil
@@ -285,7 +293,9 @@ final class MoonlightControlSession: Sendable {
             guard link.state == .connected else { return [] }
             var datagrams: [Data] = []
             for packet in sealed {
-                if let datagram = link.enet.sendReliable(packet) { datagrams.append(datagram) }
+                if let datagram = link.enet.sendReliable(packet) {
+                    datagrams.append(datagram)
+                }
             }
             return datagrams
         }
@@ -311,7 +321,9 @@ final class MoonlightControlSession: Sendable {
             let poll = settling ? settle(&link, connected: link.enet.state == .connected) : .nothing
             return (acks, payloads, poll)
         }
-        if case let .settled(continuation, connected) = poll { continuation?.resume(returning: connected) }
+        if case let .settled(continuation, connected) = poll {
+            continuation?.resume(returning: connected)
+        }
         acks.forEach(transport.send)
         payloads.compactMap(open).forEach(onEvent)
     }
@@ -326,14 +338,22 @@ final class MoonlightControlSession: Sendable {
             let out = link.enet.tick()
             let time = now()
             let keepaliveDue = time - link.lastPingMs >= Self.pingIntervalMs && link.enet.state == .connected
-            if keepaliveDue { link.lastPingMs = time }
+            if keepaliveDue {
+                link.lastPingMs = time
+            }
             let gaveUp = link.enet.state == .disconnected
-            if gaveUp { enter(.closed, &link) }
+            if gaveUp {
+                enter(.closed, &link)
+            }
             return (out, keepaliveDue, gaveUp)
         }
         out.forEach(transport.send)
-        if keepaliveDue { sendPlaintext(MoonlightInput.periodicPing()) }
-        if gaveUp { onClosed() }
+        if keepaliveDue {
+            sendPlaintext(MoonlightInput.periodicPing())
+        }
+        if gaveUp {
+            onClosed()
+        }
     }
 
     /// A forged or garbled packet is dropped, never acted on.

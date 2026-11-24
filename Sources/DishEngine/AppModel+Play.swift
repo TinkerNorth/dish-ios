@@ -182,8 +182,12 @@ package extension AppModel {
     private func show(_ screen: PlayScreen) {
         let previous = playSource.state
         guard previous != screen else { return }
-        if previous != nil { onScreen.stop() }
-        if screen == .gamepad { playTarget = onScreenSlotId }
+        if previous != nil {
+            onScreen.stop()
+        }
+        if screen == .gamepad {
+            playTarget = onScreenSlotId
+        }
         onScreen.aimTouch(at: pads.source.processor.feed(for: playTarget))
         onScreen.useAnalogTriggers(hasAnalogTriggers(onScreenEmulateAs))
         playSource.setState(screen)

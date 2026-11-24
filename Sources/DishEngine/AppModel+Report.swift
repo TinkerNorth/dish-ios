@@ -46,7 +46,9 @@ extension AppModel {
     /// The file already made for the same draft, else one made now. A
     /// draft that changed since the preview is a different file.
     private func preparedReport(_ draft: ReportDraft) async -> PreparedReport? {
-        if case let .ready(made, prepared) = reportSource.state, made == draft { return prepared }
+        if case let .ready(made, prepared) = reportSource.state, made == draft {
+            return prepared
+        }
         reportSource.setState(.preparing(draft))
         let prepared = await prepareReport(draft)
         reportSource.setState(prepared.map { .ready(draft, $0) } ?? .failed(draft))

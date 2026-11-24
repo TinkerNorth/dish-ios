@@ -187,7 +187,9 @@ final class MoonlightConnection: Identifiable {
 
     private func linkEvent(_ event: MoonlightSessionEvent) {
         let effects = apply(event)
-        if !effects.isEmpty { effectsRunner?(effects) }
+        if !effects.isEmpty {
+            effectsRunner?(effects)
+        }
     }
 
     private func startTicking(_ session: any MoonlightLiveSession) {

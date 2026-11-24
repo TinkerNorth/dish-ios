@@ -2,6 +2,8 @@
 
 Design handoff for building the Dish iOS app. This covers the navigation model, first-run setup and pairing, playing, and recovering from errors. The structure and behavior are decided. The visuals show direction; a full visual design comes later.
 
+**This is the original handoff, kept as provenance and as the source of the boards' copy and values. Where it and [`../UI_CONTRACT.md`](../UI_CONTRACT.md) differ, the contract is what the app does.** Everything below the "Not drawn yet" heading that is listed there has since been built, and the minimum iOS is 26.
+
 Source canvas (private, open it signed in): https://claude.ai/artifact/PBFKX2TTdJeNSvb2bUPkRf
 
 ## How to use this folder
@@ -43,7 +45,7 @@ Presentations:
 |---|---|
 | Setup (Welcome, then steps 1 to 3) | `.fullScreenCover`. Skip on every step goes to the Controllers tab. "Add a controller" opens it at step 1. |
 | Pair with PIN | `.sheet`, from setup step 2 or from Pair on the Connections tab |
-| Gamepad, Touchpad, Mouse | `.fullScreenCover`, locked to landscape. Exit is in the pause menu. |
+| Gamepad, Touchpad, Mouse | `.fullScreenCover`, locked to landscape. The way out is a back button (see `UI_CONTRACT.md`); the pause menu below holds the rest. |
 | Pause menu | A native `Menu` on the pause button. Rumble is a `Toggle`, Emulate as is a `Picker`, Stop gamepad has `role: .destructive`. Motion is disabled with a reason when the emulated pad has no motion. |
 | Low power dim | Full-screen black view; tap to wake |
 | Forget PC | `.confirmationDialog` |
@@ -76,18 +78,9 @@ Presentations:
 | `D4-host-lost` | PC stopped responding | Tab root | Error accessory with Reconnect, tab badge |
 | `D5-settings` | Settings tab, light mode | Tab root | Device name, streaming, help, appearance, tips |
 
-Not drawn yet:
-- long-press menus on controller and PC rows
-- swipe actions (Unbind, Forget)
-- pull to refresh on Connections to rescan
-- the "Add a PC by address" sheet
-- the Touchpad screen
-- the Setup guide, Help and Diagnostics pages
-- iPad
-- App Intents controls
-- TipKit hints
+Not drawn in the boards, and built since: long-press menus on controller and PC rows, swipe actions (Unbind, Forget), pull to refresh on Connections, the "Add a PC by address" sheet, the Touchpad screen, the Setup guide, Help and Diagnostics pages, the iPad layouts, the App Intents and TipKit hints. `UI_CONTRACT.md` describes each; `Tests/PARITY.md` lists what is still missing.
 
-## Native components and the iOS 18 fallback
+## Native components (the iOS 18 fallback is dropped)
 
 Use standard components everywhere: `TabView`, `NavigationStack`, toolbar items, `List` in the inset grouped style, `Toggle`, `Menu`, `Picker`, sheets. On iOS 26 and later the system draws them in Liquid Glass. The glass follows each person's Clear or Tinted setting, so do not restyle the bars. Do not hard-code list corner radii either.
 
@@ -96,12 +89,7 @@ iOS 26+ only:
 - `tabBarMinimizeBehavior(.onScrollDown)`
 - `navigationSubtitle`: the controller page shows "84% battery · USB-C" under the title.
 
-If the minimum is below iOS 26 (see N1 and N3):
-- The session bar becomes a custom bar placed with `safeAreaInset(edge: .bottom)`, sitting on top of the tab bar.
-- There is no navigation subtitle, so the battery moves into the status card.
-- Set `.toolbarBackground(.visible, for: .tabBar)`. iOS 15 to 18 make the tab bar transparent when a list is short.
-
-The minimum iOS version is still open. Setting it to iOS 26 removes both fallbacks.
+The minimum iOS version is 26, so none of the older-iOS fallbacks the boards N1 and N3 draw (a custom session bar, a battery in the status card, a visible tab bar background) exist in the app; `Package.swift` and `project.yml` set the floor and there is no fallback for an older iOS anywhere.
 
 ## Platform requirements
 

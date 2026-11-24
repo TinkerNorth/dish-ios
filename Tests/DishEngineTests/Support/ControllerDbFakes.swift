@@ -7,11 +7,11 @@ import Synchronization
 import XCTest
 @testable import DishEngine
 
+@MainActor
 extension ControllerDbStore {
     /// The bundled copy over `defaults`, a cache folder of its own, a gateway
     /// that never answers and a ticker nothing fires: a model's controller
     /// database for a test that is about something else.
-    @MainActor
     static func offline(defaults: UserDefaults) -> ControllerDbStore {
         ControllerDbStore(
             bundled: BundledControllerDb.load() ?? .empty,

@@ -65,7 +65,9 @@ final class SteamPadReader {
         case let .state(state, motion, pads):
             let routed = routeSteamTrackpads(pick: pick, trackpads: input.model.trackpads, pads: pads, report: state)
             feed.publishIfChanged(routed.report)
-            if let motion { feed.publishMotion(motion) }
+            if let motion {
+                feed.publishMotion(motion)
+            }
             publishSurface(routed.surface)
         }
     }

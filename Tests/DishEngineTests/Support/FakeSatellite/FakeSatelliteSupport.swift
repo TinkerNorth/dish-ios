@@ -258,7 +258,9 @@ final class FakeSatelliteStore: @unchecked Sendable {
         condition.lock()
         defer { condition.unlock() }
         while !predicate(state) {
-            if !condition.wait(until: deadline) { return predicate(state) }
+            if !condition.wait(until: deadline) {
+                return predicate(state)
+            }
         }
         return true
     }

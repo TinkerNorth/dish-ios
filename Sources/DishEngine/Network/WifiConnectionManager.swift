@@ -158,7 +158,9 @@ package final class WifiConnectionManager {
 
     func refreshRemembered() {
         let rows = store.remembered()
-        if rows != rememberedServers { rememberedServers = rows }
+        if rows != rememberedServers {
+            rememberedServers = rows
+        }
     }
 
     // MARK: - Pairing-in-flight marker
@@ -231,7 +233,9 @@ package final class WifiConnectionManager {
     /// The pool entry for `server`, created and registered on first use.
     func pooledConnection(for server: DiscoveredServer) -> WifiConnection {
         let id = WifiConnection.idFor(server)
-        if let existing = connections[id] { return existing }
+        if let existing = connections[id] {
+            return existing
+        }
         let fresh = WifiConnection(id: id, server: server, tickIntervalNs: tickIntervalNs)
         register(fresh)
         return fresh
@@ -240,7 +244,9 @@ package final class WifiConnectionManager {
     /// The pool entry for a satellite known by id, made from its freshest
     /// record on first use: the pool's, then the scan's, then the store's.
     func pooledConnection(id: String) -> WifiConnection? {
-        if let pooled = connections[id] { return pooled }
+        if let pooled = connections[id] {
+            return pooled
+        }
         return knownServer(id).map(pooledConnection(for:))
     }
 
@@ -257,14 +263,20 @@ package final class WifiConnectionManager {
 
     /// True when a scan may start; a second request while one runs is dropped.
     func markScanStarted() -> Bool {
-        if isScanning { return false }
+        if isScanning {
+            return false
+        }
         isScanning = true
         return true
     }
 
     func publishScan(_ servers: [DiscoveredServer], localNetworkDenied denied: Bool) {
-        if servers != discoveredServers { discoveredServers = servers }
-        if localNetworkDenied != denied { localNetworkDenied = denied }
+        if servers != discoveredServers {
+            discoveredServers = servers
+        }
+        if localNetworkDenied != denied {
+            localNetworkDenied = denied
+        }
         isScanning = false
     }
 
@@ -289,7 +301,9 @@ package final class WifiConnectionManager {
     /// replaced-session suppression.
     func connect(to server: DiscoveredServer, intent: ConnectIntent = .userInitiated) {
         let id = WifiConnection.idFor(server)
-        if intent == .userInitiated { clearRetry(id) }
+        if intent == .userInitiated {
+            clearRetry(id)
+        }
         if let existing = connections[id], existing.hasSession {
             existing.updateServer(server)
             return
@@ -315,7 +329,9 @@ package final class WifiConnectionManager {
         let connectionId = conn.connectionId
         let did = deviceId
         let proof = proofFor(id)
-        if conn.hasLiveSession { store.markSeen(id, at: now()) }
+        if conn.hasLiveSession {
+            store.markSeen(id, at: now())
+        }
         conn.markDisconnected()
         clearRetry(id)
         guard let connectionId else { return }

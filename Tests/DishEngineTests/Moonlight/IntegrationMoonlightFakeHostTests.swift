@@ -59,7 +59,9 @@ final class IntegrationMoonlightFakeHostTests: XCTestCase {
         )
         manager.onEvent = { [weak self] event in
             self?.seen.append(event)
-            if case let .pairingPinReady(_, shown) = event { self?.pin.set(shown) }
+            if case let .pairingPinReady(_, shown) = event {
+                self?.pin.set(shown)
+            }
         }
         store.put(RememberedMoonlightHost(host: fake.host, paired: false))
         manager.publishRemembered()
@@ -69,7 +71,9 @@ final class IntegrationMoonlightFakeHostTests: XCTestCase {
         manager?.applyDesired([:])
         await manager?.awaitQuiet()
         fake?.stop()
-        if let suite { defaults.removePersistentDomain(forName: suite) }
+        if let suite {
+            defaults.removePersistentDomain(forName: suite)
+        }
         try await super.tearDown()
     }
 
@@ -81,7 +85,13 @@ final class IntegrationMoonlightFakeHostTests: XCTestCase {
         XCTAssertTrue(paired)
         XCTAssertTrue(fake.pairing.paired, "the host verified the dish's secret in phase 4")
         XCTAssertEqual(pins.certPin(host: host.id), hostIdentity.fingerprintHex, "phase 5 proved the certificate that is now the pin")
-        XCTAssertTrue(seen.contains { if case .paired = $0 { true } else { false } })
+        XCTAssertTrue(seen.contains {
+            if case .paired = $0 {
+                true
+            } else {
+                false
+            }
+        })
 
         let probe = await manager.probe(host)
         XCTAssertEqual(probe.trust, .paired)
@@ -122,7 +132,9 @@ final class IntegrationMoonlightFakeHostTests: XCTestCase {
         // a pairing proves it (phase 5) and a refused one leaves it as it was.
         XCTAssertEqual(pins.certPin(host: host.id), hostIdentity.fingerprintHex)
         let refused = seen.compactMap { event -> MoonlightPairingFailure? in
-            if case let .pairingFailed(_, reason) = event { return reason }
+            if case let .pairingFailed(_, reason) = event {
+                return reason
+            }
             return nil
         }
         XCTAssertEqual(refused.map(\.kind), [.hostNotAuthentic], "the hash the host built under its PIN did not reproduce")

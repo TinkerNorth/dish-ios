@@ -83,7 +83,9 @@ struct ScrollStrip: View {
     private func follow(_ lead: Finger?) {
         let step = scrollStep(from: last, to: lead)
         last = lead
-        if step != 0 { onScroll(Double(step)) }
+        if step != 0 {
+            onScroll(Double(step))
+        }
     }
 }
 

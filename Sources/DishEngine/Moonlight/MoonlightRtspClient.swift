@@ -92,14 +92,20 @@ final class MoonlightRtspClient: Sendable {
     /// The facts each SETUP leaves behind: the session the first one named,
     /// the ports, the connect token, the ping payload.
     private static func absorb(_ step: MoonlightRtspStep, _ response: MoonlightRtspResponse, into state: inout Negotiation) {
-        if state.sessionId.isEmpty, let named = response.sessionId() { state.sessionId = named }
+        if state.sessionId.isEmpty, let named = response.sessionId() {
+            state.sessionId = named
+        }
         switch step {
         case .setupAudio:
             state.ports.audioPort = response.serverPort()
-            if state.ports.pingPayload.isEmpty, let payload = response.pingPayload() { state.ports.pingPayload = payload }
+            if state.ports.pingPayload.isEmpty, let payload = response.pingPayload() {
+                state.ports.pingPayload = payload
+            }
         case .setupVideo:
             state.ports.videoPort = response.serverPort()
-            if state.ports.pingPayload.isEmpty, let payload = response.pingPayload() { state.ports.pingPayload = payload }
+            if state.ports.pingPayload.isEmpty, let payload = response.pingPayload() {
+                state.ports.pingPayload = payload
+            }
         case .setupControl:
             state.ports.controlPort = response.serverPort() ?? 0
             state.ports.connectData = response.connectData() ?? 0
@@ -172,7 +178,9 @@ private final class MoonlightRtspExchange: Sendable {
         switch state {
         case .ready:
             let processed = NWConnection.SendCompletion.contentProcessed { [weak self] error in
-                if error != nil { self?.complete(nil) }
+                if error != nil {
+                    self?.complete(nil)
+                }
             }
             connection.send(content: Data(text.utf8), completion: processed)
             receive()
@@ -190,7 +198,9 @@ private final class MoonlightRtspExchange: Sendable {
     private func receive() {
         connection.receive(minimumIncompleteLength: 1, maximumLength: 64 * 1024) { [weak self] data, _, isComplete, error in
             guard let self else { return }
-            if let data { progress.withLock { $0.buffer.append(data) } }
+            if let data {
+                progress.withLock { $0.buffer.append(data) }
+            }
             if error != nil {
                 complete(nil)
                 return
@@ -211,8 +221,8 @@ private final class MoonlightRtspExchange: Sendable {
     /// the host named, or by the hang-up.
     private func framed(closed: Bool) -> MoonlightRtspResponse? {
         let buffer = progress.withLock { $0.buffer }
-        guard let text = String(bytes: buffer, encoding: .utf8), let response = MoonlightRtspResponse.parse(text) else { return nil }
-        guard buffer.range(of: Data("\r\n\r\n".utf8)) != nil || buffer.range(of: Data("\n\n".utf8)) != nil else { return nil }
+        guard let text = String(bytes: buffer, encoding: .utf8), let response = MoonlightRtspResponse.parse(text),
+              buffer.range(of: Data("\r\n\r\n".utf8)) != nil || buffer.range(of: Data("\n\n".utf8)) != nil else { return nil }
         if let length = response.contentLength() {
             return response.payload.utf8.count >= length || closed ? response : nil
         }

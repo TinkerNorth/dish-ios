@@ -152,7 +152,9 @@ func moonlightEmulateOptions(words: L10n = .app) -> [MoonlightEmulateOption] {
 
 /// Under the picker: what Auto sends for this pad, or what a pick asks of the host.
 func moonlightEmulateDetail(_ emulation: HostEmulationFact, hasMotion: Bool, host: String, words: L10n = .app) -> String {
-    if emulation.isOverride { return words.dishAsksHostToPlugIn(host) }
+    if emulation.isOverride {
+        return words.dishAsksHostToPlugIn(host)
+    }
     let resolved = MoonlightPadRules.resolveType(picked: UInt8(truncatingIfNeeded: emulation.type), sourceHasMotion: hasMotion)
     return words.autoSends(moonlightTypeName(resolved, words: words))
 }

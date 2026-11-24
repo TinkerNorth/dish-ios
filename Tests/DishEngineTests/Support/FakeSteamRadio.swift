@@ -110,7 +110,13 @@ final class FakeSteamRadio: SteamRadio, Sendable {
 
     /// How many writes the links have made to the pad so far.
     func writeCount(of pad: UUID) -> Int {
-        calls.filter { if case let .write(written, _, _) = $0 { written == pad } else { false } }.count
+        calls.filter {
+            if case let .write(written, _, _) = $0 {
+                written == pad
+            } else {
+                false
+            }
+        }.count
     }
 
     /// The write callback as CoreBluetooth gives it, in order: one answer

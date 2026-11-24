@@ -8,11 +8,12 @@ row with its files, is [`contract.md`](contract.md). The design tokens are in
 [`UI_CONTRACT.md`](UI_CONTRACT.md); the design handoff in
 [`design/README.md`](design/README.md).
 
-The shell, the controller bridge, the protocol core and the network engine
-are built: the engine finds a Satellite over Bonjour, pairs with it both
-ways, opens its session and streams a bound pad to it over the encrypted
-data plane. The sections below say which parts of the layering have code and
-which are the rules the next waves carry.
+The shell, the controller bridge, the protocol core, the network engine, the
+Moonlight engine, the play screens, Diagnostics and the App Intents are built:
+the engine finds a Satellite over Bonjour, pairs with it both ways, opens its
+session and streams a bound pad to it over the encrypted data plane, and does
+the same for a Moonlight host. What is not built yet is listed in
+[`Tests/PARITY.md`](../Tests/PARITY.md).
 
 Data flows one way. A source of truth owns state, pure reducers derive from
 it, the UI binds and renders it, and the UI sends commands back to the source.
@@ -68,9 +69,7 @@ own directory.
 | `DishCore` | The pure core: the setup machine (`Setup/`), the protocol constants (`ProtocolConstants.swift`), the wire codecs and the session crypto (`Wire/`), the policy reducers (`Reducers/`), and under `Moonlight/` the Moonlight host protocol's pure half (the wire formats and the control seal, the PIN pairing, the host's XML replies and the RTSP text, the controller numbers, what a pad's arrival declares, the pad table the hot path reads, the session reducer and the telemetry conversions) with the ENet client the control stream rides on (`Moonlight/Enet/`, a pure state machine with an injected clock), ported from dish-mac under its names and pinned by the fleet's vectors and Wolf's, and under `DirectInput/` the Steam Controllers over Bluetooth: dish-mac's decoders, trackpad router, plan and model rows, SDL's iOS GATT facts (`SteamBleGatt.swift`) and a link's lifecycle (`SteamLinkMachine.swift`). | nothing | Foundation, CryptoKit, CommonCrypto (the pairing's AES-ECB, which CryptoKit does not offer) |
 | `DishKernel` | The dataflow primitive `StateSource` and the `Repository` protocol (below) | nothing | Foundation, Observation |
 | `DishEngine` | Everything that owns state or touches the platform: the preference stores (`Preferences/`), the minute clock (`Clock/`), the Local Network seam and its Bonjour implementation (`LocalNetwork/`), the GameController bridge and the hot path's pad side (`Input/`), the satellite pool, the REST control plane and the UDP data plane (`Network/`), the Moonlight hosts' edges (`Moonlight/`: the keychain identity, one-connection HTTP with mutual TLS, the pinning gateway, the host store, the RTSP handshake, the UDP control socket and media pinger, the control session that seals input onto the ENet link, the connection that holds a host's pads and live session, the feedback router and the manager that probes, pairs, converges the bindings onto one session per host and forgets), the diagnostics source and its flight recorder (`Diagnostics/`), the App Store's tips (`Support/`), the facts the UI draws (`Models/`) and `AppModel`, the one composition root, with its intents by topic. The Steam Controllers over Bluetooth are `Input/`'s too: `SteamBluetoothPads`, their links (`SteamLinks`, `SteamPadReader`) and the CoreBluetooth radio. | `DishCore`, `DishKernel` | Foundation, Observation, os, Synchronization, GameController, CoreBluetooth, CoreHaptics, CoreMotion, StoreKit, Network, Security, CryptoKit, Darwin, DishCore, DishKernel; never SwiftUI or UIKit |
-| `Dish` | The SwiftUI library: `DishScene` and `OrientationLock` (the two `public` types), the navigation machine and its store, the shell, the pages, the setup cover and the dim, the kit, the mappers, the theme, the localized words and their catalog | `DishEngine`, `DishCore`, `DishKernel` | Foundation, Observation, SwiftUI, UIKit (only `UI/Theme.swift`, `DishScene.swift`, the scene's seams and the kit's `Fingers.swift`), the three modules |
-| `Dish` | The SwiftUI library: `DishScene` and `OrientationLock` (the two `public` types), the scene's seams under `Scene/` (the orientation lock, the window's reader), the navigation machine and its store, the shell, the pages, the setup cover and the dim, the kit, the mappers, the theme, the localized words and their catalog | `DishEngine`, `DishCore`, `DishKernel` | Foundation, Observation, SwiftUI, UIKit (only `UI/Theme.swift`, `DishScene.swift`, `Scene/Orientation.swift`, `Scene/LowPowerScreen.swift` and the kit's `Fingers.swift`), the three modules |
-| `Dish` | The SwiftUI library: `DishScene` and `OrientationLock` (the two `public` types), the navigation machine and its store, the shell, the pages, the setup cover and the dim, the kit, the mappers, the theme, the localized words and their catalog | `DishEngine`, `DishCore`, `DishKernel` | Foundation, Observation, SwiftUI, UIKit (only `UI/Theme.swift`, `DishScene.swift`, the scene's seams and the kit's `Fingers.swift`), AppIntents (only `Intents/` and `DishScene.swift`), TipKit (only the kit's `HintTip.swift` and `Scene/TipKitTips.swift`), the three modules |
+| `Dish` | The SwiftUI library: `DishScene` and `OrientationLock` (the two `public` types), the scene's seams under `Scene/` (the orientation lock, the window's reader, the low-power screen, the mail composer, the tips), the navigation machine and its store, the shell, the pages, the setup cover and the dim, the play screens, the kit, the mappers, the theme, the App Intents, the localized words and their catalog | `DishEngine`, `DishCore`, `DishKernel` | Foundation, Observation, SwiftUI, UIKit (only `UI/Theme.swift`, `DishScene.swift`, the scene's seams under `Scene/` and the kit's `Fingers.swift`), MessageUI (only the scene's mail seam), AppIntents (only `Intents/` and `DishScene.swift`), TipKit (only the kit's `HintTip.swift` and `Scene/TipKitTips.swift`), the three modules |
 
 `ImportBoundariesTests` fails the build when a file imports outside its row
 (`App/Sources` may import SwiftUI, AppIntents and `Dish` only); `PackageGraphTests` fails it
@@ -81,11 +80,11 @@ not list every test target.
 Inside the engine the folders are the contract: `Models/` is the value types
 the UI binds, `Preferences/` the stores over `UserDefaults`, `Clock/` the
 wall-clock fact, `LocalNetwork/` the permission seam, `Input/` the pads,
-`Network/` the satellites, `Diagnostics/` what the Diagnostics page reads
+`Diagnostics/` what the Diagnostics page reads
 (the session facts and counters, the rates, the flight recorder and the
-pasteboard seam), and `AppModel*.swift` the root and its intents. The engine's UI-facing
-`Network/` the satellites and the hub whose rows carry both kinds of PC,
-`Moonlight/` the Moonlight hosts, and `AppModel*.swift` the root and its intents. The engine's UI-facing
+pasteboard seam), `Network/` the satellites and the hub whose rows carry both
+kinds of PC, `Moonlight/` the Moonlight hosts, `Support/` the tips, and
+`AppModel*.swift` the root and its intents. The engine's UI-facing
 surface is `package`-visible; everything else stays `internal`, and the tests
 reach it with `@testable import`. `public` is `DishScene` and its
 `OrientationLock` alone, and the App Intents the app target's App Shortcuts

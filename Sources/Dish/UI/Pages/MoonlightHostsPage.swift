@@ -83,7 +83,9 @@ struct MoonlightHostsPageBody: View {
     }
 
     private func submit() {
-        if actions.add(draft) { draft = "" }
+        if actions.add(draft) {
+            draft = ""
+        }
     }
 }
 

@@ -78,7 +78,9 @@ class MoonlightManagerTestCase: XCTestCase {
 
     private func record(_ event: MoonlightConnectionEvent) {
         seen.append(event)
-        if case let .pairingPinReady(_, pin) = event { pins.mutate { $0.append(pin) } }
+        if case let .pairingPinReady(_, pin) = event {
+            pins.mutate { $0.append(pin) }
+        }
     }
 
     func rememberPaired(appId: String = "", appName: String = "", uniqueId: String = "abc", paired: Bool = true) {

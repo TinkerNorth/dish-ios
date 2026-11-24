@@ -23,24 +23,41 @@ scripts/setup-hooks.sh
 scripts/ci-local.sh
 ```
 
-`scripts/ci-local.sh` downloads the same SwiftFormat 0.61.1, SwiftLint 0.65.0
-and XcodeGen 2.46.0 release binaries CI pins (`scripts/tools.sh`, verified by
-SHA-256, into `.build/tools`), then runs the format check, the strict lint,
-the project drift check, `xcodebuild test` on an iPhone simulator, the UI
-tests again on an iPad simulator, and the Release build. A green run there is
-a green `ios-ci.yml` run. `--quick` skips the Release build, `--no-tests`
-builds the tests without running them, `DISH_SIM_DESTINATION` overrides the
-destination (the default is `platform=iOS Simulator,name=iPhone 17 Pro`; pin
-an OS with `platform=iOS Simulator,OS=26.5,name=iPhone 17 Pro` when several
-runtimes are installed), and `DISH_IPAD_DESTINATION` the iPad (default
-`platform=iOS Simulator,name=iPad Pro 11-inch (M5)`). The iPad's UI tests
-assume the full-screen mode a fresh iPad starts in: an iPad simulator once
-switched to windowed apps, or one that ran the app as an iPhone app, opens it
-in a small window, so erase it first (`xcrun simctl erase`). Homebrew's SwiftFormat and SwiftLint track their latest and will
-flag rules the pins do not know; use the script's copies. A pin bump is a
-deliberate commit that reformats or regenerates the tree with it, in
-`scripts/tools.sh`, `ios-ci.yml` and `THIRD_PARTY.md` together;
-`ToolPinTests` fails when the script and the workflow disagree.
+`scripts/ci-local.sh` runs the scripts `ios-ci.yml` runs, in CI's order:
+`check-security.sh` (the shared security gates, with the pinned OSV-Scanner and
+gitleaks), `check-format.sh` (SwiftFormat 0.64.7 in lint mode), `check-lint.sh`
+(SwiftLint 0.65.1, strict), `generate-project.sh --check` (XcodeGen 2.48.0),
+`test.sh iphone` (`xcodebuild test` on an iPhone simulator it creates and
+deletes), `test.sh ipad` (the UI tests again on an iPad simulator),
+`build-release.sh` (the Release build for the simulator) and
+`archive-device.sh` (the unsigned archive for a generic iOS device, then the
+IPA `package-ipa.sh` zips from it). The three tools are release binaries that
+`scripts/tools.sh` downloads into `.build/tools` and verifies by SHA-256; the
+same file pins the Xcode CI selects, 26.6, which `scripts/select-xcode.sh`
+selects on a runner (your own Xcode stays selected, and the script says when it
+differs). A tool that cannot be fetched or a simulator that cannot be created
+fails the run; nothing is skipped quietly. A green run there is a green
+`ios-ci.yml` run.
+
+| Option | Effect |
+|---|---|
+| `--quick` | skips the Release build and the device archive |
+| `--no-tests` | builds the tests without running them |
+| `--with-lock-stats` | also runs the `LOCK_STATS` tests, CI's `lock-stats` job |
+| `--with-e2e` | also runs `scripts/e2e_local.sh` against the real satellite |
+
+`DISH_SIM_DESTINATION` runs the iPhone gates on an `xcodebuild` destination
+you name instead of a simulator the script creates (pin an OS with
+`platform=iOS Simulator,OS=26.5,name=iPhone 17 Pro` when you want one), and
+`DISH_IPAD_DESTINATION` does the same for the iPad. The iPad's UI tests assume
+the full-screen mode a fresh iPad starts in: an iPad simulator once switched to
+windowed apps, or one that ran the app as an iPhone app, opens it in a small
+window, so erase it first (`xcrun simctl erase`). Homebrew's SwiftFormat and
+SwiftLint track their latest and will flag rules the pins do not know; use the
+script's copies. A pin bump is a deliberate commit that reformats or
+regenerates the tree with it: change `scripts/tools.sh` (the one place a pin
+lives) and the versions this document and `THIRD_PARTY.md` name;
+`ToolPinTests` fails when they disagree and when a workflow repeats a pin.
 
 One command runs every test:
 
@@ -146,7 +163,7 @@ a pure function under `Sources/Dish/UI/Mappers/<Page>Mappers.swift` returning
 an `Equatable` view-state struct whose last parameter is `words: L10n = .app`,
 tested in `Tests/DishTests/Mappers/<Page>MappersTests.swift`, one test per flow
 (empty, content, each variant). Never an expression inside a `body`:
-`ViewPurityTests` rules V1 to V13 read every view for a clock, IO, formatting,
+`ViewPurityTests` rules V1 to V14 read every view for a clock, IO, formatting,
 an engine object, a decision on a fact, a picked token, a boolean rule, a
 fallback word or a size class or idiom of its own: the scene reads the device
 and the window once and hands them down (`windowFacts`), and a page passes
@@ -236,7 +253,7 @@ The caps (a warning fails CI): line 140, function body 45, type body 300,
 file 500, cyclomatic complexity 10 (exhaustive `switch` arms do not count),
 parameters 8. `LintConfigTests` pins the thresholds this document names.
 
-CI builds on the `macos-26` runner image with its default Xcode (26.6, Swift
+CI builds on the `macos-26` runner image with the Xcode `scripts/tools.sh` pins (26.6, Swift
 6.3.3). The tree must be warning-free there and on the newest Xcode (27.x,
 Swift 6.4 locally); write code that both compile, and use nothing that
 arrived after the iOS 26 SDK. The older compiler is also the stricter judge:
@@ -320,11 +337,9 @@ Dish clients follow, so a fact ported between clients keeps its shape.
 | `Tests/DishCoreTests` | the setup machine: every step, event and Local Network branch | `DishCore` |
 | `Tests/DishKernelTests` | `StateSource` | `DishKernel` |
 | `Tests/DishEngineTests` | the preference stores, the clock against a `ManualTicker`, the controller bridge, the setup, connection, pairing, binding and session intents, the network engine against `FakeSatellite` (an in-process satellite on the loopback with its own crypto), the lock laws, and the env-gated driver against the real satellite; `TestDefaults` makes a fresh `UserDefaults` per test | `@testable import DishEngine` |
-| `Tests/DishTests` | the app layer where it decides: every mapper under `Mappers/` (an iPad's states included), the navigation machine, the navigation store and the orientation per device under `Navigation/`, the scene's facts (the idiom, the lock's answer, the window's size classes and shape, the device's battery) under `Scene/` | `@testable import Dish` |
+| `Tests/DishTests` | the app layer where it decides: every mapper under `Mappers/` (an iPad's states included), the navigation machine, the navigation store and the orientation per device under `Navigation/`, the scene's facts (the idiom, the lock's answer, the window's size classes and shape, the device's battery) under `Scene/`, the App Intents' events and their router under `Intents/` | `@testable import Dish` |
 | `Tests/ArchitectureTests` | the rules of the repository, read from the tree | the file system |
 | `App/UITests` (`DishUITests`, a target of the project, not the package) | the shell's critical path through the real app on the simulator, an iPhone's and again an iPad's: a first run under the welcome, Skip landing on Controllers, Add a controller opening the first step, Settings reopening the guide, Add a PC by address; on an iPad, the sidebar's three tabs and the play cover on the iPad's side and upright (`IPadUITests`, skipped on an iPhone). The onboarding flag is set through launch arguments, and `ShellUI` finds a tab wherever the device draws it | the running app, by its labels |
-| `Tests/DishTests` | the app layer where it decides: every mapper under `Mappers/`, the navigation machine and the navigation store under `Navigation/`, the App Intents' events and their router under `Intents/` | `@testable import Dish` |
-| `App/UITests` (`DishUITests`, a target of the project, not the package) | the shell's critical path through the real app on the simulator: a first run under the welcome, Skip landing on Controllers, Add a controller opening the first step, Settings reopening the guide, Add a PC by address, a swipe on a paired PC's row revealing Forget This PC, and a pull on the empty Connections page; the onboarding flag, TipKit's switch (`-tips_hidden YES`) and a remembered PC (`wifi_list`) are set through launch arguments | the running app, by its labels |
 
 `Tests/ArchitectureTests` is where knowledge written twice is checked:
 
@@ -335,14 +350,16 @@ Dish clients follow, so a fact ported between clients keeps its shape.
 | `LicenseHeaderTests` | the two-line SPDX header on every Swift file and on the manifest |
 | `NoSuppressionsTests` | no lint suppression, no deferred-work comment, no mutable static, no host singleton outside the scene, no unchecked concurrency |
 | `LintConfigTests` | the lint thresholds this document names; CI runs SwiftLint strict and SwiftFormat in lint mode |
-| `ToolPinTests` | `scripts/tools.sh` and `ios-ci.yml` pin the same tool versions and digests |
-| `WorkflowPinTests` | every `uses:` is a 40-character commit SHA (the SLSA generator's release tag is the one exception) |
-| `VersionConsistencyTests` | `VERSION` is `MAJOR.MINOR.PATCH`, `project.yml` carries it as `MARKETING_VERSION`, the changelog's newest heading names it or is `[Unreleased]`, the Info.plist reads both bundle versions from build settings |
+| `ToolPinTests` | `scripts/tools.sh` is the one place a tool or Xcode pin lives: no workflow repeats one, every macos-26 workflow selects Xcode through `select-xcode.sh`, and `project.yml`, `THIRD_PARTY.md`, this document and `README.md` name the same versions; the IPA is staged with `scripts/write-sbom.sh`'s components SBOM, which names every component `THIRD_PARTY.md` says reaches the user |
+| `WorkflowPinTests` | every `uses:` is a 40-character commit SHA |
+| `E2EWorkflowTests` | the end-to-end lane runs `scripts/e2e_local.sh` against a satellite pinned by tag, and the script seeds that satellite's update and controller database checks off before it starts |
+| `VersionConsistencyTests` | `VERSION` is `MAJOR.MINOR.PATCH`, `project.yml` carries it as `MARKETING_VERSION`, the changelog's newest heading names it or is `[Unreleased]`, the Info.plist reads both bundle versions from build settings, the protocol number the documents name is the one the code offers, and `README.md` names `VERSION`, carries the family's shared blocks word for word (`Tests/ArchitectureTests/Fixtures/readme-shared.md`) and links only files and headings that exist |
 | `LocalizationTests` | the catalog and the funnel agree, in every language, with placeholders intact; no view holds an English literal |
 | `AppIntentsLocalizationTests` | the App Intents' words and the App Shortcuts' phrases are keys of the app target's two catalogs, every key is used, in every language, with placeholders intact |
 | `ThemeTokenTests` | no raw colour, font size or kit size; `DESIGN.md` lists every token; every token outside the shared palette is drawn |
 | `InteractionFeedbackTests` | every control answers the finger: `.plain`, `.borderless`, `NavigationLink` and `Link` nowhere under `Sources/Dish`, a kit file that draws a `Button` names its style, and a control that tracks a finger reads it from the kit's touch surface, so `DragGesture` and `SpatialEventGesture` are used nowhere under `Sources/Dish` |
-| `ViewPurityTests` | rules V1 to V13 of [`docs/UI_CONTRACT.md`](docs/UI_CONTRACT.md) |
+| `StoreKitConfigurationTests` | `App/Dish.storekit` declares the three tips as consumables under the identifiers `TipTier` asks for, and the scheme's run action uses it |
+| `ViewPurityTests` | rules V1 to V14 of [`docs/UI_CONTRACT.md`](docs/UI_CONTRACT.md) |
 | `DeviceFamilyTests` | the app targets the iPhone and the iPad; the Info.plist turns an iPad all four ways and an iPhone upright or on its side; CI and `ci-local.sh` run the UI tests on the same iPad |
 | `PrivacyUsageTests` | a framework the engine imports that asks the person (CoreBluetooth) has its question in the Info.plist, without which iOS terminates the app; every question is worded in the six languages in `App/Resources/InfoPlist.xcstrings` |
 | `NavigationCoverageTests` | every tab, page and cover is worded, built, tested and drawn |
@@ -398,44 +415,64 @@ Dish clients follow, so a fact ported between clients keeps its shape.
   `Tests/PARITY.md` lands in the same change.
 - Keep commits focused; squash noisy fixup commits before review.
 
-> **Note on branch protection.** Treat the PR-based flow as a convention
-> unless the platform enforces it, and rely on CI as the quality gate.
+`main` is protected, for administrators too: a pull request merges only when
+it is up to date with `main` and these checks pass: `Build, test, lint,
+format`, `Lock statistics build and tests`, `Analyze (swift)`, the four
+`shared /` jobs of the security workflow, and `Release hardening (dry run) /
+scan, SBOM, sign`. Merges are squash merges only, so each pull request lands
+as one commit on `main`, and that commit is the one a release tag names.
 
 ## What CI runs
 
 Build + style:
 
-- `ios-ci.yml`, on `macos-26`: the pinned tools, `swiftformat --lint`,
-  `swiftlint --strict`, `scripts/generate-project.sh --check`,
-  `xcodebuild test` of the `DishApp` scheme on an iPhone 17 Pro simulator
-  (every package test target and the UI tests), the UI tests again on an
-  iPad Pro 11-inch (M5) simulator (`-only-testing:DishUITests`, over the same
-  build), a Release build for the simulator, and the `Dish.app` as an
-  artifact. There is no build cache: a restored DerivedData
-  carries the previous commit's objects and compiled resource bundles, which
-  is how a stale catalog shadows the current one.
+- `ios-ci.yml`, job **Build, test, lint, format** on `macos-26`, every step a
+  script `ci-local.sh` also runs: `select-xcode.sh` (the Xcode pinned in
+  `scripts/tools.sh`, selected by version), `check-format.sh`,
+  `check-lint.sh`, `generate-project.sh --check`, `test.sh iphone`
+  (`xcodebuild test` of the `DishApp` scheme on an iPhone 17 Pro simulator:
+  every package test target and the UI tests), `test.sh ipad` (the UI tests
+  again on an iPad Pro 11-inch simulator), `build-release.sh` (a Release build
+  for the simulator, uploaded as the `Dish.app` artifact) and
+  `archive-device.sh` with `package-ipa.sh` (the archive for a generic iOS
+  device without signing, and the unsigned IPA made from it, so a device-only
+  compile or link error shows on the pull request and not first at the tag).
+  There is no build cache: a restored DerivedData carries the previous
+  commit's objects and compiled resource bundles, which is how a stale catalog
+  shadows the current one.
+- `ios-ci.yml`, job **Lock statistics build and tests**: `test.sh lock-stats`,
+  `LockLawTests` and `TrackedLockTests` in a build with
+  `SWIFT_ACTIVE_COMPILATION_CONDITIONS='$(inherited) LOCK_STATS'`, which counts
+  every tracked lock by thread role. `ci-local.sh --with-lock-stats` runs it.
+- `ios-ci.yml`, job **Release hardening (dry run)**, on pull requests: the
+  shared `_release_harden.yml` over the unsigned IPA the main job staged
+  (`scripts/stage-ipa.sh`, the release's own staging), with a throwaway key and
+  nothing published. It cannot exercise Fulcio, Rekor or the keyless identity,
+  the code-scanning upload, the SLSA generator or anything needing the signing
+  secrets; the tag does.
 - `version-consistency.yml`: `VERSION` is the source; `CHANGELOG.md`'s top
   heading and `project.yml`'s `MARKETING_VERSION` must agree with it.
+- `e2e.yml`, job **Pair, stream and tear down against the real satellite**:
+  the real satellite, checked out at the release tag dish-mac's lane pins
+  (2.3.0) and built with Homebrew's cmake, pkg-config, libsodium and opus,
+  driven over loopback by `scripts/e2e_local.sh` (`ci-local.sh --with-e2e`
+  runs it locally; it uses `../satellite`'s built binary when there is one).
 
 Security gates (also blocking):
 
-- `security.yml`, which calls `_security.yml`: action-pin lint, vulnerability
-  allowlist expiry, OSV-Scanner, gitleaks secret scan, GitHub
-  `dependency-review-action`.
+- `security.yml`, which calls the shared `_security.yml` (the same scripts
+  `scripts/check-security.sh` runs): action-pin lint, the vulnerability
+  allowlist gate, OSV-Scanner, gitleaks secret scan, and GitHub
+  `dependency-review-action` once the Dependency graph setting is on.
 - `codeql.yml`: CodeQL `swift` analysis (security-extended +
   security-and-quality query packs) over the simulator build.
 
-- `ios-ci.yml`'s `lock-stats` job: `LockLawTests` and `TrackedLockTests` in a
-  build with `SWIFT_ACTIVE_COMPILATION_CONDITIONS='$(inherited) LOCK_STATS'`,
-  which counts every tracked lock by thread role.
-- `e2e.yml`: the real satellite, checked out at the release tag dish-mac's
-  lane pins and built with Homebrew's cmake, pkg-config, libsodium and opus,
-  driven over loopback by `scripts/e2e_local.sh` (run it locally the same
-  way; it uses `../satellite`'s built binary when there is one).
-
 If any step fails, the PR is blocked. `scripts/ci-local.sh` runs the build and
-style gates locally in the same order; the end-to-end lane is its own script.
-There is no bench yet; `Tests/PARITY.md` says so.
+style gates locally in the same order. Only CI runs the scanners (they need
+GitHub), the version-consistency text gate (`VersionConsistencyTests` runs the
+same checks in the test gate), and `release.yml`: the signed archive, the
+export and the App Store Connect upload need the six signing secrets, and the
+rest needs a tag. There is no bench yet; `Tests/PARITY.md` says so.
 
 ## Security
 
@@ -449,76 +486,85 @@ past. Renew or remove on or before `expires`.
 ### Running security checks locally
 
 ```bash
-# Action-pin lint (40-char SHA enforcement on every uses: line)
-grep -REn '^\s*uses:' .github/workflows/ \
-  | grep -vE '@[0-9a-f]{40}\b' \
-  || echo "all pinned"
-
-# Allowlist expiry
-python3 - <<'PY'
-import datetime, yaml, sys
-data = yaml.safe_load(open('.security/allowlist.yaml').read()) or {}
-for e in data.get('exceptions', []) or []:
-    if datetime.date.fromisoformat(str(e['expires'])) < datetime.date.today():
-        print('EXPIRED:', e); sys.exit(1)
-PY
-
-# OSV-Scanner against the worktree
-osv-scanner --recursive --skip-git .
-
-# Gitleaks
-gitleaks detect --no-banner --redact --source .
+scripts/check-security.sh
 ```
 
-The pin lint's grep also lists the SLSA generator, which is pinned by its
-release tag because the generator only works that way; `WorkflowPinTests`
-names the same exception.
+It runs, from the repository root and at the versions `scripts/tools.sh` pins
+(OSV-Scanner 2.7.1 and gitleaks 8.30.1 as darwin-arm64 binaries, PyYAML 6.0.4 in
+a virtual environment under `.build/tools`; CI runs the same versions on
+Linux), what `security.yml` runs through the shared `_security.yml`:
+
+- `scripts/check-action-pins.sh`: every `uses:` is a 40-character SHA followed
+  by a `# vX.Y.Z` comment;
+- `scripts/security-allowlist.py check`: the allowlist gate;
+- `scripts/osv-scan.sh --allow-no-packages -- .`: OSV-Scanner. `Package.swift`
+  has no dependencies, so there is no `Package.resolved` for it to read and "no
+  packages found" is the true answer; the first package this app takes in lands
+  one, and `--allow-no-packages` goes (in `security.yml`, `release.yml` and the
+  script);
+- `gitleaks git --config=.gitleaks.toml --redact --exit-code=1 .`.
+
+`scripts/ci-local.sh` runs it first. Dependency review runs on every pull
+request (`dependency_review_enabled: true`; the repository's Dependency graph
+and Dependabot alerts are on) and only in CI, since it reads GitHub's view of
+the pull request; CodeQL runs in `codeql.yml`.
+`WorkflowPinTests` names the pin rule's one shape: a SHA with its release in a
+comment.
 
 ### Verifying a release artifact
 
 Each GitHub Release ships `dish-X.Y.Z-unsigned.ipa` (until the App Store
 secrets exist; with them the signed archive goes to App Store Connect and
-TestFlight instead) and its stable-name copy `dish-ios.ipa`, `*.sig`/`*.crt`
-(cosign keyless), `SHA256SUMS` + `SHA256SUMS.sig`/`*.crt`, the SPDX +
-CycloneDX SBOMs, and `dish-ios.intoto.jsonl` (SLSA L3).
+TestFlight instead) and its stable-name copy `dish-ios.ipa`, one
+`<file>.sigstore.json` cosign bundle per file, `SHA256SUMS` with its bundle, the
+SPDX + CycloneDX SBOMs, and `dish-ios.intoto.jsonl` (SLSA L3). No release has
+been published yet, so the commands below have not been run against one.
 
 ```bash
-shasum -a 256 -c SHA256SUMS
-
+TAG=X.Y.Z
 cosign verify-blob \
-  --certificate SHA256SUMS.crt \
-  --signature   SHA256SUMS.sig \
-  --certificate-identity-regexp '^https://github\.com/TinkerNorth/dish-ios/\.github/workflows/release\.yml@refs/tags/[0-9].*$' \
-  --certificate-oidc-issuer 'https://token.actions.githubusercontent.com' \
+  --bundle SHA256SUMS.sigstore.json \
+  --certificate-identity "https://github.com/TinkerNorth/dish-ios/.github/workflows/_release_harden.yml@refs/tags/$TAG" \
+  --certificate-oidc-issuer https://token.actions.githubusercontent.com \
   SHA256SUMS
-
-slsa-verifier verify-artifact \
-  --provenance-path dish-ios.intoto.jsonl \
-  --source-uri      github.com/TinkerNorth/dish-ios \
-  --source-tag      X.Y.Z \
-  dish-X.Y.Z-unsigned.ipa
+sha256sum --ignore-missing -c SHA256SUMS   # macOS: shasum -a 256 -c
 ```
 
-The full verification recipe lives in [`SECURITY.md`](SECURITY.md).
+The identity names `_release_harden.yml`, the workflow that ran the signing
+step. The provenance is verified with `cosign verify-blob-attestation`, not
+`slsa-verifier`, which refuses a generator called by commit; the full recipe,
+with the generator's pinned commit, lives in [`SECURITY.md`](SECURITY.md).
 
 ## Cutting a release
 
 `release.yml` runs on a bare `MAJOR.MINOR.PATCH` tag (no `v` prefix, e.g.
-`0.1.0`) or a `workflow_dispatch` with a tag input. It re-runs the security
-gates against the tagged commit, asserts the tag equals `VERSION`, archives
-`Dish.app`, signs it and uploads it to App Store Connect when the six App
-Store secrets are present (`APP_STORE_CONNECT_KEY_ID`,
+`1.1.0`) or a `workflow_dispatch` with a tag input naming an existing tag. It
+re-runs the security gates against the tagged commit, asserts the tag equals
+`VERSION`, archives `Dish.app` for a generic iOS device through
+`scripts/archive-device.sh` (the same script and the same unsigned build every
+pull request runs), signs it and uploads it to App Store Connect when the six
+App Store secrets are present (`APP_STORE_CONNECT_KEY_ID`,
 `APP_STORE_CONNECT_ISSUER_ID`, `APP_STORE_CONNECT_PRIVATE_KEY`,
 `IOS_DISTRIBUTION_CERT_BASE64`, `IOS_DISTRIBUTION_CERT_PASSWORD`,
 `IOS_PROVISIONING_PROFILE_BASE64`), scans and signs every artifact, emits the
-SBOMs and the SLSA provenance, and publishes the GitHub Release. The signing
-gate is advisory, as the satellite's and the other clients' are: without the
-secrets a stable tag still ships, as an unsigned IPA, with a warning in the
-run and a note at the top of the release; the versioned IPA then carries
-`-unsigned` while `dish-ios.ipa` keeps its name. Set the repository variable
-`ENFORCE_RELEASE_SIGNING=true` to make missing secrets fail a stable tag.
-There is no `latest.json`: iOS has no in-app updater, because the App Store
-and TestFlight deliver updates.
+SBOMs and the SLSA provenance, uploads the GitHub Release as a draft and then
+flips it to published, so nothing that reads the release ever sees it
+half-made. The signing gate is advisory, as the satellite's and the other
+clients' are: without the secrets a stable tag still ships, as an unsigned
+IPA, with a warning in the run and a note at the top of the release; the
+versioned IPA then carries `-unsigned` while `dish-ios.ipa` keeps its name.
+Set the repository variable `ENFORCE_RELEASE_SIGNING=true` to make missing
+secrets fail a stable tag. A tag with a hyphen (`1.2.0-rc1`) is published as a
+prerelease. The hardening (scan, SBOMs, `SHA256SUMS`, one cosign bundle per
+file) is the shared `_release_harden.yml`, which signs under the run's ref: a
+tag push, or `gh workflow run release.yml --ref X.Y.Z -f tag=X.Y.Z` to run it
+again, never a dispatch from a branch. There is no `latest.json`: iOS has no in-app updater, because the
+App Store and TestFlight deliver updates.
+
+The fleet's order: the website (`dish-website`) is tagged first, and the
+clients are tagged once
+`https://dish.tinkernorth.com/controllers/v1/manifest.json` serves the new
+controller database.
 
 Before you tag:
 
@@ -527,17 +573,35 @@ Before you tag:
   `## [X.Y.Z] - YYYY-MM-DD` and updating the compare link, and move
   `MARKETING_VERSION` in `project.yml` with it, then regenerate the project.
   `version-consistency.yml` fails a PR that moves one without the others.
-  Raise `CURRENT_PROJECT_VERSION` when App Store Connect needs a new build
-  number for the same version.
+  `release.yml` sets `CURRENT_PROJECT_VERSION` to the run number, which App
+  Store Connect wants to rise with every upload of one marketing version.
 - **Update `PRIVACY.md` first** if anything about data collection changed, and
   `App/Info.plist` and `App/Dish.entitlements` with it: a new permission needs
   its usage string there, or iOS denies it.
+- **Squash-merge the bump, then tag the squash commit** with a lightweight tag
+  (`git tag X.Y.Z <sha>` and `git push origin X.Y.Z`). Do not tag a branch.
+
+The first release (no `dish-ios` tag exists yet; `VERSION` is 1.1.0 and
+`CHANGELOG.md` already dates its heading):
+
+1. Register the app record `com.tinkernorth.dish.ios` in App Store Connect,
+   create the Apple Distribution certificate and the App Store provisioning
+   profile for that bundle id, and create an App Store Connect API key; store
+   the six secrets above in the repository. Without them the first tag ships
+   the unsigned IPA only.
+2. Tag the website, wait for the controller database to be served, then tag
+   this repository as above.
+3. Watch the run: the `Archive Dish.app`, `Harden artifacts` and `Publish to
+   GitHub Releases` jobs have never run, and the signed archive, the export
+   and the upload only run with the secrets.
 
 After the workflow finishes, download `dish-ios.ipa`, check it against
 `SHA256SUMS`, and install the build from TestFlight (or, for an unsigned
 build, re-sign it with your own certificate and provisioning profile first).
 The asset names `dish-X.Y.Z-unsigned.ipa`, `dish-ios.ipa` and `SHA256SUMS`
-are a permanent API.
+are a permanent API. Nothing built locally, on a pull request or from a fork is ever signed
+with the distribution certificate: only `release.yml` on a tag holds the
+secrets.
 
 ## Touching the hot path
 

@@ -132,7 +132,9 @@ package final class SatelliteClient: Sendable {
     /// The receive loop's step before a dispatch: one relaxed load while no
     /// handler changed.
     func refreshReceiveHandlers() -> ReceiveHandlers {
-        if let fresh = handlerMail.take() { receiveHandlers.replace(with: fresh) }
+        if let fresh = handlerMail.take() {
+            receiveHandlers.replace(with: fresh)
+        }
         return receiveHandlers.current?.handlers ?? ReceiveHandlers()
     }
 
@@ -184,7 +186,9 @@ package final class SatelliteClient: Sendable {
             targetWord.store(0)
             return Int32(truncatingIfNeeded: fdWord.exchange(-1))
         }
-        if retired >= 0 { close(retired) }
+        if retired >= 0 {
+            close(retired)
+        }
     }
 
     /// Open, or keep, the socket aimed at `target`: DSCP EF, no SIGPIPE and a
@@ -195,14 +199,20 @@ package final class SatelliteClient: Sendable {
             let same = open && SendTarget(packed: targetWord.load()) == target
             return (same, open && !same)
         }
-        if alreadyAimed { return true }
+        if alreadyAimed {
+            return true
+        }
         guard let fd = openSocket() else { return false }
-        if replacing { closeSocket() }
+        if replacing {
+            closeSocket()
+        }
         let stale = gate.hold { () -> Int32 in
             targetWord.store(target.packed)
             return Int32(truncatingIfNeeded: fdWord.exchange(Int64(fd)))
         }
-        if stale >= 0 { close(stale) }
+        if stale >= 0 {
+            close(stale)
+        }
         return true
     }
 
@@ -310,7 +320,9 @@ package final class SatelliteClient: Sendable {
 /// Pairs the ack the receive loop left, if any; the caller holds the window's lock.
 private func pairPendingAck(_ pending: AtomicWord, into window: inout LatencyWindow) {
     let ackMs = pending.exchange(0)
-    if ackMs != 0 { window.ackReceived(nowMs: ackMs) }
+    if ackMs != 0 {
+        window.ackReceived(nowMs: ackMs)
+    }
 }
 
 /// A UDP socket with DSCP EF, no SIGPIPE and a 500 ms receive timeout; nil
