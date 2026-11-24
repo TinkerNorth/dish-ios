@@ -1,279 +1,121 @@
-# Dish iOS
+# Dish for iOS
 
-The native iPhone and iPad client for the Satellite wireless-gamepad server,
-one of the Dish clients beside [dish-mac], [dish-android], [dish-windows] and
-[dish-linux]. It is meant to find a Satellite on the Wi-Fi, pair with it,
-declare the device's controllers to the server and stream their input to the
-PC. The engine finds a Satellite, pairs with it and streams a bound
-controller to it; the pages for pairing and a PC are still to come. See
-[Status](#status) for what is built and what is not.
+Dish for iOS runs on your iPhone or iPad and sends the controller paired with it, or the phone's own screen, to your gaming PC as a wireless controller.
 
-[dish-mac]: https://github.com/TinkerNorth/dish-mac
-[dish-android]: https://github.com/TinkerNorth/dish-android
-[dish-windows]: https://github.com/TinkerNorth/dish-windows
-[dish-linux]: https://github.com/TinkerNorth/dish-linux
+Dish is made of two parts. The Dish apps run on the device that holds your controller, or that is the controller: Dish for Android, Dish for iOS, Dish for macOS, Dish for Windows and Dish for Linux. Satellite is the small server on the PC you play on, and it makes each Dish controller look to your games like a controller plugged into that PC. You need one of each. Everything is free and open source, the website is [dish.tinkernorth.com](https://dish.tinkernorth.com), and I maintain all of it on my own.
 
-<a href="https://github.com/TinkerNorth/dish-ios/actions/workflows/ios-ci.yml"><img alt="iOS CI" src="https://github.com/TinkerNorth/dish-ios/actions/workflows/ios-ci.yml/badge.svg"></a>
-<a href="https://github.com/TinkerNorth/dish-ios/actions/workflows/security.yml"><img alt="Security" src="https://github.com/TinkerNorth/dish-ios/actions/workflows/security.yml/badge.svg"></a>
-<a href="https://github.com/TinkerNorth/dish-ios/actions/workflows/codeql.yml"><img alt="CodeQL" src="https://github.com/TinkerNorth/dish-ios/actions/workflows/codeql.yml/badge.svg"></a>
-<a href="https://github.com/TinkerNorth/dish-ios/actions/workflows/version-consistency.yml"><img alt="Version consistency" src="https://github.com/TinkerNorth/dish-ios/actions/workflows/version-consistency.yml/badge.svg"></a>
+![The first screen of Dish for iOS on an iPhone](docs/images/welcome.png)
 
-## Status
+## Download
 
-Wave 1 builds the app's shell and everything around it, and wires none of the
-sources. The engine publishes real facts that are empty: no controllers, no
-connections, no session, and a Local Network status that stays unknown. Every
-content state is still built, tested through its mapper and shown in a
-`#Preview`, so the next waves only connect sources. Nothing opens a socket,
-reads a controller or sends a byte.
+Dish for iOS is built but not released yet.
 
-What works today:
+There is no App Store listing, no TestFlight build and no file to download. The code on main is version 1.1.0, and [CHANGELOG.md](CHANGELOG.md) says what it holds. When I release it, it will appear on this repository's [releases page](https://github.com/TinkerNorth/dish-ios/releases); on GitHub, Watch, then Custom, then Releases tells you when that happens. Until then you can build it yourself and run it on your own iPhone or iPad, or in the simulator: the steps are under For developers.
 
-- **The shell.** A tab bar with three tabs, Controllers, Connections and
-  Settings, each its own `NavigationStack`; the session accessory
-  (`tabViewBottomAccessory`) with its inline form, present only while a
-  session exists, which is never yet; the two covers, setup and the dim, as
-  `fullScreenCover`s.
-- **The setup flow.** Welcome, then Input (1 of 3), Destination (2 of 3: the
-  Local Network primer, then Pick your PC) and Binding (3 of 3: Review and
-  bind). It rises on the first launch and from Settings › Setup guide, and
-  "Add a controller" opens it at Input. Skip on any step lands on
-  Controllers. The walk is a pure machine in `DishCore`; Bind records the
-  request and sends nothing.
-- **The low-power dim.** A black cover that a tap wakes. Nothing raises it yet,
-  because its button lives on the session accessory.
-- **Settings.** Name on your PC, Keep screen on, Dim screen after, Setup
-  guide, Appearance (System, Light, Dark) and the version, stored in
-  `UserDefaults`.
-- **The empty Controllers and Connections pages**, and the Connections page's
-  "Dish can't see your network" state, which nothing reaches at run time yet.
-- **Six languages**, English, Bosnian, German, Spanish, French and Brazilian
-  Portuguese, in one String Catalog.
+Satellite and the other Dish apps are released:
 
-What is not built is listed, row by row with where it lands, in
-[`Tests/PARITY.md`](Tests/PARITY.md): the GameController bridge, discovery,
-pairing, the wire protocol, the controller and PC detail pages, the play
-screens, Support Dish, Help & FAQ, Diagnostics and the rest.
+### Satellite and the Dish apps
+
+| App | Where to get it |
+|---|---|
+| Satellite (Windows, Linux) | [GitHub releases](https://github.com/TinkerNorth/satellite/releases/latest) |
+| Dish for Android | [Google Play](https://play.google.com/store/apps/details?id=com.tinkernorth.dish), or the APK from [GitHub releases](https://github.com/TinkerNorth/dish-android/releases/latest) |
+| Dish for iOS | Not yet released |
+| Dish for macOS | [GitHub releases](https://github.com/TinkerNorth/dish-mac/releases/latest) |
+| Dish for Windows | [GitHub releases](https://github.com/TinkerNorth/dish-windows/releases/latest) |
+| Dish for Linux | [GitHub releases](https://github.com/TinkerNorth/dish-linux/releases/latest) |
+
+## Getting started
+
+1. Install Satellite on the PC you play on and start it. Its dashboard shows a 4-digit PIN under Device Pairing, with a new one every five minutes.
+2. Build Dish onto your iPhone or iPad (see For developers), pair your controller with it in Settings, Bluetooth, or plug it in, and open Dish. The phone and the PC have to be on the same Wi-Fi. The first launch shows a short welcome; Continue starts Set up Dish, and Skip on any step lands on Controllers.
+3. Pair them. Before Dish looks for the PC, it explains that iOS will ask for Local Network access; allow it. The PC shows up on Connections. Tap Pair beside it and type the PIN from the dashboard. Dish shows a code of its own at the same time under Accept on your PC; you can accept that request under Pairing Requests on the dashboard instead, if the two codes match. Dish remembers the PC, so you only pair once.
+4. Play. Controllers lists your controller and the on-screen gamepad. Bind to sends one to the PC, and Emulate as on the controller's page picks the type the game sees: Xbox Wireless, DualShock 4, DualSense, DualSense Edge or Switch Pro. Open gamepad turns the phone itself into the controller.
+
+## What it does
+
+Dish reads each controller iOS gives it and sends it to the PC you bound it to, where Satellite turns it into a virtual controller. Input travels over UDP on your own network, encrypted with a key the two devices agree on when they pair. Up to four controllers can go to one PC.
+
+Most controllers reach Dish through iOS's own game controller support, over Bluetooth or a cable: DualSense, DualShock 4, Xbox Wireless and Switch Pro controllers and the other pads iOS supports. What goes to the PC: buttons, sticks and triggers, motion and the touchpad from a PlayStation controller, and the battery (the lower of the controller's and the phone's). What comes back from the game: rumble, and on a DualSense the adaptive triggers, the light bar and the player lights.
+
+| Controller | How Dish reads it | Notes |
+|---|---|---|
+| Pads iOS supports | iOS's game controller support | A pad iOS lists without the full gamepad layout shows as Not supported |
+| Xbox Elite Series 2 | iOS's game controller support | Its four paddles reach a Satellite that speaks protocol 4, only while the pad is on its default profile; a virtual DualSense Edge has the back buttons to put them on |
+| Steam Controller (2015 on its Bluetooth firmware, and 2026) | Bluetooth, once you turn on Settings › Steam Controllers › Read over Bluetooth | Back buttons, grips, gyro and trackpads; the 2026 one also rumbles |
+| The phone's screen | Open gamepad, Open touchpad, Open mouse | Motion from the phone's sensors, rumble on its Taptic Engine |
+
+None of these controller paths has been tried with a real controller yet. The tests run them against recorded pads and the simulator, and the network side against the real Satellite running on the same Mac.
+
+iOS doesn't allow some things the Android and desktop apps do. An app gets no route to a controller's speaker, microphone or HD haptics. It can't read a pad iOS doesn't support itself, so the 8BitDo Ultimate 2 in X-input mode and Steam Controllers on a cable or their dongle don't work here (Dish for macOS reads them). iOS pauses an app you leave, so Dish keeps the screen on while you play and dims it instead of running in the background. Dish finds Satellite over mDNS only, because Satellite's older discovery beacon needs an Apple entitlement; if the PC doesn't show up, Add a PC by address on Connections takes its address. An iPhone with a Lightning port needs Apple's Lightning to USB Camera Adapter for a wired controller, and Dish says so on that iPhone.
+
+Some things aren't ported from the other apps yet: a DualSense Edge's back buttons, an Elite's paddles to a Moonlight host, a Steam Controller's trackpads as the PC's mouse, renaming a controller, and holding a controller's place on the PC for a few seconds when its Bluetooth drops. [Tests/PARITY.md](Tests/PARITY.md) lists every difference and why.
+
+Dish doesn't need Satellite to play on a Sunshine, Apollo or Wolf host. The Moonlight hosts row on Connections finds them on your network or takes an address, and Dish shows a PIN to type into the host. This path is tested against a stand-in host and not yet against a live one.
+
+Diagnostics, under Settings › Setup & help, shows what each connection and controller is doing, and its Controller tests drive a controller's rumble, light bar, player lights and adaptive triggers from the phone alone, then ask whether each one worked. Dish carries the list of controllers the whole Dish family recognises and checks for a newer one. It follows the system's light or dark appearance, or the one you pick, and speaks English, Bosnian, German, Spanish, French and Brazilian Portuguese.
 
 ## Requirements
 
-- iOS 26.0 or newer, on an iPhone or an iPad (iPadOS 26.0). An iPhone stands
-  upright but for the play screens, which lie on their side; an iPad turns
-  every way on every screen, its tabs open into a sidebar, and Controllers
-  and Connections show their list beside the page it opens. There is no
-  fallback for an older iOS anywhere.
-- Xcode 26.6 or newer (Swift 6.3) to build; CI builds on `macos-26` with its default Xcode 26.6, and the tree is also verified on Xcode 27.
-- To build from a clone, the checkout folder must be named `dish-ios`, as CI's
-  is: XcodeGen names the project's local package reference after the folder,
-  and `scripts/generate-project.sh --check` fails on any other name.
+iOS 26 or later, on an iPhone or an iPad. There is no version for an older iOS. On an iPhone the app stands upright and turns on its side for the play screens; on an iPad it turns every way, and the tabs open into a sidebar.
 
-No third-party dependency: the package depends on Apple's frameworks alone.
+Dish asks for Local Network access the first time it looks for a PC, and for Bluetooth only if you turn on Read over Bluetooth for a Steam Controller. It asks for nothing else. Its settings live in its own preferences and the keys from pairing in the Keychain.
 
-## Build and run
+Network: the phone and the PC on the same local network. Dish finds Satellite over mDNS, pairs and talks to it over HTTPS on TCP 9443, and streams on UDP 9876.
+
+## Trust and privacy
+
+Every release has a `SHA256SUMS` file signed with cosign by the release workflow. To check a download on Linux, put `SHA256SUMS` beside it and run:
 
 ```bash
-open Dish.xcodeproj          # scheme DishApp, product Dish.app
+sha256sum --ignore-missing -c SHA256SUMS
 ```
 
-`Dish.xcodeproj` is generated from `project.yml` by XcodeGen and committed, so
-a clone opens in Xcode without tools. After editing `project.yml`:
+Dish for iOS has no release yet, so there is nothing to check today; once there is, `shasum -a 256 --ignore-missing -c SHA256SUMS` does the same on a Mac. [SECURITY.md](SECURITY.md) has the signature and build provenance checks, and how to report a vulnerability.
+
+Nothing is signed yet, because nothing is released. The release workflow signs the app and uploads it to App Store Connect, for TestFlight and the App Store, once the App Store signing is set up for this repository, and I haven't done that yet. Without it a release carries only an unsigned IPA, named `dish-X.Y.Z-unsigned.ipa`, which an iPhone installs only after you re-sign it with your own certificate. A copy you build yourself is signed by your own Xcode.
+
+Dish for iOS works on your own network and has no account, no analytics, no crash reporting and no ads. Three things can leave your network: a check for a newer controller database at dish.tinkernorth.com, which has its switch in Settings (Check for controller updates automatically); the prices of the three optional tips, which StoreKit asks the App Store for when you open Support Dish; and a support report, which only you send, from your own mail app. Controller input goes only to the PC you paired with. [PRIVACY.md](PRIVACY.md) says exactly what is stored and sent.
+
+Dish for iOS is licensed under the GNU Lesser General Public License v3.0 or later ([LICENSE](LICENSE), with [COPYING.GPL3](COPYING.GPL3)). It links no third-party code; the components it ports from and the tools that build it, with their licences, are in [THIRD_PARTY.md](THIRD_PARTY.md).
+
+## For developers
+
+Dish for iOS is Swift 6 and SwiftUI: one SwiftPM package with no third-party dependencies, and a thin app project that XcodeGen generates from `project.yml`. CI builds with Xcode 26.6, warnings as errors. The scripts are the ones CI calls:
 
 ```bash
-scripts/generate-project.sh          # regenerate
-scripts/generate-project.sh --check  # fail on drift, as CI does
+scripts/setup-hooks.sh        # once, with Xcode 26.6 installed: the pre-commit hook
+scripts/test.sh iphone        # every test, on an iPhone simulator it creates and deletes
+scripts/ci-local.sh           # every CI gate, in CI's order
 ```
 
-The first launch on a fresh install shows the setup cover; Skip lands on the
-tabs.
-
-## Testing
-
-One command builds the app and runs every package test target:
+To run the app in the simulator from a fresh clone, keep the folder named `dish-ios` (the generated project refers to it by that name):
 
 ```bash
-xcodebuild test -project Dish.xcodeproj -scheme DishApp \
-  -destination "platform=iOS Simulator,name=iPhone 17 Pro"
+git clone https://github.com/TinkerNorth/dish-ios.git && cd dish-ios
+scripts/generate-project.sh --check    # fetches the pinned XcodeGen, checks the project
+udid=$(scripts/ci-simulator.sh create "Dish iPhone" "iPhone 17 Pro")
+xcodebuild build -project Dish.xcodeproj -scheme DishApp -derivedDataPath build \
+  -destination "platform=iOS Simulator,id=$udid"
+xcrun simctl install "$udid" build/Build/Products/Debug-iphonesimulator/Dish.app
+xcrun simctl launch "$udid" com.tinkernorth.dish.ios
 ```
 
-The scheme lists every test target of the package, and `PackageGraphTests`
-pins that list, so a new target that is not in `project.yml` fails the build.
-The UI tests run again on an iPad, where the sidebar and the split lists
-are, as CI runs them:
+In Xcode, open `Dish.xcodeproj` and run the DishApp scheme; it also sells the tips from a local StoreKit file on the simulator. To put Dish on your own iPhone or iPad, choose your own team under Signing & Capabilities for the DishApp target, and a bundle identifier of your own if Xcode asks for one. The app needs no special entitlement.
 
-```bash
-xcodebuild test -project Dish.xcodeproj -scheme DishApp \
-  -destination "platform=iOS Simulator,name=iPad Pro 11-inch (M5)" \
-  -only-testing:DishUITests
-```
+Where things are written down:
 
-| Target | What it pins |
-|---|---|
-| `DishCoreTests` | The setup machine: every step, every event, the Local Network branches and the draft's defaults. |
-| `DishKernelTests` | `StateSource`: distinct-until-changed publishing. |
-| `DishEngineTests` | The preference stores, the clock, the setup intents, the Local Network seam, the binding record, the page lifecycle. |
-| `DishTests` | Every mapper flow (empty, content, each variant, an iPad's included), the navigation machine and the navigation store, the orientation per device and the scene's facts. |
-| `ArchitectureTests` | Import boundaries, the package graph, license headers, no suppressions, lint thresholds, tool pins, workflow pins, the version mirrors, the catalog, the tokens, view purity, navigation coverage. |
+- [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md): the four modules, the dataflow rules, the threads and the input hot path.
+- [docs/contract.md](docs/contract.md): where each part of the Satellite protocol and the Moonlight protocol lives in this tree.
+- [docs/UI_CONTRACT.md](docs/UI_CONTRACT.md): the shell, the pages and the rules a view keeps.
+- [docs/design/README.md](docs/design/README.md): the design handoff, its screens and copy rules, with the tokens in [DESIGN.md](DESIGN.md).
+- [Tests/PARITY.md](Tests/PARITY.md): what this client has compared with the others, what iOS doesn't allow, and what is confirmed on hardware.
+- [CHANGELOG.md](CHANGELOG.md): what changed in each version.
 
-## Development
+[CONTRIBUTING.md](CONTRIBUTING.md) covers setting up, where code goes, the interface, translations, the code style, the tests, branching, what CI runs, how a release is cut, and changing the hot path or the wire protocol. Please read it before opening a pull request.
 
-The whole CI gate, locally, with SwiftFormat 0.61.1, SwiftLint 0.65.0 and
-XcodeGen 2.46.0 fetched once at the pinned checksums CI uses:
+## Getting help
 
-```bash
-scripts/ci-local.sh           # format, lint strict, project drift, tests, Release build
-scripts/ci-local.sh --quick   # skip the Release build
-scripts/ci-local.sh --no-tests  # build the tests but do not run them
-scripts/setup-hooks.sh        # pre-commit: format + lint on staged Swift files
-```
+If something doesn't work, open an issue at [github.com/TinkerNorth/dish-ios/issues](https://github.com/TinkerNorth/dish-ios/issues/new/choose). The most useful thing you can attach is the diagnostics file: in Settings, open Setup & help, then Diagnostics, press Report a problem, say what happened and pick the controller, and press Continue in Mail; Preview file shows you the file first. The file leaves out pairing keys, addresses, Wi-Fi names and the names of your PCs; read it before you attach it, it's plain JSON. Continue in Mail starts a mail to support@tinkernorth.com with the file attached, so if you'd rather write to me than open an issue, send that mail; nothing leaves your phone until you press Send.
 
-`DISH_SIM_DESTINATION` overrides the simulator destination, for example
-`platform=iOS Simulator,OS=26.5,name=iPhone 17 Pro` when several runtimes are
-installed, and `DISH_IPAD_DESTINATION` the iPad the UI tests run on again. [`CONTRIBUTING.md`](CONTRIBUTING.md) holds the rules: zero
-warnings, the shape of the code, tests red first for every flow, where code
-goes, and how a release is cut.
-
-## Architecture
-
-One SwiftPM package at the root carries four modules, so the compiler
-enforces the layering:
-
-```
-DishCore      the pure core: the setup machine now, the wire codecs and
-              crypto later                                   (Foundation)
-DishKernel    the dataflow primitive: StateSource      (Foundation + Observation)
-DishEngine    the stores, the clock, the seams and AppModel, the one
-              composition root (depends on Core and Kernel;
-              no SwiftUI, no UIKit)
-Dish          the SwiftUI library: the scene, the shell, the pages, the theme
-              and the localized words           (depends on all three)
-```
-
-A thin app target, `DishApp`, is generated by XcodeGen from `project.yml`;
-`App/Sources/DishApp.swift` is the `@main` and only calls `DishScene()`. The
-rules behind the layering, and why each exists, are in
-[`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md); `Tests/ArchitectureTests`
-fails the build when a file imports outside its module's allowlist, a
-dependency points the wrong way, a view holds a raw colour or an English
-literal, or a mutable static appears.
-
-The hot path does not exist yet. When it does, a controller report leaves
-`sendto()` with no lock, no allocation and no main-actor hop, on the
-controller's own queue; the rules to carry are in
-[`CONTRIBUTING.md`](CONTRIBUTING.md#touching-the-hot-path-later-waves).
-
-## Project layout
-
-```
-dish-ios/
-├── Package.swift                 # four modules + five test targets; warnings are errors
-├── project.yml                   # the app target and the scheme; XcodeGen's input
-├── Dish.xcodeproj/               # generated from project.yml, committed, drift-checked
-├── App/                          # Sources/DishApp.swift (@main), Info.plist, Dish.entitlements, Resources/Assets.xcassets
-├── Sources/DishCore/Setup/       # the setup machine and its models
-├── Sources/DishKernel/           # StateSource
-├── Sources/DishEngine/
-│   ├── AppModel*.swift           # the composition root; intents by topic (Setup, Preferences, Pages)
-│   ├── Models/                   # the facts the UI draws: controllers, connections, session, preferences, shell
-│   ├── Preferences/              # the UserDefaults-backed stores
-│   ├── Clock/                    # the minute clock and its ticker seam
-│   ├── LocalNetwork/             # the Local Network seam and its recording implementation
-│   └── Setup/                    # the recorded binding requests
-├── Sources/Dish/
-│   ├── DishScene.swift           # the one scene (public)
-│   ├── L10n/                     # every word, and the one reader of the catalog
-│   ├── Navigation/               # the navigation machine and its store
-│   ├── Resources/                # Localizable.xcstrings, Media.xcassets (the app mark)
-│   └── UI/                       # Theme.swift, Kit/, Mappers/, Pages/, Shell/, Setup/
-├── Tests/DishCoreTests/          # the setup machine
-├── Tests/DishKernelTests/        # StateSource
-├── Tests/DishEngineTests/        # stores, clock, intents, seams
-├── Tests/DishTests/              # mappers/ and navigation/
-├── Tests/ArchitectureTests/      # the rules a compiler cannot read
-├── Tests/PARITY.md               # what the other clients have, and where it lands
-├── docs/design/                  # the design handoff (boards, screens, README)
-├── docs/ARCHITECTURE.md          # the module map and the dataflow rules
-├── docs/UI_CONTRACT.md           # the shell, the pages, the kit rules
-├── docs/contract.md              # contract concept -> file (almost all not yet)
-├── scripts/                      # ci-local, generate-project, tools, setup-hooks, render-icon
-└── .github/workflows/            # ios-ci, security, codeql, version-consistency, release
-```
-
-## Design
-
-The design handoff is [`docs/design/README.md`](docs/design/README.md): the
-navigation model, the screen index, the boards and the copy rules.
-[`DESIGN.md`](DESIGN.md) lists the tokens as the code declares them, and
-[`docs/UI_CONTRACT.md`](docs/UI_CONTRACT.md) states the shell and the rules a
-view obeys.
-
-## Protocol
-
-This client offers **protocol 4** and still speaks 1, with control on `:9443`
-(HTTPS REST) and data on `:9876` (encrypted UDP), as the fleet does; it finds
-satellites over mDNS, since the legacy `:9879` beacon needs Apple's multicast
-entitlement. The client-server contract lives in one place,
-[`satellite/docs/contract.md`][contract]; nothing here restates it.
-[`docs/contract.md`](docs/contract.md) maps each contract concept to the Swift
-file that implements it.
-
-[contract]: https://github.com/TinkerNorth/satellite/blob/main/docs/contract.md
-
-## Languages
-
-Every word the app shows is a property of `L10n`
-(`Sources/Dish/L10n/`), read from the String Catalog
-`Sources/Dish/Resources/Localizable.xcstrings` in six languages. A new word
-is one property and one catalog entry with all five translations;
-`LocalizationTests` fails the build on a key the catalog lacks, an entry no
-code uses, a language missing a translation, a placeholder lost in
-translation, or an English literal in a view.
-
-## Contributing
-
-Changes land on `main` through a pull request. `iOS CI` runs the format check,
-strict lint, the project drift check, the tests and the Release build on every
-PR; `version-consistency` checks that `VERSION`, the changelog heading and
-`MARKETING_VERSION` agree; the `Security` and `CodeQL` workflows run alongside
-(action-pin lint, allowlist expiry, OSV-Scanner, gitleaks, dependency review,
-CodeQL `swift`). The PR template asks for the shape rules, the tests and the
-bookkeeping.
-
-## Security
-
-Vulnerability disclosure: [`SECURITY.md`](SECURITY.md). Every release ships
-cosign keyless signatures, SHA256SUMS, SBOMs (SPDX and CycloneDX) and SLSA L3
-provenance; the verification recipe is in [`SECURITY.md`](SECURITY.md) and
-[`CONTRIBUTING.md`](CONTRIBUTING.md#verifying-a-release-artifact).
-
-## Privacy
-
-[`PRIVACY.md`](PRIVACY.md) is the policy. In this wave the app makes no
-network connection at all, has no account, no analytics and no crash
-reporting, and stores only its preferences on the device. The Info.plist
-declares the Local Network permission and the Bonjour services the discovery
-wave will browse; nothing browses them yet.
-
-## Code signing policy
-
-Releases sign and upload to App Store Connect only when the repository holds
-the six App Store secrets named in the header of
-[`release.yml`](.github/workflows/release.yml). Without them the workflow
-ships an unsigned IPA, `dish-X.Y.Z-unsigned.ipa`, also published under the
-stable name `dish-ios.ipa`; it installs only after re-signing. Verify a
-download against `SHA256SUMS`, its cosign signature and the SLSA provenance.
-Nothing built locally, on a pull request or from a fork is ever signed with
-the distribution certificate.
-
-**Team.** Committers, reviewers and approvers: Emir Hasanbegovic
-([@emir-hasanbegovic](https://github.com/emir-hasanbegovic)), owner of the
-TinkerNorth organisation
-([organisation owners](https://github.com/orgs/TinkerNorth/people?query=role%3Aowner)).
-
-**Third-party components.** None at run time. The build tools (SwiftFormat,
-SwiftLint, XcodeGen) and the GitHub Actions the workflows use are listed, with
-versions and licences, in [`THIRD_PARTY.md`](THIRD_PARTY.md).
-
-## License
-
-GNU Lesser General Public License v3.0 or later. See [`LICENSE`](LICENSE)
-(the LGPL) and [`COPYING.GPL3`](COPYING.GPL3) (the GPL v3 it incorporates).
+Please also say which Dish for iOS version you run and how you installed it, your iPhone or iPad and its iOS version, which Satellite or Moonlight host and version you use, and which controller. If the problem is in Satellite rather than here, its own repository is the better place. For a security problem, don't open a public issue; [SECURITY.md](SECURITY.md) says how to report it privately.

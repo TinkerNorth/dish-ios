@@ -101,6 +101,32 @@ final class ToolPinTests: XCTestCase {
         }
     }
 
+    /// The README names the Xcode a build needs and may name the gate tools:
+    /// each at the version `scripts/tools.sh` pins.
+    func testTheReadmeNamesTheXcodeAndTheToolsAtTheirPinnedVersions() throws {
+        let readme = try RepoFiles.read("README.md")
+        let pins = try [
+            "Xcode": pin("XCODE_VERSION"),
+            "XcodeGen": pin("XCODEGEN_VERSION"),
+            "SwiftFormat": pin("SWIFTFORMAT_VERSION"),
+            "SwiftLint": pin("SWIFTLINT_VERSION")
+        ]
+        let regex = try NSRegularExpression(pattern: #"\b(Xcode|XcodeGen|SwiftFormat|SwiftLint) ([0-9]+(?:\.[0-9]+)+)"#)
+        var named: [String: Set<String>] = [:]
+        for match in regex.matches(in: readme, range: NSRange(readme.startIndex..., in: readme)) {
+            guard let tool = Range(match.range(at: 1), in: readme), let version = Range(match.range(at: 2), in: readme) else { continue }
+            named[String(readme[tool]), default: []].insert(String(readme[version]))
+        }
+        XCTAssertNotNil(named["Xcode"], "README.md must name the Xcode a build needs")
+        for (tool, versions) in named {
+            XCTAssertEqual(
+                versions,
+                [pins[tool] ?? "?"],
+                "README.md names \(tool) \(versions.sorted()); scripts/tools.sh pins \(pins[tool] ?? "?")"
+            )
+        }
+    }
+
     // MARK: the shared security and release-hardening workflows
 
     private func workflow(_ name: String) throws -> String {

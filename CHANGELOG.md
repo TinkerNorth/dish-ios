@@ -57,6 +57,14 @@ lockstep across the repos share a version number.
 - **The iPad UI tests** run on a runner with one simulator booted, which is
   deleted when its suite ends; the changelog's links to tags the repository does
   not have are gone, and `version-consistency.yml` fails one.
+- **The README is the family's.** It says plainly that Dish for iOS is built
+  but not released, what it does with each controller today, what iOS does not
+  allow and what is not ported yet, and how to run it in the simulator from a
+  fresh clone. Its version, tool versions, links and the blocks every Dish
+  README shares are held by the architecture tests, the shared blocks against a
+  fixture copy of the family's text.
+- **The end-to-end lane stays off the network.** Its Satellite 2.3.0 starts
+  with the controller database check off, as its update check already was.
 - **Documents corrected:** protocol 4 and the whole wire surface in
   `SECURITY.md`, the privacy table's session rows, `Tests/PARITY.md` against
   the code, the architecture module map and the design handoff's status, and

@@ -70,7 +70,7 @@ final class VersionConsistencyTests: XCTestCase {
     /// every "protocol N" in these is the offered version or the floor.
     func testTheProtocolDocumentsNameTheProtocolTheCodeSpeaks() throws {
         let code = try codeProtocol()
-        for file in ["SECURITY.md", "docs/contract.md", "docs/ARCHITECTURE.md", "CONTRIBUTING.md"] {
+        for file in ["README.md", "SECURITY.md", "docs/contract.md", "docs/ARCHITECTURE.md", "CONTRIBUTING.md"] {
             let text = try RepoFiles.read(file)
             let regex = try NSRegularExpression(pattern: #"(?i)\bprotocol (\d+)"#)
             for match in regex.matches(in: text, range: NSRange(text.startIndex..., in: text)) {
@@ -106,5 +106,71 @@ final class VersionConsistencyTests: XCTestCase {
             }
             XCTAssertEqual(missing, [], "\(file) names a Swift file that is not in the tree")
         }
+    }
+
+    // MARK: the README
+
+    /// Every "version X.Y.Z" the README names is `VERSION`, and it names one.
+    func testTheReadmeNamesTheVersion() throws {
+        let readme = try RepoFiles.read("README.md")
+        let regex = try NSRegularExpression(pattern: #"\bversion ([0-9]+\.[0-9]+\.[0-9]+)"#)
+        let named = regex.matches(in: readme, range: NSRange(readme.startIndex..., in: readme)).compactMap {
+            Range($0.range(at: 1), in: readme).map { String(readme[$0]) }
+        }
+        XCTAssertFalse(named.isEmpty, "README.md must name the version the code on main carries")
+        let version = try version()
+        XCTAssertEqual(Set(named), [version], "README.md names a version that is not VERSION (\(version))")
+    }
+
+    /// The blocks every Dish README shares, word for word, are the fixture's
+    /// copy of the family's canonical text; a change lands in all six
+    /// repositories and their fixtures together.
+    func testTheReadmeCarriesTheFamilysSharedText() throws {
+        let readme = try RepoFiles.read("README.md")
+        let fixture = try RepoFiles.read("Tests/ArchitectureTests/Fixtures/readme-shared.md")
+        let body = try XCTUnwrap(fixture.range(of: "-->\n")).upperBound
+        let blocks = fixture[body...]
+            .components(separatedBy: "\n%%%\n")
+            .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
+            .filter { !$0.isEmpty }
+        XCTAssertEqual(blocks.count, 6, "the fixture holds the six SHARED blocks this README carries")
+        for block in blocks {
+            XCTAssertTrue(readme.contains(block), "README.md must carry the shared block that starts \(block.prefix(60))")
+        }
+    }
+
+    /// A relative link or image in the README names a file in the tree, and
+    /// a link into another document's heading names a heading it has.
+    func testEveryRelativeLinkInTheReadmeResolves() throws {
+        let readme = try RepoFiles.read("README.md")
+        let regex = try NSRegularExpression(pattern: #"\]\(([^)\s]+)\)"#)
+        let targets = regex.matches(in: readme, range: NSRange(readme.startIndex..., in: readme)).compactMap {
+            Range($0.range(at: 1), in: readme).map { String(readme[$0]) }
+        }
+        let relative = targets.filter { !$0.contains("://") && !$0.hasPrefix("mailto:") }
+        XCTAssertFalse(relative.isEmpty, "the README links the repository's documents")
+        for target in relative {
+            let parts = target.split(separator: "#", maxSplits: 1, omittingEmptySubsequences: false).map(String.init)
+            let path = parts[0].isEmpty ? "README.md" : parts[0]
+            XCTAssertTrue(
+                FileManager.default.fileExists(atPath: RepoFiles.url(path).path),
+                "README.md links \(target), which is not in the tree"
+            )
+            if parts.count == 2, path.hasSuffix(".md") {
+                let anchors = try Self.headingAnchors(in: RepoFiles.read(path))
+                XCTAssertTrue(anchors.contains(parts[1]), "README.md links \(target), and \(path) has no such heading")
+            }
+        }
+    }
+
+    /// GitHub's anchor for each heading: lower case, punctuation dropped,
+    /// spaces as hyphens.
+    private static func headingAnchors(in markdown: String) -> Set<String> {
+        let headings = markdown.split(separator: "\n").filter { $0.hasPrefix("#") }
+        return Set(headings.map { line in
+            let title = line.drop { $0 == "#" }.trimmingCharacters(in: .whitespaces).lowercased()
+            let kept = title.filter { $0.isLetter || $0.isNumber || $0 == " " || $0 == "-" || $0 == "_" }
+            return kept.replacingOccurrences(of: " ", with: "-")
+        })
     }
 }

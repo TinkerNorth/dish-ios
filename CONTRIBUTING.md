@@ -350,10 +350,10 @@ Dish clients follow, so a fact ported between clients keeps its shape.
 | `LicenseHeaderTests` | the two-line SPDX header on every Swift file and on the manifest |
 | `NoSuppressionsTests` | no lint suppression, no deferred-work comment, no mutable static, no host singleton outside the scene, no unchecked concurrency |
 | `LintConfigTests` | the lint thresholds this document names; CI runs SwiftLint strict and SwiftFormat in lint mode |
-| `ToolPinTests` | `scripts/tools.sh` is the one place a tool or Xcode pin lives: no workflow repeats one, every macos-26 workflow selects Xcode through `select-xcode.sh`, and `project.yml`, `THIRD_PARTY.md` and this document name the same versions |
+| `ToolPinTests` | `scripts/tools.sh` is the one place a tool or Xcode pin lives: no workflow repeats one, every macos-26 workflow selects Xcode through `select-xcode.sh`, and `project.yml`, `THIRD_PARTY.md`, this document and `README.md` name the same versions |
 | `WorkflowPinTests` | every `uses:` is a 40-character commit SHA |
 | `E2EWorkflowTests` | the end-to-end lane runs `scripts/e2e_local.sh` against a satellite pinned by tag, and the script seeds that satellite's update and controller database checks off before it starts |
-| `VersionConsistencyTests` | `VERSION` is `MAJOR.MINOR.PATCH`, `project.yml` carries it as `MARKETING_VERSION`, the changelog's newest heading names it or is `[Unreleased]`, the Info.plist reads both bundle versions from build settings, and the protocol number the documents name is the one the code offers |
+| `VersionConsistencyTests` | `VERSION` is `MAJOR.MINOR.PATCH`, `project.yml` carries it as `MARKETING_VERSION`, the changelog's newest heading names it or is `[Unreleased]`, the Info.plist reads both bundle versions from build settings, the protocol number the documents name is the one the code offers, and `README.md` names `VERSION`, carries the family's shared blocks word for word (`Tests/ArchitectureTests/Fixtures/readme-shared.md`) and links only files and headings that exist |
 | `LocalizationTests` | the catalog and the funnel agree, in every language, with placeholders intact; no view holds an English literal |
 | `AppIntentsLocalizationTests` | the App Intents' words and the App Shortcuts' phrases are keys of the app target's two catalogs, every key is used, in every language, with placeholders intact |
 | `ThemeTokenTests` | no raw colour, font size or kit size; `DESIGN.md` lists every token; every token outside the shared palette is drawn |
@@ -594,7 +594,9 @@ After the workflow finishes, download `dish-ios.ipa`, check it against
 `SHA256SUMS`, and install the build from TestFlight (or, for an unsigned
 build, re-sign it with your own certificate and provisioning profile first).
 The asset names `dish-X.Y.Z-unsigned.ipa`, `dish-ios.ipa` and `SHA256SUMS`
-are a permanent API.
+are a permanent API. Nothing built locally, on a pull request or from a fork is ever signed
+with the distribution certificate: only `release.yml` on a tag holds the
+secrets.
 
 ## Touching the hot path
 
